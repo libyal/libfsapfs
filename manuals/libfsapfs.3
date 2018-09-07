@@ -1,0 +1,107 @@
+.Dd September  7, 2018
+.Dt libfsapfs 3
+.Os libfsapfs
+.Sh NAME
+.Nm libfsapfs.h
+.Nd Library to access the Apple File System (APFS) format
+.Sh LIBRARY
+.Lb libfsapfs
+.Sh SYNOPSIS
+.In libfsapfs.h
+.Pp
+Support functions
+.Ft const char *
+.Fn libfsapfs_get_version "void"
+.Ft int
+.Fn libfsapfs_get_access_flags_read "void"
+.Ft int
+.Fn libfsapfs_get_codepage "int *codepage, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_set_codepage "int codepage, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_check_volume_signature "const char *filename, libfsapfs_error_t **error"
+.Pp
+Available when compiled with wide character string support:
+.Ft int
+.Fn libfsapfs_check_volume_signature_wide "const wchar_t *filename, libfsapfs_error_t **error"
+.Pp
+Available when compiled with libbfio support:
+.Ft int
+.Fn libfsapfs_check_volume_signature_file_io_handle "libbfio_handle_t *file_io_handle, libfsapfs_error_t **error"
+.Pp
+Notify functions
+.Ft void
+.Fn libfsapfs_notify_set_verbose "int verbose"
+.Ft int
+.Fn libfsapfs_notify_set_stream "FILE *stream, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_notify_stream_open "const char *filename, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_notify_stream_close "libfsapfs_error_t **error"
+.Pp
+Error functions
+.Ft void
+.Fn libfsapfs_error_free "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_error_fprint "libfsapfs_error_t *error, FILE *stream"
+.Ft int
+.Fn libfsapfs_error_sprint "libfsapfs_error_t *error, char *string, size_t size"
+.Ft int
+.Fn libfsapfs_error_backtrace_fprint "libfsapfs_error_t *error, FILE *stream"
+.Ft int
+.Fn libfsapfs_error_backtrace_sprint "libfsapfs_error_t *error, char *string, size_t size"
+.Pp
+Volume functions
+.Ft int
+.Fn libfsapfs_volume_initialize "libfsapfs_volume_t **volume, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_free "libfsapfs_volume_t **volume, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_signal_abort "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_open "libfsapfs_volume_t *volume, const char *filename, int access_flags, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_close "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Pp
+Available when compiled with wide character string support:
+.Ft int
+.Fn libfsapfs_volume_open_wide "libfsapfs_volume_t *volume, const wchar_t *filename, int access_flags, libfsapfs_error_t **error"
+.Pp
+Available when compiled with libbfio support:
+.Ft int
+.Fn libfsapfs_volume_open_file_io_handle "libfsapfs_volume_t *volume, libbfio_handle_t *file_io_handle, int access_flags, libfsapfs_error_t **error"
+.Sh DESCRIPTION
+The
+.Fn libfsapfs_get_version
+function is used to retrieve the library version.
+.Sh RETURN VALUES
+Most of the functions return NULL or \-1 on error, dependent on the return type.
+For the actual return values see "libfsapfs.h".
+.Sh ENVIRONMENT
+None
+.Sh FILES
+None
+.Sh NOTES
+libfsapfs allows to be compiled with wide character support (wchar_t).
+
+To compile libfsapfs with wide character support use:
+.Ar ./configure --enable-wide-character-type=yes
+ or define:
+.Ar _UNICODE
+ or
+.Ar UNICODE
+ during compilation.
+
+.Ar LIBFSAPFS_WIDE_CHARACTER_TYPE
+ in libfsapfs/features.h can be used to determine if libfsapfs was compiled with wide character support.
+.Sh BUGS
+Please report bugs of any kind on the project issue tracker: https://github.com/libyal/libfsapfs/issues
+.Sh AUTHOR
+These man pages are generated from "libfsapfs.h".
+.Sh COPYRIGHT
+Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>.
+
+This is free software; see the source for copying conditions.
+There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.Sh SEE ALSO
+the libfsapfs.h include file

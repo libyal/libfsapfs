@@ -1,0 +1,77 @@
+Name: libfsapfs
+Version: @VERSION@
+Release: 1
+Summary: Library to access the Apple File System (APFS) format
+Group: System Environment/Libraries
+License: LGPL
+Source: %{name}-%{version}.tar.gz
+URL: https://github.com/libyal/libfsapfs
+BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+@libfsapfs_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcdata_spec_requires@ @ax_libcerror_spec_requires@ @ax_libcfile_spec_requires@ @ax_libclocale_spec_requires@ @ax_libcnotify_spec_requires@ @ax_libcpath_spec_requires@ @ax_libcsplit_spec_requires@ @ax_libcthreads_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_libuna_spec_requires@
+BuildRequires: gcc @ax_libbfio_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libcthreads_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libuna_spec_build_requires@
+
+%description
+Library to access the Apple File System (APFS) format
+
+%package devel
+Summary: Header files and libraries for developing applications for libfsapfs
+Group: Development/Libraries
+Requires: libfsapfs = %{version}-%{release}
+
+%description devel
+Header files and libraries for developing applications for libfsapfs.
+
+%package tools
+Summary: Several tools for reading Apple File System (APFS) volumes
+Group: Applications/System
+Requires: libfsapfs = %{version}-%{release}
+
+%description tools
+Several tools for reading Apple File System (APFS) volumes
+
+%prep
+%setup -q
+
+%build
+%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir}
+make %{?_smp_mflags}
+
+%install
+rm -rf %{buildroot}
+%make_install
+
+%clean
+rm -rf %{buildroot}
+
+%post -p /sbin/ldconfig
+
+%postun -p /sbin/ldconfig
+
+%files
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
+%attr(755,root,root) %{_libdir}/*.so.*
+
+%files devel
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README ChangeLog
+%{_libdir}/*.a
+%{_libdir}/*.la
+%{_libdir}/*.so
+%{_libdir}/pkgconfig/libfsapfs.pc
+%{_includedir}/*
+%{_mandir}/man3/*
+
+%files tools
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
+%attr(755,root,root) %{_bindir}/*
+%{_mandir}/man1/*
+
+%changelog
+* @SPEC_DATE@ Joachim Metz <joachim.metz@gmail.com> @VERSION@-1
+- Auto-generated
+

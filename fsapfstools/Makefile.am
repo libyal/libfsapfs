@@ -1,0 +1,63 @@
+AM_CPPFLAGS = \
+	-I$(top_srcdir)/include \
+	-I$(top_srcdir)/common \
+	@LIBCERROR_CPPFLAGS@ \
+	@LIBCDATA_CPPFLAGS@ \
+	@LIBCLOCALE_CPPFLAGS@ \
+	@LIBCNOTIFY_CPPFLAGS@ \
+	@LIBCSPLIT_CPPFLAGS@ \
+	@LIBUNA_CPPFLAGS@ \
+	@LIBCFILE_CPPFLAGS@ \
+	@LIBCPATH_CPPFLAGS@ \
+	@LIBBFIO_CPPFLAGS@ \
+	@LIBFDATETIME_CPPFLAGS@ \
+	@LIBFSAPFS_DLL_IMPORT@
+
+AM_LDFLAGS = @STATIC_LDFLAGS@
+
+bin_PROGRAMS = \
+	fsapfsinfo
+
+fsapfsinfo_SOURCES = \
+	fsapfsinfo.c \
+	fsapfstools_getopt.c fsapfstools_getopt.h \
+	fsapfstools_i18n.h \
+	fsapfstools_libbfio.h \
+	fsapfstools_libcerror.h \
+	fsapfstools_libclocale.h \
+	fsapfstools_libcnotify.h \
+	fsapfstools_libfcache.h \
+	fsapfstools_libfdata.h \
+	fsapfstools_libfdatetime.h \
+	fsapfstools_libfguid.h \
+	fsapfstools_libfsapfs.h \
+	fsapfstools_libfwnt.h \
+	fsapfstools_libuna.h \
+	fsapfstools_output.c fsapfstools_output.h \
+	fsapfstools_signal.c fsapfstools_signal.h \
+	fsapfstools_unused.h \
+	info_handle.c info_handle.h
+
+fsapfsinfo_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@ \
+	@LIBINTL@
+
+MAINTAINERCLEANFILES = \
+	Makefile.in
+
+distclean: clean
+	/bin/rm -f Makefile
+
+splint:
+	@echo "Running splint on fsapfsinfo ..."
+	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(fsapfsinfo_SOURCES)
+

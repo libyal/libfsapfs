@@ -1,0 +1,142 @@
+language: c
+matrix:
+  include:
+  - name: "Linux with clang"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-clang"
+    compiler: clang
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc and wide character type (wchar_t) support"
+    env:
+    - CONFIGURE_OPTIONS="--enable-wide-character-type"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-wide-character-type"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc without optimization"
+    env:
+    - CONFIGURE_OPTIONS="--enable-shared=no --enable-wide-character-type"
+    - CFLAGS="--coverage -O0"
+    - CPPFLAGS="-DOPTIMIZATION_DISABLED"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-no-optimization"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc and shared libraries"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-shared"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc, shared libraries and wide character type (wchar_t) support"
+    env:
+    - CONFIGURE_OPTIONS="--enable-wide-character-type"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-shared-wide-character-type"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc and static executables support"
+    env:
+    - CONFIGURE_OPTIONS="--enable-static-executables"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-static-executables"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "MacOS with clang"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - TARGET="macos-clang"
+    compiler: clang
+    os: osx
+    osx_image: xcode8.3
+  - name: "MacOS with gcc"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - TARGET="macos-gcc"
+    compiler: clang
+    compiler: gcc
+    os: osx
+    osx_image: xcode8.3
+  - name: "MacOS gcc and pkgbuild"
+    env:
+    - CONFIGURE_OPTIONS="--disable-dependency-tracking --prefix=/usr/local"
+    - TARGET="macos-gcc-pkgbuild"
+    compiler: clang
+    compiler: gcc
+    os: osx
+    osx_image: xcode8.3
+before_install:
+  - if test ${TRAVIS_OS_NAME} = "linux"; then
+      sudo apt-get update && sudo apt-mark hold oracle-java8-installer oracle-java9-installer postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6 postgresql-client postgresql-client-common postgresql-common postgresql-contrib-9.2 postgresql-contrib-9.3 postgresql-contrib-9.4 postgresql-contrib-9.5 postgresql-contrib-9.6 postgresql-doc && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint;
+    elif test ${TRAVIS_OS_NAME} = "osx"; then
+      brew update && brew install gettext gnu-sed && brew link --force gettext;
+    fi
+install:
+  - if test ${TRAVIS_OS_NAME} = "osx"; then
+      export SED="/usr/local/bin/gsed";
+    fi
+  - ./synclibs.sh --use-head && ./autogen.sh
+  - if test ${TARGET} = "linux-gcc-shared" || test ${TARGET} = "linux-gcc-shared-wide-character-type"; then
+      ./configure > /dev/null && make > /dev/null && ./syncsharedlibs.sh --use-head;
+    fi
+  - if test -x "synctestdata.sh"; then
+      ./synctestdata.sh;
+    fi
+script:
+  - if test ${TRAVIS_OS_NAME} = "linux"; then
+      export PATH=$(echo $PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g");
+    fi
+  - if test ${TARGET} != "coverity"; then
+      ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1;
+      if test $? -ne 0 && test -f tests/test-suite.log; then
+        cat tests/test-suite.log;
+      fi;
+      if test ${TARGET} = "macos-gcc-pkgbuild"; then
+        VERSION=`sed '5!d; s/^ \[//;s/\],$//' configure.ac` &&
+        make install DESTDIR=${PWD}/osx-pkg &&
+        mkdir -p ${PWD}/osx-pkg/usr/share/doc/libfsapfs &&
+        cp AUTHORS COPYING NEWS README ${PWD}/osx-pkg/usr/share/doc/libfsapfs &&
+        pkgbuild --root osx-pkg --identifier com.github.libyal.libfsapfs --version ${VERSION} --ownership recommended ../libfsapfs-${VERSION}.pkg;
+      fi
+    fi
+after_success:
+  - if test ${TARGET} = "linux-gcc-no-optimization"; then
+      curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
+    fi

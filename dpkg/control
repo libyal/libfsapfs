@@ -1,0 +1,43 @@
+Source: libfsapfs
+Priority: extra
+Maintainer: Joachim Metz <joachim.metz@gmail.com>
+Build-Depends: debhelper (>= 9), dh-autoreconf, pkg-config
+Standards-Version: 3.9.5
+Section: libs
+Homepage: https://github.com/libyal/libfsapfs
+
+Package: libfsapfs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: libfsapfs-dbg
+Description: Library to access the Apple File System (APFS) format
+ libfsapfs is a library to access the Apple File System (APFS) format.
+
+Package: libfsapfs-dbg
+Architecture: any
+Section: debug
+Depends: libfsapfs (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libfsapfs
+ Debugging symbols for libfsapfs.
+
+Package: libfsapfs-dev
+Section: libdevel
+Architecture: any
+Depends: libfsapfs (= ${binary:Version}), ${misc:Depends}
+Description: Header files and libraries for developing applications for libfsapfs
+ Header files and libraries for developing applications for libfsapfs.
+
+Package: libfsapfs-tools
+Section: utils
+Architecture: any
+Depends: libfsapfs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Several tools for reading Apple File System (APFS) volumes
+ Several tools for reading Apple File System (APFS) volumes.
+
+Package: libfsapfs-tools-dbg
+Section: debug
+Architecture: any
+Depends: libfsapfs-tools (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libfsapfs-tools
+ Debugging symbols for libfsapfs-tools.
+

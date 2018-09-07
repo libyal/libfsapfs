@@ -1,0 +1,268 @@
+/*
+ * Library to access the Apple File System (APFS) format
+ *
+ * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
+ *
+ * Refer to AUTHORS for acknowledgements.
+ *
+ * This software is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#if !defined( _LIBFSAPFS_H )
+#define _LIBFSAPFS_H
+
+#include <libfsapfs/codepage.h>
+#include <libfsapfs/definitions.h>
+#include <libfsapfs/error.h>
+#include <libfsapfs/extern.h>
+#include <libfsapfs/features.h>
+#include <libfsapfs/types.h>
+
+#include <stdio.h>
+
+#if defined( LIBFSAPFS_HAVE_BFIO )
+#include <libbfio.h>
+#endif
+
+#if defined( __cplusplus )
+extern "C" {
+#endif
+
+/* -------------------------------------------------------------------------
+ * Support functions
+ * ------------------------------------------------------------------------- */
+
+/* Returns the library version
+ */
+LIBFSAPFS_EXTERN \
+const char *libfsapfs_get_version(
+             void );
+
+/* Returns the access flags for reading
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_get_access_flags_read(
+     void );
+
+/* Retrieves the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_get_codepage(
+     int *codepage,
+     libfsapfs_error_t **error );
+
+/* Sets the narrow system string codepage
+ * A value of 0 represents no codepage, UTF-8 encoding is used instead
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_set_codepage(
+     int codepage,
+     libfsapfs_error_t **error );
+
+/* Determines if a file contains a REFS volume signature
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_volume_signature(
+     const char *filename,
+     libfsapfs_error_t **error );
+
+#if defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE )
+
+/* Determines if a file contains a REFS volume signature
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_volume_signature_wide(
+     const wchar_t *filename,
+     libfsapfs_error_t **error );
+
+#endif /* defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE ) */
+
+#if defined( LIBFSAPFS_HAVE_BFIO )
+
+/* Determines if a file contains a REFS volume signature using a Basic File IO (bfio) handle
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_volume_signature_file_io_handle(
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_error_t **error );
+
+#endif /* defined( LIBFSAPFS_HAVE_BFIO ) */
+
+/* -------------------------------------------------------------------------
+ * Notify functions
+ * ------------------------------------------------------------------------- */
+
+/* Sets the verbose notification
+ */
+LIBFSAPFS_EXTERN \
+void libfsapfs_notify_set_verbose(
+      int verbose );
+
+/* Sets the notification stream
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_notify_set_stream(
+     FILE *stream,
+     libfsapfs_error_t **error );
+
+/* Opens the notification stream using a filename
+ * The stream is opened in append mode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_notify_stream_open(
+     const char *filename,
+     libfsapfs_error_t **error );
+
+/* Closes the notification stream if opened using a filename
+ * Returns 0 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_notify_stream_close(
+     libfsapfs_error_t **error );
+
+/* -------------------------------------------------------------------------
+ * Error functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees an error
+ */
+LIBFSAPFS_EXTERN \
+void libfsapfs_error_free(
+      libfsapfs_error_t **error );
+
+/* Prints a descriptive string of the error to the stream
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_error_fprint(
+     libfsapfs_error_t *error,
+     FILE *stream );
+
+/* Prints a descriptive string of the error to the string
+ * The end-of-string character is not included in the return value
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_error_sprint(
+     libfsapfs_error_t *error,
+     char *string,
+     size_t size );
+
+/* Prints a backtrace of the error to the stream
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_error_backtrace_fprint(
+     libfsapfs_error_t *error,
+     FILE *stream );
+
+/* Prints a backtrace of the error to the string
+ * The end-of-string character is not included in the return value
+ * Returns the number of printed characters if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_error_backtrace_sprint(
+     libfsapfs_error_t *error,
+     char *string,
+     size_t size );
+
+/* -------------------------------------------------------------------------
+ * Volume functions
+ * ------------------------------------------------------------------------- */
+
+/* Creates a volume
+ * Make sure the value volume is referencing, is set to NULL
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_initialize(
+     libfsapfs_volume_t **volume,
+     libfsapfs_error_t **error );
+
+/* Frees a volume
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_free(
+     libfsapfs_volume_t **volume,
+     libfsapfs_error_t **error );
+
+/* Signals the volume to abort its current activity
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_signal_abort(
+     libfsapfs_volume_t *volume,
+     libfsapfs_error_t **error );
+
+/* Opens a volume
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_open(
+     libfsapfs_volume_t *volume,
+     const char *filename,
+     int access_flags,
+     libfsapfs_error_t **error );
+
+#if defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE )
+
+/* Opens a volume
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_open_wide(
+     libfsapfs_volume_t *volume,
+     const wchar_t *filename,
+     int access_flags,
+     libfsapfs_error_t **error );
+
+#endif /* defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE ) */
+
+#if defined( LIBFSAPFS_HAVE_BFIO )
+
+/* Opens a volume using a Basic File IO (bfio) handle
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_open_file_io_handle(
+     libfsapfs_volume_t *volume,
+     libbfio_handle_t *file_io_handle,
+     int access_flags,
+     libfsapfs_error_t **error );
+
+#endif /* defined( LIBFSAPFS_HAVE_BFIO ) */
+
+/* Closes a volume
+ * Returns 0 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_close(
+     libfsapfs_volume_t *volume,
+     libfsapfs_error_t **error );
+
+#if defined( __cplusplus )
+}
+#endif
+
+#endif /* !defined( _LIBFSAPFS_H ) */
+

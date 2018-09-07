@@ -1,0 +1,38 @@
+#include <windows.h>
+
+#ifdef GCC_WINDRES
+VS_VERSION_INFO				VERSIONINFO
+#else
+VS_VERSION_INFO				VERSIONINFO	MOVEABLE IMPURE LOADONCALL DISCARDABLE
+#endif
+  FILEVERSION				1,0,0,0
+  PRODUCTVERSION			1,0,0,0
+  FILEFLAGSMASK				VS_FFI_FILEFLAGSMASK
+#ifdef _DEBUG
+  FILEFLAGS				0x1L
+#else
+  FILEFLAGS				0x0L
+#endif
+  FILEOS				VOS__WINDOWS32
+  FILETYPE				VFT_DLL
+  FILESUBTYPE				0x0L
+BEGIN
+  BLOCK "StringFileInfo"
+  BEGIN
+    BLOCK "040904E4"
+    BEGIN
+      VALUE "FileDescription",		"Library to access the Apple File System (APFS) format\0"
+      VALUE "FileVersion",		"@VERSION@" "\0"
+      VALUE "InternalName",		"libfsapfs.dll\0"
+      VALUE "LegalCopyright",		"(C) 2018, Joachim Metz <joachim.metz@gmail.com>\0"
+      VALUE "OriginalFilename",		"libfsapfs.dll\0"
+      VALUE "ProductName",		"libfsapfs\0"
+      VALUE "ProductVersion",		"@VERSION@" "\0"
+      VALUE "Comments",			"For more information visit https://github.com/libyal/libfsapfs/\0"
+    END
+  END
+  BLOCK "VarFileInfo"
+  BEGIN
+    VALUE "Translation", 0x0409, 1200
+  END
+END

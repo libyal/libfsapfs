@@ -1,0 +1,60 @@
+.Dd September  7, 2018
+.Dt fsapfsinfo
+.Os libfsapfs
+.Sh NAME
+.Nm fsapfsinfo
+.Nd determines information about an Apple File System (APFS)
+.Sh SYNOPSIS
+.Nm fsapfsinfo
+.Op Fl ahvV
+.Va Ar source
+.Sh DESCRIPTION
+.Nm fsapfsinfo
+is a utility to determine information about an Apple File System (APFS)
+.Pp
+.Nm fsapfsinfo
+is part of the
+.Nm libfsapfs
+package.
+.Nm libfsapfs
+is a library to access the Apple File System (APFS) format
+.Pp
+.Ar source
+is the source file.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl a
+shows allocation information
+.It Fl h
+shows this help
+.It Fl v
+verbose output to stderr
+.It Fl V
+print version
+.El
+.Sh ENVIRONMENT
+None
+.Sh FILES
+None
+.Sh EXAMPLES
+.Bd -literal
+# fsapfsinfo /dev/sda1
+fsapfsinfo 20180907
+
+Apple File System (APFS) volume information:
+.Dl        ...
+
+.Ed
+.Sh DIAGNOSTICS
+Errors, verbose and debug output are printed to stderr when verbose output \-v is enabled.
+Verbose and debug output are only printed when enabled at compilation.
+.Sh BUGS
+Please report bugs of any kind to <joachim.metz@gmail.com> or on the project website:
+https://github.com/libyal/libfsapfs/
+.Sh AUTHOR
+These man pages were written by Joachim Metz.
+.Sh COPYRIGHT
+Copyright 2018, Joachim Metz <joachim.metz@gmail.com>.
+This is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+.Sh SEE ALSO
