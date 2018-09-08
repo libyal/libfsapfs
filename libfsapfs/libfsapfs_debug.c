@@ -28,237 +28,101 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
+#include "libfsapfs_libfguid.h"
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
-/* Prints the MFT attribute data flags
+/* Prints a GUID/UUID value
+ * Returns 1 if successful or -1 on error
  */
-void libfsapfs_debug_print_mft_attribute_data_flags(
-      uint16_t mft_attribute_data_flags )
+int libfsapfs_debug_print_guid_value(
+     const char *function_name,
+     const char *value_name,
+     const uint8_t *byte_stream,
+     size_t byte_stream_size,
+     int byte_order,
+     uint32_t string_format_flags,
+     libcerror_error_t **error )
 {
-	if( ( mft_attribute_data_flags & 0x0001 ) != 0 )
+        system_character_t guid_string[ 48 ];
+
+        libfguid_identifier_t *guid = NULL;
+	static char *function       = "libfsapfs_debug_print_guid_value";
+
+	if( libfguid_identifier_initialize(
+	     &guid,
+	     error ) != 1 )
 	{
-		libcnotify_printf(
-		 "\tIs compressed\n" );
-	}
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create GUID.",
+		 function );
 
-	if( ( mft_attribute_data_flags & 0x4000 ) != 0 )
+		goto on_error;
+	}
+	if( libfguid_identifier_copy_from_byte_stream(
+	     guid,
+	     byte_stream,
+	     byte_stream_size,
+	     byte_order,
+	     error ) != 1 )
 	{
-		libcnotify_printf(
-		 "\tIs encrypted\n" );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy byte stream to GUID.",
+		 function );
+
+		goto on_error;
 	}
-	if( ( mft_attribute_data_flags & 0x8000 ) != 0 )
+	if( libfguid_identifier_copy_to_utf8_string(
+	     guid,
+	     (uint8_t *) guid_string,
+	     48,
+	     string_format_flags,
+	     error ) != 1 )
 	{
-		libcnotify_printf(
-		 "\tIs sparse\n" );
-	}
-}
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy GUID to string.",
+		 function );
 
-/* Prints the file attribute flags
- */
-void libfsapfs_debug_print_file_attribute_flags(
-      uint32_t file_attribute_flags )
-{
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_READ_ONLY ) != 0 )
+		goto on_error;
+	}
+	libcnotify_printf(
+	 "%s: %s: %s\n",
+	 function_name,
+	 value_name,
+	 guid_string );
+
+	if( libfguid_identifier_free(
+	     &guid,
+	     error ) != 1 )
 	{
-		libcnotify_printf(
-		 "\tIs read-only (FILE_ATTRIBUTE_READ_ONLY)\n" );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free GUID.",
+		 function );
+
+		goto on_error;
 	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_HIDDEN ) != 0 )
+	return( 1 );
+
+on_error:
+	if( guid != NULL )
 	{
-		libcnotify_printf(
-		 "\tIs hidden (FILE_ATTRIBUTE_HIDDEN)\n" );
+		libfguid_identifier_free(
+		 &guid,
+		 NULL );
 	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_SYSTEM ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs system (FILE_ATTRIBUTE_SYSTEM)\n" );
-	}
-
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_DIRECTORY ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs directory (FILE_ATTRIBUTE_DIRECTORY)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_ARCHIVE ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tShould be archived (FILE_ATTRIBUTE_ARCHIVE)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_DEVICE ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs device (FILE_ATTRIBUTE_DEVICE)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_NORMAL ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs normal (FILE_ATTRIBUTE_NORMAL)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_TEMPORARY ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs temporary (FILE_ATTRIBUTE_TEMPORARY)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_SPARSE_FILE ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs a sparse file (FILE_ATTRIBUTE_SPARSE_FILE)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_REPARSE_POINT ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs a reparse point or symbolic link (FILE_ATTRIBUTE_FLAG_REPARSE_POINT)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_COMPRESSED ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs compressed (FILE_ATTRIBUTE_COMPRESSED)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_OFFLINE ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs offline (FILE_ATTRIBUTE_OFFLINE)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_NOT_CONTENT_INDEXED ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tContent should not be indexed (FILE_ATTRIBUTE_NOT_CONTENT_INDEXED)\n" );
-	}
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_ENCRYPTED ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs encrypted (FILE_ATTRIBUTE_ENCRYPTED)\n" );
-	}
-
-	if( ( file_attribute_flags & LIBFSAPFS_FILE_ATTRIBUTE_FLAG_VIRTUAL ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs virtual (FILE_ATTRIBUTE_VIRTUAL)\n" );
-	}
-
-	if( ( file_attribute_flags & 0x10000000UL ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs directory (0x10000000)\n" );
-	}
-	if( ( file_attribute_flags & 0x20000000UL ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs index view (0x20000000)\n" );
-	}
-}
-
-/* Prints the index node flags
- */
-void libfsapfs_debug_print_index_node_flags(
-      uint32_t index_node_flags )
-{
-	if( ( index_node_flags & 0x00000001UL ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tHas index allocation\n" );
-	}
-}
-
-/* Prints the index value flags
- */
-void libfsapfs_debug_print_index_value_flags(
-      uint32_t index_value_flags )
-{
-	if( ( index_value_flags & LIBFSAPFS_INDEX_VALUE_FLAG_HAS_SUB_NODE ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tHas sub node\n" );
-	}
-	if( ( index_value_flags & LIBFSAPFS_INDEX_VALUE_FLAG_IS_LAST ) != 0 )
-	{
-		libcnotify_printf(
-		 "\tIs last\n" );
-	}
-}
-
-/* Prints the attribute type
- */
-const char *libfsapfs_debug_print_attribute_type(
-             uint32_t attribute_type )
-{
-	switch( attribute_type )
-	{
-		case 0x00000000UL:
-			return( "" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_STANDARD_INFORMATION:
-			return( "$STANDARD_INFORMATION" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_ATTRIBUTE_LIST:
-			return( "$ATTRIBUTE_LIST" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_FILE_NAME:
-			return( "$FILE_NAME" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_OBJECT_IDENTIFIER:
-			return( "$OBJECT_ID" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_SECURITY_DESCRIPTOR:
-			return( "$SECURITY_DESCRIPTOR" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_VOLUME_NAME:
-			return( "$VOLUME_NAME" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_VOLUME_INFORMATION:
-			return( "$VOLUME_INFORMATION" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_DATA:
-			return( "$DATA" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_INDEX_ROOT:
-			return( "$INDEX_ROOT" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_INDEX_ALLOCATION:
-			return( "$INDEX_ALLOCATION" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_BITMAP:
-			return( "$BITMAP" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_REPARSE_POINT:
-			return( "$REPARSE_POINT" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_EXTENDED_INFORMATION:
-			return( "$EA_INFORMATION" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_EXTENDED:
-			return( "$EA" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_PROPERTY_SET:
-			return( "$PROPERTY_SET" );
-
-		case LIBFSAPFS_ATTRIBUTE_TYPE_LOGGED_UTILITY_STREAM:
-			return( "$LOGGED_UTILITY_STREAM" );
-	}
-	return( "_UNKNOWN_" );
-}
-
-/* Prints the file name attribute namespace
- */
-const char *libfsapfs_debug_print_file_name_attribute_namespace(
-             uint8_t name_namespace )
-{
-	switch( name_namespace )
-	{
-		case LIBFSAPFS_FILE_NAME_NAMESPACE_POSIX:
-			return( "POSIX" );
-
-		case LIBFSAPFS_FILE_NAME_NAMESPACE_WINDOWS:
-			return( "Windows" );
-
-		case LIBFSAPFS_FILE_NAME_NAMESPACE_DOS:
-			return( "DOS" );
-
-		case LIBFSAPFS_FILE_NAME_NAMESPACE_DOS_WINDOWS:
-			return( "DOS and Windows" );
-	}
-	return( "_UNKNOWN_" );
+	return( -1 );
 }
 
 /* Prints the read offsets
@@ -337,5 +201,5 @@ int libfsapfs_debug_print_read_offsets(
 	return( 1 );
 }
 
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 

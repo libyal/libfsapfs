@@ -31,7 +31,8 @@
 extern "C" {
 #endif
 
-extern const char fsapfs_volume_file_system_signature[ 4 ];
+extern const char fsapfs_container_signature[ 4 ];
+extern const char fsapfs_volume_signature[ 4 ];
 
 typedef struct libfsapfs_io_handle libfsapfs_io_handle_t;
 

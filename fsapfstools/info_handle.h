@@ -50,9 +50,9 @@ struct info_handle
 	 */
 	libbfio_handle_t *input_file_io_handle;
 
-	/* The libfsapfs input volume
+	/* The libfsapfs input container
 	 */
-	libfsapfs_volume_t *input_volume;
+	libfsapfs_container_t *input_container;
 
 	/* The notification output stream
 	 */
@@ -100,7 +100,7 @@ int info_handle_close_input(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
-int info_handle_volume_fprint(
+int info_handle_container_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 

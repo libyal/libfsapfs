@@ -56,6 +56,11 @@ int libfsapfs_set_codepage(
 #endif /* !defined( HAVE_LOCAL_LIBFSAPFS ) */
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_check_container_signature(
+     const char *filename,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_check_volume_signature(
      const char *filename,
      libcerror_error_t **error );
@@ -63,11 +68,21 @@ int libfsapfs_check_volume_signature(
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_check_container_signature_wide(
+     const wchar_t *filename,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_check_volume_signature_wide(
      const wchar_t *filename,
      libcerror_error_t **error );
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_container_signature_file_io_handle(
+     libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
 int libfsapfs_check_volume_signature_file_io_handle(

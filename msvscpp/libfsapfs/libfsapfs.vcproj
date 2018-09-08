@@ -39,8 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfdatetime"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFDATETIME;LIBFSAPFS_DLL_EXPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfdatetime;..\..\libfguid"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;LIBFSAPFS_DLL_EXPORT"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				CompileAs="1"
@@ -110,8 +110,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfdatetime"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFDATETIME;LIBFSAPFS_DLL_EXPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfdatetime;..\..\libfguid"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;LIBFSAPFS_DLL_EXPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
@@ -174,6 +174,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_object_map.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map_entry.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_reaper.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_space_manager.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container_superblock.c"
 				>
 			</File>
@@ -194,11 +218,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_object.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_support.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_volume.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_volume_superblock.c"
 				>
 			</File>
 		</Filter>
@@ -208,7 +240,55 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\libfsapfs\fsapfs_btree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_container_physical_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_container_reaper.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_container_space_manager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\fsapfs_container_superblock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_object.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_volume_superblock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_object_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map_entry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_reaper.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_container_space_manager.h"
 				>
 			</File>
 			<File
@@ -260,11 +340,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_libfguid.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_libuna.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_notify.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_object.h"
 				>
 			</File>
 			<File
@@ -281,6 +369,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_volume.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_volume_superblock.h"
 				>
 			</File>
 		</Filter>

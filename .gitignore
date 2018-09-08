@@ -123,13 +123,21 @@ stamp-h[1-9]
 /fsapfstools/*.exe
 /fsapfstools/fsapfsinfo
 /tests/*.exe
+/tests/fsapfs_test_container
+/tests/fsapfs_test_container_object_map
+/tests/fsapfs_test_container_physical_map
+/tests/fsapfs_test_container_physical_map_entry
+/tests/fsapfs_test_container_reaper
+/tests/fsapfs_test_container_space_manager
 /tests/fsapfs_test_container_superblock
 /tests/fsapfs_test_error
 /tests/fsapfs_test_file_entry
 /tests/fsapfs_test_io_handle
 /tests/fsapfs_test_notify
+/tests/fsapfs_test_object
 /tests/fsapfs_test_support
 /tests/fsapfs_test_volume
+/tests/fsapfs_test_volume_superblock
 /tests/input
 /tests/tmp*
 
@@ -144,4 +152,5 @@ stamp-h[1-9]
 /libcsplit
 /libcthreads
 /libfdatetime
+/libfguid
 /libuna

@@ -25,7 +25,6 @@
 #include <types.h>
 #include <wide_string.h>
 
-#include "libfsapfs_container_superblock.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_io_handle.h"
@@ -33,6 +32,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_volume.h"
+#include "libfsapfs_volume_superblock.h"
 
 /* Creates a volume
  * Make sure the value volume is referencing, is set to NULL
@@ -752,8 +752,8 @@ int libfsapfs_volume_open_read(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	libfsapfs_container_superblock_t *container_superblock = NULL;
-	static char *function                                  = "libfsapfs_internal_volume_open_read";
+	libfsapfs_volume_superblock_t *volume_superblock = NULL;
+	static char *function                            = "libfsapfs_internal_volume_open_read";
 
 	if( internal_volume == NULL )
 	{
@@ -781,24 +781,24 @@ int libfsapfs_volume_open_read(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "Reading container superblock:\n" );
+		 "Reading volume superblock:\n" );
 	}
 #endif
-	if( libfsapfs_container_superblock_initialize(
-	     &container_superblock,
+	if( libfsapfs_volume_superblock_initialize(
+	     &volume_superblock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create container superblock.",
+		 "%s: unable to create volume superblock.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsapfs_container_superblock_read_file_io_handle(
-	     container_superblock,
+	if( libfsapfs_volume_superblock_read_file_io_handle(
+	     volume_superblock,
 	     file_io_handle,
 	     0,
 	     error ) != 1 )
@@ -807,20 +807,20 @@ int libfsapfs_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read container superblock at offset: 0 (0x00000000).",
+		 "%s: unable to read volume superblock at offset: 0 (0x00000000).",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsapfs_container_superblock_free(
-	     &container_superblock,
+	if( libfsapfs_volume_superblock_free(
+	     &volume_superblock,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free container superblock.",
+		 "%s: unable to free volume superblock.",
 		 function );
 
 		goto on_error;
@@ -828,10 +828,10 @@ int libfsapfs_volume_open_read(
 	return( 1 );
 
 on_error:
-	if( container_superblock != NULL )
+	if( volume_superblock != NULL )
 	{
-		libfsapfs_container_superblock_free(
-		 &container_superblock,
+		libfsapfs_volume_superblock_free(
+		 &volume_superblock,
 		 NULL );
 	}
 	return( -1 );

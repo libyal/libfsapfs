@@ -1,7 +1,7 @@
 /*
- * The APFS container superblock functions
+ * The container superblock functions
  *
- * Copyright (C) 2010-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -38,7 +38,23 @@ struct libfsapfs_container_superblock
 {
 	/* The block size
 	 */
-	size_t block_size;
+	uint32_t block_size;
+
+	/* The number of blocks
+	 */
+	uint64_t number_of_blocks;
+
+	/* The space manager object identifier
+	 */
+	uint64_t space_manager_object_identifier;
+
+	/* The object map block number
+	 */
+	uint64_t object_map_block_number;
+
+	/* The reaper object identifier
+	 */
+	uint64_t reaper_object_identifier;
 };
 
 int libfsapfs_container_superblock_initialize(

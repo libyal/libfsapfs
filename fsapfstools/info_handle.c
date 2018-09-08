@@ -36,8 +36,8 @@
 #if !defined( LIBFSAPFS_HAVE_BFIO )
 
 extern \
-int libfsapfs_volume_open_file_io_handle(
-     libfsapfs_volume_t *volume,
+int libfsapfs_container_open_file_io_handle(
+     libfsapfs_container_t *container,
      libbfio_handle_t *file_io_handle,
      int access_flags,
      libfsapfs_error_t **error );
@@ -229,15 +229,15 @@ int info_handle_initialize(
 
 		goto on_error;
 	}
-	if( libfsapfs_volume_initialize(
-	     &( ( *info_handle )->input_volume ),
+	if( libfsapfs_container_initialize(
+	     &( ( *info_handle )->input_container ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize input volume.",
+		 "%s: unable to initialize input container.",
 		 function );
 
 		goto on_error;
@@ -287,15 +287,15 @@ int info_handle_free(
 	}
 	if( *info_handle != NULL )
 	{
-		if( libfsapfs_volume_free(
-		     &( ( *info_handle )->input_volume ),
+		if( libfsapfs_container_free(
+		     &( ( *info_handle )->input_container ),
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free input volume.",
+			 "%s: unable to free input container.",
 			 function );
 
 			result = -1;
@@ -343,17 +343,17 @@ int info_handle_signal_abort(
 	}
 	info_handle->abort = 1;
 
-	if( info_handle->input_volume != NULL )
+	if( info_handle->input_container != NULL )
 	{
-		if( libfsapfs_volume_signal_abort(
-		     info_handle->input_volume,
+		if( libfsapfs_container_signal_abort(
+		     info_handle->input_container,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to signal input volume to abort.",
+			 "%s: unable to signal input container to abort.",
 			 function );
 
 			return( -1 );
@@ -517,8 +517,8 @@ int info_handle_open_input(
 
 		return( -1 );
 	}
-	if( libfsapfs_volume_open_file_io_handle(
-	     info_handle->input_volume,
+	if( libfsapfs_container_open_file_io_handle(
+	     info_handle->input_container,
 	     info_handle->input_file_io_handle,
 	     LIBFSAPFS_OPEN_READ,
 	     error ) != 1 )
@@ -527,7 +527,7 @@ int info_handle_open_input(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open input volume.",
+		 "%s: unable to open input container.",
 		 function );
 
 		return( -1 );
@@ -555,15 +555,15 @@ int info_handle_close_input(
 
 		return( -1 );
 	}
-	if( libfsapfs_volume_close(
-	     info_handle->input_volume,
+	if( libfsapfs_container_close(
+	     info_handle->input_container,
 	     error ) != 0 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_CLOSE_FAILED,
-		 "%s: unable to close input volume.",
+		 "%s: unable to close input container.",
 		 function );
 
 		return( -1 );
@@ -571,14 +571,14 @@ int info_handle_close_input(
 	return( 0 );
 }
 
-/* Prints the volume information
+/* Prints the container information
  * Returns 1 if successful or -1 on error
  */
-int info_handle_volume_fprint(
+int info_handle_container_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error )
 {
-	static char *function = "info_handle_volume_fprint";
+	static char *function = "info_handle_container_fprint";
 
 	if( info_handle == NULL )
 	{
@@ -597,7 +597,7 @@ int info_handle_volume_fprint(
 
 	fprintf(
 	 info_handle->notify_stream,
-	 "\nVolume information:\n" );
+	 "\nContainer information:\n" );
 
 /* TODO */
 

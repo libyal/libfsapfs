@@ -7,8 +7,8 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="container_superblock error io_handle notify";
-LIBRARY_TESTS_WITH_INPUT="support volume";
+LIBRARY_TESTS="container_object_map container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error io_handle notify object";
+LIBRARY_TESTS_WITH_INPUT="container support";
 OPTION_SETS="";
 
 INPUT_GLOB="*";

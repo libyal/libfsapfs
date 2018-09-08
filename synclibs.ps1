@@ -7,7 +7,7 @@ Param (
 )
 
 $GitUrlPrefix = "https://github.com/libyal"
-$LocalLibs = "libbfio libcdata libcerror libcfile libclocale libcnotify libcpath libcsplit libcthreads libfdatetime libuna"
+$LocalLibs = "libbfio libcdata libcerror libcfile libclocale libcnotify libcpath libcsplit libcthreads libfdatetime libfguid libuna"
 $LocalLibs = ${LocalLibs} -split " "
 
 $Git = "git"

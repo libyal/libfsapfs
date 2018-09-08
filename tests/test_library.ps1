@@ -6,8 +6,8 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "container_superblock error io_handle notify"
-$LibraryTestsWithInput = "support volume"
+$LibraryTests = "container_object_map container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error io_handle notify object"
+$LibraryTestsWithInput = "container support"
 
 $InputGlob = "*"
 

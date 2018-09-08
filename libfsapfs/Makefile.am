@@ -11,13 +11,27 @@ AM_CPPFLAGS = \
 	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
+	@LIBFGUID_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_EXPORT@
 
 lib_LTLIBRARIES = libfsapfs.la
 
 libfsapfs_la_SOURCES = \
+	fsapfs_btree.h \
+	fsapfs_container_object_map.h \
+	fsapfs_container_physical_map.h \
+	fsapfs_container_reaper.h \
+	fsapfs_container_space_manager.h \
 	fsapfs_container_superblock.h \
+	fsapfs_object.h \
+	fsapfs_volume_superblock.h \
 	libfsapfs.c \
+	libfsapfs_container.c libfsapfs_container.h \
+	libfsapfs_container_object_map.c libfsapfs_container_object_map.h \
+	libfsapfs_container_physical_map.c libfsapfs_container_physical_map.h \
+	libfsapfs_container_physical_map_entry.c libfsapfs_container_physical_map_entry.h \
+	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
+	libfsapfs_container_space_manager.c libfsapfs_container_space_manager.h \
 	libfsapfs_container_superblock.c libfsapfs_container_superblock.h \
 	libfsapfs_debug.c libfsapfs_debug.h \
 	libfsapfs_definitions.h \
@@ -30,12 +44,15 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_libclocale.h \
 	libfsapfs_libcnotify.h \
 	libfsapfs_libfdatetime.h \
+	libfsapfs_libfguid.h \
 	libfsapfs_libuna.h \
 	libfsapfs_notify.c libfsapfs_notify.h \
+	libfsapfs_object.c libfsapfs_object.h \
 	libfsapfs_support.c libfsapfs_support.h \
 	libfsapfs_types.h \
 	libfsapfs_unused.h \
-	libfsapfs_volume.c libfsapfs_volume.h
+	libfsapfs_volume.c libfsapfs_volume.h \
+	libfsapfs_volume_superblock.c libfsapfs_volume_superblock.h
 
 libfsapfs_la_LIBADD = \
 	@LIBCERROR_LIBADD@ \
@@ -47,7 +64,8 @@ libfsapfs_la_LIBADD = \
 	@LIBCFILE_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
-	@LIBFDATETIME_LIBADD@
+	@LIBFDATETIME_LIBADD@ \
+	@LIBFGUID_LIBADD@
 
 libfsapfs_la_LDFLAGS = -no-undefined -version-info 1:0:0
 

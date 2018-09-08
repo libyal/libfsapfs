@@ -34,10 +34,12 @@
 /* The following type definitions hide internal data structures
  */
 #if defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI )
+typedef struct libfsapfs_container {}	libfsapfs_container_t;
 typedef struct libfsapfs_file_entry {}	libfsapfs_file_entry_t;
 typedef struct libfsapfs_volume {}	libfsapfs_volume_t;
 
 #else
+typedef intptr_t libfsapfs_container_t;
 typedef intptr_t libfsapfs_file_entry_t;
 typedef intptr_t libfsapfs_volume_t;
 

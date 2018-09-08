@@ -26,7 +26,8 @@
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libcerror.h"
 
-const char fsapfs_volume_file_system_signature[ 4 ] = "NXSB";
+const char fsapfs_container_signature[ 4 ] = "NXSB";
+const char fsapfs_volume_signature[ 4 ] = "APSB";
 
 /* Creates an IO handle
  * Make sure the value io_handle is referencing, is set to NULL

@@ -287,13 +287,13 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( info_handle_volume_fprint(
+	if( info_handle_container_fprint(
 	     fsapfsinfo_info_handle,
 	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to print volume information.\n" );
+		 "Unable to print container information.\n" );
 
 		goto on_error;
 	}

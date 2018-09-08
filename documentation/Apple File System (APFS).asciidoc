@@ -7,10 +7,10 @@ Analysis of APFS
 :numbered!:
 [abstract]
 == Summary
-The Apple File System (APFS) is a file system mainly used on the Apple
-platform such as MacOS. APFS succeeds the Hierarchical File System (HFS).
-This specification is based on publicly availble work on the format and
-was enhanced by analyzing test data.
+The Apple File System (APFS) is a volume and file system mainly used on
+the Apple platforms such as MacOS and iOS. APFS succeeds the Hierarchical
+File System (HFS) and Core Storage (CS).  This specification is based on
+publicly availble work on the format and was enhanced by analyzing test data.
 
 This document is intended as a working document for the APFS format.
 
@@ -63,6 +63,8 @@ The following version of programs were used to test the information within this 
 
 * macOS 10.13 (High Sierra)
 
+== Objects
+
 === Object
 
 The object is 32 bytes of size and consists of:
@@ -73,10 +75,15 @@ The object is 32 bytes of size and consists of:
 | 0 | 8 | | Checksum (o_cksum) +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier (oid)
-| 16 | 8 | | [yellow-background]*Unknown (xid)*
-| 24 | 4 | | [yellow-background]*Unknown (type)*
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | | Object type +
+See section: <<object_types,Object types>>
 | 28 | 4 | | [yellow-background]*Unknown (subtype)*
 |===
+
+[NOTE]
+Other sources refer to the object version as transaction or checkpoint
+identifier.
 
 === [[object_checksum]]Object checksum
 
@@ -85,9 +92,128 @@ The checksum algorithm:
 * first calculate a Fletcher-64 checksum of the object data without the checkum value and an initial value of 0
 * next calculate a Fletcher-64 checksum of the object data with the checkum value and an initial value of Fletcher-64 checksum calculated in the first step
 
+=== [[object_types]]Object types
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x0000001 | | Container superblock
+| 0x0000002 | | B-Tree root
+| 0x0000003 | | B-Tree node
+| 0x0000004 | | [yellow-background]*Unknown (MTree?)*
+| 0x0000005 | | Space manager header
+| 0x0000006 | | [yellow-background]*Unknown (CAB?)*
+| 0x0000007 | | [yellow-background]*Unknown (Chunk information block? CIB)*
+| 0x0000008 | | [yellow-background]*Unknown (Space manager IP?)*
+| | |
+| 0x000000b | | [yellow-background]*Unknown (BTreeRootPtr?)*
+| 0x000000c | | Container physical map (CPM)
+| 0x000000d | | Volume superblock 
+| | |
+| 0x0000011 | | [yellow-background]*Unknown (NR?)*
+| 0x0000012 | | [yellow-background]*Unknown (NRL?)*
+| | |
+| 0x0000016 | | [yellow-background]*Unknown (WBC?)*
+| 0x0000017 | | [yellow-background]*Unknown (WBCL?)*
+| | |
+| 0x4000000 | | [yellow-background]*Unknown (flag?)*
+| 0x8000000 | | [yellow-background]*Unknown (flag?)*
+|===
+
+== B-tree
+
+=== B-tree header
+
+The B-tree header is 24 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | Flags (flags)
+| 2 | 2 | | Level (level)
+| 4 | 4 | | Number of keys (key_count)
+| 8 | 2 | | [yellow-background]*Unknown (table_space_offset)*
+| 10 | 2 | | [yellow-background]*Unknown (table_space_length)*
+| 12 | 2 | | [yellow-background]*Unknown (free_space_offset)*
+| 14 | 2 | | [yellow-background]*Unknown (free_space_length)*
+| 16 | 2 | | [yellow-background]*Unknown (key_free_list_space_offset)*
+| 18 | 2 | | [yellow-background]*Unknown (key_free_list_space_length)*
+| 20 | 2 | | [yellow-background]*Unknown (val_free_list_space_offset)*
+| 22 | 2 | | [yellow-background]*Unknown (val_free_list_space_length)*
+|===
+
+=== B-tree footer
+
+The B-tree footer is 32 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | [yellow-background]*Unknown*
+| 4 | 4 | | [yellow-background]*Unknown (nodesize)*
+| 8 | 4 | | [yellow-background]*Unknown (key_size)*
+| 12 | 4 | | [yellow-background]*Unknown (val_size)*
+| 16 | 4 | | [yellow-background]*Unknown (key_max_size)*
+| 20 | 4 | | [yellow-background]*Unknown (val_max_size)*
+| 24 | 4 | | [yellow-background]*Unknown (entries_cnt)*
+| 28 | 4 | | [yellow-background]*Unknown (nodes_cnt)*
+|===
+
+=== Variable-size B-tree entry
+
+The variable-size B-tree entry is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | [yellow-background]*Unknown (key_offs)*
+| 2 | 2 | | [yellow-background]*Unknown (key_len)*
+| 4 | 2 | | [yellow-background]*Unknown (value_offs)*
+| 6 | 2 | | [yellow-background]*Unknown (value_len)*
+|===
+
+=== Fixed-size B-tree entry
+
+The fixed-size B-tree entry is 4 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | [yellow-background]*Unknown (key_offs)*
+| 2 | 2 | | [yellow-background]*Unknown (value_offs)*
+|===
+
+== The container
+
+APFS stores volumes inside a container. The maximum number of volumes is
+dependent on the size of the container. `[HANSEN17]` indicates:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Container size | Maximum number of volumes
+| 1 GiB | 2
+| 2 GiB | 4
+| 5 GiB | 10
+| 10 GiB | 20
+| 20 GiB | 40
+| 100 GiB | 100
+| 12 TiB | 100
+| 1.2 PiB | 100
+| 7.5 EiB | 100
+|===
+
+The container consists of:
+* current container superblock
+* current container physical map
+* [yellow-background]*backup of current container superblock?*
+* one or more pairs of:
+** previous version of container physical map
+** previous version of container superblock
+* ...
+
 === Container superblock
 
-The container superblock is 32 bytes of size and consists of:
+The container superblock is X bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -96,17 +222,293 @@ The container superblock is 32 bytes of size and consists of:
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | [yellow-background]*Unknown (xid)*
-| 24 | 4 | | Object type
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x80000001 | Object type +
+See section: <<object_types,Object types>>
 | 28 | 4 | | Object subtype
-4+|
+4+| _Object values_
 | 32 | 4 | "NXSB" | Signature (nx_magix)
 | 36 | 4 | | Block size (nx_block_size)
 | 40 | 8 | | Number of blocks (nx_block_count)
+| 48 | 8 | | Compatible feature flags (nx_features)
+| 56 | 8 | | Read-only compatible feature flags (nx_read_only_compatible_features)
+| 64 | 8 | | Incompatible feature flags (nx_incompatible_features)
+| 72 | 16 | | Container identifier (nx_uuid) +
+Contains a UUID stored in big-endian
+| 88 | 8 | | Next (available) object identifier (nx_next_oid)
+| 96 | 8 | | [yellow-background]*Next (available) ??? (nx_next_xid)*
+| 102 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_desc_blocks)*
+| 106 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_data_blocks)*
+| 110 | 8 | | [yellow-background]*??? object identifier (nx_xp_desc_base)*
+| 118 | 8 | | [yellow-background]*??? object identifier (nx_xp_data_base)*
+| 126 | 4 | | [yellow-background]*Unknown (nx_xp_desc_next)*
+| 130 | 4 | | [yellow-background]*Unknown (nx_xp_data_next)*
+| 134 | 4 | | [yellow-background]*Unknown (nx_xp_desc_index)*
+| 138 | 4 | | [yellow-background]*Unknown (nx_xp_desc_len)*
+| 142 | 4 | | [yellow-background]*Unknown (nx_xp_data_index)*
+| 146 | 4 | | [yellow-background]*Unknown (nx_xp_data_len)*
+| 150 | 8 | | Space manager object identifier (nx_spaceman_oid) +
+Contains a object identifier that can be resolved in the container physical map
+| 158 | 8 | | Object map block number (nx_omap_oid) +
+Contains a block number relative to the start of the volume
+| 166 | 8 | | Reaper object identifier (nx_reaper_oid) +
+Contains a object identifier that can be resolved in the container physical map
+| 174 | 4 | | [yellow-background]*Unknown (unk_B0)*
+| 178 | 4 | | [yellow-background]*Unknown (nx_max_file_systems)*
+| 182 | 100 x 8 = 800 | | Array of volume object identifiers (nx_fs_oid)
+| 982 | 32 x 8 = 256 | | [yellow-background]*Unknown*
+| 1238 | 8 | | [yellow-background]*Unknown (nx_blocked_out_base)*
+| 1246 | 8 | | [yellow-background]*Unknown (nx_blocked_out_blocks)*
+| 1252 | 8 | | [yellow-background]*Unknown*
+| 1260 | 8 | | [yellow-background]*Unknown*
+| 1268 | 8 | | [yellow-background]*Unknown (nx_efi_jumpstart_paddr)*
+| 1276 | 8 | | [yellow-background]*Unknown*
+| 1284 | 8 | | [yellow-background]*Unknown*
+| 1292 | 8 | | [yellow-background]*Unknown (nx_keybag_base)*
+| 1300 | 8 | | [yellow-background]*Unknown (nx_keybag_blocks)*
+| 1308 | 5 x 8 = 40 | | [yellow-background]*Unknown (nx_ephemeral_info)*
+| 1348 | 8 | | [yellow-background]*Unknown (nx_fusion_mt_oid)*
+| 1356 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_oid)*
+| 1364 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_base)*
+| 1372 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_blocks)*
+| 1380 | ... | | [yellow-background]*Unknown*
 |===
 
 [NOTE]
-Presumably NXSB is an abbreviation of NX superblock
+Presumably NXSB is an abbreviation of NX superblock. At this point it is
+unclear what NX stands for.
+
+=== Container physical map (CPM)
+
+The container physical map contains a mapping between container metadata object
+identifiers and their location in the volume.
+
+The container physical map (CPM) is 4080 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x4000000c | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | | Object subtype
+4+| _Object values_
+| 32 | 4 | | Flags (cpm_flags)
+| 36 | 4 | | Number of entries (cpm_count)
+| 40 | 101 x 40 = 4040 | | Array of map entries (cpm_map) +
+See sections: <<cpm_entry,Container physical map (CPM) entry>>
+|===
+
+[NOTE]
+Presumably CPM is short for container physical map, though other sources
+refer to this as checkpoint map.
+
+==== [[cpm_entry]]Container physical map (CPM) entry
+
+The Container physical map (CPM) entry entry is 40 bytes of size and consists
+of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 4 | | (Container) object type (cpm_type)
+| 4 | 4 | | (Container) object subtype (cpm_subtype)
+| 8 | 4 | | Size (cpm_size) +
+Contains number of bytes
+| 12 | 4 | | [yellow-background]*Unknown*
+| 16 | 8 | | File system object indentifier (cpm_fs_oid)
+| 24 | 8 | | (Container) object identifier (cpm_oid)
+| 32 | 8 | | Physical address (cpm_paddr) +
+Contains a block number relative to the start of the volume
+|===
+
+=== Space manager
+
+The space manager is X bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x80000005 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | | Object subtype
+4+| _Object values_
+| 32 | 4 | | Block size (block_size)
+| | 4 | | Number of blocks per chunk (blocks_per_chunk)
+| | 4 | | Number of chunks per CIB (chunks_per_cib)
+| | 4 | | Number of CIBs per CAB (cibs_per_cab)
+| | 8 | | Number of blocks (block_count)
+| | 8 | | Number of chunks (chunk_count)
+| | 4 | | Number of CIBs (cib_count)
+| | 4 | | Number of CABs (cab_count)
+| | 8 | | Number of unused blocks (free_count)
+| | 8 | | [yellow-background]*Unknown (cib_arr_offs)*
+| | 8 | | [yellow-background]*Unknown (cab_arr_offs?)*
+| | 8 | | [yellow-background]*Unknown (tier2_block_count)*
+| | 8 | | [yellow-background]*Unknown (tier2_chunk_count)*
+| | 4 | | [yellow-background]*Unknown (tier2_cib_count)*
+| | 4 | | [yellow-background]*Unknown (tier2_cab_count)*
+| | 8 | | [yellow-background]*Unknown (tier2_free_count)*
+| | 8 | | [yellow-background]*Unknown (tier2_cib_arr_offs)*
+| | 8 | | [yellow-background]*Unknown (tier2_cab_arr_offs?)*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown (ip_block_count)*
+| | 4 | | [yellow-background]*Unknown (ip_bm_block_count)*
+| | 4 | | [yellow-background]*Unknown (ip_bitmap_block_count)*
+| | 8 | | [yellow-background]*Unknown (ip_bm_base_address)*
+| | 8 | | [yellow-background]*Unknown (ip_base_address)*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown (free_queue_count_1)*
+| | 8 | | [yellow-background]*Unknown (free_queue_tree_1)*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown (free_queue_count_2)*
+| | 8 | | [yellow-background]*Unknown (free_queue_tree_2)*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown (free_queue_count_3)*
+| | 8 | | [yellow-background]*Unknown (free_queue_tree_3)*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 2 | | [yellow-background]*Unknown (bitmap_next_array_free)*
+| | 2 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown (unk_array_offs)*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 16 x 2 = 32 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown (blockid_vol_bitmap_hdr)*
+| | 2128 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 16 x 2 = 32 | | [yellow-background]*Unknown*
+| | 191 x 8 = 1528 | | [yellow-background]*Unknown (bid_bmp_hdr_list)*
+| | ... | | [yellow-background]*Unknown*
+|===
+
+[NOTE]
+CIB could be short for chunk indirect block
+
+=== Object map
+
+The object map contains a mapping between volume object identifiers and their
+location in the volume.
+
+The object map 72 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x4000000b | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | | Object subtype
+4+| _Object values_
+| 32 | 4 | | [yellow-background]*Unknown*
+| 36 | 4 | | [yellow-background]*Unknown*
+| 40 | 4 | | [yellow-background]*Unknown (type_1)*
+| 44 | 4 | | [yellow-background]*Unknown (type_2)*
+| 48 | 8 | | Object map B-tree object identifier (om_tree_oid)
+| 56 | 8 | | [yellow-background]*Unknown (oms_tree_oid)*
+| 64 | 8 | | [yellow-background]*Unknown (oms_tree_xid)*
+|===
+
+=== Reaper
+
+The reaper is X bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x80000011 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | | Object subtype
+4+| _Object values_
+| 32 | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 8 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+| | 4 | | [yellow-background]*Unknown*
+|===
+
+==== Reaper list
+
+The reaper list entry is X bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+|===
+
+==== Reaper list entry
+
+The reaper list entry is 40 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Forward link (fwlink)
+| 4 | 4 | | [yellow-background]*Unknown*
+| 8 | 4 | | Type (type)
+| 12 | 4 | | Block size (blksize)
+| 16 | 8 | | Object identifier (oid)
+| 24 | 8 | | Physical address (paddr) +
+Contains a block number relative to the start of the volume
+| 32 | 8 | | Object version (xid)
+|===
+
+=== Volume superblock
+
+The volume superblock is X bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x0000000d | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | | Object subtype
+4+| _Object values_
+| 32 | 4 | "APSB" | Signature (apfs_magic)
+|===
 
 == Notes
 
@@ -127,11 +529,37 @@ error: mount_apfs exit status 73
 warning: unmount: /private/var/folders/7k/s4ykb4095ld38gz50kvkhf_m0000gn/T/fsck_apfs.586: Invalid argument
 ** Verifying allocated space.
 ** The volume apfs_empty.raw appears to be OK.
+
+diskutil apfs list
+APFS Container (1 found)
+|
++-- Container disk4 B069A33C-65E6-4DAF-BD60-081493F91116
+    ====================================================
+    APFS Container Reference:     disk4
+    Size (Capacity Ceiling):      1007616 B (1.0 MB)
+    Minimum Size:                 1007616 B (1.0 MB)
+    Capacity In Use By Volumes:   376832 B (376.8 KB) (37.4% used)
+    Capacity Not Allocated:       630784 B (630.8 KB) (62.6% free)
+    |
+    +-< Physical Store disk3s1 D05BEA77-81B3-4A8D-A82A-BC5C7D2FB27C
+    |   -----------------------------------------------------------
+    |   APFS Physical Store Disk:   disk3s1
+    |   Size:                       1007616 B (1.0 MB)
+    |
+    +-> Volume disk4s1 9428213B-2E82-49E9-871E-7220B157FC8D
+        ---------------------------------------------------
+        APFS Volume Disk (Role):   disk4s1 (No specific role)
+        Name:                      untitled (Case-insensitive)
+        Mount Point:               /Volumes/untitled
+        Capacity Consumed:         24576 B (24.6 KB)
+        FileVault:                 No
 ....
 
 :numbered!:
 [appendix]
 == References
+
+`[HANSEN17]`
 
 [cols="1,5",options="header"]
 |===
@@ -139,6 +567,14 @@ warning: unmount: /private/var/folders/7k/s4ykb4095ld38gz50kvkhf_m0000gn/T/fsck_
 | Author(s): | Hansen, Kurt & Toolan, Fergus
 | Date: | September 2017
 | URL: | https://www.researchgate.net/publication/319573636_Decoding_the_APFS_file_system
+|===
+
+[cols="1,5",options="header"]
+|===
+| Title: | apfs_fuse
+| Author(s): | S. Gander
+| Date: | October 2017
+| URL: | https://github.com/sgan81/apfs-fuse
 |===
 
 [appendix]

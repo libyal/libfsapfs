@@ -73,7 +73,15 @@ int libfsapfs_set_codepage(
      int codepage,
      libfsapfs_error_t **error );
 
-/* Determines if a file contains a REFS volume signature
+/* Determines if a file contains an APFS container signature
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_container_signature(
+     const char *filename,
+     libfsapfs_error_t **error );
+
+/* Determines if a file contains an APFS volume signature
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -83,7 +91,15 @@ int libfsapfs_check_volume_signature(
 
 #if defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE )
 
-/* Determines if a file contains a REFS volume signature
+/* Determines if a file contains an APFS container signature
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_container_signature_wide(
+     const wchar_t *filename,
+     libfsapfs_error_t **error );
+
+/* Determines if a file contains an APFS volume signature
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -95,7 +111,15 @@ int libfsapfs_check_volume_signature_wide(
 
 #if defined( LIBFSAPFS_HAVE_BFIO )
 
-/* Determines if a file contains a REFS volume signature using a Basic File IO (bfio) handle
+/* Determines if a file contains an APFS container signature using a Basic File IO (bfio) handle
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_container_signature_file_io_handle(
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_error_t **error );
+
+/* Determines if a file contains an APFS volume signature using a Basic File IO (bfio) handle
  * Returns 1 if true, 0 if not or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -184,6 +208,81 @@ int libfsapfs_error_backtrace_sprint(
      libfsapfs_error_t *error,
      char *string,
      size_t size );
+
+/* -------------------------------------------------------------------------
+ * Container functions
+ * ------------------------------------------------------------------------- */
+
+/* Creates a container
+ * Make sure the value container is referencing, is set to NULL
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_initialize(
+     libfsapfs_container_t **container,
+     libfsapfs_error_t **error );
+
+/* Frees a container
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_free(
+     libfsapfs_container_t **container,
+     libfsapfs_error_t **error );
+
+/* Signals the container to abort its current activity
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_signal_abort(
+     libfsapfs_container_t *container,
+     libfsapfs_error_t **error );
+
+/* Opens a container
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_open(
+     libfsapfs_container_t *container,
+     const char *filename,
+     int access_flags,
+     libfsapfs_error_t **error );
+
+#if defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE )
+
+/* Opens a container
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_open_wide(
+     libfsapfs_container_t *container,
+     const wchar_t *filename,
+     int access_flags,
+     libfsapfs_error_t **error );
+
+#endif /* defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE ) */
+
+#if defined( LIBFSAPFS_HAVE_BFIO )
+
+/* Opens a container using a Basic File IO (bfio) handle
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_open_file_io_handle(
+     libfsapfs_container_t *container,
+     libbfio_handle_t *file_io_handle,
+     int access_flags,
+     libfsapfs_error_t **error );
+
+#endif /* defined( LIBFSAPFS_HAVE_BFIO ) */
+
+/* Closes a container
+ * Returns 0 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_close(
+     libfsapfs_container_t *container,
+     libfsapfs_error_t **error );
 
 /* -------------------------------------------------------------------------
  * Volume functions

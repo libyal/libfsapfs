@@ -34,23 +34,14 @@ extern "C" {
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
-void libfsapfs_debug_print_mft_attribute_data_flags(
-      uint16_t mft_attribute_data_flags );
-
-void libfsapfs_debug_print_file_attribute_flags(
-      uint32_t file_attribute_flags );
-
-void libfsapfs_debug_print_index_node_flags(
-      uint32_t index_node_flags );
-
-void libfsapfs_debug_print_index_value_flags(
-      uint32_t index_value_flags );
-
-const char *libfsapfs_debug_print_attribute_type(
-             uint32_t attribute_type );
-
-const char *libfsapfs_debug_print_file_name_attribute_namespace(
-             uint8_t name_namespace );
+int libfsapfs_debug_print_guid_value(
+     const char *function_name,
+     const char *value_name,
+     const uint8_t *byte_stream,
+     size_t byte_stream_size,
+     int byte_order,
+     uint32_t string_format_flags,
+     libcerror_error_t **error );
 
 int libfsapfs_debug_print_read_offsets(
      libbfio_handle_t *file_io_handle,
