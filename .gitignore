@@ -124,7 +124,6 @@ stamp-h[1-9]
 /fsapfstools/fsapfsinfo
 /tests/*.exe
 /tests/fsapfs_test_container
-/tests/fsapfs_test_container_object_map
 /tests/fsapfs_test_container_physical_map
 /tests/fsapfs_test_container_physical_map_entry
 /tests/fsapfs_test_container_reaper
@@ -135,6 +134,9 @@ stamp-h[1-9]
 /tests/fsapfs_test_io_handle
 /tests/fsapfs_test_notify
 /tests/fsapfs_test_object
+/tests/fsapfs_test_object_map
+/tests/fsapfs_test_object_map_btree
+/tests/fsapfs_test_object_map_descriptor
 /tests/fsapfs_test_support
 /tests/fsapfs_test_volume
 /tests/fsapfs_test_volume_superblock

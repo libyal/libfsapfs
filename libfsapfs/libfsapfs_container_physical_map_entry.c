@@ -142,7 +142,7 @@ int libfsapfs_container_physical_map_entry_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_container_physical_map_read_data";
+	static char *function = "libfsapfs_container_physical_map_entry_read_data";
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit  = 0;
@@ -210,7 +210,7 @@ int libfsapfs_container_physical_map_entry_read_data(
 		 ( (fsapfs_container_physical_map_entry_t *) data )->object_type,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: object type\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object type\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -218,7 +218,7 @@ int libfsapfs_container_physical_map_entry_read_data(
 		 ( (fsapfs_container_physical_map_entry_t *) data )->object_subtype,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object subtype\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -234,7 +234,7 @@ int libfsapfs_container_physical_map_entry_read_data(
 		 ( (fsapfs_container_physical_map_entry_t *) data )->unknown1,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown1\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -247,12 +247,12 @@ int libfsapfs_container_physical_map_entry_read_data(
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 container_physical_map_entry->object_identifier );
 
 		libcnotify_printf(
-		 "%s: physical address\t\t\t: %" PRIu64 "\n",
+		 "%s: physical address\t\t: %" PRIu64 "\n",
 		 function,
 		 container_physical_map_entry->physical_address );
 

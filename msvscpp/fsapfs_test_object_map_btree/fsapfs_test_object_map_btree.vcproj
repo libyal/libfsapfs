@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_container_superblock"
-	ProjectGUID="{301E1DCF-F551-40A4-9D0D-E07D48322C15}"
-	RootNamespace="fsapfs_test_container_superblock"
+	Name="fsapfs_test_object_map_btree"
+	ProjectGUID="{B7EE2B73-58EA-48CB-97B5-2F49EE1C6C23}"
+	RootNamespace="fsapfs_test_object_map_btree"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,15 +176,15 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_container_superblock.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\tests\fsapfs_test_functions.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\tests\fsapfs_test_memory.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsapfs_test_object_map_btree.c"
 				>
 			</File>
 		</Filter>

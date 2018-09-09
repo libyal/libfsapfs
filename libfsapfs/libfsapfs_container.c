@@ -25,7 +25,7 @@
 #include <types.h>
 #include <wide_string.h>
 
-#include "libfsapfs_container_object_map.h"
+#include "libfsapfs_container.h"
 #include "libfsapfs_container_physical_map.h"
 #include "libfsapfs_container_reaper.h"
 #include "libfsapfs_container_space_manager.h"
@@ -36,7 +36,12 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
-#include "libfsapfs_container.h"
+#include "libfsapfs_libcthreads.h"
+#include "libfsapfs_object_map.h"
+#include "libfsapfs_object_map_btree.h"
+#include "libfsapfs_object_map_descriptor.h"
+#include "libfsapfs_volume.h"
+#include "libfsapfs_volume_superblock.h"
 
 /* Creates a container
  * Make sure the value container is referencing, is set to NULL
@@ -112,6 +117,21 @@ int libfsapfs_container_initialize(
 
 		goto on_error;
 	}
+#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+	if( libcthreads_read_write_lock_initialize(
+	     &( internal_container->read_write_lock ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to intialize read/write lock.",
+		 function );
+
+		goto on_error;
+	}
+#endif
 	*container = (libfsapfs_container_t *) internal_container;
 
 	return( 1 );
@@ -169,6 +189,21 @@ int libfsapfs_container_free(
 		}
 		*container = NULL;
 
+#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+		if( libcthreads_read_write_lock_free(
+		     &( internal_container->read_write_lock ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free read/write lock.",
+			 function );
+
+			result = -1;
+		}
+#endif
 		if( libfsapfs_io_handle_free(
 		     &( internal_container->io_handle ),
 		     error ) != 1 )
@@ -239,6 +274,7 @@ int libfsapfs_container_open(
 	libbfio_handle_t *file_io_handle                   = NULL;
 	libfsapfs_internal_container_t *internal_container = NULL;
 	static char *function                              = "libfsapfs_container_open";
+	size_t filename_length                             = 0;
 
 	if( container == NULL )
 	{
@@ -316,11 +352,13 @@ int libfsapfs_container_open(
 		goto on_error;
 	}
 #endif
+	filename_length = narrow_string_length(
+	                   filename );
+
 	if( libbfio_file_set_name(
 	     file_io_handle,
 	     filename,
-	     narrow_string_length(
-	      filename ) + 1,
+	     filename_length + 1,
 	     error ) != 1 )
 	{
                 libcerror_error_set(
@@ -348,8 +386,38 @@ int libfsapfs_container_open(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	internal_container->file_io_handle_created_in_library = 1;
 
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	return( 1 );
 
 on_error:
@@ -376,6 +444,7 @@ int libfsapfs_container_open_wide(
 	libbfio_handle_t *file_io_handle                   = NULL;
 	libfsapfs_internal_container_t *internal_container = NULL;
 	static char *function                              = "libfsapfs_container_open_wide";
+	size_t filename_length                             = 0;
 
 	if( container == NULL )
 	{
@@ -453,11 +522,13 @@ int libfsapfs_container_open_wide(
 		goto on_error;
 	}
 #endif
+	filename_length = wide_string_length(
+	                   filename );
+
 	if( libbfio_file_set_name_wide(
 	     file_io_handle,
 	     filename,
-	     wide_string_length(
-	      filename ) + 1,
+	     filename_length + 1,
 	     error ) != 1 )
 	{
                 libcerror_error_set(
@@ -485,8 +556,38 @@ int libfsapfs_container_open_wide(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	internal_container->file_io_handle_created_in_library = 1;
 
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	return( 1 );
 
 on_error:
@@ -611,7 +712,7 @@ int libfsapfs_container_open_file_io_handle(
 		}
 		file_io_handle_opened_in_library = 1;
 	}
-	if( libfsapfs_container_open_read(
+	if( libfsapfs_internal_container_open_read(
 	     internal_container,
 	     file_io_handle,
 	     error ) != 1 )
@@ -625,9 +726,39 @@ int libfsapfs_container_open_file_io_handle(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	internal_container->file_io_handle                   = file_io_handle;
 	internal_container->file_io_handle_opened_in_library = file_io_handle_opened_in_library;
 
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	return( 1 );
 
 on_error:
@@ -675,6 +806,21 @@ int libfsapfs_container_close(
 
 		return( -1 );
 	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -777,19 +923,50 @@ int libfsapfs_container_close(
 			result = -1;
 		}
 	}
+	if( internal_container->object_map_btree != NULL )
+	{
+		if( libfsapfs_object_map_btree_free(
+		     &( internal_container->object_map_btree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free object map B-tree.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	return( result );
 }
 
 /* Opens a container for reading
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_container_open_read(
+int libfsapfs_internal_container_open_read(
      libfsapfs_internal_container_t *internal_container,
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	libfsapfs_container_object_map_t *container_object_map       = NULL;
 	libfsapfs_container_superblock_t *container_superblock       = NULL;
+	libfsapfs_object_map_t *object_map                           = NULL;
 	static char *function                                        = "libfsapfs_internal_container_open_read";
 	off64_t file_offset                                          = 0;
 
@@ -840,6 +1017,17 @@ int libfsapfs_container_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid internal container - physical map value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_container->object_map_btree != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal container - object map B-tree value already set.",
 		 function );
 
 		return( -1 );
@@ -1130,21 +1318,21 @@ int libfsapfs_container_open_read(
 #endif
 		file_offset = internal_container->superblock->object_map_block_number * internal_container->block_size;
 
-		if( libfsapfs_container_object_map_initialize(
-		     &container_object_map,
+		if( libfsapfs_object_map_initialize(
+		     &object_map,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create container object map.",
+			 "%s: unable to create object map.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsapfs_container_object_map_read_file_io_handle(
-		     container_object_map,
+		if( libfsapfs_object_map_read_file_io_handle(
+		     object_map,
 		     file_io_handle,
 		     file_offset,
 		     error ) != 1 )
@@ -1153,22 +1341,65 @@ int libfsapfs_container_open_read(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read container object map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 "%s: unable to read object map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
 			 function,
 			 file_offset,
 			 file_offset );
 
 			goto on_error;
 		}
-		if( libfsapfs_container_object_map_free(
-		     &container_object_map,
+		if( object_map->object_map_btree_block_number > 0 )
+		{
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "Reading object map B-tree:\n" );
+			}
+#endif
+			file_offset = object_map->object_map_btree_block_number * internal_container->block_size;
+
+			if( libfsapfs_object_map_btree_initialize(
+			     &( internal_container->object_map_btree ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create object map B-tree.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_object_map_btree_read_file_io_handle(
+			     internal_container->object_map_btree,
+			     file_io_handle,
+			     file_offset,
+			     internal_container->block_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read object map B-tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+				 function,
+				 file_offset,
+				 file_offset );
+
+				goto on_error;
+			}
+		}
+		if( libfsapfs_object_map_free(
+		     &object_map,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free container object map.",
+			 "%s: unable to free object map.",
 			 function );
 
 			goto on_error;
@@ -1177,10 +1408,16 @@ int libfsapfs_container_open_read(
 	return( 1 );
 
 on_error:
-	if( container_object_map != NULL )
+	if( internal_container->object_map_btree != NULL )
 	{
-		libfsapfs_container_object_map_free(
-		 &container_object_map,
+		libfsapfs_object_map_btree_free(
+		 &( internal_container->object_map_btree ),
+		 NULL );
+	}
+	if( object_map != NULL )
+	{
+		libfsapfs_object_map_free(
+		 &object_map,
 		 NULL );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1209,6 +1446,472 @@ on_error:
 		 &container_superblock,
 		 NULL );
 	}
+	return( -1 );
+}
+
+/* Retrieves the size
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_container_get_size(
+     libfsapfs_container_t *container,
+     size64_t *size,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_container_t *internal_container = NULL;
+	static char *function                              = "libfsapfs_container_get_size";
+
+	if( container == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid container.",
+		 function );
+
+		return( -1 );
+	}
+	internal_container = (libfsapfs_internal_container_t *) container;
+
+	if( internal_container->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid container - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid size.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	*size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->superblock->block_size;
+
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+}
+
+/* Retrieves the identifier
+ * The identifier is an UUID stored in big-endian and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_container_get_identifier(
+     libfsapfs_container_t *container,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_container_t *internal_container = NULL;
+	static char *function                              = "libfsapfs_container_get_identifier";
+	int result                                         = 1;
+
+	if( container == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid container.",
+		 function );
+
+		return( -1 );
+	}
+	internal_container = (libfsapfs_internal_container_t *) container;
+
+	if( internal_container->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid container - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( uuid_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid UUID data.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( uuid_data_size < 16 )
+	 || ( uuid_data_size > (size_t) SSIZE_MAX ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid UUID data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( memory_copy(
+	     uuid_data,
+	     internal_container->superblock->container_identifier,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy container identifier.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the number of volumes
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_container_get_number_of_volumes(
+     libfsapfs_container_t *container,
+     int *number_of_volumes,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_container_t *internal_container = NULL;
+	static char *function                              = "libfsapfs_container_get_number_of_volumes";
+
+	if( container == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid container.",
+		 function );
+
+		return( -1 );
+	}
+	internal_container = (libfsapfs_internal_container_t *) container;
+
+	if( internal_container->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid container - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_volumes == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid number of volumes.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	*number_of_volumes = (int) internal_container->superblock->number_of_volumes;
+
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+}
+
+/* Retrieves a specific of volume
+ * The volume reference must be freed after use with libfsapfs_volume_free
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_container_get_volume_by_index(
+     libfsapfs_container_t *container,
+     int volume_index,
+     libfsapfs_volume_t **volume,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_container_t *internal_container       = NULL;
+	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	libfsapfs_volume_superblock_t *volume_superblock         = NULL;
+	static char *function                                    = "libfsapfs_container_get_volume_by_index";
+	off64_t file_offset                                      = 0;
+
+	if( container == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid container.",
+		 function );
+
+		return( -1 );
+	}
+	internal_container = (libfsapfs_internal_container_t *) container;
+
+	if( internal_container->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid container - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( volume_index < 0 )
+	 || ( volume_index >= (int) internal_container->superblock->number_of_volumes ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid volume index value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( *volume != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume value already set.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_object_map_get_descriptor_by_object_identifier(
+	     internal_container->object_map_btree,
+	     internal_container->superblock->volume_object_identifiers[ volume_index ],
+	     &object_map_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve object map descriptor for volume object identifier: 0x08%" PRIx64 ".",
+		 function,
+		 internal_container->superblock->volume_object_identifiers[ volume_index ] );
+
+		goto on_error;
+	}
+	if( object_map_descriptor == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid object map descriptor.",
+		 function );
+
+		goto on_error;
+	}
+/* TODO move into volume */
+	if( libfsapfs_volume_superblock_initialize(
+	     &volume_superblock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create volume superblock.",
+		 function );
+
+		goto on_error;
+	}
+	file_offset = object_map_descriptor->physical_address * internal_container->block_size;
+
+	if( libfsapfs_volume_superblock_read_file_io_handle(
+	     volume_superblock,
+	     internal_container->file_io_handle,
+	     file_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read volume superblock at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 file_offset,
+		 file_offset );
+
+		goto on_error;
+	}
+/* TODO implement
+*/
+	if( libfsapfs_volume_superblock_free(
+	     &volume_superblock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free volume superblock.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( -1 );
+
+on_error:
+	if( volume_superblock != NULL )
+	{
+		libfsapfs_volume_superblock_free(
+		 &volume_superblock,
+		 NULL );
+	}
+#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_read(
+	 internal_container->read_write_lock,
+	 NULL );
+#endif
 	return( -1 );
 }
 

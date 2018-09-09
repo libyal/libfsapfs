@@ -48,25 +48,25 @@ struct fsapfs_btree_header
 	 */
 	uint8_t number_of_keys[ 4 ];
 
-	/* Unknown
+	/* The entries data offset
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown1[ 2 ];
+	uint8_t entries_data_offset[ 2 ];
 
-	/* Unknown
+	/* The entries data size
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown2[ 2 ];
+	uint8_t entries_data_size[ 2 ];
 
-	/* Unknown
+	/* The unused data offset
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown3[ 2 ];
+	uint8_t unused_data_offset[ 2 ];
 
-	/* Unknown
+	/* The unused data size
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown4[ 2 ];
+	uint8_t unused_data_size[ 2 ];
 
 	/* Unknown
 	 * Consists of 2 bytes
@@ -89,6 +89,21 @@ struct fsapfs_btree_header
 	uint8_t unknown8[ 2 ];
 };
 
+typedef struct fsapfs_btree_fixed_size_entry fsapfs_btree_fixed_size_entry_t;
+
+struct fsapfs_btree_fixed_size_entry
+{
+	/* The key data offset
+	 * Consists of 2 bytes
+	 */
+	uint8_t key_data_offset[ 2 ];
+
+	/* The value data offset
+	 * Consists of 2 bytes
+	 */
+	uint8_t value_data_offset[ 2 ];
+};
+
 typedef struct fsapfs_btree_footer fsapfs_btree_footer_t;
 
 struct fsapfs_btree_footer
@@ -98,40 +113,40 @@ struct fsapfs_btree_footer
 	 */
 	uint8_t unknown1[ 4 ];
 
-	/* Unknown
+	/* The node size
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown2[ 4 ];
+	uint8_t node_size[ 4 ];
 
-	/* Unknown
+	/* The key size
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown3[ 4 ];
+	uint8_t key_size[ 4 ];
 
-	/* Unknown
+	/* The value size
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown4[ 4 ];
+	uint8_t value_size[ 4 ];
 
-	/* Unknown
+	/* The maximum key size
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown5[ 4 ];
+	uint8_t maximum_key_size[ 4 ];
 
-	/* Unknown
+	/* The maximum value size
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown6[ 4 ];
+	uint8_t maximum_value_size[ 4 ];
 
-	/* Unknown
-	 * Consists of 4 bytes
+	/* The number of entries
+	 * Consists of 8 bytes
 	 */
-	uint8_t unknown7[ 4 ];
+	uint8_t number_of_entries[ 8 ];
 
-	/* Unknown
-	 * Consists of 4 bytes
+	/* The number of nodes
+	 * Consists of 8 bytes
 	 */
-	uint8_t unknown8[ 4 ];
+	uint8_t number_of_nodes[ 8 ];
 };
 
 #if defined( __cplusplus )

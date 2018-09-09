@@ -1,5 +1,5 @@
 /*
- * The APFS container object map definition
+ * The APFS object map definition
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _FSAPFS_CONTAINER_OBJECT_MAP_H )
-#define _FSAPFS_CONTAINER_OBJECT_MAP_H
+#if !defined( _FSAPFS_OBJECT_MAP_H )
+#define _FSAPFS_OBJECT_MAP_H
 
 #include <common.h>
 #include <types.h>
@@ -29,9 +29,9 @@
 extern "C" {
 #endif
 
-typedef struct fsapfs_container_object_map fsapfs_container_object_map_t;
+typedef struct fsapfs_object_map fsapfs_object_map_t;
 
-struct fsapfs_container_object_map
+struct fsapfs_object_map
 {
 	/* The object checksum
 	 * Consists of 8 bytes
@@ -94,9 +94,44 @@ struct fsapfs_container_object_map
 	uint8_t unknown7[ 8 ];
 };
 
+typedef struct fsapfs_object_map_btree_key fsapfs_object_map_btree_key_t;
+
+struct fsapfs_object_map_btree_key
+{
+	/* The key object identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t object_identifier[ 8 ];
+
+	/* The key object version
+	 * Consists of 8 bytes
+	 */
+	uint8_t object_version[ 8 ];
+};
+
+typedef struct fsapfs_object_map_btree_value fsapfs_object_map_btree_value_t;
+
+struct fsapfs_object_map_btree_value
+{
+	/* The object flags
+	 * Consists of 4 bytes
+	 */
+	uint8_t object_flags[ 4 ];
+
+	/* The object size
+	 * Consists of 4 bytes
+	 */
+	uint8_t object_size[ 4 ];
+
+	/* The object physical address
+	 * Consists of 8 bytes
+	 */
+	uint8_t object_physical_address[ 8 ];
+};
+
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _FSAPFS_CONTAINER_OBJECT_MAP_H ) */
+#endif /* !defined( _FSAPFS_OBJECT_MAP_H ) */
 

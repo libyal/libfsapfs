@@ -1,5 +1,5 @@
 /*
- * Library volume_superblock type test program
+ * Library object_map_btree type test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -34,32 +34,16 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_volume_superblock.h"
+#include "../libfsapfs/libfsapfs_object_map_btree.h"
 
-uint8_t fsapfs_test_volume_superblock_data1[ 4096 ] = {
-	0xc8, 0x62, 0x24, 0xf2, 0x03, 0x22, 0x3c, 0x04, 0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x41, 0x50, 0x53, 0x42, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+uint8_t fsapfs_test_object_map_btree_data1[ 4096 ] = {
+	0xa7, 0xc1, 0x94, 0x52, 0xbe, 0x2d, 0xc9, 0x5d, 0x54, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x40, 0x0b, 0x00, 0x00, 0x00,
+	0x07, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x01, 0x00, 0x00, 0xe0, 0x0d,
+	0xff, 0xff, 0x00, 0x00, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00, 0x41, 0x00, 0x47, 0x11,
-	0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x40, 0x02, 0x00, 0x00, 0x40,
-	0x69, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x66, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x14, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x3f, 0x29, 0xcd, 0x7d, 0xe1, 0xb8, 0x40, 0x6e, 0x9b, 0x3c, 0x3b, 0x36, 0xb2, 0x08, 0x6c, 0xcd,
-	0x36, 0xfc, 0x45, 0x06, 0x5a, 0x23, 0x52, 0x15, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x6e, 0x65, 0x77, 0x66, 0x73, 0x5f, 0x61, 0x70, 0x66, 0x73, 0x20, 0x28, 0x37, 0x34, 0x38, 0x2e,
-	0x37, 0x37, 0x2e, 0x38, 0x29, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x0e, 0xa2, 0xb3, 0x12, 0x55, 0x23, 0x52, 0x15, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x61, 0x70, 0x66, 0x73, 0x5f, 0x6b, 0x65, 0x78, 0x74, 0x20, 0x63, 0x6f, 0x6d, 0x70, 0x69, 0x6c,
-	0x65, 0x64, 0x20, 0x40, 0x20, 0x4a, 0x75, 0x6e, 0x20, 0x32, 0x31, 0x20, 0x32, 0x30, 0x31, 0x00,
-	0xec, 0x95, 0x8f, 0x07, 0x5a, 0x23, 0x52, 0x15, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -81,7 +65,6 @@ uint8_t fsapfs_test_volume_superblock_data1[ 4096 ] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x54, 0x65, 0x73, 0x74, 0x56, 0x6f, 0x6c, 0x75, 0x6d, 0x65, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -97,9 +80,6 @@ uint8_t fsapfs_test_volume_superblock_data1[ 4096 ] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -292,31 +272,51 @@ uint8_t fsapfs_test_volume_superblock_data1[ 4096 ] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x12, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00,
+	0x10, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_volume_superblock_initialize function
+/* Tests the libfsapfs_object_map_btree_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_volume_superblock_initialize(
+int fsapfs_test_object_map_btree_initialize(
      void )
 {
-	libcerror_error_t *error                               = NULL;
-	libfsapfs_volume_superblock_t *volume_superblock = NULL;
-	int result                                             = 0;
+	libcerror_error_t *error                                           = NULL;
+	libfsapfs_object_map_btree_t *object_map_btree = NULL;
+	int result                                                         = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                        = 1;
-	int number_of_memset_fail_tests                        = 1;
-	int test_number                                        = 0;
+	int number_of_malloc_fail_tests                                    = 1;
+	int number_of_memset_fail_tests                                    = 1;
+	int test_number                                                    = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_volume_superblock_initialize(
-	          &volume_superblock,
+	result = libfsapfs_object_map_btree_initialize(
+	          &object_map_btree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -325,15 +325,15 @@ int fsapfs_test_volume_superblock_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "volume_superblock",
-	 volume_superblock );
+	 "object_map_btree",
+	 object_map_btree );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsapfs_volume_superblock_free(
-	          &volume_superblock,
+	result = libfsapfs_object_map_btree_free(
+	          &object_map_btree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -342,8 +342,8 @@ int fsapfs_test_volume_superblock_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "volume_superblock",
-	 volume_superblock );
+	 "object_map_btree",
+	 object_map_btree );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -351,7 +351,7 @@ int fsapfs_test_volume_superblock_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_volume_superblock_initialize(
+	result = libfsapfs_object_map_btree_initialize(
 	          NULL,
 	          &error );
 
@@ -367,10 +367,10 @@ int fsapfs_test_volume_superblock_initialize(
 	libcerror_error_free(
 	 &error );
 
-	volume_superblock = (libfsapfs_volume_superblock_t *) 0x12345678UL;
+	object_map_btree = (libfsapfs_object_map_btree_t *) 0x12345678UL;
 
-	result = libfsapfs_volume_superblock_initialize(
-	          &volume_superblock,
+	result = libfsapfs_object_map_btree_initialize(
+	          &object_map_btree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -385,7 +385,7 @@ int fsapfs_test_volume_superblock_initialize(
 	libcerror_error_free(
 	 &error );
 
-	volume_superblock = NULL;
+	object_map_btree = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -393,22 +393,22 @@ int fsapfs_test_volume_superblock_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_volume_superblock_initialize with malloc failing
+		/* Test libfsapfs_object_map_btree_initialize with malloc failing
 		 */
 		fsapfs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsapfs_volume_superblock_initialize(
-		          &volume_superblock,
+		result = libfsapfs_object_map_btree_initialize(
+		          &object_map_btree,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsapfs_test_malloc_attempts_before_fail = -1;
 
-			if( volume_superblock != NULL )
+			if( object_map_btree != NULL )
 			{
-				libfsapfs_volume_superblock_free(
-				 &volume_superblock,
+				libfsapfs_object_map_btree_free(
+				 &object_map_btree,
 				 NULL );
 			}
 		}
@@ -420,8 +420,8 @@ int fsapfs_test_volume_superblock_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "volume_superblock",
-			 volume_superblock );
+			 "object_map_btree",
+			 object_map_btree );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -435,22 +435,22 @@ int fsapfs_test_volume_superblock_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_volume_superblock_initialize with memset failing
+		/* Test libfsapfs_object_map_btree_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_volume_superblock_initialize(
-		          &volume_superblock,
+		result = libfsapfs_object_map_btree_initialize(
+		          &object_map_btree,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
 		{
 			fsapfs_test_memset_attempts_before_fail = -1;
 
-			if( volume_superblock != NULL )
+			if( object_map_btree != NULL )
 			{
-				libfsapfs_volume_superblock_free(
-				 &volume_superblock,
+				libfsapfs_object_map_btree_free(
+				 &object_map_btree,
 				 NULL );
 			}
 		}
@@ -462,8 +462,8 @@ int fsapfs_test_volume_superblock_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "volume_superblock",
-			 volume_superblock );
+			 "object_map_btree",
+			 object_map_btree );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -483,19 +483,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( volume_superblock != NULL )
+	if( object_map_btree != NULL )
 	{
-		libfsapfs_volume_superblock_free(
-		 &volume_superblock,
+		libfsapfs_object_map_btree_free(
+		 &object_map_btree,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_volume_superblock_free function
+/* Tests the libfsapfs_object_map_btree_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_volume_superblock_free(
+int fsapfs_test_object_map_btree_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -503,7 +503,7 @@ int fsapfs_test_volume_superblock_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_volume_superblock_free(
+	result = libfsapfs_object_map_btree_free(
 	          NULL,
 	          &error );
 
@@ -530,21 +530,21 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_volume_superblock_read_file_io_handle function
+/* Tests the libfsapfs_object_map_btree_read_file_io_handle function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_volume_superblock_read_file_io_handle(
+int fsapfs_test_object_map_btree_read_file_io_handle(
      void )
 {
-	libbfio_handle_t *file_io_handle                       = NULL;
-	libcerror_error_t *error                               = NULL;
-	libfsapfs_volume_superblock_t *volume_superblock = NULL;
-	int result                                             = 0;
+	libbfio_handle_t *file_io_handle                                   = NULL;
+	libcerror_error_t *error                                           = NULL;
+	libfsapfs_object_map_btree_t *object_map_btree = NULL;
+	int result                                                         = 0;
 
 	/* Initialize test
 	 */
-	result = libfsapfs_volume_superblock_initialize(
-	          &volume_superblock,
+	result = libfsapfs_object_map_btree_initialize(
+	          &object_map_btree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -553,8 +553,8 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "volume_superblock",
-	 volume_superblock );
+	 "object_map_btree",
+	 object_map_btree );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -564,7 +564,7 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	 */
 	result = fsapfs_test_open_file_io_handle(
 	          &file_io_handle,
-	          fsapfs_test_volume_superblock_data1,
+	          fsapfs_test_object_map_btree_data1,
 	          4096,
 	          &error );
 
@@ -583,10 +583,11 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_volume_superblock_read_file_io_handle(
-	          volume_superblock,
+	result = libfsapfs_object_map_btree_read_file_io_handle(
+	          object_map_btree,
 	          file_io_handle,
 	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -600,10 +601,11 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_volume_superblock_read_file_io_handle(
+	result = libfsapfs_object_map_btree_read_file_io_handle(
 	          NULL,
 	          file_io_handle,
 	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -618,10 +620,11 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_volume_superblock_read_file_io_handle(
-	          volume_superblock,
+	result = libfsapfs_object_map_btree_read_file_io_handle(
+	          object_map_btree,
 	          NULL,
 	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -636,10 +639,11 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_volume_superblock_read_file_io_handle(
-	          volume_superblock,
+	result = libfsapfs_object_map_btree_read_file_io_handle(
+	          object_map_btree,
 	          file_io_handle,
 	          -1,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -673,7 +677,7 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	 */
 	result = fsapfs_test_open_file_io_handle(
 	          &file_io_handle,
-	          fsapfs_test_volume_superblock_data1,
+	          fsapfs_test_object_map_btree_data1,
 	          8,
 	          &error );
 
@@ -690,10 +694,11 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	 "error",
 	 error );
 
-	result = libfsapfs_volume_superblock_read_file_io_handle(
-	          volume_superblock,
+	result = libfsapfs_object_map_btree_read_file_io_handle(
+	          object_map_btree,
 	          file_io_handle,
 	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -725,8 +730,8 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 
 	/* Clean up
 	 */
-	result = libfsapfs_volume_superblock_free(
-	          &volume_superblock,
+	result = libfsapfs_object_map_btree_free(
+	          &object_map_btree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -735,8 +740,8 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "volume_superblock",
-	 volume_superblock );
+	 "object_map_btree",
+	 object_map_btree );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -756,29 +761,29 @@ on_error:
 		 &file_io_handle,
 		 NULL );
 	}
-	if( volume_superblock != NULL )
+	if( object_map_btree != NULL )
 	{
-		libfsapfs_volume_superblock_free(
-		 &volume_superblock,
+		libfsapfs_object_map_btree_free(
+		 &object_map_btree,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_volume_superblock_read_data function
+/* Tests the libfsapfs_object_map_btree_read_data function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_volume_superblock_read_data(
+int fsapfs_test_object_map_btree_read_data(
      void )
 {
-	libcerror_error_t *error                               = NULL;
-	libfsapfs_volume_superblock_t *volume_superblock = NULL;
-	int result                                             = 0;
+	libcerror_error_t *error                                           = NULL;
+	libfsapfs_object_map_btree_t *object_map_btree = NULL;
+	int result                                                         = 0;
 
 	/* Initialize test
 	 */
-	result = libfsapfs_volume_superblock_initialize(
-	          &volume_superblock,
+	result = libfsapfs_object_map_btree_initialize(
+	          &object_map_btree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -787,8 +792,8 @@ int fsapfs_test_volume_superblock_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "volume_superblock",
-	 volume_superblock );
+	 "object_map_btree",
+	 object_map_btree );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -796,9 +801,9 @@ int fsapfs_test_volume_superblock_read_data(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_volume_superblock_read_data(
-	          volume_superblock,
-	          fsapfs_test_volume_superblock_data1,
+	result = libfsapfs_object_map_btree_read_data(
+	          object_map_btree,
+	          fsapfs_test_object_map_btree_data1,
 	          4096,
 	          &error );
 
@@ -813,9 +818,9 @@ int fsapfs_test_volume_superblock_read_data(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_volume_superblock_read_data(
+	result = libfsapfs_object_map_btree_read_data(
 	          NULL,
-	          fsapfs_test_volume_superblock_data1,
+	          fsapfs_test_object_map_btree_data1,
 	          4096,
 	          &error );
 
@@ -831,8 +836,8 @@ int fsapfs_test_volume_superblock_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_volume_superblock_read_data(
-	          volume_superblock,
+	result = libfsapfs_object_map_btree_read_data(
+	          object_map_btree,
 	          NULL,
 	          4096,
 	          &error );
@@ -849,9 +854,9 @@ int fsapfs_test_volume_superblock_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_volume_superblock_read_data(
-	          volume_superblock,
-	          fsapfs_test_volume_superblock_data1,
+	result = libfsapfs_object_map_btree_read_data(
+	          object_map_btree,
+	          fsapfs_test_object_map_btree_data1,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
@@ -867,9 +872,9 @@ int fsapfs_test_volume_superblock_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_volume_superblock_read_data(
-	          volume_superblock,
-	          fsapfs_test_volume_superblock_data1,
+	result = libfsapfs_object_map_btree_read_data(
+	          object_map_btree,
+	          fsapfs_test_object_map_btree_data1,
 	          0,
 	          &error );
 
@@ -887,8 +892,8 @@ int fsapfs_test_volume_superblock_read_data(
 
 	/* Clean up
 	 */
-	result = libfsapfs_volume_superblock_free(
-	          &volume_superblock,
+	result = libfsapfs_object_map_btree_free(
+	          &object_map_btree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -897,8 +902,8 @@ int fsapfs_test_volume_superblock_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "volume_superblock",
-	 volume_superblock );
+	 "object_map_btree",
+	 object_map_btree );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -912,10 +917,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( volume_superblock != NULL )
+	if( object_map_btree != NULL )
 	{
-		libfsapfs_volume_superblock_free(
-		 &volume_superblock,
+		libfsapfs_object_map_btree_free(
+		 &object_map_btree,
 		 NULL );
 	}
 	return( 0 );
@@ -941,20 +946,22 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_volume_superblock_initialize",
-	 fsapfs_test_volume_superblock_initialize );
+	 "libfsapfs_object_map_btree_initialize",
+	 fsapfs_test_object_map_btree_initialize );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_volume_superblock_free",
-	 fsapfs_test_volume_superblock_free );
+	 "libfsapfs_object_map_btree_free",
+	 fsapfs_test_object_map_btree_free );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_volume_superblock_read_file_io_handle",
-	 fsapfs_test_volume_superblock_read_file_io_handle );
+	 "libfsapfs_object_map_btree_read_file_io_handle",
+	 fsapfs_test_object_map_btree_read_file_io_handle );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_volume_superblock_read_data",
-	 fsapfs_test_volume_superblock_read_data );
+	 "libfsapfs_object_map_btree_read_data",
+	 fsapfs_test_object_map_btree_read_data );
+
+/* TODO add tests for libfsapfs_object_map_get_descriptor_by_object_identifier */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

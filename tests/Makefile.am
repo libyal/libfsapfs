@@ -2,6 +2,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
 	@LIBCERROR_CPPFLAGS@ \
+	@LIBCTHREADS_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
 	@LIBCNOTIFY_CPPFLAGS@ \
@@ -11,6 +12,7 @@ AM_CPPFLAGS = \
 	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
+	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
 TESTS = \
@@ -27,7 +29,6 @@ EXTRA_DIST = \
 
 check_PROGRAMS = \
 	fsapfs_test_container \
-	fsapfs_test_container_object_map \
 	fsapfs_test_container_physical_map \
 	fsapfs_test_container_physical_map_entry \
 	fsapfs_test_container_reaper \
@@ -37,11 +38,15 @@ check_PROGRAMS = \
 	fsapfs_test_io_handle \
 	fsapfs_test_notify \
 	fsapfs_test_object \
+	fsapfs_test_object_map \
+	fsapfs_test_object_map_btree \
+	fsapfs_test_object_map_descriptor \
 	fsapfs_test_support \
 	fsapfs_test_volume \
 	fsapfs_test_volume_superblock
 
 fsapfs_test_container_SOURCES = \
+	fsapfs_test_container.c \
 	fsapfs_test_functions.c fsapfs_test_functions.h \
 	fsapfs_test_getopt.c fsapfs_test_getopt.h \
 	fsapfs_test_libbfio.h \
@@ -52,8 +57,8 @@ fsapfs_test_container_SOURCES = \
 	fsapfs_test_libuna.h \
 	fsapfs_test_macros.h \
 	fsapfs_test_memory.c fsapfs_test_memory.h \
-	fsapfs_test_unused.h \
-	fsapfs_test_container.c
+	fsapfs_test_rwlock.c fsapfs_test_rwlock.h \
+	fsapfs_test_unused.h
 
 fsapfs_test_container_LDADD = \
 	@LIBBFIO_LIBADD@ \
@@ -68,28 +73,6 @@ fsapfs_test_container_LDADD = \
 	@LIBCTHREADS_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@PTHREAD_LIBADD@
-
-fsapfs_test_container_object_map_SOURCES = \
-	fsapfs_test_container_object_map.c \
-	fsapfs_test_functions.c fsapfs_test_functions.h \
-	fsapfs_test_libbfio.h \
-	fsapfs_test_libcerror.h \
-	fsapfs_test_libfsapfs.h \
-	fsapfs_test_macros.h \
-	fsapfs_test_memory.c fsapfs_test_memory.h \
-	fsapfs_test_unused.h
-
-fsapfs_test_container_object_map_LDADD = \
-	@LIBBFIO_LIBADD@ \
-	@LIBCPATH_LIBADD@ \
-	@LIBCFILE_LIBADD@ \
-	@LIBUNA_LIBADD@ \
-	@LIBCSPLIT_LIBADD@ \
-	@LIBCNOTIFY_LIBADD@ \
-	@LIBCLOCALE_LIBADD@ \
-	@LIBCDATA_LIBADD@ \
-	../libfsapfs/libfsapfs.la \
-	@LIBCERROR_LIBADD@
 
 fsapfs_test_container_physical_map_SOURCES = \
 	fsapfs_test_container_physical_map.c \
@@ -245,6 +228,62 @@ fsapfs_test_object_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
+fsapfs_test_object_map_SOURCES = \
+	fsapfs_test_functions.c fsapfs_test_functions.h \
+	fsapfs_test_libbfio.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_object_map.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_object_map_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_object_map_btree_SOURCES = \
+	fsapfs_test_functions.c fsapfs_test_functions.h \
+	fsapfs_test_libbfio.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_object_map_btree.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_object_map_btree_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_object_map_descriptor_SOURCES = \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_object_map_descriptor.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_object_map_descriptor_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
 fsapfs_test_support_SOURCES = \
 	fsapfs_test_functions.c fsapfs_test_functions.h \
 	fsapfs_test_getopt.c fsapfs_test_getopt.h \
@@ -282,6 +321,7 @@ fsapfs_test_volume_SOURCES = \
 	fsapfs_test_libuna.h \
 	fsapfs_test_macros.h \
 	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_rwlock.c fsapfs_test_rwlock.h \
 	fsapfs_test_unused.h \
 	fsapfs_test_volume.c
 

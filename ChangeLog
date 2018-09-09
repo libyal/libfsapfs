@@ -1,3 +1,5 @@
 TODO
 * complete library
 * support opening container and file system
+* remove unused libfsapfs_object.[ch] ?
+* improve reading B-trees

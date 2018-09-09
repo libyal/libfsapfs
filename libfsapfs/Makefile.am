@@ -2,6 +2,7 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
 	@LIBCERROR_CPPFLAGS@ \
+	@LIBCTHREADS_CPPFLAGS@ \
 	@LIBCDATA_CPPFLAGS@ \
 	@LIBCLOCALE_CPPFLAGS@ \
 	@LIBCNOTIFY_CPPFLAGS@ \
@@ -12,22 +13,22 @@ AM_CPPFLAGS = \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
+	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_EXPORT@
 
 lib_LTLIBRARIES = libfsapfs.la
 
 libfsapfs_la_SOURCES = \
 	fsapfs_btree.h \
-	fsapfs_container_object_map.h \
 	fsapfs_container_physical_map.h \
 	fsapfs_container_reaper.h \
 	fsapfs_container_space_manager.h \
 	fsapfs_container_superblock.h \
 	fsapfs_object.h \
+	fsapfs_object_map.h \
 	fsapfs_volume_superblock.h \
 	libfsapfs.c \
 	libfsapfs_container.c libfsapfs_container.h \
-	libfsapfs_container_object_map.c libfsapfs_container_object_map.h \
 	libfsapfs_container_physical_map.c libfsapfs_container_physical_map.h \
 	libfsapfs_container_physical_map_entry.c libfsapfs_container_physical_map_entry.h \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
@@ -43,11 +44,15 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_libcerror.h \
 	libfsapfs_libclocale.h \
 	libfsapfs_libcnotify.h \
+	libfsapfs_libcthreads.h \
 	libfsapfs_libfdatetime.h \
 	libfsapfs_libfguid.h \
 	libfsapfs_libuna.h \
 	libfsapfs_notify.c libfsapfs_notify.h \
 	libfsapfs_object.c libfsapfs_object.h \
+	libfsapfs_object_map.c libfsapfs_object_map.h \
+	libfsapfs_object_map_btree.c libfsapfs_object_map_btree.h \
+	libfsapfs_object_map_descriptor.c libfsapfs_object_map_descriptor.h \
 	libfsapfs_support.c libfsapfs_support.h \
 	libfsapfs_types.h \
 	libfsapfs_unused.h \
@@ -56,6 +61,7 @@ libfsapfs_la_SOURCES = \
 
 libfsapfs_la_LIBADD = \
 	@LIBCERROR_LIBADD@ \
+	@LIBCTHREADS_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCNOTIFY_LIBADD@ \
@@ -65,7 +71,8 @@ libfsapfs_la_LIBADD = \
 	@LIBCPATH_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
-	@LIBFGUID_LIBADD@
+	@LIBFGUID_LIBADD@ \
+	@PTHREAD_LIBADD@
 
 libfsapfs_la_LDFLAGS = -no-undefined -version-info 1:0:0
 

@@ -44,6 +44,10 @@ struct libfsapfs_container_superblock
 	 */
 	uint64_t number_of_blocks;
 
+	/* The container identifier
+	 */
+	uint8_t container_identifier[ 16 ];
+
 	/* The space manager object identifier
 	 */
 	uint64_t space_manager_object_identifier;
@@ -55,6 +59,14 @@ struct libfsapfs_container_superblock
 	/* The reaper object identifier
 	 */
 	uint64_t reaper_object_identifier;
+
+	/* The number of volumes
+	 */
+	uint32_t number_of_volumes;
+
+	/* The volume object identifier
+	 */
+	uint64_t volume_object_identifiers[ 100 ];
 };
 
 int libfsapfs_container_superblock_initialize(

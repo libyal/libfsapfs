@@ -100,6 +100,12 @@ int info_handle_close_input(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
+int info_handle_uuid_value_fprint(
+     info_handle_t *info_handle,
+     const char *value_name,
+     const uint8_t *uuid_data,
+     libcerror_error_t **error );
+
 int info_handle_container_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error );

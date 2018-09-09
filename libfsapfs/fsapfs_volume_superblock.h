@@ -60,19 +60,14 @@ struct fsapfs_volume_superblock
 
 	/* The file system signature
 	 * Consists of 4 bytes
-	 * Contains: "NXSB"
+	 * Contains: "APSB"
 	 */
 	uint8_t signature[ 4 ];
 
-	/* The block size
+	/* Unknown
 	 * Consists of 4 bytes
 	 */
-	uint8_t block_size[ 4 ];
-
-	/* The number of block
-	 * Consists of 8 bytes
-	 */
-	uint8_t number_of_blocks[ 8 ];
+	uint8_t unknown1[ 4 ];
 
 	/* Compatible features flags
 	 * Consists of 8 bytes
@@ -89,101 +84,138 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t incompatible_features_flags[ 8 ];
 
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown5[ 8 ];
+
+	/* The number of reserved blocks
+	 * Consists of 8 bytes
+	 */
+	uint8_t number_of_reserved_blocks[ 8 ];
+
+	/* The number of quota blocks
+	 * Consists of 8 bytes
+	 */
+	uint8_t number_of_quota_blocks[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown8[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown9[ 8 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown10[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown11[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown12[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown13[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown14[ 4 ];
+
+	/* The snapshot metadata tree object type
+	 * Consists of 4 bytes
+	 */
+	uint8_t snapshot_metadata_tree_object_type[ 4 ];
+
+	/* The object map block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t object_map_block_number[ 8 ];
+
+	/* The file system root object identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t file_system_root_object_identifier[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown18[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown19[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown20[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown21[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown22[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown23[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown24[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown25[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown26[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown27[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown28[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown29[ 8 ];
+
 	/* The volume identifier
 	 * Consists of 16 bytes
 	 * Contains an UUID
 	 */
 	uint8_t volume_identifier[ 16 ];
 
-	/* The next object identifier
-	 * Consists of 8 bytes
-	 */
-	uint8_t next_object_identifier[ 8 ];
-
-	/* The unknown3
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown3[ 8 ];
-
-	/* The unknown4
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown4[ 4 ];
-
-	/* The unknown5
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown5[ 4 ];
-
-	/* The unknown6
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown6[ 8 ];
-
-	/* The unknown7
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown7[ 8 ];
-
-	/* The unknown8
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown8[ 4 ];
-
-	/* The unknown9
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown9[ 4 ];
-
-	/* The unknown10
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown10[ 4 ];
-
-	/* The unknown11
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown11[ 4 ];
-
-	/* The unknown12
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown12[ 4 ];
-
-	/* The unknown13
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown13[ 4 ];
-
-	/* The space manager object identifier
-	 * Consists of 8 bytes
-	 */
-	uint8_t space_manager_object_identifier[ 8 ];
-
-	/* The object map object identifier
-	 * Consists of 8 bytes
-	 */
-	uint8_t object_map_object_identifier[ 8 ];
-
-	/* The reaper object identifier
-	 * Consists of 8 bytes
-	 */
-	uint8_t reaper_object_identifier[ 8 ];
-
-	/* The unknown17
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown17[ 4 ];
-
-	/* The unknown18
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown18[ 4 ];
-
-	/* The volume object identifiers
-	 * Consists of 100 x 8 bytes
-	 */
-	uint8_t volume_object_identifiers[ 800 ];
+/* TODO add values starting with apfs_last_mod_time */
 };
 
 #if defined( __cplusplus )

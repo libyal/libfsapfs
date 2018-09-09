@@ -284,6 +284,46 @@ int libfsapfs_container_close(
      libfsapfs_container_t *container,
      libfsapfs_error_t **error );
 
+/* Retrieves the size
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_size(
+     libfsapfs_container_t *container,
+     size64_t *size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the identifier
+ * The identifier is an UUID stored in big-endian and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_identifier(
+     libfsapfs_container_t *container,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the number of volumes
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_number_of_volumes(
+     libfsapfs_container_t *container,
+     int *number_of_volumes,
+     libfsapfs_error_t **error );
+
+/* Retrieves a specific of volume
+ * The volume reference must be freed after use with libfsapfs_volume_free
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_volume_by_index(
+     libfsapfs_container_t *container,
+     int volume_index,
+     libfsapfs_volume_t **volume,
+     libfsapfs_error_t **error );
+
 /* -------------------------------------------------------------------------
  * Volume functions
  * ------------------------------------------------------------------------- */

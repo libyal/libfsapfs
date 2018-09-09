@@ -1,4 +1,4 @@
-.Dd September  8, 2018
+.Dd September  9, 2018
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -68,6 +68,14 @@ Container functions
 .Fn libfsapfs_container_open "libfsapfs_container_t *container, const char *filename, int access_flags, libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_container_close "libfsapfs_container_t *container, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_container_get_size "libfsapfs_container_t *container, size64_t *size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_container_get_identifier "libfsapfs_container_t *container, uint8_t *uuid_data, size_t uuid_data_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_container_get_number_of_volumes "libfsapfs_container_t *container, int *number_of_volumes, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_container_get_volume_by_index "libfsapfs_container_t *container, int volume_index, libfsapfs_volume_t **volume, libfsapfs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int

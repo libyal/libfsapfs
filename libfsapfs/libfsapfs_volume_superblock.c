@@ -67,7 +67,7 @@ int libfsapfs_volume_superblock_initialize(
 		return( -1 );
 	}
 	*volume_superblock = memory_allocate_structure(
-	                         libfsapfs_volume_superblock_t );
+	                      libfsapfs_volume_superblock_t );
 
 	if( *volume_superblock == NULL )
 	{
@@ -233,13 +233,13 @@ int libfsapfs_volume_superblock_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function       = "libfsapfs_volume_superblock_read_data";
-	uint32_t object_type        = 0;
+	static char *function   = "libfsapfs_volume_superblock_read_data";
+	uint32_t object_subtype = 0;
+	uint32_t object_type    = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit        = 0;
-	uint32_t value_32bit        = 0;
-	int object_identifier_index = 0;
+	uint64_t value_64bit    = 0;
+	uint32_t value_32bit    = 0;
 #endif
 
 	if( volume_superblock == NULL )
@@ -304,6 +304,22 @@ int libfsapfs_volume_superblock_read_data(
 
 		return( -1 );
 	}
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->object_subtype,
+	 object_subtype );
+
+	if( object_subtype != 0x00000000UL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
+		 function,
+		 object_subtype );
+
+		return( -1 );
+	}
 	if( memory_compare(
 	     ( (fsapfs_volume_superblock_t *) data )->signature,
 	     fsapfs_volume_signature,
@@ -318,10 +334,20 @@ int libfsapfs_volume_superblock_read_data(
 
 		return( -1 );
 	}
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_volume_superblock_t *) data )->block_size,
-	 volume_superblock->block_size );
+	if( memory_copy(
+	     volume_superblock->volume_identifier,
+	     ( (fsapfs_volume_superblock_t *) data )->volume_identifier,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy volume identifier.",
+		 function );
 
+		return( -1 );
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -329,7 +355,7 @@ int libfsapfs_volume_superblock_read_data(
 		 ( (fsapfs_volume_superblock_t *) data )->object_checksum,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object checksum\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: object checksum\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -345,7 +371,7 @@ int libfsapfs_volume_superblock_read_data(
 		 ( (fsapfs_volume_superblock_t *) data )->object_version,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object version\t\t\t: %" PRIu64 "\n",
+		 "%s: object version\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -354,13 +380,10 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 object_type );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->object_subtype,
-		 value_32bit );
 		libcnotify_printf(
-		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object subtype\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 value_32bit );
+		 object_subtype );
 
 		libcnotify_printf(
 		 "%s: signature\t\t\t\t: %c%c%c%c\n",
@@ -370,18 +393,13 @@ int libfsapfs_volume_superblock_read_data(
 		 ( (fsapfs_volume_superblock_t *) data )->signature[ 2 ],
 		 ( (fsapfs_volume_superblock_t *) data )->signature[ 3 ] );
 
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown1,
+		 value_32bit );
 		libcnotify_printf(
-		 "%s: block size\t\t\t\t: %" PRIu32 "\n",
+		 "%s: unknown1\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 volume_superblock->block_size );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->number_of_blocks,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: number of blocks\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
+		 value_32bit );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->compatible_features_flags,
@@ -407,87 +425,45 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		if( libfsapfs_debug_print_guid_value(
-		     function,
-		     "volume identifier\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->volume_identifier,
-		     16,
-		     LIBFGUID_ENDIAN_BIG,
-		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print UUID value.",
-			 function );
-
-			return( -1 );
-		}
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->next_object_identifier,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: next object identifier\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown3,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown3\t\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown4,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: unknown4\t\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
-
-		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown5,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: unknown5\t\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown6,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown6\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown5\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown7,
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_reserved_blocks,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown7\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: number of reserved blocks\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint32_little_endian(
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_quota_blocks,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: number of quota blocks\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown8,
-		 value_32bit );
+		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown8\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown8\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_32bit );
+		 value_64bit );
 
-		byte_stream_copy_to_uint32_little_endian(
+		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown9,
-		 value_32bit );
+		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown9\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown9\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_32bit );
+		 value_64bit );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown10,
@@ -521,59 +497,153 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_32bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->space_manager_object_identifier,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: space manager object identifier\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->object_map_object_identifier,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: object map object identifier\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->reaper_object_identifier,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: reaper object identifier\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown17,
+		 ( (fsapfs_volume_superblock_t *) data )->unknown14,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown17\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown14 object type\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
 		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->snapshot_metadata_tree_object_type,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: snapshot metadata tree object type\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->object_map_block_number,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: object map block number\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->file_system_root_object_identifier,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: file system root object identifier\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown18,
-		 value_32bit );
+		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown18\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown18\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_32bit );
+		 value_64bit );
 
-		for( object_identifier_index = 0;
-		     object_identifier_index < 100;
-		     object_identifier_index++ )
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown19,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown19\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown20,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown20\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown21,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown21\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown22,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown22\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown23,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown23\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown24,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown24\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown25,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown25\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown26,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown26\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown27,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown27\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown28,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown28\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown29,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown29\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		if( libfsapfs_debug_print_guid_value(
+		     function,
+		     "volume identifier\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->volume_identifier,
+		     16,
+		     LIBFGUID_ENDIAN_BIG,
+		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+		     error ) != 1 )
 		{
-			byte_stream_copy_to_uint64_little_endian(
-			 &( ( (fsapfs_volume_superblock_t *) data )->volume_object_identifiers[ object_identifier_index * 4 ] ),
-			 value_64bit );
-			libcnotify_printf(
-			 "%s: volume object identifier: %d\t\t: %" PRIu64 "\n",
-			 function,
-			 object_identifier_index,
-			 value_64bit );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print UUID value.",
+			 function );
+
+			return( -1 );
 		}
+
 		libcnotify_printf(
 		 "\n" );
 	}

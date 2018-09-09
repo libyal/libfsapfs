@@ -31,6 +31,8 @@
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcthreads.h"
+#include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_types.h"
 
 #if defined( __cplusplus )
@@ -57,6 +59,10 @@ struct libfsapfs_internal_container
 	 */
 	libfsapfs_container_physical_map_t *physical_map;
 
+	/* The container object map B-tree
+	 */
+	libfsapfs_object_map_btree_t *object_map_btree;
+
 	/* The IO handle
 	 */
 	libfsapfs_io_handle_t *io_handle;
@@ -72,6 +78,12 @@ struct libfsapfs_internal_container
 	/* Value to indicate if the file IO handle was opened inside the library
 	 */
 	uint8_t file_io_handle_opened_in_library;
+
+#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+	/* The read/write lock
+	 */
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
 };
 
 LIBFSAPFS_EXTERN \
@@ -119,9 +131,35 @@ int libfsapfs_container_close(
      libfsapfs_container_t *container,
      libcerror_error_t **error );
 
-int libfsapfs_container_open_read(
+int libfsapfs_internal_container_open_read(
      libfsapfs_internal_container_t *internal_container,
      libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_size(
+     libfsapfs_container_t *container,
+     size64_t *size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_identifier(
+     libfsapfs_container_t *container,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_number_of_volumes(
+     libfsapfs_container_t *container,
+     int *number_of_volumes,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_get_volume_by_index(
+     libfsapfs_container_t *container,
+     int volume_index,
+     libfsapfs_volume_t **volume,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

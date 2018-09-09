@@ -6,7 +6,7 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "container_object_map container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error io_handle notify object"
+$LibraryTests = "container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error io_handle notify object object_map object_map_btree object_map_descriptor"
 $LibraryTestsWithInput = "container support"
 
 $InputGlob = "*"

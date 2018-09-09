@@ -11,6 +11,7 @@ AM_CPPFLAGS = \
 	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
+	@LIBFGUID_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
 AM_LDFLAGS = @STATIC_LDFLAGS@
@@ -26,12 +27,9 @@ fsapfsinfo_SOURCES = \
 	fsapfstools_libcerror.h \
 	fsapfstools_libclocale.h \
 	fsapfstools_libcnotify.h \
-	fsapfstools_libfcache.h \
-	fsapfstools_libfdata.h \
 	fsapfstools_libfdatetime.h \
 	fsapfstools_libfguid.h \
 	fsapfstools_libfsapfs.h \
-	fsapfstools_libfwnt.h \
 	fsapfstools_libuna.h \
 	fsapfstools_output.c fsapfstools_output.h \
 	fsapfstools_signal.c fsapfstools_signal.h \
@@ -39,6 +37,8 @@ fsapfsinfo_SOURCES = \
 	info_handle.c info_handle.h
 
 fsapfsinfo_LDADD = \
+	@LIBFGUID_LIBADD@ \
+	@LIBFDATETIME_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBCFILE_LIBADD@ \

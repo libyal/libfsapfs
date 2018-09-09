@@ -271,6 +271,7 @@ int libfsapfs_container_physical_map_read_data(
 	size_t data_offset                                  = 0;
 	uint32_t map_entry_index                            = 0;
 	uint32_t number_of_map_entries                      = 0;
+	uint32_t object_subtype                             = 0;
 	uint32_t object_type                                = 0;
 	int entry_index                                     = 0;
 
@@ -342,6 +343,22 @@ int libfsapfs_container_physical_map_read_data(
 		goto on_error;
 	}
 	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_container_physical_map_t *) data )->object_subtype,
+	 object_subtype );
+
+	if( object_subtype != 0x00000000UL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
+		 function,
+		 object_subtype );
+
+		goto on_error;
+	}
+	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_container_physical_map_t *) data )->number_of_entries,
 	 number_of_map_entries );
 
@@ -377,13 +394,10 @@ int libfsapfs_container_physical_map_read_data(
 		 function,
 		 object_type );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_container_physical_map_t *) data )->object_subtype,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: object subtype\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 value_32bit );
+		 object_subtype );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_container_physical_map_t *) data )->flags,

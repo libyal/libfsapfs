@@ -1,6 +1,5 @@
 MSVSCPP_FILES = \
 	fsapfs_test_container/fsapfs_test_container.vcproj \
-	fsapfs_test_container_object_map/fsapfs_test_container_object_map.vcproj \
 	fsapfs_test_container_physical_map/fsapfs_test_container_physical_map.vcproj \
 	fsapfs_test_container_physical_map_entry/fsapfs_test_container_physical_map_entry.vcproj \
 	fsapfs_test_container_reaper/fsapfs_test_container_reaper.vcproj \
@@ -10,6 +9,9 @@ MSVSCPP_FILES = \
 	fsapfs_test_io_handle/fsapfs_test_io_handle.vcproj \
 	fsapfs_test_notify/fsapfs_test_notify.vcproj \
 	fsapfs_test_object/fsapfs_test_object.vcproj \
+	fsapfs_test_object_map/fsapfs_test_object_map.vcproj \
+	fsapfs_test_object_map_btree/fsapfs_test_object_map_btree.vcproj \
+	fsapfs_test_object_map_descriptor/fsapfs_test_object_map_descriptor.vcproj \
 	fsapfs_test_support/fsapfs_test_support.vcproj \
 	fsapfs_test_volume/fsapfs_test_volume.vcproj \
 	fsapfs_test_volume_superblock/fsapfs_test_volume_superblock.vcproj \

@@ -30,6 +30,7 @@
 #include "fsapfstools_libbfio.h"
 #include "fsapfstools_libcerror.h"
 #include "fsapfstools_libclocale.h"
+#include "fsapfstools_libfguid.h"
 #include "fsapfstools_libfsapfs.h"
 #include "info_handle.h"
 
@@ -571,6 +572,118 @@ int info_handle_close_input(
 	return( 0 );
 }
 
+/* Prints an UUID value
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_uuid_value_fprint(
+     info_handle_t *info_handle,
+     const char *value_name,
+     const uint8_t *uuid_data,
+     libcerror_error_t **error )
+{
+	system_character_t uuid_string[ 48 ];
+
+	libfguid_identifier_t *uuid = NULL;
+	static char *function       = "info_handle_uuid_value_fprint";
+	int result                  = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfguid_identifier_initialize(
+	     &uuid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create UUID.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfguid_identifier_copy_from_byte_stream(
+	     uuid,
+	     uuid_data,
+	     16,
+	     LIBFGUID_ENDIAN_BIG,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy byte stream to UUID.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfguid_identifier_copy_to_utf16_string(
+		  uuid,
+		  (uint16_t *) uuid_string,
+		  48,
+		  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+		  error );
+#else
+	result = libfguid_identifier_copy_to_utf8_string(
+		  uuid,
+		  (uint8_t *) uuid_string,
+		  48,
+		  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+		  error );
+#endif
+	if( result != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy UUID to string.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "%s: %" PRIs_SYSTEM "\n",
+	 value_name,
+	 uuid_string );
+
+	if( libfguid_identifier_free(
+	     &uuid,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free UUID.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( uuid != NULL )
+	{
+		libfguid_identifier_free(
+		 &uuid,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Prints the container information
  * Returns 1 if successful or -1 on error
  */
@@ -578,7 +691,12 @@ int info_handle_container_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error )
 {
-	static char *function = "info_handle_container_fprint";
+	uint8_t uuid_data[ 16 ];
+
+	libfsapfs_volume_t *volume = NULL;
+	static char *function      = "info_handle_container_fprint";
+	int number_of_volumes      = 0;
+	int volume_index           = 0;
 
 	if( info_handle == NULL )
 	{
@@ -599,12 +717,106 @@ int info_handle_container_fprint(
 	 info_handle->notify_stream,
 	 "\nContainer information:\n" );
 
-/* TODO */
+	if( libfsapfs_container_get_identifier(
+	     info_handle->input_container,
+	     uuid_data,
+	     16,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve container identifier.",
+		 function );
 
+		goto on_error;
+	}
+	if( info_handle_uuid_value_fprint(
+	     info_handle,
+	     "\tIdentifier\t\t",
+	     uuid_data,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print UUID value.",
+		 function );
+
+		goto on_error;
+	}
+/* TODO print additional container information such as size */
+
+	if( libfsapfs_container_get_number_of_volumes(
+	     info_handle->input_container,
+	     &number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tNumber of volumes\t: %d\n",
+	 number_of_volumes );
+
+	for( volume_index = 0;
+	     volume_index < number_of_volumes;
+	     volume_index++ )
+	{
+		if( libfsapfs_container_get_volume_by_index(
+		     info_handle->input_container,
+		     volume_index,
+		     &volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume: %d.",
+			 function,
+			 volume_index );
+
+			goto on_error;
+		}
+/* TODO print volume information */
+
+		if( libfsapfs_volume_free(
+		     &volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free volume.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	fprintf(
 	 info_handle->notify_stream,
 	 "\n" );
 
 	return( 1 );
+
+on_error:
+	if( volume != NULL )
+	{
+		libfsapfs_volume_free(
+		 &volume,
+		 NULL );
+	}
+	return( -1 );
 }
 

@@ -159,6 +159,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbfio\libbfio_file_io_handle.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbfio\libbfio_file_pool.c"
 				>
 			</File>
@@ -167,11 +171,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbfio\libbfio_file_range_io_handle.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbfio\libbfio_handle.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libbfio\libbfio_memory_range.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbfio\libbfio_memory_range_io_handle.c"
 				>
 			</File>
 			<File
@@ -213,11 +225,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libbfio\libbfio_file_io_handle.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libbfio\libbfio_file_pool.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libbfio\libbfio_file_range.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbfio\libbfio_file_range_io_handle.h"
 				>
 			</File>
 			<File
@@ -254,6 +274,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libbfio\libbfio_memory_range.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libbfio\libbfio_memory_range_io_handle.h"
 				>
 			</File>
 			<File

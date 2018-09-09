@@ -230,12 +230,13 @@ int libfsapfs_container_space_manager_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_container_space_manager_read_data";
-	uint32_t object_type  = 0;
+	static char *function   = "libfsapfs_container_space_manager_read_data";
+	uint32_t object_subtype = 0;
+	uint32_t object_type    = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit  = 0;
-	uint32_t value_32bit  = 0;
+	uint64_t value_64bit    = 0;
+	uint32_t value_32bit    = 0;
 #endif
 
 	if( container_space_manager == NULL )
@@ -300,6 +301,22 @@ int libfsapfs_container_space_manager_read_data(
 
 		return( -1 );
 	}
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_container_space_manager_t *) data )->object_subtype,
+	 object_subtype );
+
+	if( object_subtype != 0x00000000UL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
+		 function,
+		 object_subtype );
+
+		return( -1 );
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -332,13 +349,10 @@ int libfsapfs_container_space_manager_read_data(
 		 function,
 		 object_type );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_container_space_manager_t *) data )->object_subtype,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: object subtype\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 value_32bit );
+		 object_subtype );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_container_space_manager_t *) data )->block_size,
