@@ -24,10 +24,13 @@ libfsapfs_la_SOURCES = \
 	fsapfs_container_reaper.h \
 	fsapfs_container_space_manager.h \
 	fsapfs_container_superblock.h \
+	fsapfs_file_system.h \
 	fsapfs_object.h \
 	fsapfs_object_map.h \
 	fsapfs_volume_superblock.h \
 	libfsapfs.c \
+	libfsapfs_btree_footer.c libfsapfs_btree_footer.h \
+	libfsapfs_btree_header.c libfsapfs_btree_header.h \
 	libfsapfs_container.c libfsapfs_container.h \
 	libfsapfs_container_physical_map.c libfsapfs_container_physical_map.h \
 	libfsapfs_container_physical_map_entry.c libfsapfs_container_physical_map_entry.h \
@@ -38,6 +41,8 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_definitions.h \
 	libfsapfs_error.c libfsapfs_error.h \
 	libfsapfs_extern.h \
+	libfsapfs_file_entry.c libfsapfs_file_entry.h \
+	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
 	libfsapfs_io_handle.c libfsapfs_io_handle.h \
 	libfsapfs_libbfio.h \
 	libfsapfs_libcdata.h \

@@ -1,4 +1,4 @@
-.Dd September  9, 2018
+.Dd September 10, 2018
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -96,6 +96,18 @@ Volume functions
 .Fn libfsapfs_volume_open "libfsapfs_volume_t *volume, const char *filename, int access_flags, libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_close "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_size "libfsapfs_volume_t *volume, size64_t *size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_identifier "libfsapfs_volume_t *volume, uint8_t *uuid_data, size_t uuid_data_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_utf8_name_size "libfsapfs_volume_t *volume, size_t *utf8_string_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_utf8_name "libfsapfs_volume_t *volume, uint8_t *utf8_string, size_t utf8_string_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_utf16_name_size "libfsapfs_volume_t *volume, size_t *utf16_string_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_utf16_name "libfsapfs_volume_t *volume, uint16_t *utf16_string, size_t utf16_string_size, libfsapfs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int

@@ -38,10 +38,6 @@ typedef struct info_handle info_handle_t;
 
 struct info_handle
 {
-	/* The MFT entry index
-	 */
-	uint64_t entry_index;
-
 	/* The volume offset
 	 */
 	off64_t volume_offset;
@@ -81,11 +77,6 @@ int info_handle_signal_abort(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
-int info_handle_set_entry_index(
-     info_handle_t *info_handle,
-     const system_character_t *string,
-     libcerror_error_t **error );
-
 int info_handle_set_volume_offset(
      info_handle_t *info_handle,
      const system_character_t *string,
@@ -104,6 +95,12 @@ int info_handle_uuid_value_fprint(
      info_handle_t *info_handle,
      const char *value_name,
      const uint8_t *uuid_data,
+     libcerror_error_t **error );
+
+int info_handle_volume_fprint(
+     info_handle_t *info_handle,
+     libfsapfs_volume_t *volume,
+     int volume_index,
      libcerror_error_t **error );
 
 int info_handle_container_fprint(

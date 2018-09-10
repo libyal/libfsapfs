@@ -104,6 +104,31 @@ struct fsapfs_btree_fixed_size_entry
 	uint8_t value_data_offset[ 2 ];
 };
 
+typedef struct fsapfs_btree_variable_size_entry fsapfs_btree_variable_size_entry_t;
+
+struct fsapfs_btree_variable_size_entry
+{
+	/* The key data offset
+	 * Consists of 2 bytes
+	 */
+	uint8_t key_data_offset[ 2 ];
+
+	/* The key data size
+	 * Consists of 2 bytes
+	 */
+	uint8_t key_data_size[ 2 ];
+
+	/* The value data offset
+	 * Consists of 2 bytes
+	 */
+	uint8_t value_data_offset[ 2 ];
+
+	/* The value data size
+	 * Consists of 2 bytes
+	 */
+	uint8_t value_data_size[ 2 ];
+};
+
 typedef struct fsapfs_btree_footer fsapfs_btree_footer_t;
 
 struct fsapfs_btree_footer

@@ -79,7 +79,7 @@ struct libfsapfs_internal_container
 	 */
 	uint8_t file_io_handle_opened_in_library;
 
-#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
 	 */
 	libcthreads_read_write_lock_t *read_write_lock;
@@ -134,6 +134,7 @@ int libfsapfs_container_close(
 int libfsapfs_internal_container_open_read(
      libfsapfs_internal_container_t *internal_container,
      libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

@@ -1,5 +1,15 @@
 TODO
+* Create libfsapfs_container_superblock_get_identifier
+* Create libfsapfs_volume_superblock_get_identifier
 * complete library
 * support opening container and file system
 * remove unused libfsapfs_object.[ch] ?
 * improve reading B-trees
+
+Tests:
+* test with copy of mounted file system
+
+20180907
+* see `git log' for more recent change log
+* Initial version based on libfsrefs and libfsntfs
+

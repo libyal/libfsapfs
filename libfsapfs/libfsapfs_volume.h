@@ -29,6 +29,9 @@
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcthreads.h"
+#include "libfsapfs_object_map_btree.h"
+#include "libfsapfs_volume_superblock.h"
 #include "libfsapfs_types.h"
 
 #if defined( __cplusplus )
@@ -39,6 +42,18 @@ typedef struct libfsapfs_internal_volume libfsapfs_internal_volume_t;
 
 struct libfsapfs_internal_volume
 {
+	/* The block size
+	 */
+	uint32_t block_size;
+
+	/* The volume superblock
+	 */
+	libfsapfs_volume_superblock_t *superblock;
+
+	/* The volume object map B-tree
+	 */
+	libfsapfs_object_map_btree_t *object_map_btree;
+
 	/* The IO handle
 	 */
 	libfsapfs_io_handle_t *io_handle;
@@ -54,6 +69,12 @@ struct libfsapfs_internal_volume
 	/* Value to indicate if the file IO handle was opened inside the library
 	 */
 	uint8_t file_io_handle_opened_in_library;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	/* The read/write lock
+	 */
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
 };
 
 LIBFSAPFS_EXTERN \
@@ -101,9 +122,55 @@ int libfsapfs_volume_close(
      libfsapfs_volume_t *volume,
      libcerror_error_t **error );
 
-int libfsapfs_volume_open_read(
+int libfsapfs_internal_volume_open_read(
      libfsapfs_internal_volume_t *internal_volume,
      libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_size(
+     libfsapfs_volume_t *volume,
+     size64_t *size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_identifier(
+     libfsapfs_volume_t *volume,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf8_name_size(
+     libfsapfs_volume_t *volume,
+     size_t *utf8_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf8_name(
+     libfsapfs_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf16_name_size(
+     libfsapfs_volume_t *volume,
+     size_t *utf16_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf16_name(
+     libfsapfs_volume_t *volume,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_root_directory(
+     libfsapfs_volume_t *volume,
+     libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

@@ -1,5 +1,5 @@
 /*
- * The APFS object map definition
+ * The APFS object map definitions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *

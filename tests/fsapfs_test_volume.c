@@ -1399,9 +1399,19 @@ int main(
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-		/* TODO: add tests for libfsapfs_volume_open_read */
+		/* TODO: add tests for libfsapfs_internal_volume_open_read */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
+
+/* TODO add tests for libfsapfs_volume_get_identifier */
+
+/* TODO add tests for libfsapfs_volume_get_utf8_name_size */
+
+/* TODO add tests for libfsapfs_volume_get_utf8_name */
+
+/* TODO add tests for libfsapfs_volume_get_utf16_name_size */
+
+/* TODO add tests for libfsapfs_volume_get_utf16_name */
 
 		/* Clean up
 		 */

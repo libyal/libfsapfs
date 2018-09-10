@@ -41,7 +41,6 @@
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
 #include "libfsapfs_volume.h"
-#include "libfsapfs_volume_superblock.h"
 
 /* Creates a container
  * Make sure the value container is referencing, is set to NULL
@@ -117,7 +116,7 @@ int libfsapfs_container_initialize(
 
 		goto on_error;
 	}
-#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_initialize(
 	     &( internal_container->read_write_lock ),
 	     error ) != 1 )
@@ -189,7 +188,7 @@ int libfsapfs_container_free(
 		}
 		*container = NULL;
 
-#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 		if( libcthreads_read_write_lock_free(
 		     &( internal_container->read_write_lock ),
 		     error ) != 1 )
@@ -386,7 +385,7 @@ int libfsapfs_container_open(
 
 		goto on_error;
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -403,7 +402,7 @@ int libfsapfs_container_open(
 #endif
 	internal_container->file_io_handle_created_in_library = 1;
 
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -556,7 +555,7 @@ int libfsapfs_container_open_wide(
 
 		goto on_error;
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -573,7 +572,7 @@ int libfsapfs_container_open_wide(
 #endif
 	internal_container->file_io_handle_created_in_library = 1;
 
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -715,6 +714,7 @@ int libfsapfs_container_open_file_io_handle(
 	if( libfsapfs_internal_container_open_read(
 	     internal_container,
 	     file_io_handle,
+	     0,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -726,7 +726,7 @@ int libfsapfs_container_open_file_io_handle(
 
 		goto on_error;
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -744,7 +744,7 @@ int libfsapfs_container_open_file_io_handle(
 	internal_container->file_io_handle                   = file_io_handle;
 	internal_container->file_io_handle_opened_in_library = file_io_handle_opened_in_library;
 
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -806,7 +806,7 @@ int libfsapfs_container_close(
 
 		return( -1 );
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -939,7 +939,7 @@ int libfsapfs_container_close(
 			result = -1;
 		}
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -963,12 +963,12 @@ int libfsapfs_container_close(
 int libfsapfs_internal_container_open_read(
      libfsapfs_internal_container_t *internal_container,
      libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
      libcerror_error_t **error )
 {
 	libfsapfs_container_superblock_t *container_superblock       = NULL;
 	libfsapfs_object_map_t *object_map                           = NULL;
 	static char *function                                        = "libfsapfs_internal_container_open_read";
-	off64_t file_offset                                          = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libfsapfs_container_reaper_t *container_reaper               = NULL;
@@ -1307,6 +1307,7 @@ int libfsapfs_internal_container_open_read(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
+/* TODO refactor into function to read object map */
 	if( internal_container->superblock->object_map_block_number > 0 )
 	{
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1495,7 +1496,7 @@ int libfsapfs_container_get_size(
 
 		return( -1 );
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1510,9 +1511,9 @@ int libfsapfs_container_get_size(
 		return( -1 );
 	}
 #endif
-	*size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->superblock->block_size;
+	*size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->block_size;
 
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1591,7 +1592,7 @@ int libfsapfs_container_get_identifier(
 
 		return( -1 );
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1620,7 +1621,7 @@ int libfsapfs_container_get_identifier(
 
 		result = -1;
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1684,7 +1685,7 @@ int libfsapfs_container_get_number_of_volumes(
 
 		return( -1 );
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1701,7 +1702,7 @@ int libfsapfs_container_get_number_of_volumes(
 #endif
 	*number_of_volumes = (int) internal_container->superblock->number_of_volumes;
 
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1731,7 +1732,6 @@ int libfsapfs_container_get_volume_by_index(
 {
 	libfsapfs_internal_container_t *internal_container       = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	libfsapfs_volume_superblock_t *volume_superblock         = NULL;
 	static char *function                                    = "libfsapfs_container_get_volume_by_index";
 	off64_t file_offset                                      = 0;
 
@@ -1793,7 +1793,7 @@ int libfsapfs_container_get_volume_by_index(
 
 		return( -1 );
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1835,24 +1835,27 @@ int libfsapfs_container_get_volume_by_index(
 
 		goto on_error;
 	}
-/* TODO move into volume */
-	if( libfsapfs_volume_superblock_initialize(
-	     &volume_superblock,
+	if( libfsapfs_volume_initialize(
+	     volume,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create volume superblock.",
+		 "%s: unable to create volume.",
 		 function );
 
 		goto on_error;
 	}
-	file_offset = object_map_descriptor->physical_address * internal_container->block_size;
+/* TODO add function to set block_size */
+	( (libfsapfs_internal_volume_t *) *volume )->block_size = internal_container->block_size;
 
-	if( libfsapfs_volume_superblock_read_file_io_handle(
-	     volume_superblock,
+	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->block_size );
+
+/* TODO clone file_io_handle? */
+	if( libfsapfs_internal_volume_open_read(
+	     (libfsapfs_internal_volume_t *) *volume,
 	     internal_container->file_io_handle,
 	     file_offset,
 	     error ) != 1 )
@@ -1860,30 +1863,14 @@ int libfsapfs_container_get_volume_by_index(
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read volume superblock at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open volume: %d.",
 		 function,
-		 file_offset,
-		 file_offset );
+		 volume_index );
 
 		goto on_error;
 	}
-/* TODO implement
-*/
-	if( libfsapfs_volume_superblock_free(
-	     &volume_superblock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free volume superblock.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
 	     internal_container->read_write_lock,
 	     error ) != 1 )
@@ -1898,16 +1885,16 @@ int libfsapfs_container_get_volume_by_index(
 		return( -1 );
 	}
 #endif
-	return( -1 );
+	return( 1 );
 
 on_error:
-	if( volume_superblock != NULL )
+	if( *volume != NULL )
 	{
-		libfsapfs_volume_superblock_free(
-		 &volume_superblock,
+		libfsapfs_volume_free(
+		 volume,
 		 NULL );
 	}
-#if defined( HAVE_LIBVHDI_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_read(
 	 internal_container->read_write_lock,
 	 NULL );

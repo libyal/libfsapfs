@@ -1,5 +1,5 @@
 /*
- * Debug functions
+ * The B-tree header functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,49 +19,68 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_DEBUG_H )
-#define _LIBFSAPFS_DEBUG_H
+#if !defined( _LIBFSAPFS_BTREE_HEADER_H )
+#define _LIBFSAPFS_BTREE_HEADER_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-#if defined( HAVE_DEBUG_OUTPUT )
+typedef struct libfsapfs_btree_header libfsapfs_btree_header_t;
 
-int libfsapfs_debug_print_posix_time_value(
-     const char *function_name,
-     const char *value_name,
-     const uint8_t *byte_stream,
-     size_t byte_stream_size,
-     int byte_order,
-     uint8_t value_type,
-     uint32_t string_format_flags,
+struct libfsapfs_btree_header
+{
+	/* The flags
+	 */
+	uint16_t flags;
+
+	/* The level
+	 */
+	uint16_t level;
+
+	/* The number of keys
+	 */
+	uint16_t number_of_keys;
+
+	/* The entries data offset
+	 */
+	uint16_t entries_data_offset;
+
+	/* The entries data size
+	 */
+	uint16_t entries_data_size;
+
+	/* The unused data offset
+	 */
+	uint16_t unused_data_offset;
+
+	/* The unused data size
+	 */
+	uint16_t unused_data_size;
+};
+
+int libfsapfs_btree_header_initialize(
+     libfsapfs_btree_header_t **btree_header,
      libcerror_error_t **error );
 
-int libfsapfs_debug_print_guid_value(
-     const char *function_name,
-     const char *value_name,
-     const uint8_t *byte_stream,
-     size_t byte_stream_size,
-     int byte_order,
-     uint32_t string_format_flags,
+int libfsapfs_btree_header_free(
+     libfsapfs_btree_header_t **btree_header,
      libcerror_error_t **error );
 
-int libfsapfs_debug_print_read_offsets(
-     libbfio_handle_t *file_io_handle,
+int libfsapfs_btree_header_read_data(
+     libfsapfs_btree_header_t *btree_header,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error );
-
-#endif
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_DEBUG_H ) */
+#endif /* !defined( _LIBFSAPFS_BTREE_HEADER_H ) */
 

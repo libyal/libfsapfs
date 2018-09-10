@@ -28,6 +28,8 @@ EXTRA_DIST = \
 	$(check_SCRIPTS)
 
 check_PROGRAMS = \
+	fsapfs_test_btree_footer \
+	fsapfs_test_btree_header \
 	fsapfs_test_container \
 	fsapfs_test_container_physical_map \
 	fsapfs_test_container_physical_map_entry \
@@ -35,6 +37,7 @@ check_PROGRAMS = \
 	fsapfs_test_container_space_manager \
 	fsapfs_test_container_superblock \
 	fsapfs_test_error \
+	fsapfs_test_file_system_btree \
 	fsapfs_test_io_handle \
 	fsapfs_test_notify \
 	fsapfs_test_object \
@@ -44,6 +47,30 @@ check_PROGRAMS = \
 	fsapfs_test_support \
 	fsapfs_test_volume \
 	fsapfs_test_volume_superblock
+
+fsapfs_test_btree_footer_SOURCES = \
+	fsapfs_test_btree_footer.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_btree_footer_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_btree_header_SOURCES = \
+	fsapfs_test_btree_header.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_btree_header_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
 
 fsapfs_test_container_SOURCES = \
 	fsapfs_test_container.c \
@@ -182,6 +209,28 @@ fsapfs_test_error_SOURCES = \
 
 fsapfs_test_error_LDADD = \
 	../libfsapfs/libfsapfs.la
+
+fsapfs_test_file_system_btree_SOURCES = \
+	fsapfs_test_file_system_btree.c \
+	fsapfs_test_functions.c fsapfs_test_functions.h \
+	fsapfs_test_libbfio.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_file_system_btree_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
 
 fsapfs_test_io_handle_SOURCES = \
 	fsapfs_test_io_handle.c \

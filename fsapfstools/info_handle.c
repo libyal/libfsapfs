@@ -243,7 +243,6 @@ int info_handle_initialize(
 
 		goto on_error;
 	}
-	( *info_handle )->entry_index   = 5;
 	( *info_handle )->notify_stream = INFO_HANDLE_NOTIFY_STREAM;
 
 	return( 1 );
@@ -360,52 +359,6 @@ int info_handle_signal_abort(
 			return( -1 );
 		}
 	}
-	return( 1 );
-}
-
-/* Sets the entry index
- * Returns 1 if successful or -1 on error
- */
-int info_handle_set_entry_index(
-     info_handle_t *info_handle,
-     const system_character_t *string,
-     libcerror_error_t **error )
-{
-	static char *function = "info_handle_set_entry_index";
-	size_t string_length  = 0;
-	uint64_t value_64bit  = 0;
-
-	if( info_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid info handle.",
-		 function );
-
-		return( -1 );
-	}
-	string_length = system_string_length(
-	                 string );
-
-	if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
-	     string,
-	     string_length + 1,
-	     &value_64bit,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-		 "%s: unable to copy string to 64-bit decimal.",
-		 function );
-
-		return( -1 );
-	}
-	info_handle->entry_index = value_64bit;
-
 	return( 1 );
 }
 
@@ -684,6 +637,165 @@ on_error:
 	return( -1 );
 }
 
+/* Prints the volume information
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_volume_fprint(
+     info_handle_t *info_handle,
+     libfsapfs_volume_t *volume,
+     int volume_index,
+     libcerror_error_t **error )
+{
+	uint8_t uuid_data[ 16 ];
+
+	system_character_t *volume_name = NULL;
+	static char *function           = "info_handle_volume_fprint";
+	size_t volume_name_size         = 0;
+	int result                      = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\nVolume: %d information:\n",
+	 volume_index );
+
+	if( libfsapfs_volume_get_identifier(
+	     volume,
+	     uuid_data,
+	     16,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume identifier.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle_uuid_value_fprint(
+	     info_handle,
+	     "\tIdentifier\t\t",
+	     uuid_data,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print UUID value.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tName\t\t\t: " );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfsapfs_volume_get_utf16_name_size(
+	          volume,
+	          &volume_name_size,
+	          error );
+#else
+	result = libfsapfs_volume_get_utf8_name_size(
+	          volume,
+	          &volume_name_size,
+	          error );
+#endif
+	if( result != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume name size.",
+		 function );
+
+		goto on_error;
+	}
+	if( volume_name_size > 0 )
+	{
+		volume_name = system_string_allocate(
+		               volume_name_size );
+
+		if( volume_name == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create volume name string.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfsapfs_volume_get_utf16_name(
+		          volume,
+		          (uint16_t *) volume_name,
+		          volume_name_size,
+		          error );
+#else
+		result = libfsapfs_volume_get_utf8_name(
+		          volume,
+		          (uint8_t *) volume_name,
+		          volume_name_size,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume name.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "%" PRIs_SYSTEM "",
+		 volume_name );
+
+		memory_free(
+		 volume_name );
+
+		volume_name = NULL;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
+/* TODO print additional volume information such as size */
+
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
+	return( 1 );
+
+on_error:
+	if( volume_name != NULL )
+	{
+		memory_free(
+		 volume_name );
+	}
+	return( -1 );
+}
+
 /* Prints the container information
  * Returns 1 if successful or -1 on error
  */
@@ -788,8 +900,22 @@ int info_handle_container_fprint(
 
 			goto on_error;
 		}
-/* TODO print volume information */
+		if( info_handle_volume_fprint(
+		     info_handle,
+		     volume,
+		     volume_index,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print volume: %d.",
+			 function,
+			 volume_index );
 
+			goto on_error;
+		}
 		if( libfsapfs_volume_free(
 		     &volume,
 		     error ) != 1 )
@@ -804,10 +930,6 @@ int info_handle_container_fprint(
 			goto on_error;
 		}
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
-
 	return( 1 );
 
 on_error:

@@ -1,7 +1,7 @@
 /*
- * Debug functions
+ * File entry functions
  *
- * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2010-2018, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,49 +19,56 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_DEBUG_H )
-#define _LIBFSAPFS_DEBUG_H
+#if !defined( _LIBFSAPFS_FILE_ENTRY_H )
+#define _LIBFSAPFS_FILE_ENTRY_H
 
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_extern.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcthreads.h"
+#include "libfsapfs_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-#if defined( HAVE_DEBUG_OUTPUT )
+typedef struct libfsapfs_internal_file_entry libfsapfs_internal_file_entry_t;
 
-int libfsapfs_debug_print_posix_time_value(
-     const char *function_name,
-     const char *value_name,
-     const uint8_t *byte_stream,
-     size_t byte_stream_size,
-     int byte_order,
-     uint8_t value_type,
-     uint32_t string_format_flags,
-     libcerror_error_t **error );
+struct libfsapfs_internal_file_entry
+{
+	/* The IO handle
+	 */
+	libfsapfs_io_handle_t *io_handle;
 
-int libfsapfs_debug_print_guid_value(
-     const char *function_name,
-     const char *value_name,
-     const uint8_t *byte_stream,
-     size_t byte_stream_size,
-     int byte_order,
-     uint32_t string_format_flags,
-     libcerror_error_t **error );
+	/* The file IO handle
+	 */
+	libbfio_handle_t *file_io_handle;
 
-int libfsapfs_debug_print_read_offsets(
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	/* The read/write lock
+	 */
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
+};
+
+int libfsapfs_file_entry_initialize(
+     libfsapfs_file_entry_t **file_entry,
+     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
-#endif
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_free(
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_DEBUG_H ) */
+#endif /* !defined( _LIBFSAPFS_FILE_ENTRY_H ) */
 

@@ -956,6 +956,16 @@ int main(
 	 "libfsapfs_volume_superblock_read_data",
 	 fsapfs_test_volume_superblock_read_data );
 
+/* TODO add tests for libfsapfs_volume_superblock_get_volume_identifier */
+
+/* TODO add tests for libfsapfs_volume_superblock_get_utf8_volume_name_size */
+
+/* TODO add tests for libfsapfs_volume_superblock_get_utf8_volume_name */
+
+/* TODO add tests for libfsapfs_volume_superblock_get_utf16_volume_name_size */
+
+/* TODO add tests for libfsapfs_volume_superblock_get_utf16_volume_name */
+
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );

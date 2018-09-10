@@ -58,13 +58,10 @@ void usage_fprint(
 	fprintf( stream, "Use fsapfsinfo to determine information about an Apple\n"
 	                 " File System (APFS).\n\n" );
 
-	fprintf( stream, "Usage: fsapfsinfo [ -e entry_index ] [ -o offset ]\n"
-	                 "                  [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: fsapfsinfo [ -o offset ] [ -hvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
-	fprintf( stream, "\t-e:     show info about a specific MFT entry index\n"
-	                 "\t        (default = 5)\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
 	fprintf( stream, "\t-o:     specify the volume offset\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
@@ -124,7 +121,6 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libfsapfs_error_t *error                 = NULL;
-	system_character_t *option_entry_index   = NULL;
 	system_character_t *option_volume_offset = NULL;
 	system_character_t *source               = NULL;
 	char *program                            = "fsapfsinfo";
@@ -164,7 +160,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "e:ho:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "ho:vV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -179,11 +175,6 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_FAILURE );
-
-			case (system_integer_t) 'e':
-				option_entry_index = optarg;
-
-				break;
 
 			case (system_integer_t) 'h':
 				usage_fprint(
@@ -238,24 +229,6 @@ int main( int argc, char * const argv[] )
 		 "Unable to initialize info handle.\n" );
 
 		goto on_error;
-	}
-	if( option_entry_index != NULL )
-	{
-		if( info_handle_set_entry_index(
-		     fsapfsinfo_info_handle,
-		     option_entry_index,
-		     &error ) != 1 )
-		{
-			libcnotify_print_error_backtrace(
-			 error );
-			libcerror_error_free(
-			 &error );
-
-			fprintf(
-			 stderr,
-			 "Unsupported entry index defaulting to: %" PRIi64 ".\n",
-			 fsapfsinfo_info_handle->entry_index );
-		}
 	}
 	if( option_volume_offset != NULL )
 	{

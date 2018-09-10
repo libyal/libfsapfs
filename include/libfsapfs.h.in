@@ -399,6 +399,68 @@ int libfsapfs_volume_close(
      libfsapfs_volume_t *volume,
      libfsapfs_error_t **error );
 
+/* Retrieves the size
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_size(
+     libfsapfs_volume_t *volume,
+     size64_t *size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the identifier
+ * The identifier is an UUID stored in big-endian and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_identifier(
+     libfsapfs_volume_t *volume,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-8 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf8_name_size(
+     libfsapfs_volume_t *volume,
+     size_t *utf8_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-8 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf8_name(
+     libfsapfs_volume_t *volume,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-16 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf16_name_size(
+     libfsapfs_volume_t *volume,
+     size_t *utf16_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-16 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_utf16_name(
+     libfsapfs_volume_t *volume,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libfsapfs_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

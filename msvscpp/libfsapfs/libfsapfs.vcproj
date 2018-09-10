@@ -174,6 +174,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_footer.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_header.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container.c"
 				>
 			</File>
@@ -203,6 +211,14 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_error.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_file_entry.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_file_system_btree.c"
 				>
 			</File>
 			<File
@@ -268,6 +284,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\fsapfs_file_system.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\fsapfs_object.h"
 				>
 			</File>
@@ -277,6 +297,14 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\fsapfs_volume_superblock.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_footer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_header.h"
 				>
 			</File>
 			<File
@@ -317,6 +345,14 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_extern.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_file_entry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_file_system_btree.h"
 				>
 			</File>
 			<File

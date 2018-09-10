@@ -1,5 +1,5 @@
 /*
- * Debug functions
+ * The file system B-tree functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_DEBUG_H )
-#define _LIBFSAPFS_DEBUG_H
+#if !defined( _LIBFSAPFS_FILE_SYSTEM_BTREE_H )
+#define _LIBFSAPFS_FILE_SYSTEM_BTREE_H
 
 #include <common.h>
 #include <types.h>
@@ -32,36 +32,39 @@
 extern "C" {
 #endif
 
-#if defined( HAVE_DEBUG_OUTPUT )
+typedef struct libfsapfs_file_system_btree libfsapfs_file_system_btree_t;
 
-int libfsapfs_debug_print_posix_time_value(
-     const char *function_name,
-     const char *value_name,
-     const uint8_t *byte_stream,
-     size_t byte_stream_size,
-     int byte_order,
-     uint8_t value_type,
-     uint32_t string_format_flags,
+struct libfsapfs_file_system_btree
+{
+	/* Dummy
+	 */
+	int dummy;
+};
+
+int libfsapfs_file_system_btree_initialize(
+     libfsapfs_file_system_btree_t **file_system_btree,
      libcerror_error_t **error );
 
-int libfsapfs_debug_print_guid_value(
-     const char *function_name,
-     const char *value_name,
-     const uint8_t *byte_stream,
-     size_t byte_stream_size,
-     int byte_order,
-     uint32_t string_format_flags,
+int libfsapfs_file_system_btree_free(
+     libfsapfs_file_system_btree_t **file_system_btree,
      libcerror_error_t **error );
 
-int libfsapfs_debug_print_read_offsets(
+int libfsapfs_file_system_btree_read_file_io_handle(
+     libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
+     uint32_t block_size,
      libcerror_error_t **error );
 
-#endif
+int libfsapfs_file_system_btree_read_data(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_DEBUG_H ) */
+#endif /* !defined( _LIBFSAPFS_FILE_SYSTEM_BTREE_H ) */
 

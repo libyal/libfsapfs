@@ -36,9 +36,21 @@ typedef struct libfsapfs_volume_superblock libfsapfs_volume_superblock_t;
 
 struct libfsapfs_volume_superblock
 {
+	/* The object map block number
+	 */
+	uint64_t object_map_block_number;
+
+	/* The file system root object identifier
+	 */
+	uint64_t file_system_root_object_identifier;
+
 	/* The volume identifier
 	 */
 	uint8_t volume_identifier[ 16 ];
+
+	/* The volume name
+	 */
+	uint8_t volume_name[ 256 ];
 };
 
 int libfsapfs_volume_superblock_initialize(
@@ -59,6 +71,34 @@ int libfsapfs_volume_superblock_read_data(
      libfsapfs_volume_superblock_t *volume_superblock,
      const uint8_t *data,
      size_t data_size,
+     libcerror_error_t **error );
+
+int libfsapfs_volume_superblock_get_volume_identifier(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libcerror_error_t **error );
+
+int libfsapfs_volume_superblock_get_utf8_volume_name_size(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     size_t *utf8_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_volume_superblock_get_utf8_volume_name(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_volume_superblock_get_utf16_volume_name_size(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     size_t *utf16_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_volume_superblock_get_utf16_volume_name(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

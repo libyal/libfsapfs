@@ -124,10 +124,10 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t unknown12[ 4 ];
 
-	/* Unknown
+	/* The file system root tree object type
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown13[ 4 ];
+	uint8_t file_system_root_tree_object_type[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
@@ -215,7 +215,175 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t volume_identifier[ 16 ];
 
-/* TODO add values starting with apfs_last_mod_time */
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown30[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown31[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown32[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown33[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown34[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown35[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown36[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown37[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown38[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown39[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown40[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown41[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown42[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown43[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown44[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown45[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown46[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown47[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown48[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown49[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown50[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown51[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown52[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown53[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown54[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown55[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown56[ 32 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown57[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown58[ 8 ];
+
+	/* The volume name
+	 * Consists of 256 bytes
+	 */
+	uint8_t volume_name[ 256 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown59[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown60[ 4 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown61[ 8 ];
+
+	/* Unknown
+	 * Consists of 32 bytes
+	 */
+	uint8_t unknown62[ 32 ];
 };
 
 #if defined( __cplusplus )

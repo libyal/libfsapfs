@@ -24,13 +24,15 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsapfs_volume_superblock.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
+#include "libfsapfs_libfdatetime.h"
 #include "libfsapfs_libfguid.h"
+#include "libfsapfs_libuna.h"
+#include "libfsapfs_volume_superblock.h"
 
 #include "fsapfs_volume_superblock.h"
 
@@ -334,6 +336,14 @@ int libfsapfs_volume_superblock_read_data(
 
 		return( -1 );
 	}
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->object_map_block_number,
+	 volume_superblock->object_map_block_number );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->file_system_root_object_identifier,
+	 volume_superblock->file_system_root_object_identifier );
+
 	if( memory_copy(
 	     volume_superblock->volume_identifier,
 	     ( (fsapfs_volume_superblock_t *) data )->volume_identifier,
@@ -344,6 +354,20 @@ int libfsapfs_volume_superblock_read_data(
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
 		 "%s: unable to copy volume identifier.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_copy(
+	     volume_superblock->volume_name,
+	     ( (fsapfs_volume_superblock_t *) data )->volume_name,
+	     256 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy volume name.",
 		 function );
 
 		return( -1 );
@@ -425,14 +449,25 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown5,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown5\t\t\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown5\t\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown5,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
 
+			return( -1 );
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->number_of_reserved_blocks,
 		 value_64bit );
@@ -490,10 +525,10 @@ int libfsapfs_volume_superblock_read_data(
 		 value_32bit );
 
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown13,
+		 ( (fsapfs_volume_superblock_t *) data )->file_system_root_tree_object_type,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown13\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: file system root tree object type\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -513,21 +548,15 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_32bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->object_map_block_number,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: object map block number\t\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->object_map_block_number );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->file_system_root_object_identifier,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: file system root object identifier\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->file_system_root_object_identifier );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown18,
@@ -643,12 +672,617 @@ int libfsapfs_volume_superblock_read_data(
 
 			return( -1 );
 		}
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown30\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown30,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown31,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown31\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
 
 		libcnotify_printf(
-		 "\n" );
+		 "%s: unknown32:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown32,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown33\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown33,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown34,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown34\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown35:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown35,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown36\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown36,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown37,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown37\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown38:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown38,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown39\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown39,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown40,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown40\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown41:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown41,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown42\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown42,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown43,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown43\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown44:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown44,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown45\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown45,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown46,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown46\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown47:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown47,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown48\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown48,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown49,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown49\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown50:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown50,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown51\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown51,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown52,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown52\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown53:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown53,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown54\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown54,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown55,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown55\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown56:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown56,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		if( libfsapfs_debug_print_posix_time_value(
+		     function,
+		     "unknown57\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unknown57,
+		     8,
+		     LIBFDATETIME_ENDIAN_LITTLE,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown58,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown58\t\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: volume name:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->volume_name,
+		 256,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown59,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown59\t\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown60,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown60\t\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown61,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown61\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "%s: unknown62:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown62,
+		 32,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
+	return( 1 );
+}
+
+/* Retrieves the volume identifier
+ * The identifier is an UUID stored in big-endian and is 16 bytes of size
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_superblock_get_volume_identifier(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_volume_superblokc_get_volume_identifier";
+
+	if( volume_superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( uuid_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid UUID data.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( uuid_data_size < 16 )
+	 || ( uuid_data_size > (size_t) SSIZE_MAX ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid UUID data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_copy(
+	     uuid_data,
+	     volume_superblock->volume_identifier,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy volume identifier.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the size of the UTF-8 encoded volume name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_superblock_get_utf8_volume_name_size(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     size_t *utf8_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_volume_superblock_get_utf8_volume_name_size";
+
+	if( volume_superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf8_string_size_from_utf8_stream(
+	     volume_superblock->volume_name,
+	     256,
+	     utf8_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 string size.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-8 encoded volume name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_superblock_get_utf8_volume_name(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_volume_superblock_get_utf8_volume_name";
+
+	if( volume_superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf8_string_copy_from_utf8_stream(
+	     utf8_string,
+	     utf8_string_size,
+	     volume_superblock->volume_name,
+	     256,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 string.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the size of the UTF-16 encoded volume name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_superblock_get_utf16_volume_name_size(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     size_t *utf16_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_volume_superblock_get_utf16_volume_name_size";
+
+	if( volume_superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf16_string_size_from_utf8_stream(
+	     volume_superblock->volume_name,
+	     256,
+	     utf16_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 string size.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-16 encoded volume name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_superblock_get_utf16_volume_name(
+     libfsapfs_volume_superblock_t *volume_superblock,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_volume_superblock_get_utf16_volume_name";
+
+	if( volume_superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf16_string_copy_from_utf8_stream(
+	     utf16_string,
+	     utf16_string_size,
+	     volume_superblock->volume_name,
+	     256,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 string.",
+		 function );
+
+		return( -1 );
+	}
 	return( 1 );
 }
 
