@@ -24,8 +24,8 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsapfs_btree_footer.h"
-#include "libfsapfs_btree_header.h"
+#include "libfsapfs_btree_entry.h"
+#include "libfsapfs_btree_root.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
@@ -129,7 +129,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees a object map_btree
+/* Frees a object map B-tree
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_object_map_btree_free(
@@ -174,7 +174,7 @@ int libfsapfs_object_map_btree_free(
 	return( result );
 }
 
-/* Reads the object map_btree
+/* Reads the object map B-tree
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_object_map_btree_read_file_io_handle(
@@ -299,7 +299,7 @@ on_error:
 	return( -1 );
 }
 
-/* Reads the object map_btree
+/* Reads the object map B-tree
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_object_map_btree_read_data(
@@ -308,25 +308,13 @@ int libfsapfs_object_map_btree_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	fsapfs_btree_fixed_size_entry_t *btree_entry             = NULL;
-	libfsapfs_btree_footer_t *btree_footer                   = NULL;
-	libfsapfs_btree_header_t *btree_header                   = NULL;
+	libfsapfs_btree_entry_t *btree_entry                     = NULL;
+	libfsapfs_btree_root_t *btree_root                       = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
 	static char *function                                    = "libfsapfs_object_map_btree_read_data";
-	size_t data_offset                                       = 0;
-	size_t remaining_data_size                               = 0;
-	uint64_t map_entry_index                                 = 0;
-	uint32_t object_subtype                                  = 0;
-	uint32_t object_type                                     = 0;
-	uint16_t entries_data_offset                             = 0;
-	uint16_t footer_offset                                   = 0;
-	uint16_t key_data_offset                                 = 0;
-	uint16_t value_data_offset                               = 0;
+	int btree_entry_index                                    = 0;
 	int entry_index                                          = 0;
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                                     = 0;
-#endif
+	int number_of_entries                                    = 0;
 
 	if( object_map_btree == NULL )
 	{
@@ -339,58 +327,35 @@ int libfsapfs_object_map_btree_read_data(
 
 		return( -1 );
 	}
-	if( data == NULL )
+	if( libfsapfs_btree_root_initialize(
+	     &btree_root,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid data.",
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create B-tree root.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	if( ( data_size < sizeof( fsapfs_object_t ) )
-	 || ( data_size > (size_t) SSIZE_MAX ) )
+	if( libfsapfs_btree_root_read_data(
+	     btree_root,
+	     data,
+	     data_size,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid data size value out of bounds.",
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read B-tree root.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: object map B-tree data:\n",
-		 function );
-		libcnotify_print_data(
-		 data,
-		 data_size,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-	}
-#endif
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: object map B-tree object data:\n",
-		 function );
-		libcnotify_print_data(
-		 data,
-		 sizeof( fsapfs_object_t ),
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-	}
-#endif
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_object_t *) data )->type,
-	 object_type );
-
-	if( object_type != 0x40000002UL )
+	if( btree_root->object_type != 0x40000002UL )
 	{
 		libcerror_error_set(
 		 error,
@@ -398,15 +363,11 @@ int libfsapfs_object_map_btree_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: invalid object type: 0x%08" PRIx32 ".",
 		 function,
-		 object_type );
+		 btree_root->object_type );
 
 		goto on_error;
 	}
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_object_t *) data )->subtype,
-	 object_subtype );
-
-	if( object_subtype != 0x0000000bUL )
+	if( btree_root->object_subtype != 0x0000000bUL )
 	{
 		libcerror_error_set(
 		 error,
@@ -414,94 +375,11 @@ int libfsapfs_object_map_btree_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
 		 function,
-		 object_subtype );
+		 btree_root->object_subtype );
 
 		goto on_error;
 	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_t *) data )->checksum,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: object checksum\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_t *) data )->identifier,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_t *) data )->version,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: object version\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: object type\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 object_type );
-
-		libcnotify_printf(
-		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 object_subtype );
-
-		libcnotify_printf(
-		 "\n" );
-	}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
-	data_offset = sizeof( fsapfs_object_t );
-
-	if( data_size < ( data_offset + sizeof( fsapfs_btree_header_t ) ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid data size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_btree_header_initialize(
-	     &btree_header,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create B-tree header.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_btree_header_read_data(
-	     btree_header,
-	     &( data[ data_offset ] ),
-	     sizeof( fsapfs_btree_header_t ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read B-tree header.",
-		 function );
-
-		goto on_error;
-	}
-	if( btree_header->flags != 0x0007 )
+	if( btree_root->header->flags != 0x0007 )
 	{
 		libcerror_error_set(
 		 error,
@@ -509,106 +387,11 @@ int libfsapfs_object_map_btree_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported flags: 0x%04" PRIx16 ".",
 		 function,
-		 btree_header->flags );
+		 btree_root->header->flags );
 
 		goto on_error;
 	}
-	data_offset += sizeof( fsapfs_btree_header_t );
-
-	if( data_size < ( data_offset + sizeof( fsapfs_btree_footer_t ) ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid data size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	remaining_data_size = data_size - data_offset - sizeof( fsapfs_btree_footer_t );
-
-	if( btree_header->entries_data_offset >= remaining_data_size )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid entries offset size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	remaining_data_size -= btree_header->entries_data_offset;
-
-	if( btree_header->entries_data_size > remaining_data_size )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid entries data size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	remaining_data_size -= btree_header->entries_data_size;
-
-	if( btree_header->unused_data_offset >= remaining_data_size )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid unused offset size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	remaining_data_size -= btree_header->unused_data_offset;
-
-	if( btree_header->unused_data_size > remaining_data_size )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid unused data size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-/* TODO sanity check other data_offset and data_size values */
-
-	if( libfsapfs_btree_footer_initialize(
-	     &btree_footer,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create B-tree footer.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_btree_footer_read_data(
-	     btree_footer,
-	     &( data[ data_size - sizeof( fsapfs_btree_footer_t ) ] ),
-	     sizeof( fsapfs_btree_footer_t ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read B-tree footer.",
-		 function );
-
-		goto on_error;
-	}
-	if( btree_footer->key_size != sizeof( fsapfs_object_map_btree_key_t ) )
+	if( btree_root->footer->key_size != sizeof( fsapfs_object_map_btree_key_t ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -619,7 +402,7 @@ int libfsapfs_object_map_btree_read_data(
 
 		goto on_error;
 	}
-	if( btree_footer->value_size != sizeof( fsapfs_object_map_btree_value_t ) )
+	if( btree_root->footer->value_size != sizeof( fsapfs_object_map_btree_value_t ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -630,85 +413,71 @@ int libfsapfs_object_map_btree_read_data(
 
 		goto on_error;
 	}
-	if( btree_footer->number_of_entries > (uint64_t) ( btree_header->entries_data_size / sizeof( fsapfs_btree_fixed_size_entry_t ) ) )
+
+	if( btree_root->footer->key_size != sizeof( fsapfs_object_map_btree_key_t ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid number of entries value out of bounds.",
+		 "%s: invalid key size value out of bounds.",
 		 function );
 
 		goto on_error;
 	}
-	data_offset += btree_header->entries_data_offset;
-
-	entries_data_offset = btree_header->entries_data_offset + (uint16_t) ( sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_header_t ) );
-	footer_offset       = (uint16_t) ( data_size - sizeof( fsapfs_btree_footer_t ) );
-
-	for( map_entry_index = 0;
-	     map_entry_index < btree_footer->number_of_entries;
-	     map_entry_index++ )
+	if( btree_root->footer->value_size != sizeof( fsapfs_object_map_btree_value_t ) )
 	{
-		btree_entry = (fsapfs_btree_fixed_size_entry_t *) &( data[ data_offset ] );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid value size value out of bounds.",
+		 function );
 
-		byte_stream_copy_to_uint16_little_endian(
-		 btree_entry->key_data_offset,
-		 key_data_offset );
+		goto on_error;
+	}
+	if( libfsapfs_btree_root_get_number_of_entries(
+	     btree_root,
+	     &number_of_entries,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from B-tree root.",
+		 function );
 
-		byte_stream_copy_to_uint16_little_endian(
-		 btree_entry->value_data_offset,
-		 value_data_offset );
-
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "%s: entry: %" PRIu64 " key data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
-			 function,
-			 map_entry_index,
-			 key_data_offset,
-			 (size_t) key_data_offset + (size_t) entries_data_offset + (size_t) btree_header->entries_data_size );
-
-			libcnotify_printf(
-			 "%s: entry: %" PRIu64 " value data offset\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
-			 function,
-			 map_entry_index,
-			 value_data_offset,
-			 (size_t) footer_offset - (size_t) value_data_offset);
-
-			libcnotify_printf(
-			 "\n" );
-		}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
-		data_offset += sizeof( fsapfs_btree_fixed_size_entry_t );
-
-		key_data_offset += entries_data_offset + btree_header->entries_data_size;
-
-		if( ( (size_t) key_data_offset > data_size )
-		 || ( ( data_size - key_data_offset ) < sizeof( fsapfs_object_map_btree_key_t ) ) )
+		goto on_error;
+	}
+	for( btree_entry_index = 0;
+	     btree_entry_index < number_of_entries;
+	     btree_entry_index++ )
+	{
+		if( libfsapfs_btree_root_get_entry_by_index(
+		     btree_root,
+		     btree_entry_index,
+		     &btree_entry,
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid key data offset value out of bounds.",
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from B-tree root.",
 			 function );
 
 			goto on_error;
 		}
-		value_data_offset = footer_offset - value_data_offset;
-
-		if( ( (size_t) value_data_offset > data_size )
-		 || ( ( data_size - value_data_offset ) < sizeof( fsapfs_object_map_btree_value_t ) ) )
+		if( btree_entry == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid value data offset value out of bounds.",
-			 function );
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d.",
+			 function,
+			 btree_entry_index );
 
 			goto on_error;
 		}
@@ -727,33 +496,33 @@ int libfsapfs_object_map_btree_read_data(
 		}
 		if( libfsapfs_object_map_descriptor_read_btree_key_data(
 		     object_map_descriptor,
-		     &( data[ key_data_offset ] ),
-		     sizeof( fsapfs_object_map_btree_key_t ),
+		     btree_entry->key_data,
+		     btree_entry->key_data_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read entry: %" PRIu64 " object map key data.",
+			 "%s: unable to read entry: %d object map key data.",
 			 function,
-			 map_entry_index );
+			 btree_entry_index );
 
 			goto on_error;
 		}
 		if( libfsapfs_object_map_descriptor_read_btree_value_data(
 		     object_map_descriptor,
-		     &( data[ value_data_offset ] ),
-		     sizeof( fsapfs_object_map_btree_value_t ),
+		     btree_entry->value_data,
+		     btree_entry->value_data_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read entry: %" PRIu64 " object map value data.",
+			 "%s: unable to read entry: %d object map value data.",
 			 function,
-			 map_entry_index );
+			 btree_entry_index );
 
 			goto on_error;
 		}
@@ -767,36 +536,23 @@ int libfsapfs_object_map_btree_read_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-			 "%s: unable to append map entry: %" PRIu32 " to array.",
+			 "%s: unable to append object map descriptor: %d to array.",
 			 function,
-			 map_entry_index );
+			 btree_entry_index );
 
 			goto on_error;
 		}
 		object_map_descriptor = NULL;
 	}
-	if( libfsapfs_btree_footer_free(
-	     &btree_footer,
+	if( libfsapfs_btree_root_free(
+	     &btree_root,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free B-tree footer.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_btree_header_free(
-	     &btree_header,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free B-tree header.",
+		 "%s: unable to free B-tree root.",
 		 function );
 
 		goto on_error;
@@ -810,16 +566,10 @@ on_error:
 		 &object_map_descriptor,
 		 NULL );
 	}
-	if( btree_footer != NULL )
+	if( btree_root != NULL )
 	{
-		libfsapfs_btree_footer_free(
-		 &btree_footer,
-		 NULL );
-	}
-	if( btree_header != NULL )
-	{
-		libfsapfs_btree_header_free(
-		 &btree_header,
+		libfsapfs_btree_root_free(
+		 &btree_root,
 		 NULL );
 	}
 	return( -1 );

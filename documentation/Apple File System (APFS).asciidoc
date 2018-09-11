@@ -145,6 +145,142 @@ The object subtype is used by specific object types such as:
 | 0x000000e | | [yellow-background]*Unknown (File system?)*
 |===
 
+== [[btree]]B-tree
+
+A B-tree consists of:
+
+* B-tree (root or node) object
+* B-tree header
+* B-tree entries
+* keys data
+* unused data
+* values data
+* B-tree footer
+
+=== B-tree object
+
+==== B-tree root object
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x40000002 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | | Object subtype +
+See section: <<object_subtypes,Object subtypes>>
+|===
+
+==== B-tree node object
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x40000003 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | | Object subtype +
+See section: <<object_subtypes,Object subtypes>>
+|===
+
+=== B-tree header
+
+The B-tree header is stored after the B-tree root or node object.
+
+The B-tree header is 24 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | Flags (flags) +
+See section: <<btree_flags,B-tree flags>>
+| 2 | 2 | | Level (level)
+| 4 | 4 | | Number of keys (key_count)
+| 8 | 2 | | Entries data offset (table_space_offset) +
+Contains an offset relative to the end of the B-tree header
+| 10 | 2 | | Entries data size (table_space_length)
+| 12 | 2 | | Unused data offset (free_space_offset) +
+Contains an offset relative to the end of the entries data
+| 14 | 2 | | Unused data size (free_space_length)
+| 16 | 2 | | [yellow-background]*Unknown (key_free_list_space_offset)* +
+Contains an offset relative to ??? or -1 (0xffff) if not set
+| 18 | 2 | | [yellow-background]*Unknown (key_free_list_space_length)*
+| 20 | 2 | | [yellow-background]*Unknown (val_free_list_space_offset)* +
+Contains an offset relative to ??? or -1 (0xffff) if not set
+| 22 | 2 | | [yellow-background]*Unknown (val_free_list_space_length)*
+|===
+
+==== [[btree_flags]]B-tree flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x0001 | |  [yellow-background]*Unknown*
+| 0x0002 | |  [yellow-background]*Unknown*
+| 0x0004 | |  [yellow-background]*Unknown (Has fixed-size B-tree entry?)*
+|===
+
+=== B-tree entries
+
+The B-tree entries are stored after the B-tree header.
+
+==== Fixed-size B-tree entry
+
+The fixed-size B-tree entry is 4 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | Key data offset (key_offs) +
+Contains an offset relative to the end of the entries data
+| 2 | 2 | | Value data offset (value_offs) +
+Contains a reversed offset relative to the startof the B-Tree footer
+|===
+
+==== Variable-size B-tree entry
+
+The variable-size B-tree entry is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | Key data offset (key_offs) +
+Contains an offset relative to the end of the entries data
+| 2 | 2 | | Key data size (key_len)
+| 4 | 2 | | Value data offset (value_offs) +
+Contains a reversed offset relative to the startof the B-Tree footer
+| 6 | 2 | | Value data size (value_len)
+|===
+
+=== B-tree footer
+
+The B-tree footer is stored at the end of the block.
+
+The B-tree footer is 40 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | [yellow-background]*Unknown*
+| 4 | 4 | | Node size (nodesize)
+| 8 | 4 | | Key size (key_size) +
+Set to 0 if key has a variable size
+| 12 | 4 | | Value size (val_size) +
+Set to 0 if value has a variable size
+| 16 | 4 | | Maximum key size (key_max_size)
+| 20 | 4 | | Maximum value size (val_max_size)
+| 24 | 8 | | Number of entries (entries_cnt)
+| 32 | 8 | | Number of nodes (nodes_cnt)
+|===
+
 == The container
 
 APFS stores volumes inside a container. The maximum number of volumes is
@@ -483,143 +619,9 @@ See section: <<object_types,Object types>>
 | 64 | 8 | | [yellow-background]*Unknown (oms_tree_xid)*
 |===
 
-== B-tree
+=== Object map B-tree
 
-A B-tree consists of:
-
-* B-tree (root or node) object
-* B-tree header
-* B-tree entries
-* keys data
-* unused data
-* values data
-* B-tree footer
-
-=== B-tree object
-
-==== B-tree root object
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-4+| _Object_
-| 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
-| 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
-| 24 | 4 | 0x40000002 | Object type +
-See section: <<object_types,Object types>>
-| 28 | 4 | | Object subtype +
-See section: <<object_subtypes,Object subtypes>>
-|===
-
-==== B-tree node object
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-4+| _Object_
-| 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
-| 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
-| 24 | 4 | 0x40000003 | Object type +
-See section: <<object_types,Object types>>
-| 28 | 4 | | Object subtype +
-See section: <<object_subtypes,Object subtypes>>
-|===
-
-=== B-tree header
-
-The B-tree header is stored after the B-tree root or node object.
-
-The B-tree header is 24 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 2 | | Flags (flags) +
-See section: <<btree_flags,B-tree flags>>
-| 2 | 2 | | Level (level)
-| 4 | 4 | | Number of keys (key_count)
-| 8 | 2 | | Entries data offset (table_space_offset) +
-Contains an offset relative to the end of the B-tree header
-| 10 | 2 | | Entries data size (table_space_length)
-| 12 | 2 | | Unused data offset (free_space_offset) +
-Contains an offset relative to the end of the entries data
-| 14 | 2 | | Unused data size (free_space_length)
-| 16 | 2 | | [yellow-background]*Unknown (key_free_list_space_offset)* +
-Contains an offset relative to ??? or -1 (0xffff) if not set
-| 18 | 2 | | [yellow-background]*Unknown (key_free_list_space_length)*
-| 20 | 2 | | [yellow-background]*Unknown (val_free_list_space_offset)* +
-Contains an offset relative to ??? or -1 (0xffff) if not set
-| 22 | 2 | | [yellow-background]*Unknown (val_free_list_space_length)*
-|===
-
-==== [[btree_flags]]B-tree flags
-
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
-| 0x0001 | |  [yellow-background]*Unknown*
-| 0x0002 | |  [yellow-background]*Unknown*
-| 0x0004 | |  [yellow-background]*Unknown (Has fixed-size B-tree entry?)*
-|===
-
-=== B-tree entries
-
-The B-tree entries are stored after the B-tree header.
-
-==== Fixed-size B-tree entry
-
-The fixed-size B-tree entry is 4 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 2 | | Key data offset (key_offs) +
-Contains an offset relative to the end of the entries data
-| 2 | 2 | | Value data offset (value_offs) +
-Contains a reversed offset relative to the startof the B-Tree footer
-|===
-
-==== Variable-size B-tree entry
-
-The variable-size B-tree entry is 8 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 2 | | Key data offset (key_offs) +
-Contains an offset relative to the end of the entries data
-| 2 | 2 | | Key data size (key_len)
-| 4 | 2 | | Value data offset (value_offs) +
-Contains a reversed offset relative to the startof the B-Tree footer
-| 6 | 2 | | Value data size (value_len)
-|===
-
-=== B-tree footer
-
-The B-tree footer is stored at the end of the block.
-
-The B-tree footer is 40 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 4 | | [yellow-background]*Unknown*
-| 4 | 4 | | Node size (nodesize)
-| 8 | 4 | | Key size (key_size) +
-Set to 0 if key has a variable size
-| 12 | 4 | | Value size (val_size) +
-Set to 0 if value has a variable size
-| 16 | 4 | | Maximum key size (key_max_size)
-| 20 | 4 | | Maximum value size (val_max_size)
-| 24 | 8 | | Number of entries (entries_cnt)
-| 32 | 8 | | Number of nodes (nodes_cnt)
-|===
-
-=== Object map B-tree values
+The object map values are stored in <<btree,B-tree>>.
 
 ==== Object map B-tree key
 
@@ -652,147 +654,6 @@ Contains a block number relative to the start of the "physical" volume
 |===
 | Value | Identifier | Description
 |===
-
-=== File system B-tree values
-
-==== File system B-tree key
-
-The file system B-tree key is variable of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | | Key data types +
-See section: <<file_system_btree_data_types,File system B-tree data types>>
-| 8 | ... | | Optional additional key data
-|===
-
-==== [[file_system_btree_data_types]]File system B-tree data types
-
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
-| 0x1 | | Snapshot metadata
-| 0x2 | | Physical extent
-| 0x3 | | Inode
-| 0x4 | | Extended attribure (xattr)
-| 0x5 | | Sibling link
-| 0x6 | | Data stream
-| 0x7 | | [yellow-background]*Unknown (Crypto state?)*
-| 0x8 | | File extent
-| 0x9 | | Directory record
-| 0xa | | Directory size
-| 0xb | | Snapshot name
-| 0xc | | Sibling map
-|===
-
-==== Inode
-
-===== Inode key data
-
-The inode key data is 8 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x3 | Key data types +
-|===
-
-....
-00000000: 02 00 00 00 00 00 00 30                            .......0
-....
-
-===== Inode value data
-
-....
-00000000: 01 00 00 00 00 00 00 00  02 00 00 00 00 00 00 00   ........ ........
-00000010: da 41 b8 12 55 23 52 15  85 2b 71 56 55 23 52 15   .A..U#R. .+qVU#R.
-00000020: 85 2b 71 56 55 23 52 15  da 41 b8 12 55 23 52 15   .+qVU#R. .A..U#R.
-00000030: 00 80 00 00 00 00 00 00  01 00 00 00 00 00 00 00   ........ ........
-00000040: 02 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00   ........ ........
-00000050: fd 41 00 00 00 00 00 00  00 00 00 00 01 00 08 00   .A...... ........
-00000060: 04 02 05 00 72 6f 6f 74  00 00 00 00               ....root ....
-....
-
-==== Data stream
-
-===== Data stream key data
-
-The data stream key data is 8 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x6 | Key data types +
-|===
-
-....
-00000000: 11 00 00 00 00 00 00 60                            .....
-....
-
-===== Data stream value data
-
-....
-00000000: 01 00 00 00                                        ....
-....
-
-==== File extent
-
-===== File extent key data
-
-The file extend key data is 16 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x8 | Key data types +
-| 8 | 8 | | [yellow-background]*Unknown*
-|===
-
-....
-00000000: 11 00 00 00 00 00 00 80  00 00 00 00 00 00 00 00   ........ ........
-....
-
-===== File extent value data
-
-....
-00000000: 00 10 00 00 00 00 00 00  65 00 00 00 00 00 00 00   ........ e.......
-00000010: 00 00 00 00 00 00 00 00                            ........
-....
-
-==== Directory record
-
-===== Directory record key data
-
-The directory record key data is variable of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x9 | Key data types +
-| 8 | 1 | | Name string size +
-Includes the size of the end-of-string character
-| 9 | 4 | | [yellow-background]*Unknown (name hash?)*
-| 13 | ... | | Name string +
-Contains an UTF-8 encoded string with an end-of-string character
-|===
-
-....
-00000000: 01 00 00 00 00 00 00 90  0c 8c a6 ac 70 72 69 76   ........ ....priv
-00000010: 61 74 65 2d 64 69 72 00                            ate-dir.
-....
-
-====== Directory record value data
-
-....
-00000000: 03 00 00 00 00 00 00 00  6b 5b b8 12 55 23 52 15   ........ k[..U#R.
-00000010: 04 00                                              ..
-....
 
 == Volume
 
@@ -910,6 +771,161 @@ Contains 0 if not set
 | 0x00000002 | | [yellow-background]*Unknown (effaceable?)*
 |===
 
+== File system
+
+The file system structures are stored in a <<btree,B-tree>>.
+
+The file system B-tree uses identifiers similar to catalog identifiers (CNIDs)
+on HFS/HFS+/HFSX. In this document we refer to these identifiers as FSIDs.
+
+[cols="1,1,5",options="header"]
+|===
+| FSID | Identifier | Assignment
+| 0 | | [yellow-background]*Unknown (Reserved)*
+| 1 | | Parent identifier of the root directory (folder), nameless
+| 2 | | Directory identifier of the root directory (folder), named "root"
+| 3 | | [yellow-background]*Unknown*, named "private-dir"
+|===
+
+=== File system B-tree key
+
+The file system B-tree key is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system identifier (FSID)
+| 7.4 | 4 bits | | File system data type +
+See section: <<file_system_data_types,File system data types>>
+| 8 | ... | | Optional additional key data dependent on the data type
+|===
+
+=== [[file_system_data_types]]File system data types
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x1 | | Snapshot metadata
+| 0x2 | | Physical extent
+| 0x3 | | Inode
+| 0x4 | | Extended attribure (xattr)
+| 0x5 | | Sibling link
+| 0x6 | | Data stream
+| 0x7 | | [yellow-background]*Unknown (Crypto state?)*
+| 0x8 | | File extent
+| 0x9 | | Directory record
+| 0xa | | Directory size
+| 0xb | | Snapshot name
+| 0xc | | Sibling map
+|===
+
+=== Inode
+
+==== Inode key data
+
+The inode key data is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
+| 7.4 | 4 bits | 0x3 | Key data types +
+|===
+
+....
+00000000: 02 00 00 00 00 00 00 30                            .......0
+....
+
+==== Inode value data
+
+....
+00000000: 01 00 00 00 00 00 00 00  02 00 00 00 00 00 00 00   ........ ........
+00000010: da 41 b8 12 55 23 52 15  85 2b 71 56 55 23 52 15   .A..U#R. .+qVU#R.
+00000020: 85 2b 71 56 55 23 52 15  da 41 b8 12 55 23 52 15   .+qVU#R. .A..U#R.
+00000030: 00 80 00 00 00 00 00 00  01 00 00 00 00 00 00 00   ........ ........
+00000040: 02 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00   ........ ........
+00000050: fd 41 00 00 00 00 00 00  00 00 00 00 01 00 08 00   .A...... ........
+00000060: 04 02 05 00 72 6f 6f 74  00 00 00 00               ....root ....
+....
+
+=== Data stream
+
+==== Data stream key data
+
+The data stream key data is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
+| 7.4 | 4 bits | 0x6 | Key data types +
+|===
+
+....
+00000000: 11 00 00 00 00 00 00 60                            .....
+....
+
+==== Data stream value data
+
+....
+00000000: 01 00 00 00                                        ....
+....
+
+=== File extent
+
+==== File extent key data
+
+The file extend key data is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
+| 7.4 | 4 bits | 0x8 | Key data types +
+| 8 | 8 | | [yellow-background]*Unknown*
+|===
+
+....
+00000000: 11 00 00 00 00 00 00 80  00 00 00 00 00 00 00 00   ........ ........
+....
+
+==== File extent value data
+
+....
+00000000: 00 10 00 00 00 00 00 00  65 00 00 00 00 00 00 00   ........ e.......
+00000010: 00 00 00 00 00 00 00 00                            ........
+....
+
+=== Directory record
+
+==== Directory record key data
+
+The directory record key data is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
+| 7.4 | 4 bits | 0x9 | Key data types +
+| 8 | 1 | | Name string size +
+Includes the size of the end-of-string character
+| 9 | 4 | | [yellow-background]*Unknown (name hash?)*
+| 13 | ... | | Name string +
+Contains an UTF-8 encoded string with an end-of-string character
+|===
+
+....
+00000000: 01 00 00 00 00 00 00 90  0c 8c a6 ac 70 72 69 76   ........ ....priv
+00000010: 61 74 65 2d 64 69 72 00                            ate-dir.
+....
+
+==== Directory record value data
+
+....
+00000000: 03 00 00 00 00 00 00 00  6b 5b b8 12 55 23 52 15   ........ k[..U#R.
+00000010: 04 00                                              ..
+....
+
 == Notes
 
 ....
@@ -960,11 +976,6 @@ find /Volumes/SingleVolume
 /Volumes/SingleVolume/.fseventsd/fseventsd-uuid
 /Volumes/SingleVolume/.fseventsd/0000000000793354
 /Volumes/SingleVolume/.fseventsd/0000000000793353
-....
-
-....
-/private-dir/
-/root/
 ....
 
 :numbered!:

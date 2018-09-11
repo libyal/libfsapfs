@@ -1,6 +1,8 @@
 MSVSCPP_FILES = \
+	fsapfs_test_btree_entry/fsapfs_test_btree_entry.vcproj \
 	fsapfs_test_btree_footer/fsapfs_test_btree_footer.vcproj \
 	fsapfs_test_btree_header/fsapfs_test_btree_header.vcproj \
+	fsapfs_test_btree_root/fsapfs_test_btree_root.vcproj \
 	fsapfs_test_container/fsapfs_test_container.vcproj \
 	fsapfs_test_container_physical_map/fsapfs_test_container_physical_map.vcproj \
 	fsapfs_test_container_physical_map_entry/fsapfs_test_container_physical_map_entry.vcproj \

@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="btree_footer btree_header container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error file_system_btree io_handle notify object object_map object_map_btree object_map_descriptor";
+LIBRARY_TESTS="btree_entry btree_footer btree_header btree_root container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error file_system_btree io_handle notify object object_map object_map_btree object_map_descriptor";
 LIBRARY_TESTS_WITH_INPUT="container support";
 OPTION_SETS="";
 

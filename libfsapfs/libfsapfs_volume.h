@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "libfsapfs_extern.h"
+#include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
@@ -53,6 +54,10 @@ struct libfsapfs_internal_volume
 	/* The volume object map B-tree
 	 */
 	libfsapfs_object_map_btree_t *object_map_btree;
+
+	/* The file system B-tree
+	 */
+	libfsapfs_file_system_btree_t *file_system_btree;
 
 	/* The IO handle
 	 */

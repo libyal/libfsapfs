@@ -103,7 +103,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees a object map_btree
+/* Frees a B-tree footer
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_btree_footer_free(
@@ -133,7 +133,7 @@ int libfsapfs_btree_footer_free(
 	return( 1 );
 }
 
-/* Reads the object map_btree
+/* Reads the B-tree footer
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_btree_footer_read_data(

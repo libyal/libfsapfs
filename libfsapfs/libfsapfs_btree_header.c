@@ -104,7 +104,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees a object map_btree
+/* Frees a B-tree header
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_btree_header_free(
@@ -134,7 +134,7 @@ int libfsapfs_btree_header_free(
 	return( 1 );
 }
 
-/* Reads the object map_btree
+/* Reads the B-tree header
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_btree_header_read_data(

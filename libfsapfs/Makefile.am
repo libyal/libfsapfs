@@ -29,8 +29,10 @@ libfsapfs_la_SOURCES = \
 	fsapfs_object_map.h \
 	fsapfs_volume_superblock.h \
 	libfsapfs.c \
+	libfsapfs_btree_entry.c libfsapfs_btree_entry.h \
 	libfsapfs_btree_footer.c libfsapfs_btree_footer.h \
 	libfsapfs_btree_header.c libfsapfs_btree_header.h \
+	libfsapfs_btree_root.c libfsapfs_btree_root.h \
 	libfsapfs_container.c libfsapfs_container.h \
 	libfsapfs_container_physical_map.c libfsapfs_container_physical_map.h \
 	libfsapfs_container_physical_map_entry.c libfsapfs_container_physical_map_entry.h \

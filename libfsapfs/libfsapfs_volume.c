@@ -919,6 +919,22 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
+	if( internal_volume->file_system_btree != NULL )
+	{
+		if( libfsapfs_file_system_btree_free(
+		     &( internal_volume->file_system_btree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file system B-tree.",
+			 function );
+
+			result = -1;
+		}
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_volume->read_write_lock,
@@ -946,8 +962,9 @@ int libfsapfs_internal_volume_open_read(
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	libfsapfs_object_map_t *object_map = NULL;
-	static char *function              = "libfsapfs_internal_volume_open_read";
+	libfsapfs_object_map_t *object_map                       = NULL;
+	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	static char *function                                    = "libfsapfs_internal_volume_open_read";
 
 	if( internal_volume == NULL )
 	{
@@ -989,6 +1006,17 @@ int libfsapfs_internal_volume_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid internal volume - object map B-tree value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->file_system_btree != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal volume - file system B-tree value already set.",
 		 function );
 
 		return( -1 );
@@ -1129,86 +1157,78 @@ int libfsapfs_internal_volume_open_read(
 			goto on_error;
 		}
 	}
-/* TODO refactor to get_root */
-	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	libfsapfs_file_system_btree_t *file_system_btree         = NULL;
-
-	if( libfsapfs_object_map_get_descriptor_by_object_identifier(
-	     internal_volume->object_map_btree,
-	     internal_volume->superblock->file_system_root_object_identifier,
-	     &object_map_descriptor,
-	     error ) != 1 )
+	if( internal_volume->superblock->file_system_root_object_identifier > 0 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for file system root object identifier: 0x08%" PRIx64 ".",
-		 function,
-		 internal_volume->superblock->file_system_root_object_identifier );
+		if( libfsapfs_object_map_get_descriptor_by_object_identifier(
+		     internal_volume->object_map_btree,
+		     internal_volume->superblock->file_system_root_object_identifier,
+		     &object_map_descriptor,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve object map descriptor for file system root object identifier: 0x08%" PRIx64 ".",
+			 function,
+			 internal_volume->superblock->file_system_root_object_identifier );
 
-		goto on_error;
-	}
-	if( object_map_descriptor == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid object map descriptor.",
-		 function );
+			goto on_error;
+		}
+		if( object_map_descriptor == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid object map descriptor.",
+			 function );
 
-		goto on_error;
-	}
-	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_volume->block_size );
+			goto on_error;
+		}
+		file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_volume->block_size );
 
-	if( libfsapfs_file_system_btree_initialize(
-	     &file_system_btree,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create file system B-tree.",
-		 function );
+		if( libfsapfs_file_system_btree_initialize(
+		     &( internal_volume->file_system_btree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create file system B-tree.",
+			 function );
 
-		goto on_error;
-	}
-	if( libfsapfs_file_system_btree_read_file_io_handle(
-	     file_system_btree,
-	     file_io_handle,
-	     file_offset,
-	     internal_volume->block_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read file system B-tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 file_offset,
-		 file_offset );
+			goto on_error;
+		}
+		if( libfsapfs_file_system_btree_read_file_io_handle(
+		     internal_volume->file_system_btree,
+		     file_io_handle,
+		     file_offset,
+		     internal_volume->block_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read file system B-tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 function,
+			 file_offset,
+			 file_offset );
 
-		goto on_error;
-	}
-	if( libfsapfs_file_system_btree_free(
-	     &file_system_btree,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free file system B-tree.",
-		 function );
-
-		goto on_error;
+			goto on_error;
+		}
 	}
 	return( 1 );
 
 on_error:
+	if( internal_volume->file_system_btree != NULL )
+	{
+		libfsapfs_file_system_btree_free(
+		 &( internal_volume->file_system_btree ),
+		 NULL );
+	}
 	if( internal_volume->object_map_btree != NULL )
 	{
 		libfsapfs_object_map_btree_free(

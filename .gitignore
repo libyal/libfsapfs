@@ -123,8 +123,10 @@ stamp-h[1-9]
 /fsapfstools/*.exe
 /fsapfstools/fsapfsinfo
 /tests/*.exe
+/tests/fsapfs_test_btree_entry
 /tests/fsapfs_test_btree_footer
 /tests/fsapfs_test_btree_header
+/tests/fsapfs_test_btree_root
 /tests/fsapfs_test_container
 /tests/fsapfs_test_container_physical_map
 /tests/fsapfs_test_container_physical_map_entry
