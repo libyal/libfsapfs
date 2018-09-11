@@ -17,5 +17,6 @@ coverage:
     - "libcsplit/*"
     - "libcthreads/*"
     - "libfdatetime/*"
+    - "libfguid/*"
     - "libuna/*"
     - "tests/*"

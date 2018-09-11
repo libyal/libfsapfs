@@ -1,6 +1,28 @@
 language: c
+env:
+  global:
+   # Encrypted COVERITY_SCAN_TOKEN
+   - secure: "fa33dItMVMuChdSbj49WHMRGiBHLdbwszui7iz9XgVgkjP8wQnIr99ZO7L4SOaSPrbU37Ar6T+BanKxkEAQwH3N1vfHNEFMyX0ZSxrkLvSZ2cgvDoBhM/VBFhsAraNTJSoawfpYU1uNTGrQHj/gK+Kqi2qTjo7YX1FOvTjkACKiSl06OSTFcudaw2bf16dgAiZKfvnWZdPlf9U3M8xhf4jrJ3yyCri5DFhmKlr1FZEYwgL8e8UXOq1ggppHutKxrXsWGw0QKZZNoajB6EwACaI7kanw4Sndt6DhhIkxUJTG7FRO2jHcKL8PQ3KOC5SPV7MXvZV+4Ffz/5uMJM1wvmtXoJV9hpiAH9XdTIs0GypxuMJPWmxbFgVNinxYWyzjmpCCYEpVuS/NyBkPwSr64/OJ8kUb+tzn16maxMUS5EZsKQhJZYKfxDWzdLC2jb0llw7DczcmYUirb3RA+71C/DGdUg2By1+vvLznZFRIBjluXouCceq7oDqilxwTXLoIFoHqAnb4p4VCPLgX8w8ooN+sWyfAptA29KAwHWMOQ5OgxHw/mkwtxO5TI3TVeZs2wYrL6VNjKqqc3fpRv3tGwB4mOZMEr72CFE5DeCzup+ScGfv94bEMpTfCBk3YqAmBf5eAX6EhU1WBG2NYAZFBkOupCeHBzGOKijce7gJ2v80c="
 matrix:
   include:
+  - name: "Coverity"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - TARGET="coverity"
+    compiler: clang
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+    addons:
+      coverity_scan:
+        project:
+          name: "libyal/libfsapfs"
+          description: "Build submitted via Travis CI"
+        notification_email: joachim.metz@gmail.com
+        build_command_prepend: "./synclibs.sh && ./autogen.sh && ./configure"
+        build_command: "make -j4"
+        branch_pattern: master
   - name: "Linux with clang"
     env:
     - CONFIGURE_OPTIONS=""
@@ -107,6 +129,9 @@ before_install:
       sudo apt-get update && sudo apt-mark hold oracle-java8-installer oracle-java9-installer postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6 postgresql-client postgresql-client-common postgresql-common postgresql-contrib-9.2 postgresql-contrib-9.3 postgresql-contrib-9.4 postgresql-contrib-9.5 postgresql-contrib-9.6 postgresql-doc && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint;
     elif test ${TRAVIS_OS_NAME} = "osx"; then
       brew update && brew install gettext gnu-sed && brew link --force gettext;
+    fi
+  - if test ${TARGET} = "coverity"; then
+      echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
     fi
 install:
   - if test ${TRAVIS_OS_NAME} = "osx"; then

@@ -1,4 +1,4 @@
-.Dd September 10, 2018
+.Dd September 11, 2018
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -83,7 +83,7 @@ Available when compiled with wide character string support:
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libfsapfs_volume_open_file_io_handle "libfsapfs_volume_t *volume, libbfio_handle_t *file_io_handle, int access_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_container_open_file_io_handle "libfsapfs_container_t *container, libbfio_handle_t *file_io_handle, int access_flags, libfsapfs_error_t **error"
 .Pp
 Volume functions
 .Ft int
