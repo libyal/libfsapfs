@@ -169,7 +169,8 @@ A B-tree consists of:
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object version (xid)
-| 24 | 4 | 0x40000002 | Object type +
+| 24 | 4 | 0x00000002 +
+0x40000002 | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | | Object subtype +
 See section: <<object_subtypes,Object subtypes>>
@@ -185,7 +186,8 @@ See section: <<object_subtypes,Object subtypes>>
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object version (xid)
-| 24 | 4 | 0x40000003 | Object type +
+| 24 | 4 | 0x00000003 +
+0x40000003 | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | | Object subtype +
 See section: <<object_subtypes,Object subtypes>>
@@ -301,6 +303,7 @@ dependent on the size of the container. `[HANSEN17]` indicates:
 |===
 
 The container consists of:
+
 * current container superblock
 * current container physical map
 * [yellow-background]*backup of current container superblock?*

@@ -206,7 +206,7 @@ int libfsapfs_container_physical_map_entry_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		byte_stream_copy_to_uint64_little_endian(
+		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_container_physical_map_entry_t *) data )->object_type,
 		 value_32bit );
 		libcnotify_printf(
