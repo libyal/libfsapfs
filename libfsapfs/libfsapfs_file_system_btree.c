@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_root.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_libbfio.h"
@@ -31,8 +32,8 @@
 #include "libfsapfs_libcnotify.h"
 
 #include "fsapfs_btree.h"
-#include "fsapfs_object.h"
 #include "fsapfs_file_system.h"
+#include "fsapfs_object.h"
 
 /* Creates a file system B-tree
  * Make sure the value file_system_btree is referencing, is set to NULL
@@ -271,8 +272,15 @@ int libfsapfs_file_system_btree_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_root_t *btree_root = NULL;
-	static char *function              = "libfsapfs_file_system_btree_read_data";
+	libfsapfs_btree_entry_t *btree_entry = NULL;
+	libfsapfs_btree_root_t *btree_root   = NULL;
+	static char *function                = "libfsapfs_file_system_btree_read_data";
+	int btree_entry_index                = 0;
+	int number_of_entries                = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint64_t value_64bit                 = 0;
+#endif
 
 	if( file_system_btree == NULL )
 	{
@@ -370,6 +378,77 @@ int libfsapfs_file_system_btree_read_data(
 		 function );
 
 		goto on_error;
+	}
+	if( libfsapfs_btree_root_get_number_of_entries(
+	     btree_root,
+	     &number_of_entries,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from B-tree root.",
+		 function );
+
+		goto on_error;
+	}
+	for( btree_entry_index = 0;
+	     btree_entry_index < number_of_entries;
+	     btree_entry_index++ )
+	{
+		if( libfsapfs_btree_root_get_entry_by_index(
+		     btree_root,
+		     btree_entry_index,
+		     &btree_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from B-tree root.",
+			 function );
+
+			goto on_error;
+		}
+		if( btree_entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d.",
+			 function,
+			 btree_entry_index );
+
+			goto on_error;
+		}
+		if( btree_entry->key_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 btree_entry_index );
+
+			goto on_error;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: file system identifier\t\t: 0x%08" PRIx64 " (data type: 0x%" PRIx64 ")\n",
+			 function,
+			 value_64bit,
+			 value_64bit >> 60 );
+		}
+#endif
 	}
 	if( libfsapfs_btree_root_free(
 	     &btree_root,

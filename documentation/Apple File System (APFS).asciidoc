@@ -140,9 +140,9 @@ The object subtype is used by specific object types such as:
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x000000b | | [yellow-background]*Unknown (Object map?)*
+| 0x000000b | | Object map B-tree
 | | |
-| 0x000000e | | [yellow-background]*Unknown (File system?)*
+| 0x000000e | | File system B-tree
 |===
 
 == [[btree]]B-tree
@@ -776,7 +776,7 @@ Contains 0 if not set
 The file system structures are stored in a <<btree,B-tree>>.
 
 The file system B-tree uses identifiers similar to catalog identifiers (CNIDs)
-on HFS/HFS+/HFSX. In this document we refer to these identifiers as FSIDs.
+on HFS/HFS+/HFSX. In this document these identifiers are referred to as FSIDs.
 
 [cols="1,1,5",options="header"]
 |===
@@ -805,18 +805,18 @@ See section: <<file_system_data_types,File system data types>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x1 | | Snapshot metadata
-| 0x2 | | Physical extent
+| 0x1 | | [yellow-background]*Unknown (Snapshot metadata)*
+| 0x2 | | [yellow-background]*Unknown (Physical extent)*
 | 0x3 | | Inode
-| 0x4 | | Extended attribure (xattr)
-| 0x5 | | Sibling link
+| 0x4 | | [yellow-background]*Unknown (Extended attribure (xattr))*
+| 0x5 | | [yellow-background]*Unknown (Sibling link)*
 | 0x6 | | Data stream
 | 0x7 | | [yellow-background]*Unknown (Crypto state?)*
 | 0x8 | | File extent
 | 0x9 | | Directory record
-| 0xa | | Directory size
-| 0xb | | Snapshot name
-| 0xc | | Sibling map
+| 0xa | | [yellow-background]*Unknown (Directory size)*
+| 0xb | | [yellow-background]*Unknown (Snapshot name)*
+| 0xc | | [yellow-background]*Unknown (Sibling map)*
 |===
 
 === Inode
@@ -882,7 +882,7 @@ The file extend key data is 16 bytes of size and consists of:
 | Offset | Size | Value | Description
 | 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
 | 7.4 | 4 bits | 0x8 | Key data types +
-| 8 | 8 | | [yellow-background]*Unknown*
+| 8 | 8 | | [yellow-background]*Unknown (extent offset?)*
 |===
 
 ....

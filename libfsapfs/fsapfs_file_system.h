@@ -29,39 +29,53 @@
 extern "C" {
 #endif
 
-typedef struct fsapfs_file_system_btree_key fsapfs_file_system_btree_key_t;
+typedef struct fsapfs_file_system_btree_key_common fsapfs_file_system_btree_key_common_t;
 
-struct fsapfs_file_system_btree_key
+struct fsapfs_file_system_btree_key_common
 {
-	/* The key object identifier
+	/* The file system identifier (FSID) and data type
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_identifier[ 8 ];
-
-	/* The key object version
-	 * Consists of 8 bytes
-	 */
-	uint8_t object_version[ 8 ];
+	uint8_t file_system_identifier[ 8 ];
 };
 
-typedef struct fsapfs_file_system_btree_value fsapfs_file_system_btree_value_t;
+typedef struct fsapfs_file_system_btree_key_file_extent fsapfs_file_system_btree_key_file_extent_t;
 
-struct fsapfs_file_system_btree_value
+struct fsapfs_file_system_btree_key_file_extent
 {
-	/* The object flags
-	 * Consists of 4 bytes
-	 */
-	uint8_t object_flags[ 4 ];
-
-	/* The object size
-	 * Consists of 4 bytes
-	 */
-	uint8_t object_size[ 4 ];
-
-	/* The object physical address
+	/* The file system identifier (FSID) and data type
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_physical_address[ 8 ];
+	uint8_t file_system_identifier[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown1[ 8 ];
+};
+
+typedef struct fsapfs_file_system_btree_key_directory_record fsapfs_file_system_btree_key_directory_record_t;
+
+struct fsapfs_file_system_btree_key_directory_record
+{
+	/* The file system identifier (FSID) and data type
+	 * Consists of 8 bytes
+	 */
+	uint8_t file_system_identifier[ 8 ];
+
+	/* The name size
+	 * Consists of 1 byte
+	 */
+	uint8_t name_size[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown1[ 4 ];
+
+	/* The name string
+	 * Contains an UTF-8 string with end-of-string character
+	 */
 };
 
 #if defined( __cplusplus )
