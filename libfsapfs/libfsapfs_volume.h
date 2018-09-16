@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_io_handle.h"
@@ -32,6 +33,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_object_map_btree.h"
+#include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
 #include "libfsapfs_types.h"
 
@@ -54,6 +56,14 @@ struct libfsapfs_internal_volume
 	/* The volume object map B-tree
 	 */
 	libfsapfs_object_map_btree_t *object_map_btree;
+
+	/* The container key bag
+	 */
+	libfsapfs_container_key_bag_t *container_key_bag;
+
+	/* The volume key bag
+	 */
+	libfsapfs_volume_key_bag_t *key_bag;
 
 	/* The file system B-tree
 	 */

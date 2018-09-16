@@ -1,5 +1,5 @@
 /*
- * The object map B-tree functions
+ * The volume key bag functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_OBJECT_MAP_BTREE_H )
-#define _LIBFSAPFS_OBJECT_MAP_BTREE_H
+#if !defined( _LIBFSAPFS_VOLUME_KEY_BAG_H )
+#define _LIBFSAPFS_VOLUME_KEY_BAG_H
 
 #include <common.h>
 #include <types.h>
@@ -28,51 +28,54 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
-#include "libfsapfs_object_map_descriptor.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsapfs_object_map_btree libfsapfs_object_map_btree_t;
+typedef struct libfsapfs_volume_key_bag libfsapfs_volume_key_bag_t;
 
-struct libfsapfs_object_map_btree
+struct libfsapfs_volume_key_bag
 {
-	/* The descriptors array
+	/* The entries array
 	 */
-	libcdata_array_t *descriptors_array;
+	libcdata_array_t *entries_array;
 };
 
-int libfsapfs_object_map_btree_initialize(
-     libfsapfs_object_map_btree_t **object_map_btree,
+int libfsapfs_volume_key_bag_initialize(
+     libfsapfs_volume_key_bag_t **volume_key_bag,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_btree_free(
-     libfsapfs_object_map_btree_t **object_map_btree,
+int libfsapfs_volume_key_bag_free(
+     libfsapfs_volume_key_bag_t **volume_key_bag,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_btree_read_file_io_handle(
-     libfsapfs_object_map_btree_t *object_map_btree,
+int libfsapfs_volume_key_bag_read_file_io_handle(
+     libfsapfs_volume_key_bag_t *volume_key_bag,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
-     uint32_t block_size,
+     size64_t data_size,
+     const uint8_t *volume_identifier,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_btree_read_data(
-     libfsapfs_object_map_btree_t *object_map_btree,
+int libfsapfs_volume_key_bag_read_data(
+     libfsapfs_volume_key_bag_t *volume_key_bag,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
-     libfsapfs_object_map_btree_t *object_map_btree,
-     uint64_t object_identifier,
-     libfsapfs_object_map_descriptor_t **descriptor,
+int libfsapfs_volume_key_bag_get_volume_key_by_identifier(
+     libfsapfs_volume_key_bag_t *volume_key_bag,
+     const uint8_t *volume_identifier,
+     const uint8_t *password,
+     size_t password_length,
+     uint8_t *key,
+     size_t key_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_OBJECT_MAP_BTREE_H ) */
+#endif /* !defined( _LIBFSAPFS_VOLUME_KEY_BAG_H ) */
 

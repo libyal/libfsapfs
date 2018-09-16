@@ -13,6 +13,9 @@ AM_CPPFLAGS = \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
+	@LIBCRYPTO_CPPFLAGS@ \
+	@LIBHMAC_CPPFLAGS@ \
+	@LIBCAES_CPPFLAGS@ \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_EXPORT@
 
@@ -25,6 +28,7 @@ libfsapfs_la_SOURCES = \
 	fsapfs_container_space_manager.h \
 	fsapfs_container_superblock.h \
 	fsapfs_file_system.h \
+	fsapfs_key_bag.h \
 	fsapfs_object.h \
 	fsapfs_object_map.h \
 	fsapfs_volume_superblock.h \
@@ -34,6 +38,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_btree_header.c libfsapfs_btree_header.h \
 	libfsapfs_btree_root.c libfsapfs_btree_root.h \
 	libfsapfs_container.c libfsapfs_container.h \
+	libfsapfs_container_key_bag.c libfsapfs_container_key_bag.h \
 	libfsapfs_container_physical_map.c libfsapfs_container_physical_map.h \
 	libfsapfs_container_physical_map_entry.c libfsapfs_container_physical_map_entry.h \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
@@ -42,11 +47,16 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_debug.c libfsapfs_debug.h \
 	libfsapfs_definitions.h \
 	libfsapfs_error.c libfsapfs_error.h \
+	libfsapfs_encryption.c libfsapfs_encryption.h \
 	libfsapfs_extern.h \
 	libfsapfs_file_entry.c libfsapfs_file_entry.h \
 	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
 	libfsapfs_io_handle.c libfsapfs_io_handle.h \
+	libfsapfs_key_bag_entry.c libfsapfs_key_bag_entry.h \
+	libfsapfs_key_bag_header.c libfsapfs_key_bag_header.h \
+	libfsapfs_key_encrypted_key.c libfsapfs_key_encrypted_key.h \
 	libfsapfs_libbfio.h \
+	libfsapfs_libcaes.h \
 	libfsapfs_libcdata.h \
 	libfsapfs_libcerror.h \
 	libfsapfs_libclocale.h \
@@ -54,16 +64,19 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_libcthreads.h \
 	libfsapfs_libfdatetime.h \
 	libfsapfs_libfguid.h \
+	libfsapfs_libhmac.h \
 	libfsapfs_libuna.h \
 	libfsapfs_notify.c libfsapfs_notify.h \
 	libfsapfs_object.c libfsapfs_object.h \
 	libfsapfs_object_map.c libfsapfs_object_map.h \
 	libfsapfs_object_map_btree.c libfsapfs_object_map_btree.h \
 	libfsapfs_object_map_descriptor.c libfsapfs_object_map_descriptor.h \
+	libfsapfs_password.c libfsapfs_password.h \
 	libfsapfs_support.c libfsapfs_support.h \
 	libfsapfs_types.h \
 	libfsapfs_unused.h \
 	libfsapfs_volume.c libfsapfs_volume.h \
+	libfsapfs_volume_key_bag.c libfsapfs_volume_key_bag.h \
 	libfsapfs_volume_superblock.c libfsapfs_volume_superblock.h
 
 libfsapfs_la_LIBADD = \
@@ -79,6 +92,10 @@ libfsapfs_la_LIBADD = \
 	@LIBBFIO_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
 	@LIBFGUID_LIBADD@ \
+	@LIBHMAC_LIBADD@ \
+	@LIBCAES_LIBADD@ \
+	@LIBCRYPTO_LIBADD@ \
+	@LIBDL_LIBADD@ \
 	@PTHREAD_LIBADD@
 
 libfsapfs_la_LDFLAGS = -no-undefined -version-info 1:0:0

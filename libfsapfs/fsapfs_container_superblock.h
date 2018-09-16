@@ -105,20 +105,20 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t unknown3[ 8 ];
 
-	/* Unknown
+	/* The metadata area number of blocks
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown4[ 4 ];
+	uint8_t metadata_area_number_of_blocks[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
 	 */
 	uint8_t unknown5[ 4 ];
 
-	/* Unknown
+	/* The metadata area block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown6[ 8 ];
+	uint8_t metadata_area_block_number[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
@@ -175,10 +175,10 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t unknown17[ 4 ];
 
-	/* The number of volumes
+	/* The maximum number of volumes
 	 * Consists of 4 bytes
 	 */
-	uint8_t number_of_volumes[ 4 ];
+	uint8_t maximum_number_of_volumes[ 4 ];
 
 	/* The volume object identifiers
 	 * Consists of 100 x 8 bytes
@@ -225,15 +225,15 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t unknown26[ 8 ];
 
-	/* Unknown
+	/* The key bag block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown27[ 8 ];
+	uint8_t key_bag_block_number[ 8 ];
 
-	/* Unknown
+	/* The key bag number of blocks
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown28[ 8 ];
+	uint8_t key_bag_number_of_blocks[ 8 ];
 
 	/* Unknown
 	 * Consists of 5 x 8 bytes

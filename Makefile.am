@@ -15,6 +15,8 @@ SUBDIRS = \
 	libbfio \
 	libfdatetime \
 	libfguid \
+	libhmac \
+	libcaes \
 	libfsapfs \
 	fsapfstools \
 	po \
@@ -78,6 +80,8 @@ library:
 	(cd $(srcdir)/libbfio && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfdatetime && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfguid && $(MAKE) $(AM_MAKEFLAGS))
+	(cd $(srcdir)/libhmac && $(MAKE) $(AM_MAKEFLAGS))
+	(cd $(srcdir)/libcaes && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfsapfs && $(MAKE) $(AM_MAKEFLAGS))
 	(cd $(srcdir)/po && $(MAKE) $(AM_MAKEFLAGS))
 
@@ -106,6 +110,8 @@ splint:
 	(cd $(srcdir)/libbfio && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfdatetime && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfguid && $(MAKE) splint $(AM_MAKEFLAGS))
+	(cd $(srcdir)/libhmac && $(MAKE) splint $(AM_MAKEFLAGS))
+	(cd $(srcdir)/libcaes && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/libfsapfs && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/fsapfstools && $(MAKE) splint $(AM_MAKEFLAGS))
 	(cd $(srcdir)/po && $(MAKE) splint $(AM_MAKEFLAGS))

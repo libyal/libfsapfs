@@ -124,6 +124,8 @@ matrix:
     compiler: gcc
     os: osx
     osx_image: xcode8.3
+  allow_failures:
+  - env: TARGET="coverity"
 before_install:
   - if test ${TRAVIS_OS_NAME} = "linux"; then
       sudo apt-get update && sudo apt-mark hold oracle-java8-installer oracle-java9-installer postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6 postgresql-client postgresql-client-common postgresql-common postgresql-contrib-9.2 postgresql-contrib-9.3 postgresql-contrib-9.4 postgresql-contrib-9.5 postgresql-contrib-9.6 postgresql-doc && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint;

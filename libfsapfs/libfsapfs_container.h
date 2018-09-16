@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_container_physical_map.h"
 #include "libfsapfs_container_superblock.h"
 #include "libfsapfs_extern.h"
@@ -62,6 +63,10 @@ struct libfsapfs_internal_container
 	/* The container object map B-tree
 	 */
 	libfsapfs_object_map_btree_t *object_map_btree;
+
+	/* The container key bag
+	 */
+	libfsapfs_container_key_bag_t *key_bag;
 
 	/* The IO handle
 	 */

@@ -8,6 +8,9 @@ TODO
 
 Tests:
 * test with copy of mounted file system
+* add tests for container_key_bag
+* add tests for volume_key_bag
+* add tests for key_encrypted_key
 
 20180907
 * see `git log' for more recent change log

@@ -58,6 +58,10 @@ An APFS volume consists of:
 | Character strings | Unicode strings are stored in UTF-8
 |===
 
+[NOTE]
+The date and values are signed to represent dates before January 1, 1970.
+Other sources are known to claim the date and time values are unsigned.
+
 === Test version
 
 The following version of programs were used to test the information within this document:
@@ -69,6 +73,58 @@ The following version of programs were used to test the information within this 
 "Physical" volume, the volume in which the APFS container is stored.
 
 "Logical" volume, the volume in which an APFS file system is stored.
+
+== Keys
+To encrypt storage media APFS uses different kind of keys.
+
+=== Volume master key
+The Volume Master Key (VMK) is used to encrypt the data of a specific volume.
+
+[yellow-background]*TODO: complete this section.*
+
+=== Volume key
+For every volume on an Mac OS system with APFS, APFS provides for a volume
+password to unlock the encrypted data. The volume password is used to determine a
+volume key.
+
+[yellow-background]*TODO: complete this section.*
+
+== Encryption methods
+
+APFS uses the AES-XTS encryption method to encrypt the key bag, file system
+metadata and content data.
+
+=== AES-XTS
+
+The AES-XTS encryption method uses:
+
+* a primary key (key 1) to encrypt/decrypt the data (the whitened
+plaintext/ciphertext).
+* a secondary key (key 2) to encrypt/ decrypt the tweak value, also referred to
+as the tweak key. The encrypted tweak value is used to whiten the
+plaintext/ciphertext.
+* a tweak value
+
+The cipher block size is 128 bytes.
+
+See `[IEEE 1619-2007]` for more information.
+
+The container key bag is encrypted using the "container identifier" of the
+container as both the primary and tweak key. The sector number, relative to
+the start of the container, is used as the tweak value.
+
+The unit size is the sector size, which is assumed to be 512 bytes also for 4k
+sector media.
+
+The volume key bag is encrypted using the "volume identifier" of the
+corresponding key bag entry, as both the primary and tweak key. The sector
+number, relative to the start of the container, is used as the tweak value.
+
+The file system B-tree is encrypted using the ...
+
+[yellow-background]*TODO: complete this section.*
+
+=== [[key_bag_entries]]Key bag entries
 
 == Objects
 
@@ -126,8 +182,13 @@ The checksum algorithm:
 | 0x0000016 | | [yellow-background]*Unknown (WBC?)*
 | 0x0000017 | | [yellow-background]*Unknown (WBCL?)*
 | | |
-| 0x4000000 | | [yellow-background]*Unknown (flag?)*
-| 0x8000000 | | [yellow-background]*Unknown (flag?)*
+3+| _Flags used in combination with some of the object types_
+| 0x4000000 | | [yellow-background]*Unknown (Volume metadata flag?)*
+| 0x8000000 | | [yellow-background]*Unknown (Container metadata flag?)*
+| | |
+3+| _Object types without flags_
+| 0x6b657973 | | Container key bag
+| 0x72656373 | | Volume key bag
 |===
 
 === [[object_subtypes]]Object subtypes
@@ -140,6 +201,8 @@ The object subtype is used by specific object types such as:
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
+| 0x0000009 | | [yellow-background]*Unknown* B-tree
+| | |
 | 0x000000b | | Object map B-tree
 | | |
 | 0x000000e | | File system B-tree
@@ -152,7 +215,7 @@ A B-tree consists of:
 * B-tree (root or node) object
 * B-tree header
 * B-tree entries
-* keys data
+* crypto key data
 * unused data
 * values data
 * B-tree footer
@@ -305,15 +368,17 @@ dependent on the size of the container. `[HANSEN17]` indicates:
 The container consists of:
 
 * current container superblock
-* current container physical map
+* stored in the container metadata area:
+** current container physical map
+** previous container physical map(s)
+** previous container superblock(s)
+* stored in the container:
+** space manager
+** container object map
+** reaper
+** crypto key
+** zero or more volumes
 * [yellow-background]*backup of current container superblock?*
-* one or more pairs of:
-** previous version of container physical map
-** previous version of container superblock
-* space manager
-* container object map
-* reaper
-* zero or more volumes
 
 === Container superblock
 
@@ -341,10 +406,14 @@ See section: <<object_types,Object types>>
 Contains a UUID stored in big-endian
 | 88 | 8 | | Next (available) object identifier (nx_next_oid)
 | 96 | 8 | | [yellow-background]*Next (available) ??? (nx_next_xid)*
-| 104 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_desc_blocks)*
-| 108 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_data_blocks)*
-| 112 | 8 | | [yellow-background]*??? object identifier (nx_xp_desc_base)*
-| 120 | 8 | | [yellow-background]*??? object identifier (nx_xp_data_base)*
+| 104 | 4 | | Metadata area number of blocks (nx_xp_desc_blocks) +
+Contains size, in the number of blocks, of the metadata area
+| 108 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_data_blocks)* +
+Contains size, in the number of blocks, of the ??? B-tree
+| 112 | 8 | | Metadata area block number (nx_xp_desc_base) +
+Contains the block number of the metadata area
+| 120 | 8 | | [yellow-background]*??? block number (nx_xp_data_base)* +
+Contains the block number of the ??? B-tree
 | 128 | 4 | | [yellow-background]*Unknown (nx_xp_desc_next)*
 | 132 | 4 | | [yellow-background]*Unknown (nx_xp_data_next)*
 | 136 | 4 | | [yellow-background]*Unknown (nx_xp_desc_index)*
@@ -359,7 +428,8 @@ See section: <<object_map,Object map>>
 | 168 | 8 | | Reaper object identifier (nx_reaper_oid) +
 Contains a object identifier that can be resolved in the container physical map
 | 176 | 4 | | [yellow-background]*Unknown (unk_B0)*
-| 180 | 4 | | Number of volumes (nx_max_file_systems)
+| 180 | 4 | | Maxmum number of volumes (nx_max_file_systems) +
+Contains the maximum number of volumes supported by the container
 | 184 | 100 x 8 = 800 | | Array of volume object identifiers (nx_fs_oid)
 | 984 | 32 x 8 = 256 | | [yellow-background]*Unknown*
 | 1240 | 8 | | [yellow-background]*Unknown (nx_blocked_out_base)*
@@ -369,8 +439,9 @@ Contains a object identifier that can be resolved in the container physical map
 | 1270 | 8 | | [yellow-background]*Unknown (nx_efi_jumpstart_paddr)*
 | 1278 | 8 | | [yellow-background]*Unknown*
 | 1286 | 8 | | [yellow-background]*Unknown*
-| 1294 | 8 | | [yellow-background]*Unknown (nx_keybag_base)*
-| 1302 | 8 | | [yellow-background]*Unknown (nx_keybag_blocks)*
+| 1294 | 8 | | Container key bag data block number (nx_keybag_base)
+See section: <<key_bag,Key bag>>
+| 1302 | 8 | | Contaner key bag data number of blocks (nx_keybag_blocks)
 | 1310 | 5 x 8 = 40 | | [yellow-background]*Unknown (nx_ephemeral_info)*
 | 1350 | 8 | | [yellow-background]*Unknown (nx_fusion_mt_oid)*
 | 1358 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_oid)*
@@ -658,6 +729,213 @@ Contains a block number relative to the start of the "physical" volume
 | Value | Identifier | Description
 |===
 
+== [[key_bag]]Key bag
+
+The key bag consists of:
+
+* Container or volume key bag object
+* Key bag header
+* Key bag entries
+
+=== Container key bag object
+
+The container key bag object contains key data of the container.
+
+The container key bag object is 32 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x6b657973 ("syek") | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000000 | Object subtype
+|===
+
+=== Volume key bag object
+
+The volume key bag object contains key data of a specific volume.
+
+The volume key bag object is 32 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object version (xid)
+| 24 | 4 | 0x72656373 ("scer") | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000000 | Object subtype
+|===
+
+=== Key bag header
+
+The key bag header is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | 2 | Format version
+| 2 | 2 | | Number of entries
+| 4 | 4 | | Key bag data size +
+Contains the size of the key bag data, this includes the size of key bag header
+| 8 | 8 | | [yellow-background]*Unknown (empty values)*
+|===
+
+=== [[key_bag_entries]]Key bag entries
+
+A key bag entry consists of:
+
+* a key bag entry header
+* a key bag entry data
+* alignment padding
+
+The key bag entry header specifies the type of the key bag entry data.
+
+The key bag entries are 16-byte aligned.
+
+==== Key bag entry header
+
+The key bag entry header is 24 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 16 | | Volume identifer +
+Contains a UUID stored in big-endian
+| 16 | 2 | | Entry type +
+See section: <<key_bag_entry_types,Key bag entry types>>
+| 18 | 2 | | Entry data size
+| 20 | 4 | | [yellow-background]*Unknown*
+|===
+
+==== [[key_bag_entry_types]]Key bag entry types
+
+===== Container key bag entry types
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 2 | | Volume master key +
+See section: <<key_bag_kek_packed_object,Key encrypted key (KEK) packed object>>
+| 3 | | Volume key bag extent +
+See section: <<key_bag_data_extent,Key bag data extent>>
+|===
+
+The volume master key is encryped with a volume key.
+
+===== Volume key bag entry types
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 3 | | Volume key +
+See section: <<key_bag_kek_packed_object,Key encrypted key (KEK) packed object>>
+| 4 | | Password Hint +
+Contains a string without end-of-string character
+|===
+
+The volume key is encryped with an user key.
+
+==== [[key_bag_packed_object]]Key bag packed object
+
+The packed object consist of an object packed value that embeds attribute
+packed values.
+
+===== Key bag packed value
+
+The key bag packed value is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 1 | | Value tag (or value type) +
+[yellow-background]*Unknown (Where the most-significant bit represents a user-defined flag?)*
+| 1 | 1 | | Value data size +
+If the most-significant bit is set the value data size is stored in the next ( value & 0x7f ) bytes +
+Seen: 0x81
+| ... | ... | | Value data
+|===
+
+[NOTE]
+The meaning of the value tags differ per packed object type.
+
+===== [[key_bag_kek_packed_object]]Key encrypted key (KEK) packed object
+
+The packed object value tag of a key encrypted key is 0x30 and contains the
+following attribute value tags:
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x80 | | [yellow-background]*Unknown*
+| 0x81 | | HMAC
+| 0x82 | | [yellow-background]*Unknown (salt?)*
+| | | 
+| 0xa3 | | Wrapped Wrapped Key Encrypted Key (KEK) packed object +
+See section: <<key_bag_wrapped_kek_packed_object,Wrapped Key Encrypted Key (KEK) packed object>>
+|===
+
+===== [[key_bag_wrapped_kek_packed_object]]Wrapped Key Encrypted Key (KEK) packed object
+
+The packed object value tag of a wrapped kek encrypted key is 0xa3 and contains
+the following attribute value tags:
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x80 | | [yellow-background]*Unknown*
+| 0x81 | | Volume identifer +
+Contains a UUID stored in big-endian
+| 0x82 | | Wrapped Key Encrypted Key (KEK) metadata +
+See section: <<wrapped_kek_metadata,Wrapped Key Encrypted Key (KEK) metadata>>
+| 0x83 | | Wrapped Key Encrypted Key (KEK) data
+| 0x84 | | Number of iterations
+| 0x85 | | Salt for the PBKDF2 algorithm
+|===
+
+==== [[wrapped_kek_metadata]]Wrapped Key Encrypted Key (KEK) metadata
+
+The Wrapped Key Encrypted Key (KEK) metadata is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Encryption type +
+See section: <<encryption_types,Encryption types>>
+| 4 | 2 | | [yellow-background]*Unknown*
+| 6 | 1 | | [yellow-background]*Unknown*
+| 7 | 1 | | [yellow-background]*Unknown*
+|===
+
+===== [[encryption_types]]Encryption types
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0 | | [yellow-background]*Unknown (AES-256)*
+| | |
+| 2 | | [yellow-background]*Unknown (AES-128 FVDE compatible)*
+|===
+
+==== [[key_bag_data_extent]]Key bag data extent
+
+The key bag data extent is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Key bag block number
+| 8 | 8 | | Key bag number of blocks
+|===
+
 == Volume
 
 The volume consists of:
@@ -689,7 +967,7 @@ See section: <<object_types,Object types>>
 | 56 | 8 | | Incompatible feature flags (apfs_incompatible_features) +
 <<volume_superblock_feature,Volume superblock features>>
 | 64 | 8 | | [yellow-background]*Unknown (apfs_unmount_time)* +
-Contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
 | 72 | 8 | | Number of reserved blocks (apfs_reserve_block_count)
 | 80 | 8 | | Number of quota blocks (apfs_quota_block_count)
 | 88 | 8 | | [yellow-background]*Unknown (apfs_fs_alloc_count)*
@@ -722,7 +1000,7 @@ See section: <<object_map,Object map>>
 | 244 | 16 | | Volume identifier (apfs_vol_uuid) +
 Contains a UUID stored in big-endian
 | 260 | 8 | | [yellow-background]*Unknown (apfs_last_mod_time)* +
-Contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
 | 268 | 8 | | [yellow-background]*Unknown (apfs_fs_flags)* +
 <<volume_superblock_flags,Volume superblock flags>>
 | 276 | 40 | | Creation change information (apfs_formatted_by) +
@@ -749,7 +1027,7 @@ The volume superblock change information is 48 bytes of size and consists of:
 String that contains the first 31 characters of the name and version of the application that changed the file system +
 Contains 0 if not set
 | 32 | 8 | | Change date and time +
-Contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
 | 40 | 8 | | Change object version +
 Contains 0 if not set
 |===
@@ -808,18 +1086,18 @@ See section: <<file_system_data_types,File system data types>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x1 | | [yellow-background]*Unknown (Snapshot metadata)*
-| 0x2 | | [yellow-background]*Unknown (Physical extent)*
+| 0x1 | SnapMetadata | [yellow-background]*Unknown (Snapshot metadata)*
+| 0x2 | PhysExtent | [yellow-background]*Unknown (Physical extent)*
 | 0x3 | | Inode
 | 0x4 | | [yellow-background]*Unknown (Extended attribure (xattr))*
-| 0x5 | | [yellow-background]*Unknown (Sibling link)*
-| 0x6 | | Data stream
-| 0x7 | | [yellow-background]*Unknown (Crypto state?)*
-| 0x8 | | File extent
-| 0x9 | | Directory record
-| 0xa | | [yellow-background]*Unknown (Directory size)*
-| 0xb | | [yellow-background]*Unknown (Snapshot name)*
-| 0xc | | [yellow-background]*Unknown (Sibling map)*
+| 0x5 | SiblingLink | [yellow-background]*Unknown (Sibling link)*
+| 0x6 | DstreamID | Data stream identifier
+| 0x7 | CryptoState | [yellow-background]*Unknown (Crypto state?)*
+| 0x8 | FileExtent | File extent
+| 0x9 | DirRecord | Directory record
+| 0xa | DirSize | [yellow-background]*Unknown (Directory size)*
+| 0xb | SnapName | [yellow-background]*Unknown (Snapshot name)*
+| 0xc | SiblingMap | [yellow-background]*Unknown (Sibling map)*
 |===
 
 === Inode
@@ -851,9 +1129,9 @@ The inode key data is 8 bytes of size and consists of:
 00000060: 04 02 05 00 72 6f 6f 74  00 00 00 00               ....root ....
 ....
 
-=== Data stream
+=== Data stream identifier
 
-==== Data stream key data
+==== Data stream identifier key data
 
 The data stream key data is 8 bytes of size and consists of:
 
@@ -868,7 +1146,7 @@ The data stream key data is 8 bytes of size and consists of:
 00000000: 11 00 00 00 00 00 00 60                            .....
 ....
 
-==== Data stream value data
+==== Data stream identifier value data
 
 ....
 00000000: 01 00 00 00                                        ....
@@ -995,12 +1273,44 @@ find /Volumes/SingleVolume
 | URL: | https://www.researchgate.net/publication/319573636_Decoding_the_APFS_file_system
 |===
 
+`[GANDER17]`
+
 [cols="1,5",options="header"]
 |===
 | Title: | apfs_fuse
 | Author(s): | S. Gander
 | Date: | October 2017
 | URL: | https://github.com/sgan81/apfs-fuse
+|===
+
+`[IEEE 1619-2007]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | The XTS-AES Tweakable Block Cipher (IEEE 1619-2007)
+| Author(s): | IEEE
+| Date: | April 18, 2008
+| URL: | http://axelkenzo.ru/downloads/1619-2007-NIST-Submission.pdf +
+https://bitbucket.org/garethl/xtssharp/src/0e6a81a823e9/docs/1619-2007-NIST-Submission.pdf
+|===
+
+`[RFC2898]`
+[cols="1,5",options="header"]
+|===
+| Title: | PKCS #5: Password-Based Cryptography Specification
+| Version: | 2.0
+| Author(s): | B. Kaliski
+| Date: | September 2000
+| URL: | https://www.ietf.org/rfc/rfc2898.txt
+|===
+
+`[RFC3394]`
+[cols="1,5",options="header"]
+|===
+| Title: | Advanced Encryption Standard (AES) Key Wrap Algorithm
+| Author(s): | J. Schaad, R. Housley
+| Date: | September 2002
+| URL: | https://www.ietf.org/rfc/rfc3394.txt
 |===
 
 [appendix]

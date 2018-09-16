@@ -961,7 +961,7 @@ int main(
 	 "libfsapfs_object_map_btree_read_data",
 	 fsapfs_test_object_map_btree_read_data );
 
-/* TODO add tests for libfsapfs_object_map_get_descriptor_by_object_identifier */
+/* TODO add tests for libfsapfs_object_map_btree_get_descriptor_by_object_identifier */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

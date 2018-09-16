@@ -12,6 +12,8 @@ MSVSCPP_FILES = \
 	fsapfs_test_error/fsapfs_test_error.vcproj \
 	fsapfs_test_file_system_btree/fsapfs_test_file_system_btree.vcproj \
 	fsapfs_test_io_handle/fsapfs_test_io_handle.vcproj \
+	fsapfs_test_key_bag_entry/fsapfs_test_key_bag_entry.vcproj \
+	fsapfs_test_key_bag_header/fsapfs_test_key_bag_header.vcproj \
 	fsapfs_test_notify/fsapfs_test_notify.vcproj \
 	fsapfs_test_object/fsapfs_test_object.vcproj \
 	fsapfs_test_object_map/fsapfs_test_object_map.vcproj \
@@ -22,6 +24,7 @@ MSVSCPP_FILES = \
 	fsapfs_test_volume_superblock/fsapfs_test_volume_superblock.vcproj \
 	fsapfsinfo/fsapfsinfo.vcproj \
 	libbfio/libbfio.vcproj \
+	libcaes/libcaes.vcproj \
 	libcdata/libcdata.vcproj \
 	libcerror/libcerror.vcproj \
 	libcfile/libcfile.vcproj \
@@ -33,6 +36,7 @@ MSVSCPP_FILES = \
 	libfdatetime/libfdatetime.vcproj \
 	libfguid/libfguid.vcproj \
 	libfsapfs/libfsapfs.vcproj \
+	libhmac/libhmac.vcproj \
 	libuna/libuna.vcproj \
 	libfsapfs.sln
 

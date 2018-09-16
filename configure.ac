@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsapfs],
- [20180913],
+ [20180916],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -96,6 +96,12 @@ AX_LIBFDATETIME_CHECK_ENABLE
 dnl Check if libfguid or required headers and functions are available
 AX_LIBFGUID_CHECK_ENABLE
 
+dnl Check if libhmac or required headers and functions are available
+AX_LIBHMAC_CHECK_ENABLE
+
+dnl Check if libcaes or required headers and functions are available
+AX_LIBCAES_CHECK_ENABLE
+
 dnl Check if libfsapfs required headers and functions are available
 AX_LIBFSAPFS_CHECK_LOCAL
 
@@ -134,7 +140,7 @@ CFLAGS="$CFLAGS -Wall";
 
 dnl Check if requires and build requires should be set in spec file
 AS_IF(
- [test "x$ac_cv_libcerror" = xyes || test "x$ac_cv_libcthreads" = xyes || test "x$ac_cv_libcdata" = xyes || test "x$ac_cv_libclocale" = xyes || test "x$ac_cv_libcnotify" = xyes || test "x$ac_cv_libcsplit" = xyes || test "x$ac_cv_libuna" = xyes || test "x$ac_cv_libcfile" = xyes || test "x$ac_cv_libcpath" = xyes || test "x$ac_cv_libbfio" = xyes || test "x$ac_cv_libfdatetime" = xyes || test "x$ac_cv_libfguid" = xyes],
+ [test "x$ac_cv_libcerror" = xyes || test "x$ac_cv_libcthreads" = xyes || test "x$ac_cv_libcdata" = xyes || test "x$ac_cv_libclocale" = xyes || test "x$ac_cv_libcnotify" = xyes || test "x$ac_cv_libcsplit" = xyes || test "x$ac_cv_libuna" = xyes || test "x$ac_cv_libcfile" = xyes || test "x$ac_cv_libcpath" = xyes || test "x$ac_cv_libbfio" = xyes || test "x$ac_cv_libfdatetime" = xyes || test "x$ac_cv_libfguid" = xyes || test "x$ac_cv_libhmac" = xyes || test "x$ac_cv_libcaes" = xyes || test "x$ac_cv_libcrypto" != xno],
  [AC_SUBST(
   [libfsapfs_spec_requires],
   [Requires:])
@@ -166,6 +172,8 @@ AC_CONFIG_FILES([libcpath/Makefile])
 AC_CONFIG_FILES([libbfio/Makefile])
 AC_CONFIG_FILES([libfdatetime/Makefile])
 AC_CONFIG_FILES([libfguid/Makefile])
+AC_CONFIG_FILES([libhmac/Makefile])
+AC_CONFIG_FILES([libcaes/Makefile])
 AC_CONFIG_FILES([libfsapfs/Makefile])
 AC_CONFIG_FILES([fsapfstools/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
@@ -205,6 +213,10 @@ Building:
    libbfio support:                             $ac_cv_libbfio
    libfdatetime support:                        $ac_cv_libfdatetime
    libfguid support:                            $ac_cv_libfguid
+   libhmac support:                             $ac_cv_libhmac
+   SHA256 support:                              $ac_cv_libhmac_sha256
+   libcaes support:                             $ac_cv_libcaes
+   AES support:                                 $ac_cv_libcaes_aes
 
 Features:
    Multi-threading support:                     $ac_cv_libcthreads_multi_threading

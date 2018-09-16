@@ -6,7 +6,7 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "btree_entry btree_footer btree_header btree_root container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error file_system_btree io_handle notify object object_map object_map_btree object_map_descriptor"
+$LibraryTests = "btree_entry btree_footer btree_header btree_root container_physical_map container_physical_map_entry container_reaper container_space_manager container_superblock error file_system_btree io_handle key_bag_entry key_bag_header notify object object_map object_map_btree object_map_descriptor"
 $LibraryTestsWithInput = "container support"
 
 $InputGlob = "*"

@@ -578,13 +578,13 @@ on_error:
 /* Retrieves the object map descriptor of a specific object identifier
  * Returns 1 if successful, 0 if no such value or -1 on error
  */
-int libfsapfs_object_map_get_descriptor_by_object_identifier(
+int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t object_identifier,
      libfsapfs_object_map_descriptor_t **descriptor,
      libcerror_error_t **error )
 {
-	static char *function     = "libfsapfs_object_map_get_descriptor_by_object_identifier";
+	static char *function     = "libfsapfs_object_map_btree_get_descriptor_by_object_identifier";
 	int descriptor_index      = 0;
 	int number_of_descriptors = 0;
 

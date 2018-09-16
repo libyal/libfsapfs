@@ -128,6 +128,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_btree_header
 /tests/fsapfs_test_btree_root
 /tests/fsapfs_test_container
+/tests/fsapfs_test_container_key_bag
 /tests/fsapfs_test_container_physical_map
 /tests/fsapfs_test_container_physical_map_entry
 /tests/fsapfs_test_container_reaper
@@ -137,6 +138,8 @@ stamp-h[1-9]
 /tests/fsapfs_test_file_entry
 /tests/fsapfs_test_file_system_btree
 /tests/fsapfs_test_io_handle
+/tests/fsapfs_test_key_bag_entry
+/tests/fsapfs_test_key_bag_header
 /tests/fsapfs_test_notify
 /tests/fsapfs_test_object
 /tests/fsapfs_test_object_map
@@ -144,11 +147,13 @@ stamp-h[1-9]
 /tests/fsapfs_test_object_map_descriptor
 /tests/fsapfs_test_support
 /tests/fsapfs_test_volume
+/tests/fsapfs_test_volume_key_bag
 /tests/fsapfs_test_volume_superblock
 /tests/input
 /tests/tmp*
 
 # Local library dependencies specific files
+/libcaes
 /libbfio
 /libcdata
 /libcerror
@@ -160,4 +165,5 @@ stamp-h[1-9]
 /libcthreads
 /libfdatetime
 /libfguid
+/libhmac
 /libuna

@@ -25,6 +25,7 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_file_system_btree.h"
@@ -36,6 +37,7 @@
 #include "libfsapfs_object_map.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_volume.h"
+#include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
 
 /* Creates a volume
@@ -919,6 +921,22 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
+	if( internal_volume->key_bag != NULL )
+	{
+		if( libfsapfs_volume_key_bag_free(
+		     &( internal_volume->key_bag ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free key bag.",
+			 function );
+
+			result = -1;
+		}
+	}
 	if( internal_volume->file_system_btree != NULL )
 	{
 		if( libfsapfs_file_system_btree_free(
@@ -965,6 +983,9 @@ int libfsapfs_internal_volume_open_read(
 	libfsapfs_object_map_t *object_map                       = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_open_read";
+	uint64_t key_bag_block_number                            = 0;
+	uint64_t key_bag_number_of_blocks                        = 0;
+	int result                                               = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -1006,6 +1027,17 @@ int libfsapfs_internal_volume_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid internal volume - object map B-tree value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->key_bag != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal volume - key bag value already set.",
 		 function );
 
 		return( -1 );
@@ -1157,9 +1189,122 @@ int libfsapfs_internal_volume_open_read(
 			goto on_error;
 		}
 	}
+	if( internal_volume->container_key_bag != NULL )
+	{
+		result = libfsapfs_container_key_bag_get_volume_key_bag_extent_by_identifier(
+		          internal_volume->container_key_bag,
+		          internal_volume->superblock->volume_identifier,
+		          &key_bag_block_number,
+		          &key_bag_number_of_blocks,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume key bag extent.",
+			 function );
+
+			goto on_error;
+		}
+		else if( result != 0 )
+		{
+			if( ( key_bag_block_number == 0 )
+			 || ( key_bag_number_of_blocks == 0 ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid volume key bag extent.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_volume_key_bag_initialize(
+			     &( internal_volume->key_bag ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create volume key bag.",
+				 function );
+
+				goto on_error;
+			}
+			file_offset = key_bag_block_number * internal_volume->block_size;
+
+			if( libfsapfs_volume_key_bag_read_file_io_handle(
+			     internal_volume->key_bag,
+			     file_io_handle,
+			     file_offset,
+			     (size64_t) key_bag_number_of_blocks * internal_volume->block_size,
+			     internal_volume->superblock->volume_identifier,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read volume key bag at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+				 function,
+				 file_offset,
+				 file_offset );
+
+				goto on_error;
+			}
+/* TODO unlock volume key */
+			uint8_t volume_key[ 32 ];
+
+			if( libfsapfs_volume_key_bag_get_volume_key_by_identifier(
+			     internal_volume->key_bag,
+			     internal_volume->superblock->volume_identifier,
+			     (uint8_t *) "test",
+			     4,
+			     volume_key,
+			     256,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve volume key.",
+				 function );
+
+				goto on_error;
+			}
+/* TODO unlock volume master key */
+			uint8_t volume_master_key[ 32 ];
+
+			if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
+			     internal_volume->container_key_bag,
+			     internal_volume->superblock->volume_identifier,
+			     volume_key,
+			     256,
+			     volume_master_key,
+			     256,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve volume master key.",
+				 function );
+
+				goto on_error;
+			}
+		}
+/* TODO return 0 to indicate volume could not be unlocked ? */
+	}
 	if( internal_volume->superblock->file_system_root_object_identifier > 0 )
 	{
-		if( libfsapfs_object_map_get_descriptor_by_object_identifier(
+		if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 		     internal_volume->object_map_btree,
 		     internal_volume->superblock->file_system_root_object_identifier,
 		     &object_map_descriptor,
@@ -1227,6 +1372,12 @@ on_error:
 	{
 		libfsapfs_file_system_btree_free(
 		 &( internal_volume->file_system_btree ),
+		 NULL );
+	}
+	if( internal_volume->key_bag != NULL )
+	{
+		libfsapfs_volume_key_bag_free(
+		 &( internal_volume->key_bag ),
 		 NULL );
 	}
 	if( internal_volume->object_map_btree != NULL )

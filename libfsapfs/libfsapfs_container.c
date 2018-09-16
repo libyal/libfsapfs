@@ -26,6 +26,7 @@
 #include <wide_string.h>
 
 #include "libfsapfs_container.h"
+#include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_container_physical_map.h"
 #include "libfsapfs_container_reaper.h"
 #include "libfsapfs_container_space_manager.h"
@@ -939,6 +940,22 @@ int libfsapfs_container_close(
 			result = -1;
 		}
 	}
+	if( internal_container->key_bag != NULL )
+	{
+		if( libfsapfs_container_key_bag_free(
+		     &( internal_container->key_bag ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free key bag.",
+			 function );
+
+			result = -1;
+		}
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_container->read_write_lock,
@@ -1028,6 +1045,17 @@ int libfsapfs_internal_container_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid internal container - object map B-tree value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_container->key_bag != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid internal container - key bag value already set.",
 		 function );
 
 		return( -1 );
@@ -1406,9 +1434,53 @@ int libfsapfs_internal_container_open_read(
 			goto on_error;
 		}
 	}
+	if( ( internal_container->superblock->key_bag_block_number > 0 )
+	 && ( internal_container->superblock->key_bag_number_of_blocks > 0 ) )
+	{
+		if( libfsapfs_container_key_bag_initialize(
+		     &( internal_container->key_bag ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create container key bag.",
+			 function );
+
+			goto on_error;
+		}
+		file_offset = internal_container->superblock->key_bag_block_number * internal_container->block_size;
+
+		if( libfsapfs_container_key_bag_read_file_io_handle(
+		     internal_container->key_bag,
+		     file_io_handle,
+		     file_offset,
+		     (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->block_size,
+		     internal_container->superblock->container_identifier,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read container key bag at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 function,
+			 file_offset,
+			 file_offset );
+
+			goto on_error;
+		}
+	}
 	return( 1 );
 
 on_error:
+	if( internal_container->key_bag != NULL )
+	{
+		libfsapfs_container_key_bag_free(
+		 &( internal_container->key_bag ),
+		 NULL );
+	}
 	if( internal_container->object_map_btree != NULL )
 	{
 		libfsapfs_object_map_btree_free(
@@ -1700,7 +1772,7 @@ int libfsapfs_container_get_number_of_volumes(
 		return( -1 );
 	}
 #endif
-	*number_of_volumes = (int) internal_container->superblock->number_of_volumes;
+	*number_of_volumes = internal_container->superblock->number_of_volumes;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -1808,7 +1880,7 @@ int libfsapfs_container_get_volume_by_index(
 		return( -1 );
 	}
 #endif
-	if( libfsapfs_object_map_get_descriptor_by_object_identifier(
+	if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 	     internal_container->object_map_btree,
 	     internal_container->superblock->volume_object_identifiers[ volume_index ],
 	     &object_map_descriptor,
@@ -1850,6 +1922,8 @@ int libfsapfs_container_get_volume_by_index(
 	}
 /* TODO add function to set block_size */
 	( (libfsapfs_internal_volume_t *) *volume )->block_size = internal_container->block_size;
+/* TODO add function to set container_key_bag */
+	( (libfsapfs_internal_volume_t *) *volume )->container_key_bag = internal_container->key_bag;
 
 	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->block_size );
 

@@ -60,9 +60,17 @@ struct libfsapfs_container_superblock
 	 */
 	uint64_t reaper_object_identifier;
 
+	/* The key bag block number
+	 */
+	uint64_t key_bag_block_number;
+
+	/* The key bag number of blocks
+	 */
+	uint64_t key_bag_number_of_blocks;
+
 	/* The number of volumes
 	 */
-	uint32_t number_of_volumes;
+	int number_of_volumes;
 
 	/* The volume object identifier
 	 */
