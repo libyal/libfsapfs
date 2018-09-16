@@ -24,10 +24,436 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_definitions.h"
 #include "libfsapfs_encryption.h"
 #include "libfsapfs_libcaes.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
+
+/* Creates an encryption context
+ * Make sure the value encryption context is referencing, is set to NULL
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_encryption_context_initialize(
+     libfsapfs_encryption_context_t **context,
+     uint32_t method,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_encryption_context_initialize";
+
+	if( context == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( *context != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid context value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( method != LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported method.",
+		 function );
+
+		return( -1 );
+	}
+	*context = memory_allocate_structure(
+	            libfsapfs_encryption_context_t );
+
+	if( *context == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create context.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     *context,
+	     0,
+	     sizeof( libfsapfs_encryption_context_t ) ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear context.",
+		 function );
+
+		memory_free(
+		 *context );
+
+		*context = NULL;
+
+		return( -1 );
+	}
+	if( libcaes_tweaked_context_initialize(
+	     &( ( *context )->decryption_context ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize decryption context.",
+		 function );
+
+		goto on_error;
+	}
+	( *context )->method = method;
+
+	return( 1 );
+
+on_error:
+	if( *context != NULL )
+	{
+		if( ( *context )->decryption_context != NULL )
+		{
+			libcaes_tweaked_context_free(
+			 &( ( *context )->decryption_context ),
+			 NULL );
+		}
+		memory_free(
+		 *context );
+
+		*context = NULL;
+	}
+	return( -1 );
+}
+
+/* Frees an encryption context
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_encryption_context_free(
+     libfsapfs_encryption_context_t **context,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_encryption_context_free";
+	int result            = 1;
+
+	if( context == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( *context != NULL )
+	{
+		if( libcaes_tweaked_context_free(
+		     &( ( *context )->decryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable free decryption context.",
+			 function );
+
+			result = -1;
+		}
+		memory_free(
+		 *context );
+
+		*context = NULL;
+	}
+	return( result );
+}
+
+/* Sets the de- and encryption keys
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_encryption_context_set_keys(
+     libfsapfs_encryption_context_t *context,
+     const uint8_t *key,
+     size_t key_size,
+     const uint8_t *tweak_key,
+     size_t tweak_key_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_encryption_context_set_keys";
+	size_t key_bit_size   = 0;
+	size_t key_byte_size  = 0;
+
+	if( context == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid key size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( tweak_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid tweak key.",
+		 function );
+
+		return( -1 );
+	}
+	if( tweak_key_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid tweak key size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( context->method == LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS )
+	{
+		key_byte_size = 16;
+	}
+	if( key_size < key_byte_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid key value too small.",
+		 function );
+
+		return( -1 );
+	}
+	if( tweak_key_size < key_byte_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+		 "%s: invalid tweak key value too small.",
+		 function );
+
+		return( -1 );
+	}
+	key_bit_size = key_byte_size * 8;
+
+	if( libcaes_tweaked_context_set_keys(
+	     context->decryption_context,
+	     LIBCAES_CRYPT_MODE_DECRYPT,
+	     key,
+	     key_bit_size,
+	     tweak_key,
+	     key_bit_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set keys in decryption context.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* De- or encrypts a block of data
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_encryption_context_crypt(
+     libfsapfs_encryption_context_t *context,
+     int mode,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     uint64_t sector_number,
+     uint16_t bytes_per_sector,
+     libcerror_error_t **error )
+{
+	uint8_t tweak_value[ 16 ];
+
+	static char *function = "libfsapfs_encryption_context_crypt";
+	size_t data_offset    = 0;
+
+	if( context == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid context.",
+		 function );
+
+		return( -1 );
+	}
+	if( mode != LIBFSAPFS_ENCRYPTION_CRYPT_MODE_DECRYPT )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported mode.",
+		 function );
+
+		return( -1 );
+	}
+	if( input_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid input data.",
+		 function );
+
+		return( -1 );
+	}
+	if( input_data_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid input data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid output data.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid output data size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( output_data_size < input_data_size )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid output data size value smaller than input data size.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_set(
+	     tweak_value,
+	     0,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear tweak value.",
+		 function );
+
+		goto on_error;
+	}
+	for( data_offset = 0;
+	     data_offset < input_data_size;
+	     data_offset += bytes_per_sector )
+	{
+		byte_stream_copy_from_uint64_little_endian(
+		 tweak_value,
+		 sector_number );
+
+		if( libcaes_crypt_xts(
+		     context->decryption_context,
+		     LIBCAES_CRYPT_MODE_DECRYPT,
+		     tweak_value,
+		     16,
+		     &( input_data[ data_offset ] ),
+		     bytes_per_sector,
+		     &( output_data[ data_offset ] ),
+		     bytes_per_sector,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+			 "%s: unable to decrypt data.",
+			 function );
+
+			goto on_error;
+		}
+		sector_number += 1;
+	}
+	return( 1 );
+
+on_error:
+	memory_set(
+	 tweak_value,
+	 0,
+	 16 );
+
+	return( -1 );
+}
 
 /* Unwrap data using AES Key Wrap (RFC3394)
  * Returns 1 if successful or -1 on error

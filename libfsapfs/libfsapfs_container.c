@@ -1097,10 +1097,7 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	internal_container->block_size       = internal_container->superblock->block_size;
-	internal_container->number_of_blocks = internal_container->superblock->number_of_blocks;
-
-	file_offset += internal_container->block_size;
+	file_offset += internal_container->superblock->block_size;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -1139,7 +1136,7 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	file_offset += internal_container->block_size;
+	file_offset += internal_container->superblock->block_size;
 
 /* TODO read previous copies of superblock and physical map */
 
@@ -1219,7 +1216,7 @@ int libfsapfs_internal_container_open_read(
 
 				goto on_error;
 			}
-			file_offset = space_manager_block_number * internal_container->block_size;
+			file_offset = space_manager_block_number * internal_container->superblock->block_size;
 
 			if( libfsapfs_container_space_manager_initialize(
 			     &container_space_manager,
@@ -1286,7 +1283,7 @@ int libfsapfs_internal_container_open_read(
 
 				goto on_error;
 			}
-			file_offset = reaper_block_number * internal_container->block_size;
+			file_offset = reaper_block_number * internal_container->superblock->block_size;
 
 			if( libfsapfs_container_reaper_initialize(
 			     &container_reaper,
@@ -1345,7 +1342,7 @@ int libfsapfs_internal_container_open_read(
 			 "Reading object map:\n" );
 		}
 #endif
-		file_offset = internal_container->superblock->object_map_block_number * internal_container->block_size;
+		file_offset = internal_container->superblock->object_map_block_number * internal_container->superblock->block_size;
 
 		if( libfsapfs_object_map_initialize(
 		     &object_map,
@@ -1386,7 +1383,7 @@ int libfsapfs_internal_container_open_read(
 				 "Reading object map B-tree:\n" );
 			}
 #endif
-			file_offset = object_map->object_map_btree_block_number * internal_container->block_size;
+			file_offset = object_map->object_map_btree_block_number * internal_container->superblock->block_size;
 
 			if( libfsapfs_object_map_btree_initialize(
 			     &( internal_container->object_map_btree ),
@@ -1405,7 +1402,7 @@ int libfsapfs_internal_container_open_read(
 			     internal_container->object_map_btree,
 			     file_io_handle,
 			     file_offset,
-			     internal_container->block_size,
+			     internal_container->superblock->block_size,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -1450,13 +1447,13 @@ int libfsapfs_internal_container_open_read(
 
 			goto on_error;
 		}
-		file_offset = internal_container->superblock->key_bag_block_number * internal_container->block_size;
+		file_offset = internal_container->superblock->key_bag_block_number * internal_container->superblock->block_size;
 
 		if( libfsapfs_container_key_bag_read_file_io_handle(
 		     internal_container->key_bag,
 		     file_io_handle,
 		     file_offset,
-		     (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->block_size,
+		     (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->superblock->block_size,
 		     internal_container->superblock->container_identifier,
 		     error ) != 1 )
 		{
@@ -1472,6 +1469,8 @@ int libfsapfs_internal_container_open_read(
 			goto on_error;
 		}
 	}
+	internal_container->size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->superblock->block_size;
+
 	return( 1 );
 
 on_error:
@@ -1583,7 +1582,7 @@ int libfsapfs_container_get_size(
 		return( -1 );
 	}
 #endif
-	*size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->block_size;
+	*size = internal_container->size;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -1921,11 +1920,13 @@ int libfsapfs_container_get_volume_by_index(
 		goto on_error;
 	}
 /* TODO add function to set block_size */
-	( (libfsapfs_internal_volume_t *) *volume )->block_size = internal_container->block_size;
+	( (libfsapfs_internal_volume_t *) *volume )->block_size = internal_container->superblock->block_size;
+/* TODO add function to set size */
+	( (libfsapfs_internal_volume_t *) *volume )->container_size = internal_container->size;
 /* TODO add function to set container_key_bag */
 	( (libfsapfs_internal_volume_t *) *volume )->container_key_bag = internal_container->key_bag;
 
-	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->block_size );
+	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->superblock->block_size );
 
 /* TODO clone file_io_handle? */
 	if( libfsapfs_internal_volume_open_read(

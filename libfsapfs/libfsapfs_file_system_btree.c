@@ -28,6 +28,7 @@
 #include "libfsapfs_btree_root.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcaes.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 
@@ -148,9 +149,15 @@ int libfsapfs_file_system_btree_read_file_io_handle(
      uint32_t block_size,
      libcerror_error_t **error )
 {
-	uint8_t *block_data   = NULL;
-	static char *function = "libfsapfs_file_system_btree_read_file_io_handle";
-	ssize_t read_count    = 0;
+	uint8_t tweak_value[ 16 ];
+
+	libcaes_tweaked_context_t *xts_context = NULL;
+	uint8_t *block_data                    = NULL;
+	uint8_t *data                          = NULL;
+	static char *function                  = "libfsapfs_file_system_btree_read_file_io_handle";
+	size_t data_offset                     = 0;
+	ssize_t read_count                     = 0;
+	uint64_t calculated_sector_number      = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -234,6 +241,105 @@ int libfsapfs_file_system_btree_read_file_io_handle(
 
 		goto on_error;
 	}
+	if( file_system_btree->is_encrypted != 0 )
+	{
+		if( libcaes_tweaked_context_initialize(
+		     &xts_context,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+			 "%s: unable to initialize XTS context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libcaes_tweaked_context_set_keys(
+		     xts_context,
+		     LIBCAES_CRYPT_MODE_DECRYPT,
+		     file_system_btree->volume_master_key,
+		     128,
+		     &( file_system_btree->volume_master_key[ 16 ] ),
+		     128,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_SEEK_FAILED,
+			 "%s: unable to set AES-XTS keys.",
+			 function );
+
+			goto on_error;
+		}
+		data = (uint8_t *) memory_allocate(
+		                    sizeof( uint8_t ) * block_size );
+
+		if( data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create data.",
+			 function );
+
+			goto on_error;
+		}
+		if( memory_set(
+		     tweak_value,
+		     0,
+		     16 ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to copy block number to tweak value.",
+			 function );
+
+			goto on_error;
+		}
+		calculated_sector_number = (uint64_t) file_offset / 512;
+
+		for( data_offset = 0;
+		     data_offset < (size_t) block_size;
+		     data_offset += 512 )
+		{
+			byte_stream_copy_from_uint64_little_endian(
+			 tweak_value,
+			 calculated_sector_number );
+
+			if( libcaes_crypt_xts(
+			     xts_context,
+			     LIBCAES_CRYPT_MODE_DECRYPT,
+			     tweak_value,
+			     16,
+			     &( block_data[ data_offset ] ),
+			     512,
+			     &( data[ data_offset ] ),
+			     512,
+			     error ) == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+				 "%s: unable to decrypt data.",
+				 function );
+
+				goto on_error;
+			}
+			calculated_sector_number += 1;
+		}
+		memory_free(
+		 block_data );
+
+		block_data = data;
+		data       = NULL;
+	}
 	if( libfsapfs_file_system_btree_read_data(
 	     file_system_btree,
 	     block_data,
@@ -255,6 +361,11 @@ int libfsapfs_file_system_btree_read_file_io_handle(
 	return( 1 );
 
 on_error:
+	if( data != NULL )
+	{
+		memory_free(
+		 data );
+	}
 	if( block_data != NULL )
 	{
 		memory_free(
@@ -321,7 +432,8 @@ int libfsapfs_file_system_btree_read_data(
 
 		goto on_error;
 	}
-	if( btree_root->object_type != 0x00000002UL )
+	if( ( btree_root->object_type != 0x00000002UL )
+	 && ( btree_root->object_type != 0x10000002UL ) )
 	{
 		libcerror_error_set(
 		 error,

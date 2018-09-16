@@ -153,8 +153,8 @@ stamp-h[1-9]
 /tests/tmp*
 
 # Local library dependencies specific files
-/libcaes
 /libbfio
+/libcaes
 /libcdata
 /libcerror
 /libcfile
@@ -163,6 +163,8 @@ stamp-h[1-9]
 /libcpath
 /libcsplit
 /libcthreads
+/libfcache
+/libfdata
 /libfdatetime
 /libfguid
 /libhmac

@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 
 GIT_URL_PREFIX="https://github.com/libyal";
-LOCAL_LIBS="libbfio libcaes libcdata libcerror libcfile libclocale libcnotify libcpath libcsplit libcthreads libfdatetime libfguid libhmac libuna";
+LOCAL_LIBS="libbfio libcaes libcdata libcerror libcfile libclocale libcnotify libcpath libcsplit libcthreads libfcache libfdata libfdatetime libfguid libhmac libuna";
 
 OLDIFS=$IFS;
 IFS=" ";

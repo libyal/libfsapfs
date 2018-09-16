@@ -32,6 +32,47 @@
 extern "C" {
 #endif
 
+typedef struct libfsapfs_encryption_context libfsapfs_encryption_context_t;
+
+struct libfsapfs_encryption_context
+{
+	/* The encryption method
+	 */
+	uint32_t method;
+
+	/* The AES-XTS decryption context
+	 */
+	libcaes_tweaked_context_t *decryption_context;
+};
+
+int libfsapfs_encryption_context_initialize(
+     libfsapfs_encryption_context_t **context,
+     uint32_t method,
+     libcerror_error_t **error );
+
+int libfsapfs_encryption_context_free(
+     libfsapfs_encryption_context_t **context,
+     libcerror_error_t **error );
+
+int libfsapfs_encryption_context_set_keys(
+     libfsapfs_encryption_context_t *context,
+     const uint8_t *key,
+     size_t key_size,
+     const uint8_t *tweak_key,
+     size_t tweak_key_size,
+     libcerror_error_t **error );
+
+int libfsapfs_encryption_context_crypt(
+     libfsapfs_encryption_context_t *context,
+     int mode,
+     const uint8_t *input_data,
+     size_t input_data_size,
+     uint8_t *output_data,
+     size_t output_data_size,
+     uint64_t sector_number,
+     uint16_t bytes_per_sector,
+     libcerror_error_t **error );
+
 int libfsapfs_encryption_aes_key_unwrap(
      const uint8_t *key,
      size_t key_size_bits,

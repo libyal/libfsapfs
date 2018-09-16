@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsapfs],
- [20180916],
+ [20180917],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -90,6 +90,12 @@ AX_LIBCPATH_CHECK_ENABLE
 dnl Check if libbfio or required headers and functions are available
 AX_LIBBFIO_CHECK_ENABLE
 
+dnl Check if libfcache or required headers and functions are available
+AX_LIBFCACHE_CHECK_ENABLE
+
+dnl Check if libfdata or required headers and functions are available
+AX_LIBFDATA_CHECK_ENABLE
+
 dnl Check if libfdatetime or required headers and functions are available
 AX_LIBFDATETIME_CHECK_ENABLE
 
@@ -140,7 +146,7 @@ CFLAGS="$CFLAGS -Wall";
 
 dnl Check if requires and build requires should be set in spec file
 AS_IF(
- [test "x$ac_cv_libcerror" = xyes || test "x$ac_cv_libcthreads" = xyes || test "x$ac_cv_libcdata" = xyes || test "x$ac_cv_libclocale" = xyes || test "x$ac_cv_libcnotify" = xyes || test "x$ac_cv_libcsplit" = xyes || test "x$ac_cv_libuna" = xyes || test "x$ac_cv_libcfile" = xyes || test "x$ac_cv_libcpath" = xyes || test "x$ac_cv_libbfio" = xyes || test "x$ac_cv_libfdatetime" = xyes || test "x$ac_cv_libfguid" = xyes || test "x$ac_cv_libhmac" = xyes || test "x$ac_cv_libcaes" = xyes || test "x$ac_cv_libcrypto" != xno],
+ [test "x$ac_cv_libcerror" = xyes || test "x$ac_cv_libcthreads" = xyes || test "x$ac_cv_libcdata" = xyes || test "x$ac_cv_libclocale" = xyes || test "x$ac_cv_libcnotify" = xyes || test "x$ac_cv_libcsplit" = xyes || test "x$ac_cv_libuna" = xyes || test "x$ac_cv_libcfile" = xyes || test "x$ac_cv_libcpath" = xyes || test "x$ac_cv_libbfio" = xyes || test "x$ac_cv_libfcache" = xyes || test "x$ac_cv_libfdata" = xyes || test "x$ac_cv_libfdatetime" = xyes || test "x$ac_cv_libfguid" = xyes || test "x$ac_cv_libhmac" = xyes || test "x$ac_cv_libcaes" = xyes || test "x$ac_cv_libcrypto" != xno],
  [AC_SUBST(
   [libfsapfs_spec_requires],
   [Requires:])
@@ -170,6 +176,8 @@ AC_CONFIG_FILES([libuna/Makefile])
 AC_CONFIG_FILES([libcfile/Makefile])
 AC_CONFIG_FILES([libcpath/Makefile])
 AC_CONFIG_FILES([libbfio/Makefile])
+AC_CONFIG_FILES([libfcache/Makefile])
+AC_CONFIG_FILES([libfdata/Makefile])
 AC_CONFIG_FILES([libfdatetime/Makefile])
 AC_CONFIG_FILES([libfguid/Makefile])
 AC_CONFIG_FILES([libhmac/Makefile])
@@ -211,6 +219,8 @@ Building:
    libcfile support:                            $ac_cv_libcfile
    libcpath support:                            $ac_cv_libcpath
    libbfio support:                             $ac_cv_libbfio
+   libfcache support:                           $ac_cv_libfcache
+   libfdata support:                            $ac_cv_libfdata
    libfdatetime support:                        $ac_cv_libfdatetime
    libfguid support:                            $ac_cv_libfguid
    libhmac support:                             $ac_cv_libhmac

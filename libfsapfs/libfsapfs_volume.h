@@ -49,6 +49,10 @@ struct libfsapfs_internal_volume
 	 */
 	uint32_t block_size;
 
+	/* The container size
+	 */
+	size64_t container_size;
+
 	/* The volume superblock
 	 */
 	libfsapfs_volume_superblock_t *superblock;
@@ -64,6 +68,10 @@ struct libfsapfs_internal_volume
 	/* The volume key bag
 	 */
 	libfsapfs_volume_key_bag_t *key_bag;
+
+	/* The volume master key
+	 */
+	uint8_t volume_master_key[ 32 ];
 
 	/* The file system B-tree
 	 */

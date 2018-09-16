@@ -937,6 +937,11 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
+	memory_set(
+	 internal_volume->volume_master_key,
+	 0,
+	 32 );
+
 	if( internal_volume->file_system_btree != NULL )
 	{
 		if( libfsapfs_file_system_btree_free(
@@ -980,6 +985,8 @@ int libfsapfs_internal_volume_open_read(
      off64_t file_offset,
      libcerror_error_t **error )
 {
+	uint8_t volume_key[ 32 ];
+
 	libfsapfs_object_map_t *object_map                       = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_open_read";
@@ -1257,9 +1264,6 @@ int libfsapfs_internal_volume_open_read(
 
 				goto on_error;
 			}
-/* TODO unlock volume key */
-			uint8_t volume_key[ 32 ];
-
 			if( libfsapfs_volume_key_bag_get_volume_key_by_identifier(
 			     internal_volume->key_bag,
 			     internal_volume->superblock->volume_identifier,
@@ -1278,15 +1282,12 @@ int libfsapfs_internal_volume_open_read(
 
 				goto on_error;
 			}
-/* TODO unlock volume master key */
-			uint8_t volume_master_key[ 32 ];
-
 			if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
 			     internal_volume->container_key_bag,
 			     internal_volume->superblock->volume_identifier,
 			     volume_key,
 			     256,
-			     volume_master_key,
+			     internal_volume->volume_master_key,
 			     256,
 			     error ) != 1 )
 			{
@@ -1299,6 +1300,10 @@ int libfsapfs_internal_volume_open_read(
 
 				goto on_error;
 			}
+			memory_set(
+			 volume_key,
+			 0,
+			 32 );
 		}
 /* TODO return 0 to indicate volume could not be unlocked ? */
 	}
@@ -1346,6 +1351,15 @@ int libfsapfs_internal_volume_open_read(
 
 			goto on_error;
 		}
+/* TODO refactor into vector
+		memory_copy(
+		 internal_volume->file_system_btree->volume_master_key,
+		 internal_volume->volume_master_key,
+		 32 );
+
+		internal_volume->file_system_btree->is_encrypted = 1;
+*/
+
 		if( libfsapfs_file_system_btree_read_file_io_handle(
 		     internal_volume->file_system_btree,
 		     file_io_handle,
@@ -1374,6 +1388,16 @@ on_error:
 		 &( internal_volume->file_system_btree ),
 		 NULL );
 	}
+	memory_set(
+	 internal_volume->volume_master_key,
+	 0,
+	 32 );
+
+	memory_set(
+	 volume_key,
+	 0,
+	 32 );
+
 	if( internal_volume->key_bag != NULL )
 	{
 		libfsapfs_volume_key_bag_free(

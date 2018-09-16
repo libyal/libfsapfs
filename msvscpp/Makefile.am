@@ -33,6 +33,8 @@ MSVSCPP_FILES = \
 	libcpath/libcpath.vcproj \
 	libcsplit/libcsplit.vcproj \
 	libcthreads/libcthreads.vcproj \
+	libfcache/libfcache.vcproj \
+	libfdata/libfdata.vcproj \
 	libfdatetime/libfdatetime.vcproj \
 	libfguid/libfguid.vcproj \
 	libfsapfs/libfsapfs.vcproj \

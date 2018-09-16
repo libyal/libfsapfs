@@ -44,17 +44,13 @@ typedef struct libfsapfs_internal_container libfsapfs_internal_container_t;
 
 struct libfsapfs_internal_container
 {
-	/* The block size
-	 */
-	uint32_t block_size;
-
-	/* The number of blocks
-	 */
-	uint64_t number_of_blocks;
-
 	/* The container superblock
 	 */
 	libfsapfs_container_superblock_t *superblock;
+
+	/* The container size
+	 */
+	size64_t size;
 
 	/* The container physical map
 	 */

@@ -8,6 +8,7 @@ coverage:
     changes: false
   ignore:
     - "libbfio/*"
+    - "libcaes/*"
     - "libcdata/*"
     - "libcerror/*"
     - "libcfile/*"
@@ -16,7 +17,10 @@ coverage:
     - "libcpath/*"
     - "libcsplit/*"
     - "libcthreads/*"
+    - "libfcache/*"
+    - "libfdata/*"
     - "libfdatetime/*"
     - "libfguid/*"
+    - "libhmac/*"
     - "libuna/*"
     - "tests/*"

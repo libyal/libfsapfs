@@ -11,6 +11,8 @@ AM_CPPFLAGS = \
 	@LIBCFILE_CPPFLAGS@ \
 	@LIBCPATH_CPPFLAGS@ \
 	@LIBBFIO_CPPFLAGS@ \
+	@LIBFCACHE_CPPFLAGS@ \
+	@LIBFDATA_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
 	@LIBCRYPTO_CPPFLAGS@ \
@@ -62,6 +64,8 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_libclocale.h \
 	libfsapfs_libcnotify.h \
 	libfsapfs_libcthreads.h \
+	libfsapfs_libfcache.h \
+	libfsapfs_libfdata.h \
 	libfsapfs_libfdatetime.h \
 	libfsapfs_libfguid.h \
 	libfsapfs_libhmac.h \
@@ -90,6 +94,8 @@ libfsapfs_la_LIBADD = \
 	@LIBCFILE_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
+	@LIBFCACHE_LIBADD@ \
+	@LIBFDATA_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
 	@LIBFGUID_LIBADD@ \
 	@LIBHMAC_LIBADD@ \

@@ -91,7 +91,7 @@ run_test_with_input()
 				if test "${OSTYPE}" = "msys";
 				then
 					# A test executable built with MinGW expects a Windows path.
-					INPUT_FILE=`echo INPUT_FILE | sed 's?/?\\\\?g'`;
+					INPUT_FILE=`echo ${INPUT_FILE} | sed 's?/?\\\\?g'`;
 				fi
 				run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "default" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}";
 				RESULT=$?;
@@ -107,7 +107,7 @@ run_test_with_input()
 				if test "${OSTYPE}" = "msys";
 				then
 					# A test executable built with MinGW expects a Windows path.
-					INPUT_FILE=`echo INPUT_FILE | sed 's?/?\\\\?g'`;
+					INPUT_FILE=`echo ${INPUT_FILE} | sed 's?/?\\\\?g'`;
 				fi
 				run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "default" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}";
 				RESULT=$?;

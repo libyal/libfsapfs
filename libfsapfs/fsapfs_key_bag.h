@@ -84,10 +84,10 @@ typedef struct fsapfs_key_bag_kek_metadata fsapfs_key_bag_kek_metadata_t;
 
 struct fsapfs_key_bag_kek_metadata
 {
-	/* The encryption type
+	/* The encryption method
 	 * Consists of 4 bytes
 	 */
-	uint8_t encryption_type[ 4 ];
+	uint8_t encryption_method[ 4 ];
 
 	/* Unknown
 	 * Consists of 2 bytes

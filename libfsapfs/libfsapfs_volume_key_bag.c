@@ -24,11 +24,12 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_definitions.h"
+#include "libfsapfs_encryption.h"
 #include "libfsapfs_key_bag_entry.h"
 #include "libfsapfs_key_bag_header.h"
 #include "libfsapfs_key_encrypted_key.h"
 #include "libfsapfs_libbfio.h"
-#include "libfsapfs_libcaes.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
@@ -185,15 +186,11 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
      const uint8_t *volume_identifier,
      libcerror_error_t **error )
 {
-	uint8_t tweak_value[ 16 ];
-
-	libcaes_tweaked_context_t *xts_context = NULL;
-	uint8_t *data                          = NULL;
-	uint8_t *encrypted_data                = NULL;
-	static char *function                  = "libfsapfs_volume_key_bag_read_file_io_handle";
-	size_t data_offset                     = 0;
-	ssize_t read_count                     = 0;
-	uint64_t calculated_sector_number      = 0;
+	libfsapfs_encryption_context_t *encryption_context = NULL;
+	uint8_t *data                                      = NULL;
+	uint8_t *encrypted_data                            = NULL;
+	static char *function                              = "libfsapfs_volume_key_bag_read_file_io_handle";
+	ssize_t read_count                                 = 0;
 
 	if( volume_key_bag == NULL )
 	{
@@ -275,37 +272,6 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 
 		goto on_error;
 	}
-	if( libcaes_tweaked_context_initialize(
-	     &xts_context,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-		 "%s: unable to initialize XTS context.",
-		 function );
-
-		goto on_error;
-	}
-	if( libcaes_tweaked_context_set_keys(
-	     xts_context,
-	     LIBCAES_CRYPT_MODE_DECRYPT,
-	     volume_identifier,
-	     128,
-	     volume_identifier,
-	     128,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to set AES-XTS keys.",
-		 function );
-
-		goto on_error;
-	}
 	data = (uint8_t *) memory_allocate(
 	                    sizeof( uint8_t ) * data_size );
 
@@ -320,51 +286,70 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 
 		goto on_error;
 	}
-	if( memory_set(
-	     tweak_value,
-	     0,
-	     16 ) == NULL )
+	if( libfsapfs_encryption_context_initialize(
+	     &encryption_context,
+	     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
+	     error ) == -1 )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to copy block number to tweak value.",
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize encryption context.",
 		 function );
 
 		goto on_error;
 	}
-	calculated_sector_number = (uint64_t) file_offset / 512;
-
-	for( data_offset = 0;
-	     data_offset < data_size;
-	     data_offset += 512 )
+	if( libfsapfs_encryption_context_set_keys(
+	     encryption_context,
+	     volume_identifier,
+	     16,
+	     volume_identifier,
+	     16,
+	     error ) == -1 )
 	{
-		byte_stream_copy_from_uint64_little_endian(
-		 tweak_value,
-		 calculated_sector_number );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to set keys in encryption context.",
+		 function );
 
-		if( libcaes_crypt_xts(
-		     xts_context,
-		     LIBCAES_CRYPT_MODE_DECRYPT,
-		     tweak_value,
-		     16,
-		     &( encrypted_data[ data_offset ] ),
-		     512,
-		     &( data[ data_offset ] ),
-		     512,
-		     error ) == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
-			 "%s: unable to decrypt data.",
-			 function );
+		goto on_error;
+	}
+/* TODO use bytes_per_sector instead of hard coding 512 */
+	if( libfsapfs_encryption_context_crypt(
+	     encryption_context,
+	     LIBCAES_CRYPT_MODE_DECRYPT,
+	     encrypted_data,
+	     data_size,
+	     data,
+	     data_size,
+	     (uint64_t) ( file_offset / 512 ),
+	     512,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+		 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+		 "%s: unable to decrypt data.",
+		 function );
 
-			goto on_error;
-		}
-		calculated_sector_number += 1;
+		goto on_error;
+	}
+	if( libfsapfs_encryption_context_free(
+	     &encryption_context,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free encryption context.",
+		 function );
+
+		goto on_error;
 	}
 	memory_free(
 	 encrypted_data );
@@ -404,6 +389,12 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 	return( 1 );
 
 on_error:
+	if( encryption_context != NULL )
+	{
+		libfsapfs_encryption_context_free(
+		 &encryption_context,
+		 NULL );
+	}
 	if( data != NULL )
 	{
 		memory_free(

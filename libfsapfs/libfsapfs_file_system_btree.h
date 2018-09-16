@@ -39,6 +39,9 @@ struct libfsapfs_file_system_btree
 	/* Dummy
 	 */
 	int dummy;
+
+	int is_encrypted;
+	uint8_t volume_master_key[ 32 ];
 };
 
 int libfsapfs_file_system_btree_initialize(

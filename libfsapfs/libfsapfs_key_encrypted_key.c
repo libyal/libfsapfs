@@ -651,16 +651,17 @@ int libfsapfs_key_encrypted_key_read_data(
 				}
 				kek_metadata = (fsapfs_key_bag_kek_metadata_t *) &( wrapped_kek_object_data[ data_offset ] );
 
+				byte_stream_copy_to_uint32_little_endian(
+				 kek_metadata->encryption_method,
+				 key_encrypted_key->encryption_method );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 				if( libcnotify_verbose != 0 )
 				{
-					byte_stream_copy_to_uint32_little_endian(
-					 kek_metadata->encryption_type,
-					 value_32bit );
 					libcnotify_printf(
-					 "%s: encryption type\t\t\t: %" PRIu32 "\n",
+					 "%s: encryption method\t\t: %" PRIu32 "\n",
 					 function,
-					 value_32bit );
+					 key_encrypted_key->encryption_method );
 
 					byte_stream_copy_to_uint16_little_endian(
 					 kek_metadata->unknown1,
@@ -820,6 +821,17 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 
 		return( -1 );
 	}
+	if( key_encrypted_key->encryption_method != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported encryption method.",
+		 function );
+
+		return( -1 );
+	}
 	if( key == NULL )
 	{
 		libcerror_error_set(
@@ -961,6 +973,17 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid key encrypted key.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_encrypted_key->encryption_method != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported encryption method.",
 		 function );
 
 		return( -1 );

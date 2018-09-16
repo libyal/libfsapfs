@@ -183,6 +183,8 @@ The checksum algorithm:
 | 0x0000017 | | [yellow-background]*Unknown (WBCL?)*
 | | |
 3+| _Flags used in combination with some of the object types_
+| 0x1000000 | | [yellow-background]*Unknown (Is encrypted flag?)*
+| | |
 | 0x4000000 | | [yellow-background]*Unknown (Volume metadata flag?)*
 | 0x8000000 | | [yellow-background]*Unknown (Container metadata flag?)*
 | | |
@@ -908,14 +910,14 @@ The Wrapped Key Encrypted Key (KEK) metadata is 8 bytes of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 4 | | Encryption type +
-See section: <<encryption_types,Encryption types>>
+| 0 | 4 | | Encryption method +
+See section: <<encryption_methods,Encryption methods>>
 | 4 | 2 | | [yellow-background]*Unknown*
 | 6 | 1 | | [yellow-background]*Unknown*
 | 7 | 1 | | [yellow-background]*Unknown*
 |===
 
-===== [[encryption_types]]Encryption types
+===== [[encryption_methods]]Encryption methods
 
 [cols="1,1,5",options="header"]
 |===
