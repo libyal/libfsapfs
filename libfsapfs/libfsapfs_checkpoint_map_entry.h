@@ -1,5 +1,5 @@
 /*
- * The container physical map entry functions
+ * The checkpoint map entry functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_CONTAINER_PHYSICAL_MAP_ENTRY_H )
-#define _LIBFSAPFS_CONTAINER_PHYSICAL_MAP_ENTRY_H
+#if !defined( _LIBFSAPFS_CHECKPOINT_MAP_ENTRY_H )
+#define _LIBFSAPFS_CHECKPOINT_MAP_ENTRY_H
 
 #include <common.h>
 #include <types.h>
@@ -31,9 +31,9 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_container_physical_map_entry libfsapfs_container_physical_map_entry_t;
+typedef struct libfsapfs_checkpoint_map_entry libfsapfs_checkpoint_map_entry_t;
 
-struct libfsapfs_container_physical_map_entry
+struct libfsapfs_checkpoint_map_entry
 {
 	/* The object identifier
 	 */
@@ -44,16 +44,16 @@ struct libfsapfs_container_physical_map_entry
 	uint64_t physical_address;
 };
 
-int libfsapfs_container_physical_map_entry_initialize(
-     libfsapfs_container_physical_map_entry_t **container_physical_map_entry,
+int libfsapfs_checkpoint_map_entry_initialize(
+     libfsapfs_checkpoint_map_entry_t **checkpoint_map_entry,
      libcerror_error_t **error );
 
-int libfsapfs_container_physical_map_entry_free(
-     libfsapfs_container_physical_map_entry_t **container_physical_map_entry,
+int libfsapfs_checkpoint_map_entry_free(
+     libfsapfs_checkpoint_map_entry_t **checkpoint_map_entry,
      libcerror_error_t **error );
 
-int libfsapfs_container_physical_map_entry_read_data(
-     libfsapfs_container_physical_map_entry_t *container_physical_map_entry,
+int libfsapfs_checkpoint_map_entry_read_data(
+     libfsapfs_checkpoint_map_entry_t *checkpoint_map_entry,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
@@ -62,5 +62,5 @@ int libfsapfs_container_physical_map_entry_read_data(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_CONTAINER_PHYSICAL_MAP_ENTRY_H ) */
+#endif /* !defined( _LIBFSAPFS_CHECKPOINT_MAP_ENTRY_H ) */
 

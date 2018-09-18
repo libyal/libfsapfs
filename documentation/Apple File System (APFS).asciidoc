@@ -48,7 +48,8 @@ in the section entitled "GNU Free Documentation License".
 
 An APFS volume consists of:
 
-* Container superblock
+* Container
+** Zero or more volumes
 
 [cols="1,5",options="header"]
 |===
@@ -60,7 +61,8 @@ An APFS volume consists of:
 
 [NOTE]
 The date and values are signed to represent dates before January 1, 1970.
-Other sources are known to claim the date and time values are unsigned.
+Other sources are known to claim the date and time values are unsigned
+including Apple's reference documentation `[APPLE18]`.
 
 === Test version
 
@@ -130,26 +132,23 @@ The file system B-tree is encrypted using the ...
 
 APFS uses the "object" data type to distinguish between different data types.
 
-=== Object
+=== Object header
 
-The object is 32 bytes of size and consists of:
+The object header (obj_phys_t) is 32 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Checksum (o_cksum) +
 See section: <<object_checksum,Object checkum>>
-| 8 | 8 | | Object identifier (oid)
-| 16 | 8 | | Object version (xid)
-| 24 | 4 | | Object type +
+| 8 | 8 | | Object identifier (o_oid)
+| 16 | 8 | | Object transaction identifier (o_xid) +
+Identifier of the most recent transaction that this object was modified in
+| 24 | 4 | | Object type (o_type) +
 See section: <<object_types,Object types>>
-| 28 | 4 | | Object subtype +
+| 28 | 4 | | Object subtype (o_subtype) +
 See section: <<object_subtypes,Object subtypes>>
 |===
-
-[NOTE]
-Other sources refer to the object version as transaction or checkpoint
-identifier.
 
 === [[object_checksum]]Object checksum
 
@@ -158,35 +157,76 @@ The checksum algorithm:
 * first calculate a Fletcher-64 checksum of the object data without the checkum value and an initial value of 0
 * next calculate a Fletcher-64 checksum of the object data with the checkum value and an initial value of Fletcher-64 checksum calculated in the first step
 
-=== [[object_types]]Object types
+=== Object identifiers
+
+* For a physical object, its identifier is the logical block address on disk where the object is stored.
+* For an ephemeral object, its identifier is a number.
+* For a virtual object, its identifier is a number.
 
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x0000001 | | Container superblock
-| 0x0000002 | | B-Tree root
-| 0x0000003 | | B-Tree node
-| 0x0000004 | | [yellow-background]*Unknown (MTree?)*
-| 0x0000005 | | Space manager header
-| 0x0000006 | | [yellow-background]*Unknown (CAB?)*
-| 0x0000007 | | [yellow-background]*Unknown (Chunk information block? CIB)*
-| 0x0000008 | | [yellow-background]*Unknown (Space manager IP?)*
+| 0 | OID_INVALID | Invalid
+| 1 | OID_NX_SUPERBLOCK | Container superblock
 | | |
-| 0x000000b | | [yellow-background]*Unknown (BTreeRootPtr?)*
-| 0x000000c | | Container physical map (CPM)
-| 0x000000d | | Volume superblock 
+| 1024 | OID_RESERVED_COUNT | Number of reserved object identifiers
+|===
+
+=== [[object_types]]Object types
+
+The object type (o_type) value consists of a type and flags.
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000000 | OBJECT_TYPE_INVALID | Invalid
+| 0x00000001 | OBJECT_TYPE_NX_SUPERBLOCK | Container superblock +
+See section: <<container_superblock,Container superblock>>
+| 0x00000002 | OBJECT_TYPE_BTREE | B-Tree (root)
+| 0x00000003 | OBJECT_TYPE_BTREE_NODE | B-Tree node
+| 0x00000004 | | [yellow-background]*Unknown (MTree?)*
+| 0x00000005 | OBJECT_TYPE_SPACEMAN | Space manager header
+| 0x00000006 | OBJECT_TYPE_SPACEMAN_CAB | [yellow-background]*Unknown (Spacemanager CAB?)*
+| 0x00000007 | OBJECT_TYPE_SPACEMAN_CIB | [yellow-background]*Unknown (Spacemanager CIB (Chunk information block)?*
+| 0x00000008 | OBJECT_TYPE_SPACEMAN_BITMAP | Space manager bitmap
+| 0x00000009 | OBJECT_TYPE_SPACEMAN_FREE_QUEUE | Space manager free queue
+| 0x0000000a | OBJECT_TYPE_EXTENT_LIST_TREE | Extent list tree
+| 0x0000000b | OBJECT_TYPE_OMAP | Object map +
+See section: <<object_map,Object map>>
+| 0x0000000c | OBJECT_TYPE_CHECKPOINT_MAP | Checkpoint map
+| 0x0000000d | OBJECT_TYPE_FS | Volume superblock (File system)
+| 0x0000000e | OBJECT_TYPE_FS | File system tree
+| 0x0000000f | OBJECT_TYPE_BLOCKREFTREE | [yellow-background]*Unknown (Block reference tree)*
+| 0x00000010 | OBJECT_TYPE_SNAPMETATREE | [yellow-background]*Unknown (Snapshot metadata tree)*
+| 0x00000011 | OBJECT_TYPE_NX_REAPER | Reaper
+| 0x00000012 | OBJECT_TYPE_NX_REAP_LIST | Reaper list
+| 0x00000013 | OBJECT_TYPE_OMAP_SNAPSHOT | Object map snapshot
+| 0x00000014 | OBJECT_TYPE_EFI_JUMPSTART | EFI jumpstart +
+See section: <<efi_jumpstart,EFI jumpstart>>
+| 0x00000015 | OBJECT_TYPE_FUSION_MIDDLE_TREE | [yellow-background]*Unknown (Fusion middle tree?)*
+| 0x00000016 | OBJECT_TYPE_NX_FUSION_WBC | [yellow-background]*Unknown (Fusion WBC?)*
+| 0x00000017 | OBJECT_TYPE_NX_FUSION_WBC_LIST | [yellow-background]*Unknown (Fusion WBC list?)*
+| 0x00000018 | OBJECT_TYPE_ER_STATE | [yellow-background]*Unknown (ER state?)*
+| 0x00000019 | OBJECT_TYPE_GBITMAP | [yellow-background]*Unknown (G Bitmap?)*
+| 0x0000001a | OBJECT_TYPE_GBITMAP_TREE | [yellow-background]*Unknown (G Bitmap tree?)*
+| 0x0000001b | OBJECT_TYPE_GBITMAP_BLOCK | [yellow-background]*Unknown (G Bitmap block?)*
 | | |
-| 0x0000011 | | [yellow-background]*Unknown (NR?)*
-| 0x0000012 | | [yellow-background]*Unknown (NRL?)*
+| 0x000000ff | OBJECT_TYPE_TEST | [yellow-background]*Unknown (test?)*
 | | |
-| 0x0000016 | | [yellow-background]*Unknown (WBC?)*
-| 0x0000017 | | [yellow-background]*Unknown (WBCL?)*
+| 0x0000ffff | OBJECT_TYPE_MASK | Object type bitmask
 | | |
 3+| _Flags used in combination with some of the object types_
-| 0x1000000 | | [yellow-background]*Unknown (Is encrypted flag?)*
+| 0x08000000 | OBJ_NONPERSISTENT | [yellow-background]*Unknown (Non-persistent?)*
+| 0x10000000 | OBJ_ENCRYPTED | Is encrypted
+| 0x20000000 | OBJ_NOHEADER | Has no object (obj_phys_t) header
 | | |
-| 0x4000000 | | [yellow-background]*Unknown (Volume metadata flag?)*
-| 0x8000000 | | [yellow-background]*Unknown (Container metadata flag?)*
+| 0x00000000 | OBJ_VIRTUAL | Is virtual object
+| 0x40000000 | OBJ_PHYSICAL | Is physical object
+| 0x80000000 | OBJ_EPHEMERAL | Is ephemeral object
+| | |
+| 0xffff0000 | OBJECT_TYPE_FLAGS_MASK | Object type flags bitmask
+| 0xc0000000 | OBJ_STORAGETYPE_MASK | Object storage type bitmast
+| 0xf8000000 | OBJECT_TYPE_FLAGS_DEFINED_MASK | [yellow-background]*Unknown*
 | | |
 3+| _Object types without flags_
 | 0x6b657973 | | Container key bag
@@ -200,15 +240,7 @@ The object subtype is used by specific object types such as:
 * B-Tree root
 * B-Tree node
 
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
-| 0x0000009 | | [yellow-background]*Unknown* B-tree
-| | |
-| 0x000000b | | Object map B-tree
-| | |
-| 0x000000e | | File system B-tree
-|===
+The object subtypes are the same as the <<object_types,Object types>>.
 
 == [[btree]]B-tree
 
@@ -229,11 +261,11 @@ A B-tree consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x00000002 +
 0x40000002 | Object type +
 See section: <<object_types,Object types>>
@@ -246,11 +278,11 @@ See section: <<object_subtypes,Object subtypes>>
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x00000003 +
 0x40000003 | Object type +
 See section: <<object_types,Object types>>
@@ -371,8 +403,8 @@ The container consists of:
 
 * current container superblock
 * stored in the container metadata area:
-** current container physical map
-** previous container physical map(s)
+** current checkpoint map
+** previous checkpoint map(s)
 ** previous container superblock(s)
 * stored in the container:
 ** space manager
@@ -382,18 +414,18 @@ The container consists of:
 ** zero or more volumes
 * [yellow-background]*backup of current container superblock?*
 
-=== Container superblock
+=== [[container_superblock]]Container superblock
 
 The container superblock is [yellow-background]*unknown* of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000001 | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
@@ -401,13 +433,16 @@ See section: <<object_types,Object types>>
 | 32 | 4 | "NXSB" | Signature (nx_magix)
 | 36 | 4 | | Block size (nx_block_size)
 | 40 | 8 | | Number of blocks (nx_block_count)
-| 48 | 8 | | Compatible feature flags (nx_features)
-| 56 | 8 | | Read-only compatible feature flags (nx_read_only_compatible_features)
-| 64 | 8 | | Incompatible feature flags (nx_incompatible_features)
+| 48 | 8 | | Compatible feature flags (nx_features) +
+See section: <<container_feature_flags,Container feature flags>>
+| 56 | 8 | | Read-only compatible feature flags (nx_readonly_compatible_features) +
+See section: <<container_readonly_feature_flags,Container read-only feature flags>>
+| 64 | 8 | | Incompatible feature flags (nx_incompatible_features) +
+See section: <<container_incompatible_feature_flags,Container incompatible feature flags>>
 | 72 | 16 | | Container identifier (nx_uuid) +
 Contains a UUID stored in big-endian
 | 88 | 8 | | Next (available) object identifier (nx_next_oid)
-| 96 | 8 | | [yellow-background]*Next (available) ??? (nx_next_xid)*
+| 96 | 8 | | Next (available) transaction identifier (nx_next_xid)
 | 104 | 4 | | Metadata area number of blocks (nx_xp_desc_blocks) +
 Contains size, in the number of blocks, of the metadata area
 | 108 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_data_blocks)* +
@@ -423,32 +458,40 @@ Contains the block number of the ??? B-tree
 | 144 | 4 | | [yellow-background]*Unknown (nx_xp_data_index)*
 | 148 | 4 | | [yellow-background]*Unknown (nx_xp_data_len)*
 | 152 | 8 | | Space manager object identifier (nx_spaceman_oid) +
-Contains a object identifier that can be resolved in the container physical map
+Contains a object identifier that can be resolved in the checkpoint map
 | 160 | 8 | | Object map block number (nx_omap_oid) +
 Contains a block number relative to the start of the "physical" volume +
 See section: <<object_map,Object map>>
 | 168 | 8 | | Reaper object identifier (nx_reaper_oid) +
-Contains a object identifier that can be resolved in the container physical map
-| 176 | 4 | | [yellow-background]*Unknown (unk_B0)*
+Contains a object identifier that can be resolved in the checkpoint map
+| 176 | 4 | | [yellow-background]*Unknown (nx_test_type)*
 | 180 | 4 | | Maxmum number of volumes (nx_max_file_systems) +
 Contains the maximum number of volumes supported by the container
 | 184 | 100 x 8 = 800 | | Array of volume object identifiers (nx_fs_oid)
-| 984 | 32 x 8 = 256 | | [yellow-background]*Unknown*
+| 984 | 32 x 8 = 256 | | [yellow-background]*Unknown (nx_counters)*
+4+| _Unknown (nx_blocked_out_prange)_
 | 1240 | 8 | | [yellow-background]*Unknown (nx_blocked_out_base)*
 | 1248 | 8 | | [yellow-background]*Unknown (nx_blocked_out_blocks)*
-| 1254 | 8 | | [yellow-background]*Unknown*
-| 1262 | 8 | | [yellow-background]*Unknown*
-| 1270 | 8 | | [yellow-background]*Unknown (nx_efi_jumpstart_paddr)*
-| 1278 | 8 | | [yellow-background]*Unknown*
-| 1286 | 8 | | [yellow-background]*Unknown*
+4+|
+| 1254 | 8 | | [yellow-background]*Unknown (nx_evict_mapping_tree_oid)*
+| 1262 | 8 | | [yellow-background]*Unknown (nx_flags)* +
+See section: <<container_flags,Container flags>>
+| 1270 | 8 | | [yellow-background]*Unknown (nx_efi_jumpstart)* +
+Contains a block number relative to the start of the "physical" volume +
+| 1278 | 16 | | [yellow-background]*Unknown (nx_fusion_uuid)*
+4+| _Unknown (nx_keylocker)_
 | 1294 | 8 | | Container key bag data block number (nx_keybag_base)
 See section: <<key_bag,Key bag>>
 | 1302 | 8 | | Contaner key bag data number of blocks (nx_keybag_blocks)
-| 1310 | 5 x 8 = 40 | | [yellow-background]*Unknown (nx_ephemeral_info)*
+4+|
+| 1310 | 4 x 8 = 40 | | [yellow-background]*Unknown (nx_ephemeral_info)*
+| 1342 | 8 | | [yellow-background]*Unknown (nx_test_oid)*
 | 1350 | 8 | | [yellow-background]*Unknown (nx_fusion_mt_oid)*
 | 1358 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_oid)*
+4+| _Unknown (nx_fusion_wbc)_
 | 1366 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_base)*
 | 1374 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_blocks)*
+4+|
 | 1382 | ... | | [yellow-background]*Unknown (empty values)*
 |===
 
@@ -456,54 +499,205 @@ See section: <<key_bag,Key bag>>
 Presumably NXSB is an abbreviation of NX superblock. At this point it is
 unclear what NX stands for.
 
-=== Container physical map (CPM)
+==== [[container_flags]]Container flags
 
-The container physical map contains a mapping between container metadata object
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | NX_RESERVED_1 | [yellow-background]*Unknown (reserved)*
+| 0x00000002 | NX_RESERVED_2 | [yellow-background]*Unknown (reserved)*
+| 0x00000004 | NX_CRYPTO_SW | The encryption is performed in software
+|===
+
+==== [[container_feature_flags]]Container feature flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x0000000000000001 | NX_FEATURE_DEFRAG | Supports defragmentation
+| 0x0000000000000002 | NX_FEATURE_LCFD | Use low-capacity Fusion Drive mode
+|===
+
+==== [[container_readonly_feature_flags]]Container read-only feature flags
+
+Current no read-only feature flags are defined
+
+==== [[container_incompatible_feature_flags]]Container incompatible feature flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x0000000000000001 | NX_INCOMPAT_VERSION1 | Pre-release version 1 of APFS
+| 0x0000000000000002 | NX_INCOMPAT_VERSION2 | Release version 2 of APFS
+| | |
+| 0x0000000000000100 | NX_INCOMPAT_FUSION | Supports Fusion Drives
+|===
+
+[NOTE]
+According to `[APPLE18]` the pre-release version 1 and release version 2 are
+incompatble.
+
+==== Notes
+
+....
+Counter indexes
+NX_CNTR_OBJ_CKSUM_SET = 0,
+NX_CNTR_OBJ_CKSUM_FAIL = 1,
+....
+
+=== Checkpoint map
+
+The checkpoint map contains a mapping between container metadata object
 identifiers and their location in the volume.
 
-The container physical map (CPM) is 4080 bytes of size and consists of:
+==== Checkpoint map object
+
+The checkpoint map object (checkpoint_map_phys_t) is 4080 bytes of size and
+consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x4000000c | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
 4+| _Object values_
-| 32 | 4 | | Flags (cpm_flags)
+| 32 | 4 | | Flags (cpm_flags) +
+See section: <<checkpoint_flags,Checkpoint flags>>
 | 36 | 4 | | Number of entries (cpm_count)
 | 40 | 101 x 40 = 4040 | | Array of map entries (cpm_map) +
-See sections: <<cpm_entry,Container physical map (CPM) entry>>
+See sections: <<checkpoint_map_entry,Checkpoint map entry>>
 |===
 
-[NOTE]
-Presumably CPM is short for container physical map, though other sources
-refer to this as checkpoint map.
+==== [[checkpoint_flags]]Checkpoint flags
 
-==== [[cpm_entry]]Container physical map (CPM) entry
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | CHECKPOINT_MAP_LAST | Last checkpoint map object
+|===
 
-The Container physical map (CPM) entry entry is 40 bytes of size and consists
-of:
+==== [[checkpoint_map_entry]]Checkpoint map entry
+
+The checkpoint map (checkpoint_mapping_t) entry entry is 40 bytes of size and
+consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
-| 0 | 4 | | (Container) object type (cpm_type)
+4+| _Object header_
+| 0 | 4 | | (Container) object type (cpm_type) +
+See section: <<object_types,Object types>>
 | 4 | 4 | | (Container) object subtype (cpm_subtype)
 | 8 | 4 | | Size (cpm_size) +
 Contains number of bytes
-| 12 | 4 | | [yellow-background]*Unknown*
+| 12 | 4 | | [yellow-background]*Padding (cpm_pad)*
 | 16 | 8 | | File system object indentifier (cpm_fs_oid)
 | 24 | 8 | | (Container) object identifier (cpm_oid)
 | 32 | 8 | | Physical address (cpm_paddr) +
 Contains a block number relative to the start of the "physical" volume
 |===
+
+== [[object_map]]Object map
+
+The object map contains a mapping between volume object identifiers and their
+"physical" location.
+
+The object map consists of:
+
+* object map (object)
+* object map B-tree
+
+=== Object map object
+
+The object map object (omap_phys_t) is 88 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object header_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object transaction identifier (xid)
+| 24 | 4 | 0x4000000b | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000000 | Object subtype
+4+| _Object values_
+| 32 | 4 | | Flags (om_flags) +
+See section: <<object_map_flags,Object map flags>>
+| 36 | 4 | | [yellow-background]*Unknown (om_snap_count)*
+| 40 | 4 | | [yellow-background]*Unknown (om_tree_type)*
+| 44 | 4 | | [yellow-background]*Unknown (om_snapshot_tree_type)*
+| 48 | 8 | | Object map B-tree object identifier (om_tree_oid)
+| 56 | 8 | | [yellow-background]*Unknown object identifier (om_snapshot_tree_oid)*
+| 64 | 8 | | [yellow-background]*Unknown transaction identifier (om_most_recent_snap)*
+| 72 | 8 | | [yellow-background]*Unknown transaction identifier (om_pending_revert_min)*
+| 80 | 8 | | [yellow-background]*Unknown transaction identifier (om_pending_revert_max)*
+|===
+
+==== [[object_map_flags]]Object map flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | OMAP_MANUALLY_MANAGED | [yellow-background]*Unknown*
+| 0x00000002 | OMAP_ENCRYPTING | [yellow-background]*Unknown*
+| 0x00000004 | OMAP_DECRYPTING | [yellow-background]*Unknown*
+| 0x00000008 | OMAP_KEYROLLING | [yellow-background]*Unknown*
+| 0x00000010 | OMAP_CRYPTO_GENERATION | [yellow-background]*Unknown*
+|===
+
+=== Object map B-tree
+
+The object map values are stored in <<btree,B-tree>>.
+
+==== Object map B-tree key
+
+The object map B-tree key (omap_key_t) is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Key object identifier (ok_oid)
+| 8 | 8 | | Key object transaction identifier (ok_xid)
+|===
+
+==== Object map B-tree value
+
+The object map B-tree value (omap_val_t) is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Value object flags (ov_flags) +
+See section: <<object_map_btree_value_flags,Object map B-tree value flags>>
+| 4 | 4 | | Value object size (ov_size)
+| 8 | 8 | | Value object physical addresss (ov_paddr) +
+Contains a block number relative to the start of the "physical" volume
+|===
+
+===== [[object_map_btree_value_flags]]Object map B-tree value flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | OMAP_VAL_DELETED | [yellow-background]*Unknown*
+| 0x00000002 | OMAP_VAL_SAVED | [yellow-background]*Unknown*
+| 0x00000004 | OMAP_VAL_ENCRYPTED | [yellow-background]*Unknown*
+| 0x00000008 | OMAP_VAL_NOHEADER | [yellow-background]*Unknown*
+| 0x00000010 | OMAP_VAL_CRYPTO_GENERATION | [yellow-background]*Unknown*
+|===
+
+==== Notes
+
+TODO document omap_snapshot_t
+TODO document Object Map Reaper Phases
 
 === Space manager
 
@@ -512,11 +706,11 @@ The space manager is [yellow-background]*unknown* of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000005 | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
@@ -591,11 +785,11 @@ The reaper is [yellow-background]*unknown* of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000011 | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
@@ -622,11 +816,11 @@ The reaper list entry is [yellow-background]*unknown* of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000012 | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
@@ -657,78 +851,7 @@ The reaper list entry is 40 bytes of size and consists of:
 | 16 | 8 | | Object identifier (oid)
 | 24 | 8 | | Physical address (paddr) +
 Contains a block number relative to the start of the "physical" volume
-| 32 | 8 | | Object version (xid)
-|===
-
-== [[object_map]]Object map
-
-The object map contains a mapping between volume object identifiers and their
-"physical" location.
-
-The object map consists of:
-
-* object map (object)
-* object map B-tree
-
-=== Object map object
-
-The object map 72 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-4+| _Object_
-| 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
-| 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
-| 24 | 4 | 0x4000000b | Object type +
-See section: <<object_types,Object types>>
-| 28 | 4 | 0x00000000 | Object subtype
-4+| _Object values_
-| 32 | 4 | | [yellow-background]*Unknown*
-| 36 | 4 | | [yellow-background]*Unknown*
-| 40 | 4 | | [yellow-background]*Unknown (type_1)*
-| 44 | 4 | | [yellow-background]*Unknown (type_2)*
-| 48 | 8 | | Object map B-tree object identifier (om_tree_oid)
-| 56 | 8 | | [yellow-background]*Unknown (oms_tree_oid)*
-| 64 | 8 | | [yellow-background]*Unknown (oms_tree_xid)*
-|===
-
-=== Object map B-tree
-
-The object map values are stored in <<btree,B-tree>>.
-
-==== Object map B-tree key
-
-The object map B-tree key is 16 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 8 | | Key object identifier (ok_oid)
-| 8 | 8 | | Key object version (ok_xid)
-|===
-
-==== Object map B-tree value
-
-The object map B-tree value is 16 bytes of size and consists of:
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 4 | | Value object flags (ov_flags) +
-See section: <<object_map_btree_value_flags,Object map B-tree value flags>>
-| 4 | 4 | | Value object size (ov_size)
-| 8 | 8 | | Value object physical addresss (ov_paddr) +
-Contains a block number relative to the start of the "physical" volume
-|===
-
-===== [[object_map_btree_value_flags]]Object map B-tree value flags
-
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
+| 32 | 8 | | Object transaction identifier (xid)
 |===
 
 == [[key_bag]]Key bag
@@ -748,11 +871,11 @@ The container key bag object is 32 bytes of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x6b657973 ("syek") | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
@@ -767,11 +890,11 @@ The volume key bag object is 32 bytes of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x72656373 ("scer") | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
@@ -948,16 +1071,17 @@ The volume consists of:
 
 === Volume superblock
 
-The volume superblock is [yellow-background]*unknown* of size and consists of:
+The volume superblock (apfs_superblock_t) is [yellow-background]*unknown* of
+size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object_
+4+| _Object header_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
-| 16 | 8 | | Object version (xid)
+| 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x0000000d | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
@@ -1209,7 +1333,46 @@ Contains an UTF-8 encoded string with an end-of-string character
 00000010: 04 00                                              ..
 ....
 
+== [[efi_jumpstart]]EFI jumpstart
+
+The EFI jumpstart (nx_efi_jumpstart_t) is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object header_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object transaction identifier (xid)
+| 24 | 4 | 0x00000014 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000000 | Object subtype
+4+| _Object values_
+| 32 | 4 | "RDSJ" | Signature (nej_magic)
+| 36 | 4 | 1 | Format version (nej_version)
+| 40 | 4 | | [yellow-background]*Unknown (nej_efi_file_len?)*
+| 44 | 4 | | Number of extents (nej_num_extents)
+| 48 | 16 x 8 | | [yellow-background]*Unknown (nej_reserved?)*
+| 176 | number of extents x 16 | | Extents (nej_rec_extents) +
+Contains the extents where the EFI driver is stored +
+See section: <<efi_jumpstart_extent,EFI jumpstart extent>>
+|===
+
+== [[efi_jumpstart_extent]]EFI jumpstart extent
+
+The EFI jumpstart extent (prange_t) is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Block number
+| 8 | 8 | | Number of blocks
+|===
+
 == Notes
+
+TODO describe evict_mapping_val_t
 
 ....
 fsck_apfs -n apfs_empty.raw
@@ -1264,6 +1427,16 @@ find /Volumes/SingleVolume
 :numbered!:
 [appendix]
 == References
+
+`[APPLE18]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | Apple File System Reference
+| Author(s): | Apple
+| Date: | September 2018
+| URL: | https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf
+|===
 
 `[HANSEN17]`
 

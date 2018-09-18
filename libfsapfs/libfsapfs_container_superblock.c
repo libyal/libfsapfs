@@ -424,10 +424,10 @@ int libfsapfs_container_superblock_read_data(
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->object_version,
+		 ( (fsapfs_container_superblock_t *) data )->object_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object version\t\t\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -510,10 +510,10 @@ int libfsapfs_container_superblock_read_data(
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->unknown3,
+		 ( (fsapfs_container_superblock_t *) data )->next_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown3\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: next transaction identifier\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

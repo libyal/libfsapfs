@@ -190,19 +190,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_checkpoint_map.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_checkpoint_map_entry.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container_key_bag.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map_entry.c"
 				>
 			</File>
 			<File
@@ -304,7 +304,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\fsapfs_container_physical_map.h"
+				RelativePath="..\..\libfsapfs\fsapfs_checkpoint_map.h"
 				>
 			</File>
 			<File
@@ -356,19 +356,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_checkpoint_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_checkpoint_map_entry.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container_key_bag.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_container_physical_map_entry.h"
 				>
 			</File>
 			<File

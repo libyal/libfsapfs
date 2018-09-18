@@ -43,10 +43,10 @@ struct fsapfs_object_map
 	 */
 	uint8_t object_identifier[ 8 ];
 
-	/* The object version
+	/* The object transaction identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_version[ 8 ];
+	uint8_t object_transaction_identifier[ 8 ];
 
 	/* The object type
 	 * Consists of 4 bytes
@@ -103,10 +103,10 @@ struct fsapfs_object_map_btree_key
 	 */
 	uint8_t object_identifier[ 8 ];
 
-	/* The key object version
+	/* The key object transaction identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_version[ 8 ];
+	uint8_t object_transaction_identifier[ 8 ];
 };
 
 typedef struct fsapfs_object_map_btree_value fsapfs_object_map_btree_value_t;

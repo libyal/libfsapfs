@@ -336,10 +336,10 @@ int libfsapfs_container_reaper_read_data(
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_reaper_t *) data )->object_version,
+		 ( (fsapfs_container_reaper_t *) data )->object_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object version\t\t\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

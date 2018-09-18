@@ -1,5 +1,5 @@
 /*
- * Library container_physical_map_entry type test program
+ * Library checkpoint_map_entry type test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,9 +33,9 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_container_physical_map_entry.h"
+#include "../libfsapfs/libfsapfs_checkpoint_map_entry.h"
 
-uint8_t fsapfs_test_container_physical_map_entry_data1[ 40 ] = {
+uint8_t fsapfs_test_checkpoint_map_entry_data1[ 40 ] = {
 	0x05, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -43,26 +43,26 @@ uint8_t fsapfs_test_container_physical_map_entry_data1[ 40 ] = {
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_container_physical_map_entry_initialize function
+/* Tests the libfsapfs_checkpoint_map_entry_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_container_physical_map_entry_initialize(
+int fsapfs_test_checkpoint_map_entry_initialize(
      void )
 {
-	libcerror_error_t *error                                               = NULL;
-	libfsapfs_container_physical_map_entry_t *container_physical_map_entry = NULL;
-	int result                                                             = 0;
+	libcerror_error_t *error                               = NULL;
+	libfsapfs_checkpoint_map_entry_t *checkpoint_map_entry = NULL;
+	int result                                             = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                                        = 1;
-	int number_of_memset_fail_tests                                        = 1;
-	int test_number                                                        = 0;
+	int number_of_malloc_fail_tests                        = 1;
+	int number_of_memset_fail_tests                        = 1;
+	int test_number                                        = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_container_physical_map_entry_initialize(
-	          &container_physical_map_entry,
+	result = libfsapfs_checkpoint_map_entry_initialize(
+	          &checkpoint_map_entry,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -71,15 +71,15 @@ int fsapfs_test_container_physical_map_entry_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "container_physical_map_entry",
-	 container_physical_map_entry );
+	 "checkpoint_map_entry",
+	 checkpoint_map_entry );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsapfs_container_physical_map_entry_free(
-	          &container_physical_map_entry,
+	result = libfsapfs_checkpoint_map_entry_free(
+	          &checkpoint_map_entry,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -88,8 +88,8 @@ int fsapfs_test_container_physical_map_entry_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "container_physical_map_entry",
-	 container_physical_map_entry );
+	 "checkpoint_map_entry",
+	 checkpoint_map_entry );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -97,7 +97,7 @@ int fsapfs_test_container_physical_map_entry_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_container_physical_map_entry_initialize(
+	result = libfsapfs_checkpoint_map_entry_initialize(
 	          NULL,
 	          &error );
 
@@ -113,10 +113,10 @@ int fsapfs_test_container_physical_map_entry_initialize(
 	libcerror_error_free(
 	 &error );
 
-	container_physical_map_entry = (libfsapfs_container_physical_map_entry_t *) 0x12345678UL;
+	checkpoint_map_entry = (libfsapfs_checkpoint_map_entry_t *) 0x12345678UL;
 
-	result = libfsapfs_container_physical_map_entry_initialize(
-	          &container_physical_map_entry,
+	result = libfsapfs_checkpoint_map_entry_initialize(
+	          &checkpoint_map_entry,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -131,7 +131,7 @@ int fsapfs_test_container_physical_map_entry_initialize(
 	libcerror_error_free(
 	 &error );
 
-	container_physical_map_entry = NULL;
+	checkpoint_map_entry = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -139,22 +139,22 @@ int fsapfs_test_container_physical_map_entry_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_container_physical_map_entry_initialize with malloc failing
+		/* Test libfsapfs_checkpoint_map_entry_initialize with malloc failing
 		 */
 		fsapfs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsapfs_container_physical_map_entry_initialize(
-		          &container_physical_map_entry,
+		result = libfsapfs_checkpoint_map_entry_initialize(
+		          &checkpoint_map_entry,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsapfs_test_malloc_attempts_before_fail = -1;
 
-			if( container_physical_map_entry != NULL )
+			if( checkpoint_map_entry != NULL )
 			{
-				libfsapfs_container_physical_map_entry_free(
-				 &container_physical_map_entry,
+				libfsapfs_checkpoint_map_entry_free(
+				 &checkpoint_map_entry,
 				 NULL );
 			}
 		}
@@ -166,8 +166,8 @@ int fsapfs_test_container_physical_map_entry_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "container_physical_map_entry",
-			 container_physical_map_entry );
+			 "checkpoint_map_entry",
+			 checkpoint_map_entry );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -181,22 +181,22 @@ int fsapfs_test_container_physical_map_entry_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_container_physical_map_entry_initialize with memset failing
+		/* Test libfsapfs_checkpoint_map_entry_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_container_physical_map_entry_initialize(
-		          &container_physical_map_entry,
+		result = libfsapfs_checkpoint_map_entry_initialize(
+		          &checkpoint_map_entry,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
 		{
 			fsapfs_test_memset_attempts_before_fail = -1;
 
-			if( container_physical_map_entry != NULL )
+			if( checkpoint_map_entry != NULL )
 			{
-				libfsapfs_container_physical_map_entry_free(
-				 &container_physical_map_entry,
+				libfsapfs_checkpoint_map_entry_free(
+				 &checkpoint_map_entry,
 				 NULL );
 			}
 		}
@@ -208,8 +208,8 @@ int fsapfs_test_container_physical_map_entry_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "container_physical_map_entry",
-			 container_physical_map_entry );
+			 "checkpoint_map_entry",
+			 checkpoint_map_entry );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -229,19 +229,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( container_physical_map_entry != NULL )
+	if( checkpoint_map_entry != NULL )
 	{
-		libfsapfs_container_physical_map_entry_free(
-		 &container_physical_map_entry,
+		libfsapfs_checkpoint_map_entry_free(
+		 &checkpoint_map_entry,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_container_physical_map_entry_free function
+/* Tests the libfsapfs_checkpoint_map_entry_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_container_physical_map_entry_free(
+int fsapfs_test_checkpoint_map_entry_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -249,7 +249,7 @@ int fsapfs_test_container_physical_map_entry_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_container_physical_map_entry_free(
+	result = libfsapfs_checkpoint_map_entry_free(
 	          NULL,
 	          &error );
 
@@ -276,20 +276,20 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_container_physical_map_entry_read_data function
+/* Tests the libfsapfs_checkpoint_map_entry_read_data function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_container_physical_map_entry_read_data(
+int fsapfs_test_checkpoint_map_entry_read_data(
      void )
 {
-	libcerror_error_t *error                                               = NULL;
-	libfsapfs_container_physical_map_entry_t *container_physical_map_entry = NULL;
-	int result                                                             = 0;
+	libcerror_error_t *error                               = NULL;
+	libfsapfs_checkpoint_map_entry_t *checkpoint_map_entry = NULL;
+	int result                                             = 0;
 
 	/* Initialize test
 	 */
-	result = libfsapfs_container_physical_map_entry_initialize(
-	          &container_physical_map_entry,
+	result = libfsapfs_checkpoint_map_entry_initialize(
+	          &checkpoint_map_entry,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -298,8 +298,8 @@ int fsapfs_test_container_physical_map_entry_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "container_physical_map_entry",
-	 container_physical_map_entry );
+	 "checkpoint_map_entry",
+	 checkpoint_map_entry );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -307,9 +307,9 @@ int fsapfs_test_container_physical_map_entry_read_data(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_container_physical_map_entry_read_data(
-	          container_physical_map_entry,
-	          fsapfs_test_container_physical_map_entry_data1,
+	result = libfsapfs_checkpoint_map_entry_read_data(
+	          checkpoint_map_entry,
+	          fsapfs_test_checkpoint_map_entry_data1,
 	          40,
 	          &error );
 
@@ -324,9 +324,9 @@ int fsapfs_test_container_physical_map_entry_read_data(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_container_physical_map_entry_read_data(
+	result = libfsapfs_checkpoint_map_entry_read_data(
 	          NULL,
-	          fsapfs_test_container_physical_map_entry_data1,
+	          fsapfs_test_checkpoint_map_entry_data1,
 	          40,
 	          &error );
 
@@ -342,8 +342,8 @@ int fsapfs_test_container_physical_map_entry_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_physical_map_entry_read_data(
-	          container_physical_map_entry,
+	result = libfsapfs_checkpoint_map_entry_read_data(
+	          checkpoint_map_entry,
 	          NULL,
 	          40,
 	          &error );
@@ -360,9 +360,9 @@ int fsapfs_test_container_physical_map_entry_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_physical_map_entry_read_data(
-	          container_physical_map_entry,
-	          fsapfs_test_container_physical_map_entry_data1,
+	result = libfsapfs_checkpoint_map_entry_read_data(
+	          checkpoint_map_entry,
+	          fsapfs_test_checkpoint_map_entry_data1,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
@@ -378,9 +378,9 @@ int fsapfs_test_container_physical_map_entry_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_physical_map_entry_read_data(
-	          container_physical_map_entry,
-	          fsapfs_test_container_physical_map_entry_data1,
+	result = libfsapfs_checkpoint_map_entry_read_data(
+	          checkpoint_map_entry,
+	          fsapfs_test_checkpoint_map_entry_data1,
 	          0,
 	          &error );
 
@@ -398,8 +398,8 @@ int fsapfs_test_container_physical_map_entry_read_data(
 
 	/* Clean up
 	 */
-	result = libfsapfs_container_physical_map_entry_free(
-	          &container_physical_map_entry,
+	result = libfsapfs_checkpoint_map_entry_free(
+	          &checkpoint_map_entry,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -408,8 +408,8 @@ int fsapfs_test_container_physical_map_entry_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "container_physical_map_entry",
-	 container_physical_map_entry );
+	 "checkpoint_map_entry",
+	 checkpoint_map_entry );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -423,10 +423,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( container_physical_map_entry != NULL )
+	if( checkpoint_map_entry != NULL )
 	{
-		libfsapfs_container_physical_map_entry_free(
-		 &container_physical_map_entry,
+		libfsapfs_checkpoint_map_entry_free(
+		 &checkpoint_map_entry,
 		 NULL );
 	}
 	return( 0 );
@@ -452,16 +452,16 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_container_physical_map_entry_initialize",
-	 fsapfs_test_container_physical_map_entry_initialize );
+	 "libfsapfs_checkpoint_map_entry_initialize",
+	 fsapfs_test_checkpoint_map_entry_initialize );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_container_physical_map_entry_free",
-	 fsapfs_test_container_physical_map_entry_free );
+	 "libfsapfs_checkpoint_map_entry_free",
+	 fsapfs_test_checkpoint_map_entry_free );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_container_physical_map_entry_read_data",
-	 fsapfs_test_container_physical_map_entry_read_data );
+	 "libfsapfs_checkpoint_map_entry_read_data",
+	 fsapfs_test_checkpoint_map_entry_read_data );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

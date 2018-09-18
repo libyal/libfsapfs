@@ -25,8 +25,8 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_checkpoint_map.h"
 #include "libfsapfs_container_key_bag.h"
-#include "libfsapfs_container_physical_map.h"
 #include "libfsapfs_container_superblock.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_io_handle.h"
@@ -54,7 +54,7 @@ struct libfsapfs_internal_container
 
 	/* The container physical map
 	 */
-	libfsapfs_container_physical_map_t *physical_map;
+	libfsapfs_checkpoint_map_t *physical_map;
 
 	/* The container object map B-tree
 	 */

@@ -127,10 +127,10 @@ stamp-h[1-9]
 /tests/fsapfs_test_btree_footer
 /tests/fsapfs_test_btree_header
 /tests/fsapfs_test_btree_root
+/tests/fsapfs_test_checkpoint_map
+/tests/fsapfs_test_checkpoint_map_entry
 /tests/fsapfs_test_container
 /tests/fsapfs_test_container_key_bag
-/tests/fsapfs_test_container_physical_map
-/tests/fsapfs_test_container_physical_map_entry
 /tests/fsapfs_test_container_reaper
 /tests/fsapfs_test_container_space_manager
 /tests/fsapfs_test_container_superblock

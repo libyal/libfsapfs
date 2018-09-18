@@ -195,8 +195,8 @@ int libfsapfs_object_map_descriptor_read_btree_key_data(
 	 object_map_descriptor->identifier );
 
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsapfs_object_map_btree_key_t *) data )->object_version,
-	 object_map_descriptor->version );
+	 ( (fsapfs_object_map_btree_key_t *) data )->object_transaction_identifier,
+	 object_map_descriptor->transaction_identifier );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -207,9 +207,9 @@ int libfsapfs_object_map_descriptor_read_btree_key_data(
 		 object_map_descriptor->identifier );
 
 		libcnotify_printf(
-		 "%s: object version\t\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t: %" PRIu64 "\n",
 		 function,
-		 object_map_descriptor->version );
+		 object_map_descriptor->transaction_identifier );
 
 		libcnotify_printf(
 		 "\n" );

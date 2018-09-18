@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_container_physical_map"
-	ProjectGUID="{48B9EB1B-FE24-4D76-816D-D8981025A72D}"
-	RootNamespace="fsapfs_test_container_physical_map"
+	Name="fsapfs_test_checkpoint_map"
+	ProjectGUID="{D843D749-9B47-4833-8643-B08EE7FB1DF3}"
+	RootNamespace="fsapfs_test_checkpoint_map"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_container_physical_map.c"
+				RelativePath="..\..\tests\fsapfs_test_checkpoint_map.c"
 				>
 			</File>
 			<File

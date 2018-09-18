@@ -39,9 +39,9 @@ struct libfsapfs_object_map_descriptor
 	 */
 	uint64_t identifier;
 
-	/* The version
+	/* The transaction identifier
 	 */
-	uint64_t version;
+	uint64_t transaction_identifier;
 
 	/* The flags
 	 */

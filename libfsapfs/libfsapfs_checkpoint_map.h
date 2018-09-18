@@ -1,5 +1,5 @@
 /*
- * The container physical map functions
+ * The checkpoint map functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_CONTAINER_PHYSICAL_MAP_H )
-#define _LIBFSAPFS_CONTAINER_PHYSICAL_MAP_H
+#if !defined( _LIBFSAPFS_CHECKPOINT_MAP_H )
+#define _LIBFSAPFS_CHECKPOINT_MAP_H
 
 #include <common.h>
 #include <types.h>
@@ -33,37 +33,37 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_container_physical_map libfsapfs_container_physical_map_t;
+typedef struct libfsapfs_checkpoint_map libfsapfs_checkpoint_map_t;
 
-struct libfsapfs_container_physical_map
+struct libfsapfs_checkpoint_map
 {
 	/* The entries array
 	 */
 	libcdata_array_t *entries_array;
 };
 
-int libfsapfs_container_physical_map_initialize(
-     libfsapfs_container_physical_map_t **container_physical_map,
+int libfsapfs_checkpoint_map_initialize(
+     libfsapfs_checkpoint_map_t **checkpoint_map,
      libcerror_error_t **error );
 
-int libfsapfs_container_physical_map_free(
-     libfsapfs_container_physical_map_t **container_physical_map,
+int libfsapfs_checkpoint_map_free(
+     libfsapfs_checkpoint_map_t **checkpoint_map,
      libcerror_error_t **error );
 
-int libfsapfs_container_physical_map_read_file_io_handle(
-     libfsapfs_container_physical_map_t *container_physical_map,
+int libfsapfs_checkpoint_map_read_file_io_handle(
+     libfsapfs_checkpoint_map_t *checkpoint_map,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error );
 
-int libfsapfs_container_physical_map_read_data(
-     libfsapfs_container_physical_map_t *container_physical_map,
+int libfsapfs_checkpoint_map_read_data(
+     libfsapfs_checkpoint_map_t *checkpoint_map,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libfsapfs_container_physical_map_get_physical_address_by_object_identifier(
-     libfsapfs_container_physical_map_t *container_physical_map,
+int libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
+     libfsapfs_checkpoint_map_t *checkpoint_map,
      uint64_t object_identifier,
      uint64_t *physical_address,
      libcerror_error_t **error );
@@ -72,5 +72,5 @@ int libfsapfs_container_physical_map_get_physical_address_by_object_identifier(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_CONTAINER_PHYSICAL_MAP_H ) */
+#endif /* !defined( _LIBFSAPFS_CHECKPOINT_MAP_H ) */
 

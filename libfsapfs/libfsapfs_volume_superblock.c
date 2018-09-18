@@ -392,10 +392,10 @@ int libfsapfs_volume_superblock_read_data(
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->object_version,
+		 ( (fsapfs_volume_superblock_t *) data )->object_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object version\t\t\t\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

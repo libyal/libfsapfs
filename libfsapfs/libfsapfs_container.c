@@ -25,9 +25,9 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include "libfsapfs_checkpoint_map.h"
 #include "libfsapfs_container.h"
 #include "libfsapfs_container_key_bag.h"
-#include "libfsapfs_container_physical_map.h"
 #include "libfsapfs_container_reaper.h"
 #include "libfsapfs_container_space_manager.h"
 #include "libfsapfs_container_superblock.h"
@@ -910,7 +910,7 @@ int libfsapfs_container_close(
 	}
 	if( internal_container->physical_map != NULL )
 	{
-		if( libfsapfs_container_physical_map_free(
+		if( libfsapfs_checkpoint_map_free(
 		     &( internal_container->physical_map ),
 		     error ) != 1 )
 		{
@@ -1106,7 +1106,7 @@ int libfsapfs_internal_container_open_read(
 		 "Reading container physical map:\n" );
 	}
 #endif
-	if( libfsapfs_container_physical_map_initialize(
+	if( libfsapfs_checkpoint_map_initialize(
 	     &( internal_container->physical_map ),
 	     error ) != 1 )
 	{
@@ -1119,7 +1119,7 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	if( libfsapfs_container_physical_map_read_file_io_handle(
+	if( libfsapfs_checkpoint_map_read_file_io_handle(
 	     internal_container->physical_map,
 	     file_io_handle,
 	     file_offset,
@@ -1200,7 +1200,7 @@ int libfsapfs_internal_container_open_read(
 			libcnotify_printf(
 			 "Reading space manager:\n" );
 
-			if( libfsapfs_container_physical_map_get_physical_address_by_object_identifier(
+			if( libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
 			     internal_container->physical_map,
 			     internal_container->superblock->space_manager_object_identifier,
 			     &space_manager_block_number,
@@ -1267,7 +1267,7 @@ int libfsapfs_internal_container_open_read(
 			libcnotify_printf(
 			 "Reading reaper:\n" );
 
-			if( libfsapfs_container_physical_map_get_physical_address_by_object_identifier(
+			if( libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
 			     internal_container->physical_map,
 			     internal_container->superblock->reaper_object_identifier,
 			     &reaper_block_number,
@@ -1508,7 +1508,7 @@ on_error:
 #endif
 	if( internal_container->physical_map != NULL )
 	{
-		libfsapfs_container_physical_map_free(
+		libfsapfs_checkpoint_map_free(
 		 &( internal_container->physical_map ),
 		 NULL );
 	}

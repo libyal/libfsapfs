@@ -1,5 +1,5 @@
 /*
- * The APFS container physical map definition
+ * The APFS checkpoint map definition
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _FSAPFS_CONTAINER_PHYSICAL_MAP_H )
-#define _FSAPFS_CONTAINER_PHYSICAL_MAP_H
+#if !defined( _FSAPFS_CHECKPOINT_MAP_H )
+#define _FSAPFS_CHECKPOINT_MAP_H
 
 #include <common.h>
 #include <types.h>
@@ -29,9 +29,9 @@
 extern "C" {
 #endif
 
-typedef struct fsapfs_container_physical_map fsapfs_container_physical_map_t;
+typedef struct fsapfs_checkpoint_map fsapfs_checkpoint_map_t;
 
-struct fsapfs_container_physical_map
+struct fsapfs_checkpoint_map
 {
 	/* The object checksum
 	 * Consists of 8 bytes
@@ -43,10 +43,10 @@ struct fsapfs_container_physical_map
 	 */
 	uint8_t object_identifier[ 8 ];
 
-	/* The object version
+	/* The object transaction identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_version[ 8 ];
+	uint8_t object_transaction_identifier[ 8 ];
 
 	/* The object type
 	 * Consists of 4 bytes
@@ -74,9 +74,9 @@ struct fsapfs_container_physical_map
 	uint8_t entries_array[ 4040 ];
 };
 
-typedef struct fsapfs_container_physical_map_entry fsapfs_container_physical_map_entry_t;
+typedef struct fsapfs_checkpoint_map_entry fsapfs_checkpoint_map_entry_t;
 
-struct fsapfs_container_physical_map_entry
+struct fsapfs_checkpoint_map_entry
 {
 	/* The object type
 	 * Consists of 4 bytes
@@ -118,5 +118,5 @@ struct fsapfs_container_physical_map_entry
 }
 #endif
 
-#endif /* !defined( _FSAPFS_CONTAINER_PHYSICAL_MAP_H ) */
+#endif /* !defined( _FSAPFS_CHECKPOINT_MAP_H ) */
 

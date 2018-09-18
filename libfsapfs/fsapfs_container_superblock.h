@@ -43,10 +43,10 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t object_identifier[ 8 ];
 
-	/* The object version
+	/* The object transaction identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_version[ 8 ];
+	uint8_t object_transaction_identifier[ 8 ];
 
 	/* The object type
 	 * Consists of 4 bytes
@@ -100,10 +100,10 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t next_object_identifier[ 8 ];
 
-	/* Unknown
+	/* The next transaction identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown3[ 8 ];
+	uint8_t next_transaction_identifier[ 8 ];
 
 	/* The metadata area number of blocks
 	 * Consists of 4 bytes

@@ -43,10 +43,10 @@ struct fsapfs_container_reaper
 	 */
 	uint8_t object_identifier[ 8 ];
 
-	/* The object version
+	/* The object transaction identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_version[ 8 ];
+	uint8_t object_transaction_identifier[ 8 ];
 
 	/* The object type
 	 * Consists of 4 bytes

@@ -25,7 +25,7 @@ lib_LTLIBRARIES = libfsapfs.la
 
 libfsapfs_la_SOURCES = \
 	fsapfs_btree.h \
-	fsapfs_container_physical_map.h \
+	fsapfs_checkpoint_map.h \
 	fsapfs_container_reaper.h \
 	fsapfs_container_space_manager.h \
 	fsapfs_container_superblock.h \
@@ -39,10 +39,10 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_btree_footer.c libfsapfs_btree_footer.h \
 	libfsapfs_btree_header.c libfsapfs_btree_header.h \
 	libfsapfs_btree_root.c libfsapfs_btree_root.h \
+	libfsapfs_checkpoint_map.c libfsapfs_checkpoint_map.h \
+	libfsapfs_checkpoint_map_entry.c libfsapfs_checkpoint_map_entry.h \
 	libfsapfs_container.c libfsapfs_container.h \
 	libfsapfs_container_key_bag.c libfsapfs_container_key_bag.h \
-	libfsapfs_container_physical_map.c libfsapfs_container_physical_map.h \
-	libfsapfs_container_physical_map_entry.c libfsapfs_container_physical_map_entry.h \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
 	libfsapfs_container_space_manager.c libfsapfs_container_space_manager.h \
 	libfsapfs_container_superblock.c libfsapfs_container_superblock.h \
