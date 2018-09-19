@@ -89,6 +89,8 @@ int libfsapfs_io_handle_initialize(
 
 		goto on_error;
 	}
+	( *io_handle )->bytes_per_sector = 512;
+
 	return( 1 );
 
 on_error:
@@ -167,6 +169,8 @@ int libfsapfs_io_handle_clear(
 
 		return( -1 );
 	}
+	io_handle->bytes_per_sector = 512;
+
 	return( 1 );
 }
 

@@ -1,12 +1,11 @@
 TODO
-* rename libfsapfs_encryption to libfsapfs_encryption_context
-* Read file system B-tree via block vector, handle encrypted blocks
-* Create libfsapfs_container_superblock_get_identifier
-* Create libfsapfs_volume_superblock_get_identifier
 * complete library
-* support opening container and file system
-* remove unused libfsapfs_object.[ch] ?
-* improve reading B-trees
+** refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
+** Create libfsapfs_container_superblock_get_identifier
+** Create libfsapfs_volume_superblock_get_identifier
+** support opening container and file system
+** improve reading B-trees
+* add python bindings
 
 Tests:
 * test with copy of mounted file system

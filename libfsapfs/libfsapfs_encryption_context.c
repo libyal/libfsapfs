@@ -25,7 +25,7 @@
 #include <types.h>
 
 #include "libfsapfs_definitions.h"
-#include "libfsapfs_encryption.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_libcaes.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"

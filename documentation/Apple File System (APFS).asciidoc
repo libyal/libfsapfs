@@ -194,7 +194,8 @@ See section: <<container_superblock,Container superblock>>
 | 0x0000000b | OBJECT_TYPE_OMAP | Object map +
 See section: <<object_map,Object map>>
 | 0x0000000c | OBJECT_TYPE_CHECKPOINT_MAP | Checkpoint map
-| 0x0000000d | OBJECT_TYPE_FS | Volume superblock (File system)
+| 0x0000000d | OBJECT_TYPE_FS | Volume superblock (File system) +
+See section: <<volume_superblock,Volume superblock>>
 | 0x0000000e | OBJECT_TYPE_FS | File system tree
 | 0x0000000f | OBJECT_TYPE_BLOCKREFTREE | [yellow-background]*Unknown (Block reference tree)*
 | 0x00000010 | OBJECT_TYPE_SNAPMETATREE | [yellow-background]*Unknown (Snapshot metadata tree)*
@@ -416,7 +417,7 @@ The container consists of:
 
 === [[container_superblock]]Container superblock
 
-The container superblock is [yellow-background]*unknown* of size and consists of:
+The container superblock is 1382 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -436,7 +437,7 @@ See section: <<object_types,Object types>>
 | 48 | 8 | | Compatible feature flags (nx_features) +
 See section: <<container_feature_flags,Container feature flags>>
 | 56 | 8 | | Read-only compatible feature flags (nx_readonly_compatible_features) +
-See section: <<container_readonly_feature_flags,Container read-only feature flags>>
+See section: <<container_read_only_feature_flags,Container read-only feature flags>>
 | 64 | 8 | | Incompatible feature flags (nx_incompatible_features) +
 See section: <<container_incompatible_feature_flags,Container incompatible feature flags>>
 | 72 | 16 | | Container identifier (nx_uuid) +
@@ -492,7 +493,6 @@ See section: <<key_bag,Key bag>>
 | 1366 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_base)*
 | 1374 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_blocks)*
 4+|
-| 1382 | ... | | [yellow-background]*Unknown (empty values)*
 |===
 
 [NOTE]
@@ -518,7 +518,7 @@ unclear what NX stands for.
 | 0x0000000000000002 | NX_FEATURE_LCFD | Use low-capacity Fusion Drive mode
 |===
 
-==== [[container_readonly_feature_flags]]Container read-only feature flags
+==== [[container_read_only_feature_flags]]Container read-only feature flags
 
 Current no read-only feature flags are defined
 
@@ -902,16 +902,16 @@ See section: <<object_types,Object types>>
 
 === Key bag header
 
-The key bag header is 16 bytes of size and consists of:
+The key bag header (kb_locker_t) is 16 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 2 | 2 | Format version
-| 2 | 2 | | Number of entries
-| 4 | 4 | | Key bag data size +
+| 0 | 2 | 2 | Format version (kl_version)
+| 2 | 2 | | Number of entries (kl_nkeys)
+| 4 | 4 | | Key bag data size (kl_nbytes) +
 Contains the size of the key bag data, this includes the size of key bag header
-| 8 | 8 | | [yellow-background]*Unknown (empty values)*
+| 8 | 8 | | [yellow-background]*Unknown (padding)*
 |===
 
 === [[key_bag_entries]]Key bag entries
@@ -928,17 +928,17 @@ The key bag entries are 16-byte aligned.
 
 ==== Key bag entry header
 
-The key bag entry header is 24 bytes of size and consists of:
+The key bag entry header (keybag_entry_t) is 24 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 16 | | Volume identifer +
+| 0 | 16 | | Volume identifer (ke_uuid) +
 Contains a UUID stored in big-endian
-| 16 | 2 | | Entry type +
+| 16 | 2 | | Entry type (ke_tag) +
 See section: <<key_bag_entry_types,Key bag entry types>>
-| 18 | 2 | | Entry data size
-| 20 | 4 | | [yellow-background]*Unknown*
+| 18 | 2 | | Entry data size (ke_keylen)
+| 20 | 4 | | [yellow-background]*Unknown (padding)*
 |===
 
 ==== [[key_bag_entry_types]]Key bag entry types
@@ -948,10 +948,15 @@ See section: <<key_bag_entry_types,Key bag entry types>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 2 | | Volume master key +
+| 0x00 | KB_TAG_UNKNOWN | Unknown
+| 0x01 | KB_TAG_WRAPPING_KEY | Wrapping key
+| 0x02 | KB_TAG_VOLUME_KEY | Volume master key +
 See section: <<key_bag_kek_packed_object,Key encrypted key (KEK) packed object>>
-| 3 | | Volume key bag extent +
+| 0x03 | KB_TAG_VOLUME_UNLOCK_RECORDS | Volume key bag extent +
 See section: <<key_bag_data_extent,Key bag data extent>>
+| 0x04 | KB_TAG_VOLUME_PASSPHRASE_HINT | Passphrase hint
+| | |
+| 0xf8 | KB_TAG_USER_PAYLOAD | [yellow-background]*Unknown (user payload)*
 |===
 
 The volume master key is encryped with a volume key.
@@ -1069,10 +1074,9 @@ The volume consists of:
 * volume object map
 * ...
 
-=== Volume superblock
+=== [[volume_superblock]]Volume superblock
 
-The volume superblock (apfs_superblock_t) is [yellow-background]*unknown* of
-size and consists of:
+The volume superblock (apfs_superblock_t) is 940 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1088,19 +1092,19 @@ See section: <<object_types,Object types>>
 4+| _Object values_
 | 32 | 4 | "APSB" | Signature (apfs_magic)
 | 36 | 4 | | [yellow-background]*Unknown (apfs_fs_index)*
-| 40 | 8 | | Compatible feature flags (apfs_features
-| 48 | 8 | | Read-only compatible feature flags (apfs_readonly_compatible_features)
-| 56 | 8 | | Incompatible feature flags (apfs_incompatible_features) +
+| 40 | 8 | | Compatible feature flags (apfs_features) +
 <<volume_superblock_feature,Volume superblock features>>
+| 48 | 8 | | Read-only compatible feature flags (apfs_readonly_compatible_features) +
+<<volume_read_only_superblock_feature,Volume read-only superblock features>>
+| 56 | 8 | | Incompatible feature flags (apfs_incompatible_features) +
+<<volume_incompatible_superblock_feature,Volume incompatible superblock features>>
 | 64 | 8 | | [yellow-background]*Unknown (apfs_unmount_time)* +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
 | 72 | 8 | | Number of reserved blocks (apfs_reserve_block_count)
 | 80 | 8 | | Number of quota blocks (apfs_quota_block_count)
 | 88 | 8 | | [yellow-background]*Unknown (apfs_fs_alloc_count)*
-| 96 | 8 | | [yellow-background]*Unknown*
-| 104 | 4 | | [yellow-background]*Unknown*
-| 108 | 4 | | [yellow-background]*Unknown*
-| 112 | 4 | | [yellow-background]*Unknown*
+| 96 | 20 | | Encryption state (apfs_meta_crypto) +
+See section: <<encryption_state,Encryption state>>
 | 116 | 4 | | File system root tree object type (apfs_root_tree_type) +
 See section: <<object_types,Object types>>
 | 120 | 4 | | [yellow-background]*Unknown (apfs_extentref_tree_type)* +
@@ -1114,7 +1118,7 @@ See section: <<object_map,Object map>>
 | 148 | 8 | | [yellow-background]*Unknown (apfs_extentref_tree_oid)*
 | 156 | 8 | | [yellow-background]*Unknown (apfs_snap_meta_tree_oid)*
 | 164 | 8 | | [yellow-background]*Unknown (apfs_revert_to_xid)*
-| 172 | 8 | | [yellow-background]*Unknown*
+| 172 | 8 | | [yellow-background]*Unknown (apfs_revert_to_sblock_oid)*
 | 180 | 8 | | [yellow-background]*Unknown (apfs_next_obj_id)*
 | 188 | 8 | | [yellow-background]*Unknown (apfs_num_files)*
 | 196 | 8 | | [yellow-background]*Unknown (apfs_num_directories)*
@@ -1130,32 +1134,67 @@ Signed integer that contains the number of nanoseconds since January 1, 1970 00:
 | 268 | 8 | | [yellow-background]*Unknown (apfs_fs_flags)* +
 <<volume_superblock_flags,Volume superblock flags>>
 | 276 | 40 | | Creation change information (apfs_formatted_by) +
-See section: <<volume_superblock_change_information,Volume superblock change information>>
+See section: <<change_information,Change information>>
 | 316 | 8 x 40 | | Modification change information (apfs_modified_by) +
 [yellow-background]*Contains the 8 last entries from least recent to most recent?* +
-See section: <<volume_superblock_change_information,Volume superblock change information>>
+See section: <<change_information,Change information>>
 | 636 | 256 | | Volume name (apfs_volname)
 | 892 | 4 | | [yellow-background]*Unknown (apfs_next_doc_id)*
-| 896 | 4 | | [yellow-background]*Unknown*
-| 900 | 8 | | [yellow-background]*Unknown*
-| 908 | 32 | | [yellow-background]*Unknown*
-| 940 | ... | | [yellow-background]*Unknown (Empty values)*
+| 896 | 2 | | [yellow-background]*Unknown (apfs_role)*
+| 898 | 2 | | [yellow-background]*Unknown (reserved)*
+| 900 | 8 | | [yellow-background]*Unknown (apfs_root_to_xid)*
+| 908 | 32 | | [yellow-background]*Unknown (apfs_er_state_oid)*
 |===
 
-=== [[volume_superblock_change_information]]Volume superblock change information
+=== [[encryption_state]]Encryption state
 
-The volume superblock change information is 48 bytes of size and consists of:
+The encryption state (wrapped_meta_crypto_state_t) is 20 bytes of size and
+consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 32 | | Application +
+| 0 | 2 | | Major format version (major_version)
+| 2 | 2 | | Minor format version (minor_version)
+| 4 | 4 | | Flags (cpflags) +
+See section: <<encryption_state_flags,Encryption state flags>>
+| 8 | 4 | | [yellow-background]*Unknown (persistent_class)*
+| 12 | 4 | | [yellow-background]*Unknown (key_os_version)*
+| 16 | 2 | | [yellow-background]*Unknown (key_revision)*
+| 18 | 2 | | [yellow-background]*Unknown (unused)*
+|===
+
+==== [[encryption_state_flags]]Encryption state flags
+
+[yellow-background]*TODO: complete this section.*
+
+=== [[change_information]]Change information
+
+The change information (apfs_modified_by_t) is 48 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 32 | | Application (id) +
 String that contains the first 31 characters of the name and version of the application that changed the file system +
 Contains 0 if not set
-| 32 | 8 | | Change date and time +
+| 32 | 8 | | Change date and time (timestamp) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
-| 40 | 8 | | Change object version +
+| 40 | 8 | | Change object transaction number (last_xid) +
 Contains 0 if not set
+|===
+
+==== [[volume_superblock_flags]]Volume flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | APFS_FS_UNENCRYPTED | [yellow-background]*Unknown (unencrypted?)*
+| 0x00000002 | APFS_FS_EFFACEABLE | [yellow-background]*Unknown (effaceable?)*
+| 0x00000004 | APFS_FS_RESERVED_4 | [yellow-background]*Unknown (reserved)*
+| 0x00000008 | APFS_FS_ONEKEY | [yellow-background]*Unknown (one key?)*
+| 0x00000010 | APFS_FS_SPILLEDOVER | [yellow-background]*Unknown (spilled over?)*
+| 0x00000020 | APFS_FS_RUN_SPILLOVER_CLEANER | [yellow-background]*Unknown (spill over cleaner?)*
 |===
 
 ==== [[volume_superblock_feature]]Volume superblock features
@@ -1163,19 +1202,24 @@ Contains 0 if not set
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000000 | | [yellow-background]*Unknown (old format (iOS)?)*
-| 0x00000001 | | [yellow-background]*Unknown (case-insensitive?)*
-| 0x00000008 | | [yellow-background]*Unknown (case-sensitive?)*
+| 0x00000001 | APFS_FEATURE_DEFRAG_PRERELEASE | [yellow-background]*Unknown*
+| 0x00000002 | APFS_FEATURE_HARDLINK_MAP_RECORDS | [yellow-background]*Unknown*
+| 0x00000003 | APFS_FEATURE_DEFRAG | [yellow-background]*Unknown*
 |===
 
-==== [[volume_superblock_flags]]Volume superblock flags
+==== [[volume_read_only_feature_flags]]Volume read-only feature flags
+
+Current no read-only feature flags are defined
+
+==== [[volume_incompatible_feature_flags]]Volume incompatible feature flags
 
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000000 | | [yellow-background]*Unknown (encrypted?)*
-| 0x00000001 | | [yellow-background]*Unknown (unencrypted?)*
-| 0x00000002 | | [yellow-background]*Unknown (effaceable?)*
+| 0x00000001 | APFS_INCOMPAT_CASE_INSENSITIVE | [yellow-background]*Unknown (case-insensitive?)*
+| 0x00000002 | APFS_INCOMPAT_DATALESS_SNAPS | [yellow-background]*Unknown*
+| 0x00000004 | APFS_INCOMPAT_ENC_ROLLED | [yellow-background]*Unknown*
+| 0x00000008 | APFS_INCOMPAT_NORMALIZATION_INSENSITIVE | Is case insensitive
 |===
 
 == File system

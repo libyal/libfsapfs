@@ -202,7 +202,7 @@ int libfsapfs_object_map_descriptor_read_btree_key_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: object identifier\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 object_map_descriptor->identifier );
 

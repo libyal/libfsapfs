@@ -218,11 +218,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_debug.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_encryption.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_encryption_context.c"
 				>
 			</File>
 			<File
@@ -283,6 +287,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_volume.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_volume_data_handle.c"
 				>
 			</File>
 			<File
@@ -384,6 +392,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_debug.h"
 				>
 			</File>
@@ -392,7 +404,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_encryption.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_encryption_context.h"
 				>
 			</File>
 			<File
@@ -517,6 +529,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_volume.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_volume_data_handle.h"
 				>
 			</File>
 			<File

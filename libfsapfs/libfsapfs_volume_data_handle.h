@@ -1,5 +1,5 @@
 /*
- * The file system B-tree functions
+ * The volume data handle functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,12 +19,14 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_FILE_SYSTEM_BTREE_H )
-#define _LIBFSAPFS_FILE_SYSTEM_BTREE_H
+#if !defined( _LIBFSAPFS_VOLUME_DATA_HANDLE_H )
+#define _LIBFSAPFS_VOLUME_DATA_HANDLE_H
 
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_encryption_context.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
@@ -34,40 +36,46 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_file_system_btree libfsapfs_file_system_btree_t;
+typedef struct libfsapfs_volume_data_handle libfsapfs_volume_data_handle_t;
 
-struct libfsapfs_file_system_btree
+struct libfsapfs_volume_data_handle
 {
-	/* Dummy
+	/* The IO handle
 	 */
-	int dummy;
+	libfsapfs_io_handle_t *io_handle;
+
+	/* The encryption context
+	 */
+	libfsapfs_encryption_context_t *encryption_context;
 };
 
-int libfsapfs_file_system_btree_initialize(
-     libfsapfs_file_system_btree_t **file_system_btree,
+int libfsapfs_volume_data_handle_initialize(
+     libfsapfs_volume_data_handle_t **volume_data_handle,
+     libfsapfs_io_handle_t *io_handle,
+     const uint8_t *volume_master_key,
+     size_t volume_master_key_size,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_free(
-     libfsapfs_file_system_btree_t **file_system_btree,
+int libfsapfs_volume_data_handle_free(
+     libfsapfs_volume_data_handle_t **volume_data_handle,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_read_block(
-     libfsapfs_file_system_btree_t *file_system_btree,
+int libfsapfs_volume_data_handle_read_sector(
+     libfsapfs_volume_data_handle_t *volume_data_handle,
      libbfio_handle_t *file_io_handle,
-     libfdata_vector_t *data_block_vector,
-     libfcache_cache_t *data_block_cache,
-     uint64_t block_number,
-     libcerror_error_t **error );
-
-int libfsapfs_file_system_btree_read_data(
-     libfsapfs_file_system_btree_t *file_system_btree,
-     const uint8_t *data,
-     size_t data_size,
+     libfdata_vector_t *vector,
+     libfcache_cache_t *cache,
+     int element_index,
+     int element_data_file_index,
+     off64_t element_data_offset,
+     size64_t element_data_size,
+     uint32_t element_data_flags,
+     uint8_t read_flags,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_FILE_SYSTEM_BTREE_H ) */
+#endif /* !defined( _LIBFSAPFS_VOLUME_DATA_HANDLE_H ) */
 

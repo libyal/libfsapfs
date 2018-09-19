@@ -46,10 +46,11 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
 	libfsapfs_container_space_manager.c libfsapfs_container_space_manager.h \
 	libfsapfs_container_superblock.c libfsapfs_container_superblock.h \
+	libfsapfs_data_block.c libfsapfs_data_block.h \
 	libfsapfs_debug.c libfsapfs_debug.h \
 	libfsapfs_definitions.h \
 	libfsapfs_error.c libfsapfs_error.h \
-	libfsapfs_encryption.c libfsapfs_encryption.h \
+	libfsapfs_encryption_context.c libfsapfs_encryption_context.h \
 	libfsapfs_extern.h \
 	libfsapfs_file_entry.c libfsapfs_file_entry.h \
 	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
@@ -80,6 +81,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_types.h \
 	libfsapfs_unused.h \
 	libfsapfs_volume.c libfsapfs_volume.h \
+	libfsapfs_volume_data_handle.c libfsapfs_volume_data_handle.h \
 	libfsapfs_volume_key_bag.c libfsapfs_volume_key_bag.h \
 	libfsapfs_volume_superblock.c libfsapfs_volume_superblock.h
 

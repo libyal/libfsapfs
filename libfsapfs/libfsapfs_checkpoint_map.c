@@ -369,7 +369,7 @@ int libfsapfs_checkpoint_map_read_data(
 		 ( (fsapfs_checkpoint_map_t *) data )->object_checksum,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object checksum\t\t: 0x%08" PRIx64 "\n",
+		 "%s: object checksum\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -377,7 +377,7 @@ int libfsapfs_checkpoint_map_read_data(
 		 ( (fsapfs_checkpoint_map_t *) data )->object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object identifier\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -390,12 +390,12 @@ int libfsapfs_checkpoint_map_read_data(
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: object type\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object type\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_type );
 
 		libcnotify_printf(
-		 "%s: object subtype\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_subtype );
 
@@ -403,12 +403,12 @@ int libfsapfs_checkpoint_map_read_data(
 		 ( (fsapfs_checkpoint_map_t *) data )->flags,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: flags\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: flags\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
 		libcnotify_printf(
-		 "%s: number of entries\t\t: %" PRIu32 "\n",
+		 "%s: number of entries\t\t\t: %" PRIu32 "\n",
 		 function,
 		 number_of_map_entries );
 

@@ -25,7 +25,8 @@
 #include <types.h>
 
 #include "libfsapfs_definitions.h"
-#include "libfsapfs_encryption.h"
+#include "libfsapfs_encryption_context.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_key_bag_entry.h"
 #include "libfsapfs_key_bag_header.h"
 #include "libfsapfs_key_encrypted_key.h"
@@ -180,6 +181,7 @@ int libfsapfs_volume_key_bag_free(
  */
 int libfsapfs_volume_key_bag_read_file_io_handle(
      libfsapfs_volume_key_bag_t *volume_key_bag,
+     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      size64_t data_size,
@@ -199,6 +201,28 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume key bag.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( io_handle->bytes_per_sector == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid IO handle - missing bytes per sector.",
 		 function );
 
 		return( -1 );
@@ -310,14 +334,13 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to set keys in encryption context.",
 		 function );
 
 		goto on_error;
 	}
-/* TODO use bytes_per_sector instead of hard coding 512 */
 	if( libfsapfs_encryption_context_crypt(
 	     encryption_context,
 	     LIBCAES_CRYPT_MODE_DECRYPT,
@@ -325,8 +348,8 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 	     data_size,
 	     data,
 	     data_size,
-	     (uint64_t) ( file_offset / 512 ),
-	     512,
+	     (uint64_t) ( file_offset / io_handle->bytes_per_sector ),
+	     io_handle->bytes_per_sector,
 	     error ) == -1 )
 	{
 		libcerror_error_set(

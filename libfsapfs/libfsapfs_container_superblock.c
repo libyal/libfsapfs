@@ -427,7 +427,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->object_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object transaction identifier\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -513,7 +513,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->next_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: next transaction identifier\t: %" PRIu64 "\n",
+		 "%s: next transaction identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

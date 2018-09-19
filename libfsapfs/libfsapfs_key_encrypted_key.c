@@ -25,12 +25,12 @@
 #include <types.h>
 
 #include "libfsapfs_debug.h"
-#include "libfsapfs_encryption.h"
+#include "libfsapfs_encryption_context.h"
+#include "libfsapfs_key_encrypted_key.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libfguid.h"
 #include "libfsapfs_password.h"
-#include "libfsapfs_key_encrypted_key.h"
 
 #include "fsapfs_key_bag.h"
 
@@ -159,7 +159,6 @@ int libfsapfs_key_encrypted_key_read_data(
 	uint8_t value_tag                           = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint32_t value_32bit                        = 0;
 	uint16_t value_16bit                        = 0;
 #endif
 

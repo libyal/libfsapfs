@@ -1451,6 +1451,7 @@ int libfsapfs_internal_container_open_read(
 
 		if( libfsapfs_container_key_bag_read_file_io_handle(
 		     internal_container->key_bag,
+		     internal_container->io_handle,
 		     file_io_handle,
 		     file_offset,
 		     (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->superblock->block_size,

@@ -32,6 +32,8 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
+#include "libfsapfs_libfcache.h"
+#include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
@@ -72,6 +74,14 @@ struct libfsapfs_internal_volume
 	/* The volume master key
 	 */
 	uint8_t volume_master_key[ 32 ];
+
+	/* The data block vector
+	 */
+	libfdata_vector_t *data_block_vector;
+
+	/* The data block cache
+	 */
+	libfcache_cache_t *data_block_cache;
 
 	/* The file system B-tree
 	 */

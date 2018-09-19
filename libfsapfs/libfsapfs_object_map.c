@@ -344,7 +344,7 @@ int libfsapfs_object_map_read_data(
 		 ( (fsapfs_object_map_t *) data )->object_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object transaction identifier\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

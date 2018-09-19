@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
@@ -52,6 +53,7 @@ int libfsapfs_container_key_bag_free(
 
 int libfsapfs_container_key_bag_read_file_io_handle(
      libfsapfs_container_key_bag_t *container_key_bag,
+     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      size64_t data_size,

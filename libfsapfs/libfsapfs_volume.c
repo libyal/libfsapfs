@@ -34,9 +34,12 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libcthreads.h"
+#include "libfsapfs_libfcache.h"
+#include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_volume.h"
+#include "libfsapfs_volume_data_handle.h"
 #include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
 
@@ -937,11 +940,32 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
-	memory_set(
-	 internal_volume->volume_master_key,
-	 0,
-	 32 );
+	if( libfdata_vector_free(
+	     &( internal_volume->data_block_vector ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free data block vector.",
+		 function );
 
+		result = -1;
+	}
+	if( libfcache_cache_free(
+	     &( internal_volume->data_block_cache ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free data block cache.",
+		 function );
+
+		result = -1;
+	}
 	if( internal_volume->file_system_btree != NULL )
 	{
 		if( libfsapfs_file_system_btree_free(
@@ -986,12 +1010,16 @@ int libfsapfs_internal_volume_open_read(
      libcerror_error_t **error )
 {
 	uint8_t volume_key[ 32 ];
+	uint8_t volume_master_key[ 32 ];
 
 	libfsapfs_object_map_t *object_map                       = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle       = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_open_read";
+	size_t volume_master_key_size                            = 0;
 	uint64_t key_bag_block_number                            = 0;
 	uint64_t key_bag_number_of_blocks                        = 0;
+	int element_index                                        = 0;
 	int result                                               = 0;
 
 	if( internal_volume == NULL )
@@ -1045,6 +1073,28 @@ int libfsapfs_internal_volume_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid internal volume - key bag value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->data_block_vector != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file - data block vector already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->data_block_cache != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file - data block cache already set.",
 		 function );
 
 		return( -1 );
@@ -1247,6 +1297,7 @@ int libfsapfs_internal_volume_open_read(
 
 			if( libfsapfs_volume_key_bag_read_file_io_handle(
 			     internal_volume->key_bag,
+			     internal_volume->io_handle,
 			     file_io_handle,
 			     file_offset,
 			     (size64_t) key_bag_number_of_blocks * internal_volume->block_size,
@@ -1264,6 +1315,7 @@ int libfsapfs_internal_volume_open_read(
 
 				goto on_error;
 			}
+/* TODO allow to set password via API */
 			if( libfsapfs_volume_key_bag_get_volume_key_by_identifier(
 			     internal_volume->key_bag,
 			     internal_volume->superblock->volume_identifier,
@@ -1287,7 +1339,7 @@ int libfsapfs_internal_volume_open_read(
 			     internal_volume->superblock->volume_identifier,
 			     volume_key,
 			     256,
-			     internal_volume->volume_master_key,
+			     volume_master_key,
 			     256,
 			     error ) != 1 )
 			{
@@ -1304,8 +1356,85 @@ int libfsapfs_internal_volume_open_read(
 			 volume_key,
 			 0,
 			 32 );
+
+			volume_master_key_size = 32;
 		}
 /* TODO return 0 to indicate volume could not be unlocked ? */
+	}
+	if( libfsapfs_volume_data_handle_initialize(
+	     &volume_data_handle,
+	     internal_volume->io_handle,
+	     volume_master_key,
+	     volume_master_key_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create volume data handle.",
+		 function );
+
+		goto on_error;
+	}
+	memory_set(
+	 volume_master_key,
+	 0,
+	 32 );
+
+	if( libfdata_vector_initialize(
+	     &( internal_volume->data_block_vector ),
+	     (size64_t) internal_volume->block_size,
+	     (intptr_t *) volume_data_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
+	     NULL,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_sector,
+	     NULL,
+	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block vector.",
+		 function );
+
+		goto on_error;
+	}
+	volume_data_handle = NULL;
+
+	if( libfdata_vector_append_segment(
+	     internal_volume->data_block_vector,
+	     &element_index,
+	     0,
+	     0,
+	     internal_volume->container_size,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+		 "%s: unable to append segment to data block vector.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfcache_cache_initialize(
+	     &( internal_volume->data_block_cache ),
+	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_SECTORS,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block cache.",
+		 function );
+
+		goto on_error;
 	}
 	if( internal_volume->superblock->file_system_root_object_identifier > 0 )
 	{
@@ -1336,8 +1465,6 @@ int libfsapfs_internal_volume_open_read(
 
 			goto on_error;
 		}
-		file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_volume->block_size );
-
 		if( libfsapfs_file_system_btree_initialize(
 		     &( internal_volume->file_system_btree ),
 		     error ) != 1 )
@@ -1351,30 +1478,21 @@ int libfsapfs_internal_volume_open_read(
 
 			goto on_error;
 		}
-/* TODO refactor into vector
-		memory_copy(
-		 internal_volume->file_system_btree->volume_master_key,
-		 internal_volume->volume_master_key,
-		 32 );
-
-		internal_volume->file_system_btree->is_encrypted = 1;
-*/
-
-		if( libfsapfs_file_system_btree_read_file_io_handle(
+		if( libfsapfs_file_system_btree_read_block(
 		     internal_volume->file_system_btree,
 		     file_io_handle,
-		     file_offset,
-		     internal_volume->block_size,
+		     internal_volume->data_block_vector,
+		     internal_volume->data_block_cache,
+		     object_map_descriptor->physical_address,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read file system B-tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 "%s: unable to read file system B-tree block: %" PRIu64 ".",
 			 function,
-			 file_offset,
-			 file_offset );
+			 object_map_descriptor->physical_address );
 
 			goto on_error;
 		}
@@ -1388,8 +1506,26 @@ on_error:
 		 &( internal_volume->file_system_btree ),
 		 NULL );
 	}
+	if( internal_volume->data_block_cache != NULL )
+	{
+		libfcache_cache_free(
+		 &( internal_volume->data_block_cache ),
+		 NULL );
+	}
+	if( internal_volume->data_block_vector != NULL )
+	{
+		libfdata_vector_free(
+		 &( internal_volume->data_block_vector ),
+		 NULL );
+	}
+	if( volume_data_handle != NULL )
+	{
+		libfsapfs_volume_data_handle_free(
+		 &volume_data_handle,
+		 NULL );
+	}
 	memory_set(
-	 internal_volume->volume_master_key,
+	 volume_master_key,
 	 0,
 	 32 );
 

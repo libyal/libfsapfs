@@ -1,5 +1,5 @@
 /*
- * Input/Output (IO) handle functions
+ * Data block functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,49 +19,54 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_IO_HANDLE_H )
-#define _LIBFSAPFS_IO_HANDLE_H
+#if !defined( _LIBFSAPFS_DATA_BLOCK_H )
+#define _LIBFSAPFS_DATA_BLOCK_H
 
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_encryption_context.h"
+#include "libfsapfs_io_handle.h"
+#include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-extern const char fsapfs_container_signature[ 4 ];
-extern const char fsapfs_volume_signature[ 4 ];
+typedef struct libfsapfs_data_block libfsapfs_data_block_t;
 
-typedef struct libfsapfs_io_handle libfsapfs_io_handle_t;
-
-struct libfsapfs_io_handle
+struct libfsapfs_data_block
 {
-	/* The bytes per sector
+	/* The data
 	 */
-	uint16_t bytes_per_sector;
+	uint8_t *data;
 
-	/* Value to indicate if abort was signalled
+	/* The data size
 	 */
-	int abort;
+	size_t data_size;
 };
 
-int libfsapfs_io_handle_initialize(
-     libfsapfs_io_handle_t **io_handle,
+int libfsapfs_data_block_initialize(
+     libfsapfs_data_block_t **data_block,
+     size_t data_size,
      libcerror_error_t **error );
 
-int libfsapfs_io_handle_free(
-     libfsapfs_io_handle_t **io_handle,
+int libfsapfs_data_block_free(
+     libfsapfs_data_block_t **data_block,
      libcerror_error_t **error );
 
-int libfsapfs_io_handle_clear(
+int libfsapfs_data_block_read(
+     libfsapfs_data_block_t *data_block,
      libfsapfs_io_handle_t *io_handle,
+     libfsapfs_encryption_context_t *encryption_context,
+     libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_IO_HANDLE_H ) */
+#endif /* !defined( _LIBFSAPFS_DATA_BLOCK_H ) */
 
