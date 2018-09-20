@@ -1,5 +1,6 @@
 TODO
 * complete library
+** change container read bootstap as advised in documentation
 ** refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 ** Create libfsapfs_container_superblock_get_identifier
 ** Create libfsapfs_volume_superblock_get_identifier

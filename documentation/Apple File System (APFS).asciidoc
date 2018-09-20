@@ -55,7 +55,7 @@ An APFS volume consists of:
 |===
 | Characteristics | Description
 | Byte order | little-endian
-| Date and time values | number of nanoseconds since January 1, 1970 00:00:00 UTC (POSIX epoch)
+| Date and time values | number of nanoseconds since January 1, 1970 00:00:00 UTC (POSIX epoch), disregarding leap seconds
 | Character strings | Unicode strings are stored in UTF-8
 |===
 
@@ -1227,11 +1227,12 @@ Current no read-only feature flags are defined
 The file system structures are stored in a <<btree,B-tree>>.
 
 The file system B-tree uses identifiers similar to catalog identifiers (CNIDs)
-on HFS/HFS+/HFSX. In this document these identifiers are referred to as FSIDs.
+on HFS/HFS+/HFSX. In this document these identifiers are referred to as File
+System object identifiers (FSOIDs) to contrast other object identifiers (OIDs).
 
 [cols="1,1,5",options="header"]
 |===
-| FSID | Identifier | Assignment
+| FSOID | Identifier | Assignment
 | 0 | | [yellow-background]*Unknown (Reserved)*
 | 1 | | Parent identifier of the root directory (folder), nameless
 | 2 | | Directory identifier of the root directory (folder), named "root"
@@ -1245,7 +1246,8 @@ The file system B-tree key is variable of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 60 bits | | File system identifier (FSID)
+4+| _Object identifier and type (obj_id_and_type)_
+| 0 | 60 bits | | File system object identifier (FSOID)
 | 7.4 | 4 bits | | File system data type +
 See section: <<file_system_data_types,File system data types>>
 | 8 | ... | | Optional additional key data dependent on the data type
@@ -1256,126 +1258,403 @@ See section: <<file_system_data_types,File system data types>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x1 | SnapMetadata | [yellow-background]*Unknown (Snapshot metadata)*
-| 0x2 | PhysExtent | [yellow-background]*Unknown (Physical extent)*
-| 0x3 | | Inode
-| 0x4 | | [yellow-background]*Unknown (Extended attribure (xattr))*
-| 0x5 | SiblingLink | [yellow-background]*Unknown (Sibling link)*
-| 0x6 | DstreamID | Data stream identifier
-| 0x7 | CryptoState | [yellow-background]*Unknown (Crypto state?)*
-| 0x8 | FileExtent | File extent
-| 0x9 | DirRecord | Directory record
-| 0xa | DirSize | [yellow-background]*Unknown (Directory size)*
-| 0xb | SnapName | [yellow-background]*Unknown (Snapshot name)*
-| 0xc | SiblingMap | [yellow-background]*Unknown (Sibling map)*
+| 0x0 | APFS_TYPE_ANY | [yellow-background]*Unknown (Any)*
+| 0x1 | APFS_TYPE_SNAP_METADATA | Snapshot metadata
+| 0x2 | APFS_TYPE_EXTENT | Extent
+| 0x3 | APFS_TYPE_INODE | Inode
+| 0x4 | APFS_TYPE_XATTR | Extended attribute (xattr)
+| 0x5 | APFS_TYPE_SIBLING_LINK | Sibling link
+| 0x6 | APFS_TYPE_DSTREAM_ID | Data stream identifier
+| 0x7 | APFS_TYPE_CRYPTO_STATE | Encryption state
+| 0x8 | APFS_TYPE_FILE_EXTENT | File extent
+| 0x9 | APFS_TYPE_DIR_REC | Directory record
+| 0xa | APFS_TYPE_DIR_STATS | Directory stats
+| 0xb | APFS_TYPE_SNAP_NAME | Snapshot name
+| 0xc | APFS_TYPE_SIBLING_MAP | Sibling map
+| | |
+| 0xf | APFS_TYPE_INVALID | Invalid
+|===
+
+=== Extent
+
+==== Extent key data
+
+The extent key data (j_phys_ext_key_t) is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x2 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+|===
+
+==== Extent value data
+
+The extent value data (j_phys_ext_val_t) is 20 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Extent size and data type (len_and_kind)_
+| 0 | 60 bits | | Extent data size
+| 7.4 | 4 bits | | File system data type +
+See section: <<file_system_data_types,File system data types>>
+4+|
+| 8 | 8 | | File system object identifier of owner (owning_obj_id)
+| 16 | 4 | | Reference count (refcnt)
 |===
 
 === Inode
 
 ==== Inode key data
 
-The inode key data is 8 bytes of size and consists of:
+The inode key data (j_inode_key_t) is 8 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x3 | Key data types +
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x3 | File system data type +
+See section: <<file_system_data_types,File system data types>>
 |===
-
-....
-00000000: 02 00 00 00 00 00 00 30                            .......0
-....
 
 ==== Inode value data
 
-....
-00000000: 01 00 00 00 00 00 00 00  02 00 00 00 00 00 00 00   ........ ........
-00000010: da 41 b8 12 55 23 52 15  85 2b 71 56 55 23 52 15   .A..U#R. .+qVU#R.
-00000020: 85 2b 71 56 55 23 52 15  da 41 b8 12 55 23 52 15   .+qVU#R. .A..U#R.
-00000030: 00 80 00 00 00 00 00 00  01 00 00 00 00 00 00 00   ........ ........
-00000040: 02 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00   ........ ........
-00000050: fd 41 00 00 00 00 00 00  00 00 00 00 01 00 08 00   .A...... ........
-00000060: 04 02 05 00 72 6f 6f 74  00 00 00 00               ....root ....
-....
+The inode value data (APFS_TYPE_INVALID) is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Parent file system object identifier (parent_id)
+| 8 | 8 | | Data stream file system object identifier (private_id)
+| 16 | 8 | | Creation date and time (create_time) +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+| 24 | 8 | | Modification date and time (mod_time) +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+| 32 | 8 | | Change date and time (change_time) +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+| 48 | 8 | | Access date and time (access_time) +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+| 56 | 8 | | Inode flags (internal_flags) +
+See section: <<inode_flags,Inode flags>>
+| 64 | 4 | | Number of children (nchildren) or number of links (nlink)
+| 68 | 4 | | [yellow-background]*Unknown (default_protection_class)*
+| 72 | 4 | | [yellow-background]*Unknown (write_generation_counter)*
+| 76 | 4 | | BSD file entry flags (bsd_flags) +
+See section: <<bsd_file_entry_flags,BSD file entry flags>>
+| 80 | 4 | | Owner user identifier (owner)
+| 84 | 4 | | Group identifier (gid)
+| 86 | 2 | | File mode +
+See section: <<file_modes,File modes>>
+| 88 | 2 | | [yellow-background]*Unknown (pad1)*
+| 90 | 8 | | [yellow-background]*Unknown (pad2)*
+| 98 | ... | | Extended fields (xfields) +
+See section: <<extended_fields,extended fields>>
+|===
+
+===== [[inode_flags]]Inode flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | INODE_IS_APFS_PRIVATE | Is private +
+The inode is used internally, typically for a data stream
+| 0x00000002 | INODE_MAINTAIN_DIR_STATS | Maintains directory stats +
+The inode tracks the size of all of its children
+| 0x00000004 | INODE_DIR_STATS_ORIGIN | [yellow-background]*Unknown (TODO)* +
+The inode has the INODE_MAINTAIN_DIR_STATS flag set explicitly, not due to inheritance
+| 0x00000008 | INODE_PROT_CLASS_EXPLICIT | [yellow-background]*Unknown (TODO)* +
+The inode data protection class was set explicitly when the inode was created
+| 0x00000010 | INODE_WAS_CLONED | Was cloned +
+The inode was created by cloning another inode
+| 0x00000020 | INODE_FLAG_UNUSED | [yellow-background]*Unknown (Reserved)*
+| 0x00000040 | INODE_HAS_SECURITY_EA | Has security extended attribute +
+The inode has an access control list
+| 0x00000080 | INODE_BEING_TRUNCATED | Is truncated +
+The inode was truncated
+| 0x00000100 | INODE_HAS_FINDER_INFO | Has Finder information +
+The inode has a Finder info extended field
+| 0x00000200 | INODE_IS_SPARSE | Is sparse +
+The inode has a sparse byte count extended field
+| 0x00000400 | INODE_WAS_EVER_CLONED | Was cloned +
+The inode has been cloned at least once
+| 0x00000800 | INODE_ACTIVE_FILE_TRIMMED | [yellow-background]*Unknown (TODO)* +
+The inode is an overprovisioning file that has been trimmed
+| 0x00001000 | INODE_PINNED_TO_MAIN | [yellow-background]*Unknown (TODO)* +
+The inode file content is always on the main storage device +
+This flag is used for Fusion drives where the main storage is a solid-state drive
+| 0x00002000 | INODE_PINNED_TO_TIER2 | [yellow-background]*Unknown (TODO)* +
+The inode file content is always on the secondary storage device +
+This flag is used for Fusion drives where the secondary storage is a (magnetic) hard drive
+| 0x00004000 | INODE_HAS_RSRC_FORK | Has resource fork +
+The inode has a resource fork
+| 0x00008000 | INODE_NO_RSRC_FORK | Had no resource fork +
+The inode does not have a resource fork
+| 0x00010000 | INODE_ALLOCATION_SPILLEDOVER | [yellow-background]*Unknown (TODO)* +
+The inode file content has some space allocated outside of the preferred storage tier for that file
+|===
+
+===== [[file_modes]]File modes
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0170000 | S_IFMT | File type bitmask
+| 0010000 | S_IFIFO | Named pipe
+| 0020000 | S_IFCHR | Character-special file (Character device)
+| 0040000 | S_IFDIR | Directory
+| 0060000 | S_IFBLK | Block-special file (Block device)
+| 0100000 | S_IFREG | Regular file
+| 0120000 | S_IFLNK | Symbolic link
+| 0140000 | S_IFSOCK | Socket
+| 0160000 | S_IFWHT | Whiteout +
+A whiteout is a file entry that covers up all entries of a particular name from lower branches
+|===
+
+===== [[bsd_file_entry_flags]]BSD file entry flags
+
+See the 'chflags(2)' man page and the '<sys/stat.h>' header file.
+
+=== Extended attribute
+
+==== Extended attribute key data
+
+The extended attribute key data (j_xattr_key_t) is variable of size and consists
+of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x4 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+| 8 | 2 | | Name string size (name_len) +
+Includes the size of the end-of-string character
+| 10 | ... | | Name string (name) +
+Contains an UTF-8 encoded string with an end-of-string character
+|===
+
+==== Extended attribute value data
+
+The extended attribute value data (j_xattr_val_t) is variable of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | Flags (flags) +
+See section: <<extended_attribute_flags,Extended attribute flags>>
+| 2 | 2 | | Extended attribute data size
+| 4 | ... | | Extended attribute data
+|===
+
+==== [[extended_attribute_flags]]Extended attribute flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | XATTR_DATA_STREAM | Extended attribute data is stored in a data stream +
+The extended attribute data contains an 8-byte file system object identifier of the corresponding data stream +
+See section: <<extended_attribute_data_stream,Extended attribute data_stream>>
+| 0x00000002 | XATTR_DATA_EMBEDDED | Extended attribute data is stored directly in the record
+| 0x00000004 | XATTR_FILE_SYSTEM_OWNED | Extended attribute record is owned by the file system
+| 0x00000008 | XATTR_RESERVED_8 | [yellow-background]*Unknown (Reserved)*
+|===
+
+==== [[extended_attribute_data_stream]]Extended attribute data stream
+
+The extended attribute data stream (j_xattr_dstream_t) is 48 bytes of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+|===
+
+[yellow-background]*TODO: complete this section.*
 
 === Data stream identifier
 
 ==== Data stream identifier key data
 
-The data stream key data is 8 bytes of size and consists of:
+The data stream key data (j_dstream_id_key_t) is 8 bytes of size and consists
+of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x6 | Key data types +
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x6 | File system data type +
+See section: <<file_system_data_types,File system data types>>
 |===
-
-....
-00000000: 11 00 00 00 00 00 00 60                            .....
-....
 
 ==== Data stream identifier value data
 
-....
-00000000: 01 00 00 00                                        ....
-....
+The data stream value data (j_dstream_id_val_t) is 4 bytes of size and consists
+of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Reference count (refcnt)
+|===
 
 === File extent
 
 ==== File extent key data
 
-The file extend key data is 16 bytes of size and consists of:
+The file extent key data (j_file_extent_key_t) is 16 bytes of size and consists
+of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x8 | Key data types +
-| 8 | 8 | | [yellow-background]*Unknown (extent offset?)*
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x8 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+| 8 | 8 | | Logical address (logical_addr) +
+Contains an offset relative to the start of the file entry data
 |===
-
-....
-00000000: 11 00 00 00 00 00 00 80  00 00 00 00 00 00 00 00   ........ ........
-....
 
 ==== File extent value data
 
-....
-00000000: 00 10 00 00 00 00 00 00  65 00 00 00 00 00 00 00   ........ e.......
-00000010: 00 00 00 00 00 00 00 00                            ........
-....
-
-=== Directory record
-
-==== Directory record key data
-
-The directory record key data is variable of size and consists of:
+The file extent value data (j_file_extent_val_t) is 24 bytes of size and consists
+of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 60 bits | | [yellow-background]*Unknown (catalog node identifier?)*
-| 7.4 | 4 bits | 0x9 | Key data types +
-| 8 | 1 | | Name string size +
+4+| _Extent data size and flags (len_and_flags)_
+| 0 | 7 | | Extent data size
+| 7 | 1 | | Flags +
+See section: <<file_extent_flags,File extent flags>>
+| 8 | 8 | | Physical block number (phys_block_num)
+| 16 | 8 | | Encryption identifier (crypto_id)
+|===
+
+==== [[file_extent_flags]]File extent flags
+
+=== Directory record
+
+The directory record can have 2 different types of keys:
+
+* Key with name
+* Key with name and hash
+
+==== Directory record key data with name
+
+The directory record key data with name (j_drec_key_t) is variable of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x9 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+| 8 | 2 | | Name string size (name_len) +
 Includes the size of the end-of-string character
-| 9 | 4 | | [yellow-background]*Unknown (name hash?)*
-| 13 | ... | | Name string +
+| 10 | ... | | Name string (name) +
 Contains an UTF-8 encoded string with an end-of-string character
 |===
 
-....
-00000000: 01 00 00 00 00 00 00 90  0c 8c a6 ac 70 72 69 76   ........ ....priv
-00000010: 61 74 65 2d 64 69 72 00                            ate-dir.
-....
+==== Directory record key data with name and hash
+
+The directory record key data with name and hash (j_drec_hashed_key_t) is
+variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x9 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+4+| _Name string size and hash (name_len_and_hash)_
+| 8 | 11 bits | | Name string size +
+Includes the size of the end-of-string character
+| 9.3 | 21 bits | | Name hash
+| 12 | ... | | Name string (name) +
+Contains an UTF-8 encoded string with an end-of-string character
+|===
 
 ==== Directory record value data
 
-....
-00000000: 03 00 00 00 00 00 00 00  6b 5b b8 12 55 23 52 15   ........ k[..U#R.
-00000010: 04 00                                              ..
-....
+The directory record value data (j_drec_val_t) is variable of size and consists
+of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | File system object identifier of the directory entry (file_id)
+| 8 | 8 | | Date and time the directory entry was added (date_added) +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+| 16 | 2 | | Directory entry flags +
+See section: <<directory_entry_flags,Directory entry flags>>
+| 18 | ... | | Extended fields (xfields) +
+See section: <<extended_fields,extended fields>>
+|===
+
+===== [[directory_entry_flags]]Directory entry flags
+
+[yellow-background]*TODO: complete this section.*
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x0000 | DT_UNKNOWN | Unknown
+| 0x0001 | DT_FIFO | Named pipe
+| 0x0002 | DT_CHR | Character-special file (Character device)
+| | |
+| 0x0004 | DT_DIR | Directory
+| | |
+| 0x0006 | DT_BLK | Block-special file (Block device)
+| | |
+| 0x0008 | DT_REG | Regular file
+| | |
+| 0x000a | DT_LNK | Symbolic link
+| | |
+| 0x000c | DT_SOCK | Socket
+| | |
+| 0x000e | DT_WHT | Whiteout +
+A whiteout is a directory entry that covers up all entries of a particular name from lower branches
+| | |
+| 0x000f | DREC_TYPE_MASK | Directory type bitmask
+| 0x0010 | RESERVED_10 | [yellow-background]*Unknown (reserved)*
+|===
+
+=== Directory stats
+
+==== Directory stats key data
+
+The directory stats key data (j_dir_stats_key_t) is 8 bytes of size and consists
+of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0xa | File system data type +
+See section: <<file_system_data_types,File system data types>>
+|===
+
+==== Directory stats value data
+
+The directory stats value data (j_dir_stats_val_t) is 32 bytes of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Number of children (num_children)
+| 8 | 8 | | Total size (total_size)
+| 16 | 8 | | Parent directory file system object identifier (chained_key)
+| 24 | 8 | | Generation count (gen_count)
+|===
+
+=== [[extended_fields]]Extended fields
+
+[yellow-background]*TODO: complete this section.*
 
 == [[efi_jumpstart]]EFI jumpstart
 
