@@ -36,8 +36,10 @@
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
+#include "libfsapfs_libuna.h"
 #include "libfsapfs_object_map.h"
 #include "libfsapfs_object_map_btree.h"
+#include "libfsapfs_object_map_descriptor.h"
 #include "libfsapfs_volume.h"
 #include "libfsapfs_volume_data_handle.h"
 #include "libfsapfs_volume_key_bag.h"
@@ -117,6 +119,8 @@ int libfsapfs_volume_initialize(
 
 		goto on_error;
 	}
+	internal_volume->is_locked = 1;
+
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_initialize(
 	     &( internal_volume->read_write_lock ),
@@ -892,6 +896,30 @@ int libfsapfs_volume_close(
 
 		result = -1;
 	}
+	internal_volume->is_locked = 1;
+
+	if( internal_volume->user_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->user_password,
+		     0,
+		     internal_volume->user_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear user password.",
+			 function );
+
+			result = -1;
+		}
+		memory_free(
+		 internal_volume->user_password );
+
+		internal_volume->user_password      = NULL;
+		internal_volume->user_password_size = 0;
+	}
 	if( internal_volume->superblock != NULL )
 	{
 		if( libfsapfs_volume_superblock_free(
@@ -1009,18 +1037,13 @@ int libfsapfs_internal_volume_open_read(
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	uint8_t volume_key[ 32 ];
-	uint8_t volume_master_key[ 32 ];
-
-	libfsapfs_object_map_t *object_map                       = NULL;
-	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle       = NULL;
-	static char *function                                    = "libfsapfs_internal_volume_open_read";
-	size_t volume_master_key_size                            = 0;
-	uint64_t key_bag_block_number                            = 0;
-	uint64_t key_bag_number_of_blocks                        = 0;
-	int element_index                                        = 0;
-	int result                                               = 0;
+	libfsapfs_object_map_t *object_map                 = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
+	static char *function                              = "libfsapfs_internal_volume_open_read";
+	uint64_t key_bag_block_number                      = 0;
+	uint64_t key_bag_number_of_blocks                  = 0;
+	int element_index                                  = 0;
+	int result                                         = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -1095,17 +1118,6 @@ int libfsapfs_internal_volume_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid file - data block cache already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_volume->file_system_btree != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal volume - file system B-tree value already set.",
 		 function );
 
 		return( -1 );
@@ -1246,6 +1258,8 @@ int libfsapfs_internal_volume_open_read(
 			goto on_error;
 		}
 	}
+	internal_volume->is_locked = 0;
+
 	if( internal_volume->container_key_bag != NULL )
 	{
 		result = libfsapfs_container_key_bag_get_volume_key_bag_extent_by_identifier(
@@ -1315,57 +1329,23 @@ int libfsapfs_internal_volume_open_read(
 
 				goto on_error;
 			}
-/* TODO allow to set password via API */
-			if( libfsapfs_volume_key_bag_get_volume_key_by_identifier(
-			     internal_volume->key_bag,
-			     internal_volume->superblock->volume_identifier,
-			     (uint8_t *) "test",
-			     4,
-			     volume_key,
-			     256,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve volume key.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
-			     internal_volume->container_key_bag,
-			     internal_volume->superblock->volume_identifier,
-			     volume_key,
-			     256,
-			     volume_master_key,
-			     256,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve volume master key.",
-				 function );
-
-				goto on_error;
-			}
-			memory_set(
-			 volume_key,
-			 0,
-			 32 );
-
-			volume_master_key_size = 32;
+			internal_volume->is_locked = 1;
 		}
-/* TODO return 0 to indicate volume could not be unlocked ? */
+	}
+	if( internal_volume->superblock->file_system_root_object_identifier == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file system root object identifier - value out of bounds.",
+		 function );
+
+		goto on_error;
 	}
 	if( libfsapfs_volume_data_handle_initialize(
 	     &volume_data_handle,
 	     internal_volume->io_handle,
-	     volume_master_key,
-	     volume_master_key_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1377,11 +1357,6 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
-	memory_set(
-	 volume_master_key,
-	 0,
-	 32 );
-
 	if( libfdata_vector_initialize(
 	     &( internal_volume->data_block_vector ),
 	     (size64_t) internal_volume->block_size,
@@ -1402,7 +1377,8 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
-	volume_data_handle = NULL;
+	internal_volume->volume_data_handle = volume_data_handle;
+	volume_data_handle                  = NULL;
 
 	if( libfdata_vector_append_segment(
 	     internal_volume->data_block_vector,
@@ -1436,76 +1412,9 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
-	if( internal_volume->superblock->file_system_root_object_identifier > 0 )
-	{
-		if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
-		     internal_volume->object_map_btree,
-		     internal_volume->superblock->file_system_root_object_identifier,
-		     &object_map_descriptor,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve object map descriptor for file system root object identifier: 0x08%" PRIx64 ".",
-			 function,
-			 internal_volume->superblock->file_system_root_object_identifier );
-
-			goto on_error;
-		}
-		if( object_map_descriptor == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid object map descriptor.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_file_system_btree_initialize(
-		     &( internal_volume->file_system_btree ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file system B-tree.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_file_system_btree_read_block(
-		     internal_volume->file_system_btree,
-		     file_io_handle,
-		     internal_volume->data_block_vector,
-		     internal_volume->data_block_cache,
-		     object_map_descriptor->physical_address,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read file system B-tree block: %" PRIu64 ".",
-			 function,
-			 object_map_descriptor->physical_address );
-
-			goto on_error;
-		}
-	}
 	return( 1 );
 
 on_error:
-	if( internal_volume->file_system_btree != NULL )
-	{
-		libfsapfs_file_system_btree_free(
-		 &( internal_volume->file_system_btree ),
-		 NULL );
-	}
 	if( internal_volume->data_block_cache != NULL )
 	{
 		libfcache_cache_free(
@@ -1524,16 +1433,6 @@ on_error:
 		 &volume_data_handle,
 		 NULL );
 	}
-	memory_set(
-	 volume_master_key,
-	 0,
-	 32 );
-
-	memory_set(
-	 volume_key,
-	 0,
-	 32 );
-
 	if( internal_volume->key_bag != NULL )
 	{
 		libfsapfs_volume_key_bag_free(
@@ -1558,6 +1457,129 @@ on_error:
 		 &( internal_volume->superblock ),
 		 NULL );
 	}
+	return( -1 );
+}
+
+/* Unlocks an encrypted volume
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_volume_unlock(
+     libfsapfs_internal_volume_t *internal_volume,
+     libcerror_error_t **error )
+{
+	uint8_t volume_key[ 32 ];
+	uint8_t volume_master_key[ 32 ];
+
+	static char *function = "libfsapfs_internal_volume_unlock";
+
+	if( internal_volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->key_bag == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing key bag.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_volume_key_bag_get_volume_key_by_identifier(
+	     internal_volume->key_bag,
+	     internal_volume->superblock->volume_identifier,
+	     internal_volume->user_password,
+	     internal_volume->user_password_size - 1,
+	     volume_key,
+	     256,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume key.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
+	     internal_volume->container_key_bag,
+	     internal_volume->superblock->volume_identifier,
+	     volume_key,
+	     256,
+	     volume_master_key,
+	     256,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume master key.",
+		 function );
+
+		goto on_error;
+	}
+	memory_set(
+	 volume_key,
+	 0,
+	 32 );
+
+	if( libfsapfs_volume_data_handle_set_volume_master_key(
+	     internal_volume->volume_data_handle,
+	     volume_master_key,
+	     32,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set volume master key in volume data handle.",
+		 function );
+
+		goto on_error;
+	}
+	memory_set(
+	 volume_master_key,
+	 0,
+	 32 );
+
+/* TODO return 0 to indicate volume could not be unlocked ? */
+	return( 1 );
+
+on_error:
+	memory_set(
+	 volume_master_key,
+	 0,
+	 32 );
+
+	memory_set(
+	 volume_key,
+	 0,
+	 32 );
+
 	return( -1 );
 }
 
@@ -2025,6 +2047,373 @@ int libfsapfs_volume_get_utf16_name(
 	return( result );
 }
 
+/* Determines if the volume is locked
+ * Returns 1 if locked, 0 if not or -1 on error
+ */
+int libfsapfs_volume_is_locked(
+     libfsapfs_volume_t *volume,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_is_locked";
+	uint8_t is_locked                            = 0;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	is_locked = internal_volume->is_locked;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( is_locked );
+}
+
+/* Sets an UTF-8 formatted password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if password is invalid or -1 on error
+ */
+int libfsapfs_volume_set_utf8_password(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_set_utf8_password";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->user_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->user_password,
+		     0,
+		     internal_volume->user_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear user password.",
+			 function );
+
+			goto on_error;
+		}
+		memory_free(
+		 internal_volume->user_password );
+
+		internal_volume->user_password      = NULL;
+		internal_volume->user_password_size = 0;
+	}
+	internal_volume->user_password_size = 1 + narrow_string_length(
+	                                           (char *) utf8_string );
+
+	internal_volume->user_password = (uint8_t *) memory_allocate(
+	                                              sizeof( uint8_t ) * internal_volume->user_password_size );
+
+	if( internal_volume->user_password == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to create user password.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_copy(
+	     internal_volume->user_password,
+	     utf8_string,
+	     utf8_string_length ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy user password.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->user_password[ internal_volume->user_password_size - 1 ] = 0;
+
+	internal_volume->user_password_is_set = 1;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: user password: %s\n",
+		 function,
+		 internal_volume->user_password );
+	}
+#endif
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+	if( internal_volume->user_password != NULL )
+	{
+		memory_set(
+		 internal_volume->user_password,
+		 0,
+		 internal_volume->user_password_size );
+		memory_free(
+		 internal_volume->user_password );
+
+		internal_volume->user_password = NULL;
+	}
+	internal_volume->user_password_size = 0;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_volume->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Sets an UTF-16 formatted password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if password is invalid or -1 on error
+ */
+int libfsapfs_volume_set_utf16_password(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_set_utf16_password";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->user_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->user_password,
+		     0,
+		     internal_volume->user_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear user password.",
+			 function );
+
+			goto on_error;
+		}
+		memory_free(
+		 internal_volume->user_password );
+
+		internal_volume->user_password      = NULL;
+		internal_volume->user_password_size = 0;
+	}
+	if( libuna_utf8_string_size_from_utf16(
+	     utf16_string,
+	     utf16_string_length,
+	     &( internal_volume->user_password_size ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set password size.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->user_password_size += 1;
+
+	internal_volume->user_password = (uint8_t *) memory_allocate(
+	                                              sizeof( uint8_t ) * internal_volume->user_password_size );
+
+	if( internal_volume->user_password == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to create user password.",
+		 function );
+
+		goto on_error;
+	}
+	if( libuna_utf8_string_copy_from_utf16(
+	     internal_volume->user_password,
+	     internal_volume->user_password_size,
+	     utf16_string,
+	     utf16_string_length,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to copy user password.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->user_password[ internal_volume->user_password_size - 1 ] = 0;
+
+	internal_volume->user_password_is_set = 1;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: user password: %s\n",
+		 function,
+		 internal_volume->user_password );
+	}
+#endif
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+	if( internal_volume->user_password != NULL )
+	{
+		memory_set(
+		 internal_volume->user_password,
+		 0,
+		 internal_volume->user_password_size );
+		memory_free(
+		 internal_volume->user_password );
+
+		internal_volume->user_password = NULL;
+	}
+	internal_volume->user_password_size = 0;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_volume->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
 /* Retrieves the root directory file entry
  * Returns 1 if successful or -1 on error
  */
@@ -2033,8 +2422,9 @@ int libfsapfs_volume_get_root_directory(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_get_root_directory";
+	libfsapfs_internal_volume_t *internal_volume             = NULL;
+	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	static char *function                                    = "libfsapfs_volume_get_root_directory";
 
 	if( volume == NULL )
 	{
@@ -2071,7 +2461,93 @@ int libfsapfs_volume_get_root_directory(
 
 		return( -1 );
 	}
+	if( internal_volume->is_locked != 0 )
+	{
+		if( libfsapfs_internal_volume_unlock(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to unlock volume.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( internal_volume->file_system_btree == NULL )
+	{
+		if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
+		     internal_volume->object_map_btree,
+		     internal_volume->superblock->file_system_root_object_identifier,
+		     &object_map_descriptor,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve object map descriptor for file system root object identifier: 0x08%" PRIx64 ".",
+			 function,
+			 internal_volume->superblock->file_system_root_object_identifier );
+
+			goto on_error;
+		}
+		if( object_map_descriptor == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid object map descriptor.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_file_system_btree_initialize(
+		     &( internal_volume->file_system_btree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create file system B-tree.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_file_system_btree_read_block(
+		     internal_volume->file_system_btree,
+		     internal_volume->file_io_handle,
+		     internal_volume->data_block_vector,
+		     internal_volume->data_block_cache,
+		     object_map_descriptor->physical_address,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read file system B-tree block: %" PRIu64 ".",
+			 function,
+			 object_map_descriptor->physical_address );
+
+			goto on_error;
+		}
+	}
 /* TODO implement */
+	return( -1 );
+
+on_error:
+	if( internal_volume->file_system_btree != NULL )
+	{
+		libfsapfs_file_system_btree_free(
+		 &( internal_volume->file_system_btree ),
+		 NULL );
+	}
 	return( -1 );
 }
 

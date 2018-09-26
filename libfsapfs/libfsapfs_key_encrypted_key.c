@@ -37,7 +37,7 @@
 const uint8_t libfsapfs_key_encrypted_key_wrapped_kek_initialization_vector[ 8 ] = {
        0xa6, 0xa6, 0xa6, 0xa6, 0xa6, 0xa6, 0xa6, 0xa6 };
 
-/* Creates container physical_map_entry
+/* Creates a key encrypted key
  * Make sure the value key_encrypted_key is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
@@ -70,7 +70,7 @@ int libfsapfs_key_encrypted_key_initialize(
 		return( -1 );
 	}
 	*key_encrypted_key = memory_allocate_structure(
-	               libfsapfs_key_encrypted_key_t );
+	                      libfsapfs_key_encrypted_key_t );
 
 	if( *key_encrypted_key == NULL )
 	{

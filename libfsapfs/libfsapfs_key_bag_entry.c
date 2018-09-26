@@ -32,7 +32,7 @@
 
 #include "fsapfs_key_bag.h"
 
-/* Creates container physical_map_entry
+/* Creates key bag entry
  * Make sure the value key_bag_entry is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */

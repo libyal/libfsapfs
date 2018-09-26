@@ -313,6 +313,28 @@ int info_handle_free(
 
 			result = -1;
 		}
+		if( ( *info_handle )->user_password != NULL )
+		{
+			if( memory_set(
+			     ( *info_handle )->user_password,
+			     0,
+			     ( *info_handle )->user_password_size ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+				 "%s: unable to clear user password.",
+				 function );
+
+				result = -1;
+			}
+			memory_free(
+			 ( *info_handle )->user_password );
+
+			( *info_handle )->user_password      = NULL;
+			( *info_handle )->user_password_size = 0;
+		}
 		memory_free(
 		 *info_handle );
 
@@ -360,6 +382,98 @@ int info_handle_signal_abort(
 		}
 	}
 	return( 1 );
+}
+
+/* Sets the password
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_password(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_set_password";
+	size_t string_length  = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( info_handle->user_password != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid info handle - user password value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( string == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid string.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = system_string_length(
+	                 string );
+
+	info_handle->user_password_size = string_length + 1;
+
+	info_handle->user_password = system_string_allocate(
+	                              info_handle->user_password_size );
+
+	if( info_handle->user_password == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create user password.",
+		 function );
+
+		goto on_error;
+	}
+	if( system_string_copy(
+	     info_handle->user_password,
+	     string,
+	     info_handle->user_password_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy user password.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( info_handle->user_password != NULL )
+	{
+		memory_free(
+		 info_handle->user_password );
+
+		info_handle->user_password = NULL;
+	}
+	info_handle->user_password_size = 0;
+
+	return( -1 );
 }
 
 /* Sets the volume offset
@@ -899,6 +1013,32 @@ int info_handle_container_fprint(
 			 volume_index );
 
 			goto on_error;
+		}
+		if( info_handle->user_password != NULL )
+		{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+			if( libfsapfs_volume_set_utf16_password(
+			     volume,
+			     (uint16_t *) info_handle->user_password,
+			     info_handle->user_password_size - 1,
+			     error ) != 1 )
+#else
+			if( libfsapfs_volume_set_utf8_password(
+			     volume,
+			     (uint8_t *) info_handle->user_password,
+			     info_handle->user_password_size - 1,
+			     error ) != 1 )
+#endif
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+				 "%s: unable to set password.",
+				 function );
+
+				goto on_error;
+			}
 		}
 		if( info_handle_volume_fprint(
 		     info_handle,

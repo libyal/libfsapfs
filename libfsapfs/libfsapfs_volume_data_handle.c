@@ -33,15 +33,13 @@
 #include "libfsapfs_unused.h"
 #include "libfsapfs_volume_data_handle.h"
 
-/* Creates container physical_map_entry
+/* Creates volume data handle
  * Make sure the value volume_data_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_volume_data_handle_initialize(
      libfsapfs_volume_data_handle_t **volume_data_handle,
      libfsapfs_io_handle_t *io_handle,
-     const uint8_t *volume_master_key,
-     size_t volume_master_key_size,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_volume_data_handle_initialize";
@@ -79,29 +77,6 @@ int libfsapfs_volume_data_handle_initialize(
 
 		return( -1 );
 	}
-	if( volume_master_key == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume master key.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( volume_master_key_size != 0 )
-	 && ( volume_master_key_size != 32 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: unsupported volume master key.",
-		 function );
-
-		return( -1 );
-	}
 	*volume_data_handle = memory_allocate_structure(
 	                       libfsapfs_volume_data_handle_t );
 
@@ -128,46 +103,7 @@ int libfsapfs_volume_data_handle_initialize(
 		 "%s: unable to clear volume data handle.",
 		 function );
 
-		memory_free(
-		 *volume_data_handle );
-
-		*volume_data_handle = NULL;
-
-		return( -1 );
-	}
-	if( volume_master_key_size != 0 )
-	{
-		if( libfsapfs_encryption_context_initialize(
-		     &( ( *volume_data_handle )->encryption_context ),
-		     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
-		     error ) == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to initialize encryption context.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_encryption_context_set_keys(
-		     ( *volume_data_handle )->encryption_context,
-		     volume_master_key,
-		     16,
-		     &( volume_master_key[ 16 ] ),
-		     16,
-		     error ) == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set keys in encryption context.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	( *volume_data_handle )->io_handle = io_handle;
 
@@ -176,12 +112,6 @@ int libfsapfs_volume_data_handle_initialize(
 on_error:
 	if( *volume_data_handle != NULL )
 	{
-		if( ( *volume_data_handle )->encryption_context != NULL )
-		{
-			libfsapfs_encryption_context_free(
-			 &( ( *volume_data_handle )->encryption_context ),
-			 NULL );
-		}
 		memory_free(
 		 *volume_data_handle );
 
@@ -235,6 +165,104 @@ int libfsapfs_volume_data_handle_free(
 		*volume_data_handle = NULL;
 	}
 	return( result );
+}
+
+/* Sets the volume master key
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_data_handle_set_volume_master_key(
+     libfsapfs_volume_data_handle_t *volume_data_handle,
+     const uint8_t *volume_master_key,
+     size_t volume_master_key_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_volume_data_handle_set_volume_master_key";
+
+	if( volume_data_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume data handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_data_handle->encryption_context != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume data handle - encryption context already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_master_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume master key.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume_master_key_size != 32 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: unsupported volume master key size.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_encryption_context_initialize(
+	     &( volume_data_handle->encryption_context ),
+	     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize encryption context.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_encryption_context_set_keys(
+	     volume_data_handle->encryption_context,
+	     volume_master_key,
+	     16,
+	     &( volume_master_key[ 16 ] ),
+	     16,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set keys in encryption context.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( volume_data_handle->encryption_context != NULL )
+	{
+		libfsapfs_encryption_context_free(
+		 &( volume_data_handle->encryption_context ),
+		 NULL );
+	}
+	return( -1 );
 }
 
 /* Reads a sector

@@ -461,6 +461,28 @@ int libfsapfs_volume_get_utf16_name(
      size_t utf16_string_size,
      libfsapfs_error_t **error );
 
+/* Sets an UTF-8 formatted password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if password is invalid or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf8_password(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_error_t **error );
+
+/* Sets an UTF-16 formatted password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if password is invalid or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf16_password(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

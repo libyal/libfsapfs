@@ -35,6 +35,7 @@
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
+#include "libfsapfs_volume_data_handle.h"
 #include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
 #include "libfsapfs_types.h"
@@ -75,6 +76,10 @@ struct libfsapfs_internal_volume
 	 */
 	uint8_t volume_master_key[ 32 ];
 
+	/* The volume data handle
+	 */
+	libfsapfs_volume_data_handle_t *volume_data_handle;
+
 	/* The data block vector
 	 */
 	libfdata_vector_t *data_block_vector;
@@ -102,6 +107,22 @@ struct libfsapfs_internal_volume
 	/* Value to indicate if the file IO handle was opened inside the library
 	 */
 	uint8_t file_io_handle_opened_in_library;
+
+	/* Value to indicate if the volume is locked
+	 */
+	uint8_t is_locked;
+
+	/* The user password
+	 */
+	uint8_t *user_password;
+
+        /* User password size
+	 */
+	size_t user_password_size;
+
+	/* Value to indicate the user password is set
+	 */
+	uint8_t user_password_is_set;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -161,6 +182,10 @@ int libfsapfs_internal_volume_open_read(
      off64_t file_offset,
      libcerror_error_t **error );
 
+int libfsapfs_internal_volume_unlock(
+     libfsapfs_internal_volume_t *internal_volume,
+     libcerror_error_t **error );
+
 LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_size(
      libfsapfs_volume_t *volume,
@@ -198,6 +223,25 @@ int libfsapfs_volume_get_utf16_name(
      libfsapfs_volume_t *volume,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_is_locked(
+     libfsapfs_volume_t *volume,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf8_password(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf16_password(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

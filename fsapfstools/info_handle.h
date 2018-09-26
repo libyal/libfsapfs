@@ -24,7 +24,10 @@
 
 #include <common.h>
 #include <file_stream.h>
+#include <narrow_string.h>
+#include <system_string.h>
 #include <types.h>
+#include <wide_string.h>
 
 #include "fsapfstools_libbfio.h"
 #include "fsapfstools_libcerror.h"
@@ -38,6 +41,14 @@ typedef struct info_handle info_handle_t;
 
 struct info_handle
 {
+	/* The user password
+	 */
+	system_character_t *user_password;
+
+	/* The user password size
+	 */
+	size_t user_password_size;
+
 	/* The volume offset
 	 */
 	off64_t volume_offset;
@@ -75,6 +86,11 @@ int info_handle_free(
 
 int info_handle_signal_abort(
      info_handle_t *info_handle,
+     libcerror_error_t **error );
+
+int info_handle_set_password(
+     info_handle_t *info_handle,
+     const system_character_t *string,
      libcerror_error_t **error );
 
 int info_handle_set_volume_offset(

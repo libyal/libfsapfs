@@ -30,7 +30,7 @@
 
 #include "fsapfs_checkpoint_map.h"
 
-/* Creates container physical_map_entry
+/* Creates checkpoint map entry
  * Make sure the value checkpoint_map_entry is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */

@@ -52,12 +52,16 @@ struct libfsapfs_volume_data_handle
 int libfsapfs_volume_data_handle_initialize(
      libfsapfs_volume_data_handle_t **volume_data_handle,
      libfsapfs_io_handle_t *io_handle,
-     const uint8_t *volume_master_key,
-     size_t volume_master_key_size,
      libcerror_error_t **error );
 
 int libfsapfs_volume_data_handle_free(
      libfsapfs_volume_data_handle_t **volume_data_handle,
+     libcerror_error_t **error );
+
+int libfsapfs_volume_data_handle_set_volume_master_key(
+     libfsapfs_volume_data_handle_t *volume_data_handle,
+     const uint8_t *volume_master_key,
+     size_t volume_master_key_size,
      libcerror_error_t **error );
 
 int libfsapfs_volume_data_handle_read_sector(

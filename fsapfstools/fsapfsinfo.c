@@ -58,12 +58,14 @@ void usage_fprint(
 	fprintf( stream, "Use fsapfsinfo to determine information about an Apple\n"
 	                 " File System (APFS).\n\n" );
 
-	fprintf( stream, "Usage: fsapfsinfo [ -o offset ] [ -hvV ] source\n\n" );
+	fprintf( stream, "Usage: fsapfsinfo [ -o offset ] [ -p password ] [ -hvV ]\n"
+	                 "                  source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
 	fprintf( stream, "\t-o:     specify the volume offset\n" );
+	fprintf( stream, "\t-p:     specify the password\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
 }
@@ -121,6 +123,7 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libfsapfs_error_t *error                 = NULL;
+	system_character_t *option_password      = NULL;
 	system_character_t *option_volume_offset = NULL;
 	system_character_t *source               = NULL;
 	char *program                            = "fsapfsinfo";
@@ -160,7 +163,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "ho:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "ho:p:vV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -184,6 +187,11 @@ int main( int argc, char * const argv[] )
 
 			case (system_integer_t) 'o':
 				option_volume_offset = optarg;
+
+				break;
+
+			case (system_integer_t) 'p':
+				option_password = optarg;
 
 				break;
 
@@ -229,6 +237,20 @@ int main( int argc, char * const argv[] )
 		 "Unable to initialize info handle.\n" );
 
 		goto on_error;
+	}
+	if( option_password != NULL )
+	{
+		if( info_handle_set_password(
+		     fsapfsinfo_info_handle,
+		     option_password,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set password.\n" );
+
+			goto on_error;
+		}
 	}
 	if( option_volume_offset != NULL )
 	{
