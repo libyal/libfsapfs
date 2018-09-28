@@ -28,6 +28,7 @@
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_inode.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
@@ -92,6 +93,10 @@ struct libfsapfs_internal_volume
 	 */
 	libfsapfs_file_system_btree_t *file_system_btree;
 
+	/* The root directory inode
+	 */
+	libfsapfs_inode_t *root_directory_inode;
+
 	/* The IO handle
 	 */
 	libfsapfs_io_handle_t *io_handle;
@@ -131,9 +136,12 @@ struct libfsapfs_internal_volume
 #endif
 };
 
-LIBFSAPFS_EXTERN \
 int libfsapfs_volume_initialize(
      libfsapfs_volume_t **volume,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_container_key_bag_t *container_key_bag,
+     size64_t container_size,
+     uint32_t block_size,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

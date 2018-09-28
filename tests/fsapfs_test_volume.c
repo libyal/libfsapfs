@@ -38,6 +38,8 @@
 #include "fsapfs_test_macros.h"
 #include "fsapfs_test_memory.h"
 
+#include "../libfsapfs/libfsapfs_volume.h"
+
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER ) && SIZEOF_WCHAR_T != 2 && SIZEOF_WCHAR_T != 4
 #error Unsupported size of wchar_t
 #endif
@@ -481,6 +483,10 @@ int fsapfs_test_volume_open_source(
 	}
 	if( libfsapfs_volume_initialize(
 	     volume,
+	     NULL,
+	     NULL,
+	     0,
+	     4096,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -598,6 +604,10 @@ int fsapfs_test_volume_initialize(
 	 */
 	result = libfsapfs_volume_initialize(
 	          &volume,
+	          NULL,
+	          NULL,
+	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -634,6 +644,10 @@ int fsapfs_test_volume_initialize(
 	 */
 	result = libfsapfs_volume_initialize(
 	          NULL,
+	          NULL,
+	          NULL,
+	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -652,6 +666,10 @@ int fsapfs_test_volume_initialize(
 
 	result = libfsapfs_volume_initialize(
 	          &volume,
+	          NULL,
+	          NULL,
+	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -680,6 +698,10 @@ int fsapfs_test_volume_initialize(
 
 		result = libfsapfs_volume_initialize(
 		          &volume,
+		          NULL,
+		          NULL,
+		          0,
+		          4096,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
@@ -722,6 +744,10 @@ int fsapfs_test_volume_initialize(
 
 		result = libfsapfs_volume_initialize(
 		          &volume,
+		          NULL,
+		          NULL,
+		          0,
+		          4096,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
@@ -842,6 +868,10 @@ int fsapfs_test_volume_open(
 
 	result = libfsapfs_volume_initialize(
 	          &volume,
+	          NULL,
+	          NULL,
+	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -963,6 +993,10 @@ int fsapfs_test_volume_open_wide(
 
 	result = libfsapfs_volume_initialize(
 	          &volume,
+	          NULL,
+	          NULL,
+	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1105,6 +1139,10 @@ int fsapfs_test_volume_open_close(
 	 */
 	result = libfsapfs_volume_initialize(
 	          &volume,
+	          NULL,
+	          NULL,
+	          0,
+	          4096,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(

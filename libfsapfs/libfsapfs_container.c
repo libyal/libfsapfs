@@ -1909,6 +1909,10 @@ int libfsapfs_container_get_volume_by_index(
 	}
 	if( libfsapfs_volume_initialize(
 	     volume,
+	     internal_container->file_io_handle,
+	     internal_container->key_bag,
+	     internal_container->size,
+	     internal_container->superblock->block_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1920,16 +1924,8 @@ int libfsapfs_container_get_volume_by_index(
 
 		goto on_error;
 	}
-/* TODO add function to set block_size */
-	( (libfsapfs_internal_volume_t *) *volume )->block_size = internal_container->superblock->block_size;
-/* TODO add function to set size */
-	( (libfsapfs_internal_volume_t *) *volume )->container_size = internal_container->size;
-/* TODO add function to set container_key_bag */
-	( (libfsapfs_internal_volume_t *) *volume )->container_key_bag = internal_container->key_bag;
-
 	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->superblock->block_size );
 
-/* TODO clone file_io_handle? */
 	if( libfsapfs_internal_volume_open_read(
 	     (libfsapfs_internal_volume_t *) *volume,
 	     internal_container->file_io_handle,

@@ -1139,7 +1139,7 @@ See section: <<change_information,Change information>>
 [yellow-background]*Contains the 8 last entries from least recent to most recent?* +
 See section: <<change_information,Change information>>
 | 636 | 256 | | Volume name (apfs_volname)
-| 892 | 4 | | [yellow-background]*Unknown (apfs_next_doc_id)*
+| 892 | 4 | | Next (available) document identifier (apfs_next_doc_id)
 | 896 | 2 | | [yellow-background]*Unknown (apfs_role)*
 | 898 | 2 | | [yellow-background]*Unknown (reserved)*
 | 900 | 8 | | [yellow-background]*Unknown (apfs_root_to_xid)*
@@ -1350,7 +1350,7 @@ See section: <<file_modes,File modes>>
 | 88 | 2 | | [yellow-background]*Unknown (pad1)*
 | 90 | 8 | | [yellow-background]*Unknown (pad2)*
 | 98 | ... | | Extended fields (xfields) +
-See section: <<extended_fields,extended fields>>
+See section: <<extended_fields,Extended fields>>
 |===
 
 ===== [[inode_flags]]Inode flags
@@ -1389,7 +1389,7 @@ The inode file content is always on the secondary storage device +
 This flag is used for Fusion drives where the secondary storage is a (magnetic) hard drive
 | 0x00004000 | INODE_HAS_RSRC_FORK | Has resource fork +
 The inode has a resource fork
-| 0x00008000 | INODE_NO_RSRC_FORK | Had no resource fork +
+| 0x00008000 | INODE_NO_RSRC_FORK | Has no resource fork +
 The inode does not have a resource fork
 | 0x00010000 | INODE_ALLOCATION_SPILLEDOVER | [yellow-background]*Unknown (TODO)* +
 The inode file content has some space allocated outside of the preferred storage tier for that file
@@ -1592,7 +1592,7 @@ Signed integer that contains the number of nanoseconds since January 1, 1970 00:
 | 16 | 2 | | Directory entry flags +
 See section: <<directory_entry_flags,Directory entry flags>>
 | 18 | ... | | Extended fields (xfields) +
-See section: <<extended_fields,extended fields>>
+See section: <<extended_fields,Extended fields>>
 |===
 
 ===== [[directory_entry_flags]]Directory entry flags
@@ -1654,7 +1654,95 @@ consists of:
 
 === [[extended_fields]]Extended fields
 
-[yellow-background]*TODO: complete this section.*
+Directory entries and inodes use extended fields to store additional attributes,
+such as the filename.
+
+The extended fields (xf_blob_t) consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 2 | | Number of extended fields (xf_num_exts)
+| 2 | 2 | | [yellow-background]*Unknown (xf_used_data)*
+| 4 | ... | | Array of extended fields (xf_data) +
+See section: <<extended_field,Extended field>>
+|===
+
+==== [[extended_field]]Extended field
+
+An extended field (x_field_t) consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 1 | | Extended field type (x_type) +
+See section: <<extended_field_types,Extended field types>>
+| 1 | 1 | | Extended field flags (x_flags) +
+See section: <<extended_field_flags,Extended field flags>>
+| 2 | 2 | | Extended field data size (x_size)
+| 4 | ... | | Extended field data
+|===
+
+[yellow-background]*TODO determine if the extended field data is stored directly after x_field_t or after the array of x_field_t*
+
+==== [[extended_field_types]]Extended field types
+
+===== Directory record extended field types
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 1 | DREC_EXT_TYPE_SIBLING_ID | Sibling identifier for a directory record +
+The extended field data contains a 64-bit integer value +
+This extended field is used by hard links
+|===
+
+===== Inode extended field types
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 1 | INO_EXT_TYPE_SNAP_XID | Transaction identifier of a snapshot +
+The extended field data contains a 64-bit integer value
+| 2 | INO_EXT_TYPE_DELTA_TREE_OID | Object identifier of the snapshot extent delta list +
+The extended field data contains a 64-bit integer value
+| 3 | INO_EXT_TYPE_DOCUMENT_ID | Document identifier +
+The extended field data contains a 32-bit integer value
+| 4 | INO_EXT_TYPE_NAME | Filename +
+The extended field data contains an UTF-8 string with end-of-string character
+| 5 | INO_EXT_TYPE_PREV_FSIZE | Previous file size +
+The extended field data contains a 64-bit integer value
+| 6 | INO_EXT_TYPE_RESERVED_6 | [yellow-background]*Unknown (Reserved)*
+| 7 | INO_EXT_TYPE_FINDER_INFO | Finder information +
+The extended field data contains a 32-bit integer value
+| 8 | INO_EXT_TYPE_DSTREAM | Data stream +
+[yellow-background]*Unknown if this contains the object identifier of the data stream or a j_dstream_t structure*
+| 9 | INO_EXT_TYPE_RESERVED_9 | [yellow-background]*Unknown (Reserved)*
+| 10 | INO_EXT_TYPE_DIR_STATS_KEY | Direcotry statistics +
+[yellow-background]*Unknown if this contains the object identifier of the directory statisticts or a j_dir_stats_val_t structure*
+| 11 | INO_EXT_TYPE_FS_UUID | Mounted file system identifier +
+The extended field data contains a 128-bit UUID value
+| 12 | INO_EXT_TYPE_RESERVED_12 | [yellow-background]*Unknown (Reserved)*
+| 13 | INO_EXT_TYPE_SPARSE_BYTES | Number of sparse bytes in the data stream +
+The extended field data contains a 64-bit integer value
+| 14 | INO_EXT_TYPE_RDEV | Block- or character-device identifier +
+The extended field data contains a 32-bit integer value
+|===
+
+==== [[extended_field_flags]]Extended field flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x01 | XF_DATA_DEPENDENT | [yellow-background]*Unknown*
+| 0x02 | XF_DO_NOT_COPY | Do not duplicate the extended field when copied
+| 0x04 | XF_RESERVED_4 | [yellow-background]*Unknown (Reserved)*
+| 0x08 | XF_CHILDREN_INHERIT | [yellow-background]*Unknown*
+| 0x10 | XF_USER_FIELD | [yellow-background]*Unknown*
+| 0x20 | XF_SYSTEM_FIELD | [yellow-background]*Unknown*
+| 0x40 | XF_RESERVED_40 | [yellow-background]*Unknown*
+| 0x80 | XF_RESERVED_80 | [yellow-background]*Unknown*
+|===
 
 == [[efi_jumpstart]]EFI jumpstart
 

@@ -43,6 +43,12 @@
 #include "fsapfstools_unused.h"
 #include "info_handle.h"
 
+enum FSAPFSINFO_MODES
+{
+	FSAPFSINFO_MODE_CONTAINER,
+	FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY
+};
+
 info_handle_t *fsapfsinfo_info_handle = NULL;
 int fsapfsinfo_abort                  = 0;
 
@@ -58,12 +64,13 @@ void usage_fprint(
 	fprintf( stream, "Use fsapfsinfo to determine information about an Apple\n"
 	                 " File System (APFS).\n\n" );
 
-	fprintf( stream, "Usage: fsapfsinfo [ -o offset ] [ -p password ] [ -hvV ]\n"
+	fprintf( stream, "Usage: fsapfsinfo [ -o offset ] [ -p password ] [ -hHvV ]\n"
 	                 "                  source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-h:     shows this help\n" );
+	fprintf( stream, "\t-H:     shows the file system hierarchy\n" );
 	fprintf( stream, "\t-o:     specify the volume offset\n" );
 	fprintf( stream, "\t-p:     specify the password\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
@@ -128,6 +135,7 @@ int main( int argc, char * const argv[] )
 	system_character_t *source               = NULL;
 	char *program                            = "fsapfsinfo";
 	system_integer_t option                  = 0;
+	int option_mode                          = FSAPFSINFO_MODE_CONTAINER;
 	int verbose                              = 0;
 
 	libcnotify_stream_set(
@@ -163,7 +171,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "ho:p:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "hHo:p:vV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -184,6 +192,11 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_SUCCESS );
+
+			case (system_integer_t) 'H':
+				option_mode = FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY;
+
+				break;
 
 			case (system_integer_t) 'o':
 				option_volume_offset = optarg;
@@ -282,15 +295,34 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	if( info_handle_container_fprint(
-	     fsapfsinfo_info_handle,
-	     &error ) != 1 )
+	switch( option_mode )
 	{
-		fprintf(
-		 stderr,
-		 "Unable to print container information.\n" );
+		case FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY:
+			if( info_handle_file_system_hierarchy_fprint(
+			     fsapfsinfo_info_handle,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to print file system hierarchy.\n" );
 
-		goto on_error;
+				goto on_error;
+			}
+			break;
+
+		case FSAPFSINFO_MODE_CONTAINER:
+		default:
+			if( info_handle_container_fprint(
+			     fsapfsinfo_info_handle,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to print container information.\n" );
+
+				goto on_error;
+			}
+			break;
 	}
 	if( info_handle_close_input(
 	     fsapfsinfo_info_handle,

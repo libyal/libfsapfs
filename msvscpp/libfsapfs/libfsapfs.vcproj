@@ -186,7 +186,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_btree_root.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_node.c"
 				>
 			</File>
 			<File
@@ -239,6 +239,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_file_system_btree.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_inode.c"
 				>
 			</File>
 			<File
@@ -360,7 +364,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_btree_root.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_node.h"
 				>
 			</File>
 			<File
@@ -421,6 +425,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_file_system_btree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_inode.h"
 				>
 			</File>
 			<File

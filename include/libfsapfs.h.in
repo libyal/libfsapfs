@@ -328,15 +328,6 @@ int libfsapfs_container_get_volume_by_index(
  * Volume functions
  * ------------------------------------------------------------------------- */
 
-/* Creates a volume
- * Make sure the value volume is referencing, is set to NULL
- * Returns 1 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_initialize(
-     libfsapfs_volume_t **volume,
-     libfsapfs_error_t **error );
-
 /* Frees a volume
  * Returns 1 if successful or -1 on error
  */
@@ -481,6 +472,88 @@ int libfsapfs_volume_set_utf16_password(
      libfsapfs_volume_t *volume,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     libfsapfs_error_t **error );
+
+/* Retrieves the root directory file entry
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_root_directory(
+     libfsapfs_volume_t *volume,
+     libfsapfs_file_entry_t **file_entry,
+     libfsapfs_error_t **error );
+
+/* -------------------------------------------------------------------------
+ * File entry functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees a file entry
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_free(
+     libfsapfs_file_entry_t **file_entry,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-8 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf8_name_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf8_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-8 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf8_name(
+     libfsapfs_file_entry_t *file_entry,
+     uint8_t *utf8_name,
+     size_t utf8_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-16 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf16_name_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf16_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-16 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf16_name(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *utf16_name,
+     size_t utf16_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the number of sub file entries
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_sub_file_entries(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_sub_file_entries,
+     libfsapfs_error_t **error );
+
+/* Retrieves the sub file entry for the specific index
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_sub_file_entry_by_index(
+     libfsapfs_file_entry_t *file_entry,
+     int sub_file_entry_index,
+     libfsapfs_file_entry_t **sub_file_entry,
      libfsapfs_error_t **error );
 
 #if defined( __cplusplus )

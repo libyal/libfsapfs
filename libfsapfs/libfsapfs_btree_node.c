@@ -1,5 +1,5 @@
 /*
- * The B-tree root functions
+ * The B-tree node functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -27,7 +27,7 @@
 #include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_footer.h"
 #include "libfsapfs_btree_header.h"
-#include "libfsapfs_btree_root.h"
+#include "libfsapfs_btree_node.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
@@ -35,73 +35,73 @@
 #include "fsapfs_btree.h"
 #include "fsapfs_object.h"
 
-/* Creates a B-tree root
- * Make sure the value btree_root is referencing, is set to NULL
+/* Creates a B-tree node
+ * Make sure the value btree_node is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_root_initialize(
-     libfsapfs_btree_root_t **btree_root,
+int libfsapfs_btree_node_initialize(
+     libfsapfs_btree_node_t **btree_node,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_root_initialize";
+	static char *function = "libfsapfs_btree_node_initialize";
 
-	if( btree_root == NULL )
+	if( btree_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree root.",
+		 "%s: invalid B-tree node.",
 		 function );
 
 		return( -1 );
 	}
-	if( *btree_root != NULL )
+	if( *btree_node != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid B-tree root value already set.",
+		 "%s: invalid B-tree node value already set.",
 		 function );
 
 		return( -1 );
 	}
-	*btree_root = memory_allocate_structure(
-	               libfsapfs_btree_root_t );
+	*btree_node = memory_allocate_structure(
+	               libfsapfs_btree_node_t );
 
-	if( *btree_root == NULL )
+	if( *btree_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create B-tree root.",
+		 "%s: unable to create B-tree node.",
 		 function );
 
 		goto on_error;
 	}
 	if( memory_set(
-	     *btree_root,
+	     *btree_node,
 	     0,
-	     sizeof( libfsapfs_btree_root_t ) ) == NULL )
+	     sizeof( libfsapfs_btree_node_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear B-tree root.",
+		 "%s: unable to clear B-tree node.",
 		 function );
 
 		memory_free(
-		 *btree_root );
+		 *btree_node );
 
-		*btree_root = NULL;
+		*btree_node = NULL;
 
 		return( -1 );
 	}
 	if( libcdata_array_initialize(
-	     &( ( *btree_root )->entries_array ),
+	     &( ( *btree_node )->entries_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -117,43 +117,43 @@ int libfsapfs_btree_root_initialize(
 	return( 1 );
 
 on_error:
-	if( *btree_root != NULL )
+	if( *btree_node != NULL )
 	{
 		memory_free(
-		 *btree_root );
+		 *btree_node );
 
-		*btree_root = NULL;
+		*btree_node = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees a B-tree root
+/* Frees a B-tree node
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_root_free(
-     libfsapfs_btree_root_t **btree_root,
+int libfsapfs_btree_node_free(
+     libfsapfs_btree_node_t **btree_node,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_root_free";
+	static char *function = "libfsapfs_btree_node_free";
 	int result            = 1;
 
-	if( btree_root == NULL )
+	if( btree_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree root.",
+		 "%s: invalid B-tree node.",
 		 function );
 
 		return( -1 );
 	}
-	if( *btree_root != NULL )
+	if( *btree_node != NULL )
 	{
-		if( ( *btree_root )->header != NULL )
+		if( ( *btree_node )->header != NULL )
 		{
 			if( libfsapfs_btree_header_free(
-			     &( ( *btree_root )->header ),
+			     &( ( *btree_node )->header ),
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -166,10 +166,10 @@ int libfsapfs_btree_root_free(
 				result = -1;
 			}
 		}
-		if( ( *btree_root )->footer != NULL )
+		if( ( *btree_node )->footer != NULL )
 		{
 			if( libfsapfs_btree_footer_free(
-			     &( ( *btree_root )->footer ),
+			     &( ( *btree_node )->footer ),
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -183,7 +183,7 @@ int libfsapfs_btree_root_free(
 			}
 		}
 		if( libcdata_array_free(
-		     &( ( *btree_root )->entries_array ),
+		     &( ( *btree_node )->entries_array ),
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_btree_entry_free,
 		     error ) != 1 )
 		{
@@ -197,25 +197,25 @@ int libfsapfs_btree_root_free(
 			result = -1;
 		}
 		memory_free(
-		 *btree_root );
+		 *btree_node );
 
-		*btree_root = NULL;
+		*btree_node = NULL;
 	}
 	return( result );
 }
 
-/* Reads the B-tree root
+/* Reads the B-tree node
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_root_read_data(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_read_data(
+     libfsapfs_btree_node_t *btree_node,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *btree_entry = NULL;
-	const uint8_t *btree_root_entry      = NULL;
-	static char *function                = "libfsapfs_btree_root_read_data";
+	const uint8_t *btree_node_entry      = NULL;
+	static char *function                = "libfsapfs_btree_node_read_data";
 	size_t btree_entry_data_size         = 0;
 	size_t data_offset                   = 0;
 	size_t minimum_data_size             = 0;
@@ -229,35 +229,35 @@ int libfsapfs_btree_root_read_data(
 	uint16_t value_data_size             = 0;
 	int entry_index                      = 0;
 
-	if( btree_root == NULL )
+	if( btree_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree root.",
+		 "%s: invalid B-tree node.",
 		 function );
 
 		return( -1 );
 	}
-	if( btree_root->header != NULL )
+	if( btree_node->header != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid B-tree root - header value already set.",
+		 "%s: invalid B-tree node - header value already set.",
 		 function );
 
 		return( -1 );
 	}
-	if( btree_root->footer != NULL )
+	if( btree_node->footer != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid B-tree root - footer value already set.",
+		 "%s: invalid B-tree node - footer value already set.",
 		 function );
 
 		return( -1 );
@@ -291,7 +291,7 @@ int libfsapfs_btree_root_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: B-tree root data:\n",
+		 "%s: B-tree node data:\n",
 		 function );
 		libcnotify_print_data(
 		 data,
@@ -299,8 +299,8 @@ int libfsapfs_btree_root_read_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
-	if( libfsapfs_btree_root_read_object_data(
-	     btree_root,
+	if( libfsapfs_btree_node_read_object_data(
+	     btree_node,
 	     data,
 	     data_size,
 	     error ) != 1 )
@@ -309,7 +309,7 @@ int libfsapfs_btree_root_read_data(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read B-tree root object data.",
+		 "%s: unable to read B-tree node object data.",
 		 function );
 
 		goto on_error;
@@ -317,7 +317,7 @@ int libfsapfs_btree_root_read_data(
 	data_offset = sizeof( fsapfs_object_t );
 
 	if( libfsapfs_btree_header_initialize(
-	     &( btree_root->header ),
+	     &( btree_node->header ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -330,7 +330,7 @@ int libfsapfs_btree_root_read_data(
 		goto on_error;
 	}
 	if( libfsapfs_btree_header_read_data(
-	     btree_root->header,
+	     btree_node->header,
 	     &( data[ data_offset ] ),
 	     sizeof( fsapfs_btree_header_t ),
 	     error ) != 1 )
@@ -348,7 +348,7 @@ int libfsapfs_btree_root_read_data(
 
 	remaining_data_size = data_size - minimum_data_size;
 
-	if( btree_root->header->entries_data_offset >= remaining_data_size )
+	if( btree_node->header->entries_data_offset >= remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -359,9 +359,9 @@ int libfsapfs_btree_root_read_data(
 
 		goto on_error;
 	}
-	remaining_data_size -= btree_root->header->entries_data_offset;
+	remaining_data_size -= btree_node->header->entries_data_offset;
 
-	if( btree_root->header->entries_data_size > remaining_data_size )
+	if( btree_node->header->entries_data_size > remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -372,9 +372,9 @@ int libfsapfs_btree_root_read_data(
 
 		goto on_error;
 	}
-	remaining_data_size -= btree_root->header->entries_data_size;
+	remaining_data_size -= btree_node->header->entries_data_size;
 
-	if( btree_root->header->unused_data_offset >= remaining_data_size )
+	if( btree_node->header->unused_data_offset >= remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -385,9 +385,9 @@ int libfsapfs_btree_root_read_data(
 
 		goto on_error;
 	}
-	remaining_data_size -= btree_root->header->unused_data_offset;
+	remaining_data_size -= btree_node->header->unused_data_offset;
 
-	if( btree_root->header->unused_data_size > remaining_data_size )
+	if( btree_node->header->unused_data_size > remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -401,7 +401,7 @@ int libfsapfs_btree_root_read_data(
 /* TODO sanity check other data_offset and data_size values */
 
 	if( libfsapfs_btree_footer_initialize(
-	     &( btree_root->footer ),
+	     &( btree_node->footer ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -414,7 +414,7 @@ int libfsapfs_btree_root_read_data(
 		goto on_error;
 	}
 	if( libfsapfs_btree_footer_read_data(
-	     btree_root->footer,
+	     btree_node->footer,
 	     &( data[ data_size - sizeof( fsapfs_btree_footer_t ) ] ),
 	     sizeof( fsapfs_btree_footer_t ),
 	     error ) != 1 )
@@ -428,7 +428,7 @@ int libfsapfs_btree_root_read_data(
 
 		goto on_error;
 	}
-	if( ( btree_root->header->flags & 0x0004 ) == 0 )
+	if( ( btree_node->header->flags & 0x0004 ) == 0 )
 	{
 		btree_entry_data_size = sizeof( fsapfs_btree_variable_size_entry_t );
 	}
@@ -436,7 +436,7 @@ int libfsapfs_btree_root_read_data(
 	{
 		btree_entry_data_size = sizeof( fsapfs_btree_fixed_size_entry_t );
 	}
-	if( btree_root->footer->number_of_entries > (uint64_t) ( btree_root->header->entries_data_size / btree_entry_data_size ) )
+	if( btree_node->footer->number_of_entries > (uint64_t) ( btree_node->header->entries_data_size / btree_entry_data_size ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -447,48 +447,48 @@ int libfsapfs_btree_root_read_data(
 
 		goto on_error;
 	}
-	data_offset += btree_root->header->entries_data_offset;
+	data_offset += btree_node->header->entries_data_offset;
 
-	entries_data_offset = btree_root->header->entries_data_offset + (uint16_t) ( sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_header_t ) );
+	entries_data_offset = btree_node->header->entries_data_offset + (uint16_t) ( sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_header_t ) );
 	footer_offset       = (uint16_t) ( data_size - sizeof( fsapfs_btree_footer_t ) );
 
 	for( map_entry_index = 0;
-	     map_entry_index < btree_root->footer->number_of_entries;
+	     map_entry_index < btree_node->footer->number_of_entries;
 	     map_entry_index++ )
 	{
-		btree_root_entry = &( data[ data_offset ] );
+		btree_node_entry = &( data[ data_offset ] );
 
-		if( ( btree_root->header->flags & 0x0004 ) == 0 )
+		if( ( btree_node->header->flags & 0x0004 ) == 0 )
 		{
 			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsapfs_btree_variable_size_entry_t *) btree_root_entry )->key_data_offset,
+			 ( (fsapfs_btree_variable_size_entry_t *) btree_node_entry )->key_data_offset,
 			 key_data_offset );
 
 			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsapfs_btree_variable_size_entry_t *) btree_root_entry )->key_data_size,
+			 ( (fsapfs_btree_variable_size_entry_t *) btree_node_entry )->key_data_size,
 			 key_data_size );
 
 			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsapfs_btree_variable_size_entry_t *) btree_root_entry )->value_data_offset,
+			 ( (fsapfs_btree_variable_size_entry_t *) btree_node_entry )->value_data_offset,
 			 value_data_offset );
 
 			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsapfs_btree_variable_size_entry_t *) btree_root_entry )->value_data_size,
+			 ( (fsapfs_btree_variable_size_entry_t *) btree_node_entry )->value_data_size,
 			 value_data_size );
 		}
 		else
 		{
 			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsapfs_btree_fixed_size_entry_t *) btree_root_entry )->key_data_offset,
+			 ( (fsapfs_btree_fixed_size_entry_t *) btree_node_entry )->key_data_offset,
 			 key_data_offset );
 
-			key_data_size = btree_root->footer->key_size;
+			key_data_size = btree_node->footer->key_size;
 
 			byte_stream_copy_to_uint16_little_endian(
-			 ( (fsapfs_btree_fixed_size_entry_t *) btree_root_entry )->value_data_offset,
+			 ( (fsapfs_btree_fixed_size_entry_t *) btree_node_entry )->value_data_offset,
 			 value_data_offset );
 
-			value_data_size = btree_root->footer->value_size;
+			value_data_size = btree_node->footer->value_size;
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
@@ -498,7 +498,7 @@ int libfsapfs_btree_root_read_data(
 			 function,
 			 map_entry_index,
 			 key_data_offset,
-			 (size_t) key_data_offset + (size_t) entries_data_offset + (size_t) btree_root->header->entries_data_size );
+			 (size_t) key_data_offset + (size_t) entries_data_offset + (size_t) btree_node->header->entries_data_size );
 
 			libcnotify_printf(
 			 "%s: entry: %02" PRIu64 " key data size\t\t\t: %" PRIu16 "\n",
@@ -526,7 +526,7 @@ int libfsapfs_btree_root_read_data(
 
 		data_offset += btree_entry_data_size;
 
-		key_data_offset += entries_data_offset + btree_root->header->entries_data_size;
+		key_data_offset += entries_data_offset + btree_node->header->entries_data_size;
 
 		if( ( (size_t) key_data_offset > data_size )
 		 || ( (size_t) key_data_size > ( data_size - key_data_offset ) ) )
@@ -599,7 +599,7 @@ int libfsapfs_btree_root_read_data(
 		btree_entry->value_data_size = (size_t) value_data_size;
 
 		if( libcdata_array_append_entry(
-		     btree_root->entries_array,
+		     btree_node->entries_array,
 		     &entry_index,
 		     (intptr_t *) btree_entry,
 		     error ) != 1 )
@@ -625,43 +625,43 @@ on_error:
 		 &btree_entry,
 		 NULL );
 	}
-	if( btree_root->footer != NULL )
+	if( btree_node->footer != NULL )
 	{
 		libfsapfs_btree_footer_free(
-		 &( btree_root->footer ),
+		 &( btree_node->footer ),
 		 NULL );
 	}
-	if( btree_root->header != NULL )
+	if( btree_node->header != NULL )
 	{
 		libfsapfs_btree_header_free(
-		 &( btree_root->header ),
+		 &( btree_node->header ),
 		 NULL );
 	}
 	return( -1 );
 }
 
-/* Reads the B-tree root object
+/* Reads the B-tree node object
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_root_read_object_data(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_read_object_data(
+     libfsapfs_btree_node_t *btree_node,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_root_read_object_data";
+	static char *function = "libfsapfs_btree_node_read_object_data";
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit  = 0;
 #endif
 
-	if( btree_root == NULL )
+	if( btree_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree root.",
+		 "%s: invalid B-tree node.",
 		 function );
 
 		return( -1 );
@@ -693,7 +693,7 @@ int libfsapfs_btree_root_read_object_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: B-tree root object data:\n",
+		 "%s: B-tree node object data:\n",
 		 function );
 		libcnotify_print_data(
 		 data,
@@ -703,9 +703,9 @@ int libfsapfs_btree_root_read_object_data(
 #endif
 	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_object_t *) data )->type,
-	 btree_root->object_type );
+	 btree_node->object_type );
 
-	if( ( btree_root->object_type & 0x0ffffffUL ) != 0x00000002UL )
+	if( ( btree_node->object_type & 0x0ffffffUL ) != 0x00000002UL )
 	{
 		libcerror_error_set(
 		 error,
@@ -713,13 +713,13 @@ int libfsapfs_btree_root_read_object_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: invalid object type: 0x%08" PRIx32 ".",
 		 function,
-		 btree_root->object_type );
+		 btree_node->object_type );
 
 		return( -1 );
 	}
 	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_object_t *) data )->subtype,
-	 btree_root->object_subtype );
+	 btree_node->object_subtype );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -751,12 +751,12 @@ int libfsapfs_btree_root_read_object_data(
 		libcnotify_printf(
 		 "%s: object type\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 btree_root->object_type );
+		 btree_node->object_type );
 
 		libcnotify_printf(
 		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 btree_root->object_subtype );
+		 btree_node->object_subtype );
 
 		libcnotify_printf(
 		 "\n" );
@@ -769,26 +769,26 @@ int libfsapfs_btree_root_read_object_data(
 /* Retrieves the number of B-tree entries
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_root_get_number_of_entries(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_get_number_of_entries(
+     libfsapfs_btree_node_t *btree_node,
      int *number_of_entries,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_root_get_number_of_entries";
+	static char *function = "libfsapfs_btree_node_get_number_of_entries";
 
-	if( btree_root == NULL )
+	if( btree_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree root.",
+		 "%s: invalid B-tree node.",
 		 function );
 
 		return( -1 );
 	}
 	if( libcdata_array_get_number_of_entries(
-	     btree_root->entries_array,
+	     btree_node->entries_array,
 	     number_of_entries,
 	     error ) != 1 )
 	{
@@ -807,27 +807,27 @@ int libfsapfs_btree_root_get_number_of_entries(
 /* Retrieves a specific of B-tree entry
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_root_get_entry_by_index(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_get_entry_by_index(
+     libfsapfs_btree_node_t *btree_node,
      int entry_index,
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_root_get_entry_by_index";
+	static char *function = "libfsapfs_btree_node_get_entry_by_index";
 
-	if( btree_root == NULL )
+	if( btree_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree root.",
+		 "%s: invalid B-tree node.",
 		 function );
 
 		return( -1 );
 	}
 	if( libcdata_array_get_entry_by_index(
-	     btree_root->entries_array,
+	     btree_node->entries_array,
 	     entry_index,
 	     (intptr_t **) btree_entry,
 	     error ) != 1 )

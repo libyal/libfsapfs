@@ -25,9 +25,11 @@
 #include <types.h>
 
 #include "libfsapfs_btree_entry.h"
-#include "libfsapfs_btree_root.h"
+#include "libfsapfs_btree_node.h"
 #include "libfsapfs_data_block.h"
+#include "libfsapfs_definitions.h"
 #include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_inode.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcaes.h"
 #include "libfsapfs_libcerror.h"
@@ -45,6 +47,9 @@
  */
 int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
+     libfdata_vector_t *data_block_vector,
+     libfcache_cache_t *data_block_cache,
+     uint64_t root_node_block_number,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_file_system_btree_initialize";
@@ -99,6 +104,10 @@ int libfsapfs_file_system_btree_initialize(
 
 		goto on_error;
 	}
+	( *file_system_btree )->data_block_vector      = data_block_vector;
+	( *file_system_btree )->data_block_cache       = data_block_cache;
+	( *file_system_btree )->root_node_block_number = root_node_block_number;
+
 	return( 1 );
 
 on_error:
@@ -134,6 +143,8 @@ int libfsapfs_file_system_btree_free(
 	}
 	if( *file_system_btree != NULL )
 	{
+		/* The data_block_vector and data_block_cache are referenced and freed elsewhere
+		 */
 		memory_free(
 		 *file_system_btree );
 
@@ -142,19 +153,17 @@ int libfsapfs_file_system_btree_free(
 	return( 1 );
 }
 
-/* Reads the file system B-tree
+/* Retrieves the file system B-tree root node
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_file_system_btree_read_block(
+int libfsapfs_file_system_btree_get_root_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
-     libfdata_vector_t *data_block_vector,
-     libfcache_cache_t *data_block_cache,
-     uint64_t block_number,
+     libfsapfs_btree_node_t **root_node,
      libcerror_error_t **error )
 {
 	libfsapfs_data_block_t *data_block = NULL;
-	static char *function              = "libfsapfs_file_system_btree_read_block";
+	static char *function              = "libfsapfs_file_system_btree_get_root_node";
 
 	if( file_system_btree == NULL )
 	{
@@ -168,10 +177,10 @@ int libfsapfs_file_system_btree_read_block(
 		return( -1 );
 	}
 	if( libfdata_vector_get_element_value_by_index(
-	     data_block_vector,
+	     file_system_btree->data_block_vector,
 	     (intptr_t *) file_io_handle,
-	     data_block_cache,
-	     (int) block_number,
+	     file_system_btree->data_block_cache,
+	     (int) file_system_btree->root_node_block_number,
 	     (intptr_t **) &data_block,
 	     0,
 	     error ) != 1 )
@@ -182,9 +191,9 @@ int libfsapfs_file_system_btree_read_block(
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve data block: %" PRIu64 ".",
 		 function,
-		 block_number );
+		 file_system_btree->root_node_block_number );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( data_block == NULL )
 	{
@@ -194,12 +203,25 @@ int libfsapfs_file_system_btree_read_block(
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid data block: %" PRIu64 ".",
 		 function,
-		 block_number );
+		 file_system_btree->root_node_block_number );
 
-		return( -1 );
+		goto on_error;
 	}
-	if( libfsapfs_file_system_btree_read_data(
-	     file_system_btree,
+	if( libfsapfs_btree_node_initialize(
+	     root_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create B-tree node.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_btree_node_read_data(
+	     *root_node,
 	     data_block->data,
 	     data_block->data_size,
 	     error ) != 1 )
@@ -208,32 +230,173 @@ int libfsapfs_file_system_btree_read_block(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read file system B-tree data.",
+		 "%s: unable to read B-tree node.",
 		 function );
 
-		return( -1 );
+		goto on_error;
+	}
+	if( ( ( *root_node )->object_type != 0x00000002UL )
+	 && ( ( *root_node )->object_type != 0x10000002UL ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid object type: 0x%08" PRIx32 ".",
+		 function,
+		 ( *root_node )->object_type );
+
+		goto on_error;
+	}
+	if( ( *root_node )->object_subtype != 0x0000000eUL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
+		 function,
+		 ( *root_node )->object_subtype );
+
+		goto on_error;
+	}
+	if( ( *root_node )->header->flags != 0x0003 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported flags: 0x%04" PRIx16 ".",
+		 function,
+		 ( *root_node )->header->flags );
+
+		goto on_error;
+	}
+	if( ( *root_node )->footer->key_size != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid key size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( *root_node )->footer->value_size != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid value size value out of bounds.",
+		 function );
+
+		goto on_error;
 	}
 	return( 1 );
+
+on_error:
+	if( *root_node != NULL )
+	{
+		libfsapfs_btree_node_free(
+		 root_node,
+		 NULL );
+	}
+	return( -1 );
 }
 
-/* Reads the file system B-tree
- * Returns 1 if successful or -1 on error
+/* Retrieves an inode for a specific identifier from the file system B-tree
+ * Returns 1 if successful, 0 if not found or -1 on error
  */
-int libfsapfs_file_system_btree_read_data(
+int libfsapfs_file_system_btree_get_inode(
      libfsapfs_file_system_btree_t *file_system_btree,
-     const uint8_t *data,
-     size_t data_size,
+     libbfio_handle_t *file_io_handle,
+     uint64_t identifier,
+     libfsapfs_inode_t **inode,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_node_t *root_node = NULL;
+	static char *function             = "libfsapfs_file_system_btree_get_inode";
+	int result                        = 0;
+
+	if( libfsapfs_file_system_btree_get_root_node(
+	     file_system_btree,
+	     file_io_handle,
+	     &root_node,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree root node.",
+		 function );
+
+		goto on_error;
+	}
+	result = libfsapfs_file_system_btree_get_inode_from_node(
+	          file_system_btree,
+	          file_io_handle,
+	          root_node,
+	          identifier,
+	          inode,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve inode: %" PRIu64 " from file system B-tree root node.",
+		 function,
+		 identifier );
+
+		goto on_error;
+	}
+	if( libfsapfs_btree_node_free(
+	     &root_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free B-tree node.",
+		 function );
+
+		goto on_error;
+	}
+	return( result );
+
+on_error:
+	if( root_node != NULL )
+	{
+		libfsapfs_btree_node_free(
+		 &root_node,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Retrieves an indoe for a specific identifier from the file system B-tree node
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_file_system_btree_get_inode_from_node(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t identifier,
+     libfsapfs_inode_t **inode,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *btree_entry = NULL;
-	libfsapfs_btree_root_t *btree_root   = NULL;
-	static char *function                = "libfsapfs_file_system_btree_read_data";
+	static char *function                = "libfsapfs_file_system_btree_get_inode_from_node";
 	int btree_entry_index                = 0;
 	int number_of_entries                = 0;
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                 = 0;
-#endif
+	uint64_t file_system_identifier      = 0;
+	uint8_t data_type                    = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -246,95 +409,30 @@ int libfsapfs_file_system_btree_read_data(
 
 		return( -1 );
 	}
-	if( libfsapfs_btree_root_initialize(
-	     &btree_root,
-	     error ) != 1 )
+	if( inode == NULL )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create B-tree root.",
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
-	if( libfsapfs_btree_root_read_data(
-	     btree_root,
-	     data,
-	     data_size,
-	     error ) != 1 )
+	if( *inode != NULL )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read B-tree root.",
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid inode value already set.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
-	if( ( btree_root->object_type != 0x00000002UL )
-	 && ( btree_root->object_type != 0x10000002UL ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: invalid object type: 0x%08" PRIx32 ".",
-		 function,
-		 btree_root->object_type );
-
-		goto on_error;
-	}
-	if( btree_root->object_subtype != 0x0000000eUL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
-		 function,
-		 btree_root->object_subtype );
-
-		goto on_error;
-	}
-	if( btree_root->header->flags != 0x0003 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported flags: 0x%04" PRIx16 ".",
-		 function,
-		 btree_root->header->flags );
-
-		goto on_error;
-	}
-	if( btree_root->footer->key_size != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid key size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	if( btree_root->footer->value_size != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid value size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_btree_root_get_number_of_entries(
-	     btree_root,
+	if( libfsapfs_btree_node_get_number_of_entries(
+	     node,
 	     &number_of_entries,
 	     error ) != 1 )
 	{
@@ -342,17 +440,19 @@ int libfsapfs_file_system_btree_read_data(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from B-tree root.",
+		 "%s: unable to retrieve number of entries from B-tree node.",
 		 function );
 
 		goto on_error;
 	}
+/* TODO implement B-tree sub node support */
+
 	for( btree_entry_index = 0;
 	     btree_entry_index < number_of_entries;
 	     btree_entry_index++ )
 	{
-		if( libfsapfs_btree_root_get_entry_by_index(
-		     btree_root,
+		if( libfsapfs_btree_node_get_entry_by_index(
+		     node,
 		     btree_entry_index,
 		     &btree_entry,
 		     error ) != 1 )
@@ -361,7 +461,7 @@ int libfsapfs_file_system_btree_read_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of entries from B-tree root.",
+			 "%s: unable to retrieve number of entries from B-tree node.",
 			 function );
 
 			goto on_error;
@@ -390,40 +490,73 @@ int libfsapfs_file_system_btree_read_data(
 
 			goto on_error;
 		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
+		 file_system_identifier );
+
+		data_type = (uint8_t) ( file_system_identifier >> 60 );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-			byte_stream_copy_to_uint64_little_endian(
-			 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
-			 value_64bit );
 			libcnotify_printf(
-			 "%s: file system identifier\t\t: 0x%08" PRIx64 " (data type: 0x%" PRIx64 ")\n",
+			 "%s: identifier: %d\t\t: 0x%08" PRIx64 " (data type: 0x%" PRIx64 ")\n",
 			 function,
-			 value_64bit,
-			 value_64bit >> 60 );
+			 btree_entry_index,
+			 file_system_identifier,
+			 data_type );
 		}
 #endif
-	}
-	if( libfsapfs_btree_root_free(
-	     &btree_root,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free B-tree root.",
-		 function );
+		if( data_type != LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_INODE )
+		{
+			continue;
+		}
+		file_system_identifier &= (uint64_t) 0x0fffffffffffffffUL;
 
-		goto on_error;
+		if( identifier != file_system_identifier )
+		{
+			continue;
+		}
+		if( libfsapfs_inode_initialize(
+		     inode,
+		     file_system_identifier,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create inode: %" PRIu64 ".",
+			 function,
+			 file_system_identifier );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_data(
+		     *inode,
+		     btree_entry->value_data,
+		     (size_t) btree_entry->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode: %" PRIu64 ".",
+			 function,
+			 file_system_identifier );
+
+			goto on_error;
+		}
+		return( 1 );
 	}
-	return( 1 );
+	return( 0 );
 
 on_error:
-	if( btree_root != NULL )
+	if( *inode != NULL )
 	{
-		libfsapfs_btree_root_free(
-		 &btree_root,
+		libfsapfs_inode_free(
+		 inode,
 		 NULL );
 	}
 	return( -1 );

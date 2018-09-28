@@ -365,10 +365,10 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t volume_name[ 256 ];
 
-	/* Unknown
+	/* The next (available) document identifier
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown59[ 4 ];
+	uint8_t next_document_identifier[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes

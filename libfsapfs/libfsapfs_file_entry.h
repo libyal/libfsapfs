@@ -26,7 +26,8 @@
 #include <types.h>
 
 #include "libfsapfs_extern.h"
-#include "libfsapfs_io_handle.h"
+#include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_inode.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
@@ -40,13 +41,17 @@ typedef struct libfsapfs_internal_file_entry libfsapfs_internal_file_entry_t;
 
 struct libfsapfs_internal_file_entry
 {
-	/* The IO handle
+	/* Inode
 	 */
-	libfsapfs_io_handle_t *io_handle;
+	libfsapfs_inode_t *inode;
 
 	/* The file IO handle
 	 */
 	libbfio_handle_t *file_io_handle;
+
+	/* The file system B-tree
+	 */
+	libfsapfs_file_system_btree_t *file_system_btree;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -57,13 +62,53 @@ struct libfsapfs_internal_file_entry
 
 int libfsapfs_file_entry_initialize(
      libfsapfs_file_entry_t **file_entry,
-     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libfsapfs_inode_t *inode,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_free(
      libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf8_name_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf8_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf8_name(
+     libfsapfs_file_entry_t *file_entry,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf16_name_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf16_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf16_name(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_sub_file_entries(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_sub_entries,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_sub_file_entry_by_index(
+     libfsapfs_file_entry_t *file_entry,
+     int sub_file_entry_index,
+     libfsapfs_file_entry_t **sub_file_entry,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

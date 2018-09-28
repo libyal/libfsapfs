@@ -34,6 +34,9 @@ extern "C" {
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
+void libfsapfs_debug_print_inode_flags(
+      uint64_t inode_flags );
+
 int libfsapfs_debug_print_posix_time_value(
      const char *function_name,
      const char *value_name,

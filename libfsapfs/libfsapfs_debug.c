@@ -33,6 +33,98 @@
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
+/* Prints the inode flags
+ */
+void libfsapfs_debug_print_inode_flags(
+      uint64_t inode_flags )
+{
+	if( ( inode_flags & 0x00000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_IS_APFS_PRIVATE)\n" );
+	}
+	if( ( inode_flags & 0x00000002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_MAINTAIN_DIR_STATS)\n" );
+	}
+	if( ( inode_flags & 0x00000004 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_DIR_STATS_ORIGIN)\n" );
+	}
+	if( ( inode_flags & 0x00000008 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_PROT_CLASS_EXPLICIT)\n" );
+	}
+	if( ( inode_flags & 0x00000010 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_WAS_CLONED)\n" );
+	}
+	if( ( inode_flags & 0x00000020 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_FLAG_UNUSED)\n" );
+	}
+	if( ( inode_flags & 0x00000040 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_HAS_SECURITY_EA)\n" );
+	}
+	if( ( inode_flags & 0x00000080 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_BEING_TRUNCATED)\n" );
+	}
+	if( ( inode_flags & 0x00000100 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_HAS_FINDER_INFO)\n" );
+	}
+	if( ( inode_flags & 0x00000200 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_IS_SPARSE)\n" );
+	}
+	if( ( inode_flags & 0x00000400 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_WAS_EVER_CLONED)\n" );
+	}
+	if( ( inode_flags & 0x00000800 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_ACTIVE_FILE_TRIMMED)\n" );
+	}
+	if( ( inode_flags & 0x00001000 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_PINNED_TO_MAIN)\n" );
+	}
+	if( ( inode_flags & 0x00002000 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_PINNED_TO_TIER2)\n" );
+	}
+	if( ( inode_flags & 0x00004000 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_HAS_RSRC_FORK)\n" );
+	}
+	if( ( inode_flags & 0x00008000 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_NO_RSRC_FORK)\n" );
+	}
+	if( ( inode_flags & 0x00010000 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(INODE_ALLOCATION_SPILLEDOVER)\n" );
+	}
+}
+
 /* Prints a POSIX value
  * Returns 1 if successful or -1 on error
  */

@@ -1023,10 +1023,10 @@ int libfsapfs_volume_superblock_read_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown59,
+		 ( (fsapfs_volume_superblock_t *) data )->next_document_identifier,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown59\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: next document identifier\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 

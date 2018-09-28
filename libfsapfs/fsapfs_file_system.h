@@ -78,6 +78,94 @@ struct fsapfs_file_system_btree_key_directory_record
 	 */
 };
 
+typedef struct fsapfs_file_system_btree_value_inode fsapfs_file_system_btree_value_inode_t;
+
+struct fsapfs_file_system_btree_value_inode
+{
+	/* The parent file system identifier (FSID)
+	 * Consists of 8 bytes
+	 */
+	uint8_t parent_identifier[ 8 ];
+
+	/* The data stream file system identifier (FSID)
+	 * Consists of 8 bytes
+	 */
+	uint8_t data_stream_identifier[ 8 ];
+
+	/* The modification date and time
+	 * Consists of 8 bytes
+	 */
+	uint8_t modification_time[ 8 ];
+
+	/* The creation date and time
+	 * Consists of 8 bytes
+	 */
+	uint8_t creation_time[ 8 ];
+
+	/* The change date and time
+	 * Consists of 8 bytes
+	 */
+	uint8_t change_time[ 8 ];
+
+	/* The access date and time
+	 * Consists of 8 bytes
+	 */
+	uint8_t access_time[ 8 ];
+
+	/* The inode flags
+	 * Consists of 8 bytes
+	 */
+	uint8_t inode_flags[ 8 ];
+
+	/* The number of children
+	 * Consists of 4 bytes
+	 */
+	uint8_t number_of_children[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown1[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown2[ 4 ];
+
+	/* The BSD flags
+	 * Consists of 4 bytes
+	 */
+	uint8_t bsd_flags[ 4 ];
+
+	/* The owner user identifier (UID)
+	 * Consists of 4 bytes
+	 */
+	uint8_t owner_identifier[ 4 ];
+
+	/* The group identifier (GID)
+	 * Consists of 4 bytes
+	 */
+	uint8_t group_identifier[ 4 ];
+
+	/* The file mode
+	 * Consists of 2 bytes
+	 */
+	uint8_t file_mode[ 2 ];
+
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown3[ 2 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown4[ 8 ];
+
+	/* Extended fields
+	 */
+};
+
 #if defined( __cplusplus )
 }
 #endif

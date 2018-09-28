@@ -1,5 +1,5 @@
 /*
- * Library btree_root type test program
+ * Library btree_node type test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,23 +33,23 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_btree_root.h"
+#include "../libfsapfs/libfsapfs_btree_node.h"
 
-uint8_t fsapfs_test_btree_root_object_data1[ 32 ] = {
+uint8_t fsapfs_test_btree_node_object_data1[ 32 ] = {
 	0xa7, 0xc1, 0x94, 0x52, 0xbe, 0x2d, 0xc9, 0x5d, 0x54, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x40, 0x0b, 0x00, 0x00, 0x00,
 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_btree_root_initialize function
+/* Tests the libfsapfs_btree_node_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_root_initialize(
+int fsapfs_test_btree_node_initialize(
      void )
 {
 	libcerror_error_t *error           = NULL;
-	libfsapfs_btree_root_t *btree_root = NULL;
+	libfsapfs_btree_node_t *btree_node = NULL;
 	int result                         = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
@@ -60,8 +60,8 @@ int fsapfs_test_btree_root_initialize(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_btree_root_initialize(
-	          &btree_root,
+	result = libfsapfs_btree_node_initialize(
+	          &btree_node,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -70,15 +70,15 @@ int fsapfs_test_btree_root_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "btree_root",
-	 btree_root );
+	 "btree_node",
+	 btree_node );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsapfs_btree_root_free(
-	          &btree_root,
+	result = libfsapfs_btree_node_free(
+	          &btree_node,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -87,8 +87,8 @@ int fsapfs_test_btree_root_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "btree_root",
-	 btree_root );
+	 "btree_node",
+	 btree_node );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -96,7 +96,7 @@ int fsapfs_test_btree_root_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_root_initialize(
+	result = libfsapfs_btree_node_initialize(
 	          NULL,
 	          &error );
 
@@ -112,10 +112,10 @@ int fsapfs_test_btree_root_initialize(
 	libcerror_error_free(
 	 &error );
 
-	btree_root = (libfsapfs_btree_root_t *) 0x12345678UL;
+	btree_node = (libfsapfs_btree_node_t *) 0x12345678UL;
 
-	result = libfsapfs_btree_root_initialize(
-	          &btree_root,
+	result = libfsapfs_btree_node_initialize(
+	          &btree_node,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -130,7 +130,7 @@ int fsapfs_test_btree_root_initialize(
 	libcerror_error_free(
 	 &error );
 
-	btree_root = NULL;
+	btree_node = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -138,22 +138,22 @@ int fsapfs_test_btree_root_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_btree_root_initialize with malloc failing
+		/* Test libfsapfs_btree_node_initialize with malloc failing
 		 */
 		fsapfs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsapfs_btree_root_initialize(
-		          &btree_root,
+		result = libfsapfs_btree_node_initialize(
+		          &btree_node,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsapfs_test_malloc_attempts_before_fail = -1;
 
-			if( btree_root != NULL )
+			if( btree_node != NULL )
 			{
-				libfsapfs_btree_root_free(
-				 &btree_root,
+				libfsapfs_btree_node_free(
+				 &btree_node,
 				 NULL );
 			}
 		}
@@ -165,8 +165,8 @@ int fsapfs_test_btree_root_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "btree_root",
-			 btree_root );
+			 "btree_node",
+			 btree_node );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -180,22 +180,22 @@ int fsapfs_test_btree_root_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_btree_root_initialize with memset failing
+		/* Test libfsapfs_btree_node_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_btree_root_initialize(
-		          &btree_root,
+		result = libfsapfs_btree_node_initialize(
+		          &btree_node,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
 		{
 			fsapfs_test_memset_attempts_before_fail = -1;
 
-			if( btree_root != NULL )
+			if( btree_node != NULL )
 			{
-				libfsapfs_btree_root_free(
-				 &btree_root,
+				libfsapfs_btree_node_free(
+				 &btree_node,
 				 NULL );
 			}
 		}
@@ -207,8 +207,8 @@ int fsapfs_test_btree_root_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "btree_root",
-			 btree_root );
+			 "btree_node",
+			 btree_node );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -228,19 +228,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( btree_root != NULL )
+	if( btree_node != NULL )
 	{
-		libfsapfs_btree_root_free(
-		 &btree_root,
+		libfsapfs_btree_node_free(
+		 &btree_node,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_btree_root_free function
+/* Tests the libfsapfs_btree_node_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_root_free(
+int fsapfs_test_btree_node_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -248,7 +248,7 @@ int fsapfs_test_btree_root_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_root_free(
+	result = libfsapfs_btree_node_free(
 	          NULL,
 	          &error );
 
@@ -275,20 +275,20 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_btree_root_read_object_data function
+/* Tests the libfsapfs_btree_node_read_object_data function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_root_read_object_data(
+int fsapfs_test_btree_node_read_object_data(
      void )
 {
 	libcerror_error_t *error           = NULL;
-	libfsapfs_btree_root_t *btree_root = NULL;
+	libfsapfs_btree_node_t *btree_node = NULL;
 	int result                         = 0;
 
 	/* Initialize test
 	 */
-	result = libfsapfs_btree_root_initialize(
-	          &btree_root,
+	result = libfsapfs_btree_node_initialize(
+	          &btree_node,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -297,8 +297,8 @@ int fsapfs_test_btree_root_read_object_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "btree_root",
-	 btree_root );
+	 "btree_node",
+	 btree_node );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -306,9 +306,9 @@ int fsapfs_test_btree_root_read_object_data(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_btree_root_read_object_data(
-	          btree_root,
-	          fsapfs_test_btree_root_object_data1,
+	result = libfsapfs_btree_node_read_object_data(
+	          btree_node,
+	          fsapfs_test_btree_node_object_data1,
 	          32,
 	          &error );
 
@@ -323,9 +323,9 @@ int fsapfs_test_btree_root_read_object_data(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_root_read_object_data(
+	result = libfsapfs_btree_node_read_object_data(
 	          NULL,
-	          fsapfs_test_btree_root_object_data1,
+	          fsapfs_test_btree_node_object_data1,
 	          32,
 	          &error );
 
@@ -341,8 +341,8 @@ int fsapfs_test_btree_root_read_object_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_btree_root_read_object_data(
-	          btree_root,
+	result = libfsapfs_btree_node_read_object_data(
+	          btree_node,
 	          NULL,
 	          32,
 	          &error );
@@ -359,9 +359,9 @@ int fsapfs_test_btree_root_read_object_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_btree_root_read_object_data(
-	          btree_root,
-	          fsapfs_test_btree_root_object_data1,
+	result = libfsapfs_btree_node_read_object_data(
+	          btree_node,
+	          fsapfs_test_btree_node_object_data1,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
@@ -377,9 +377,9 @@ int fsapfs_test_btree_root_read_object_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_btree_root_read_object_data(
-	          btree_root,
-	          fsapfs_test_btree_root_object_data1,
+	result = libfsapfs_btree_node_read_object_data(
+	          btree_node,
+	          fsapfs_test_btree_node_object_data1,
 	          0,
 	          &error );
 
@@ -397,8 +397,8 @@ int fsapfs_test_btree_root_read_object_data(
 
 	/* Clean up
 	 */
-	result = libfsapfs_btree_root_free(
-	          &btree_root,
+	result = libfsapfs_btree_node_free(
+	          &btree_node,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -407,8 +407,8 @@ int fsapfs_test_btree_root_read_object_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "btree_root",
-	 btree_root );
+	 "btree_node",
+	 btree_node );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -422,10 +422,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( btree_root != NULL )
+	if( btree_node != NULL )
 	{
-		libfsapfs_btree_root_free(
-		 &btree_root,
+		libfsapfs_btree_node_free(
+		 &btree_node,
 		 NULL );
 	}
 	return( 0 );
@@ -451,20 +451,20 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_root_initialize",
-	 fsapfs_test_btree_root_initialize );
+	 "libfsapfs_btree_node_initialize",
+	 fsapfs_test_btree_node_initialize );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_root_free",
-	 fsapfs_test_btree_root_free );
+	 "libfsapfs_btree_node_free",
+	 fsapfs_test_btree_node_free );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_root_read_object_data",
-	 fsapfs_test_btree_root_read_object_data );
+	 "libfsapfs_btree_node_read_object_data",
+	 fsapfs_test_btree_node_read_object_data );
 
-/* TODO add tests for libfsapfs_btree_root_get_number_of_entries */
+/* TODO add tests for libfsapfs_btree_node_get_number_of_entries */
 
-/* TODO add tests for libfsapfs_btree_root_get_entry_by_index */
+/* TODO add tests for libfsapfs_btree_node_get_entry_by_index */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

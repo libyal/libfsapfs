@@ -1,5 +1,5 @@
 /*
- * The B-tree root functions
+ * The B-tree node functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_BTREE_ROOT_H )
-#define _LIBFSAPFS_BTREE_ROOT_H
+#if !defined( _LIBFSAPFS_BTREE_NODE_H )
+#define _LIBFSAPFS_BTREE_NODE_H
 
 #include <common.h>
 #include <types.h>
@@ -35,9 +35,9 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_btree_root libfsapfs_btree_root_t;
+typedef struct libfsapfs_btree_node libfsapfs_btree_node_t;
 
-struct libfsapfs_btree_root
+struct libfsapfs_btree_node
 {
 	/* The object type
 	 */
@@ -60,33 +60,33 @@ struct libfsapfs_btree_root
 	libcdata_array_t *entries_array;
 };
 
-int libfsapfs_btree_root_initialize(
-     libfsapfs_btree_root_t **btree_root,
+int libfsapfs_btree_node_initialize(
+     libfsapfs_btree_node_t **btree_node,
      libcerror_error_t **error );
 
-int libfsapfs_btree_root_free(
-     libfsapfs_btree_root_t **btree_root,
+int libfsapfs_btree_node_free(
+     libfsapfs_btree_node_t **btree_node,
      libcerror_error_t **error );
 
-int libfsapfs_btree_root_read_data(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_read_data(
+     libfsapfs_btree_node_t *btree_node,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libfsapfs_btree_root_read_object_data(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_read_object_data(
+     libfsapfs_btree_node_t *btree_node,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libfsapfs_btree_root_get_number_of_entries(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_get_number_of_entries(
+     libfsapfs_btree_node_t *btree_node,
      int *number_of_entries,
      libcerror_error_t **error );
 
-int libfsapfs_btree_root_get_entry_by_index(
-     libfsapfs_btree_root_t *btree_root,
+int libfsapfs_btree_node_get_entry_by_index(
+     libfsapfs_btree_node_t *btree_node,
      int entry_index,
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error );
@@ -95,5 +95,5 @@ int libfsapfs_btree_root_get_entry_by_index(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_BTREE_ROOT_H ) */
+#endif /* !defined( _LIBFSAPFS_BTREE_NODE_H ) */
 

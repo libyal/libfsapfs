@@ -25,6 +25,8 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_btree_node.h"
+#include "libfsapfs_inode.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
@@ -38,31 +40,49 @@ typedef struct libfsapfs_file_system_btree libfsapfs_file_system_btree_t;
 
 struct libfsapfs_file_system_btree
 {
-	/* Dummy
+	/* Data block vector
 	 */
-	int dummy;
+	libfdata_vector_t *data_block_vector;
+
+	/* Data block cache
+	 */
+	libfcache_cache_t *data_block_cache;
+
+	/* Block number of B-tree root node
+	 */
+	uint64_t root_node_block_number;
 };
 
 int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
+     libfdata_vector_t *data_block_vector,
+     libfcache_cache_t *data_block_cache,
+     uint64_t root_node_block_number,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_free(
      libfsapfs_file_system_btree_t **file_system_btree,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_read_block(
+int libfsapfs_file_system_btree_get_root_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
-     libfdata_vector_t *data_block_vector,
-     libfcache_cache_t *data_block_cache,
-     uint64_t block_number,
+     libfsapfs_btree_node_t **root_node,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_read_data(
+int libfsapfs_file_system_btree_get_inode(
      libfsapfs_file_system_btree_t *file_system_btree,
-     const uint8_t *data,
-     size_t data_size,
+     libbfio_handle_t *file_io_handle,
+     uint64_t identifier,
+     libfsapfs_inode_t **inode,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_inode_from_node(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t identifier,
+     libfsapfs_inode_t **inode,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

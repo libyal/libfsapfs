@@ -28,7 +28,9 @@
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
+#include "libfsapfs_file_entry.h"
 #include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_inode.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
@@ -51,6 +53,10 @@
  */
 int libfsapfs_volume_initialize(
      libfsapfs_volume_t **volume,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_container_key_bag_t *container_key_bag,
+     size64_t container_size,
+     uint32_t block_size,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_volume_t *internal_volume = NULL;
@@ -77,6 +83,39 @@ int libfsapfs_volume_initialize(
 		 function );
 
 		return( -1 );
+	}
+	if( file_io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( container_size == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid container size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	if( block_size == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid block size value out of bounds.",
+		 function );
+
+		goto on_error;
 	}
 	internal_volume = memory_allocate_structure(
 	                   libfsapfs_internal_volume_t );
@@ -119,7 +158,12 @@ int libfsapfs_volume_initialize(
 
 		goto on_error;
 	}
-	internal_volume->is_locked = 1;
+/* TODO clone file_io_handle? */
+	internal_volume->file_io_handle    = file_io_handle;
+	internal_volume->container_key_bag = container_key_bag;
+	internal_volume->container_size    = container_size;
+	internal_volume->block_size        = block_size;
+	internal_volume->is_locked         = 1;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_initialize(
@@ -1005,6 +1049,22 @@ int libfsapfs_volume_close(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
 			 "%s: unable to free file system B-tree.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->root_directory_inode != NULL )
+	{
+		if( libfsapfs_inode_free(
+		     &( internal_volume->root_directory_inode ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free root directory inode.",
 			 function );
 
 			result = -1;
@@ -2425,6 +2485,7 @@ int libfsapfs_volume_get_root_directory(
 	libfsapfs_internal_volume_t *internal_volume             = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
 	static char *function                                    = "libfsapfs_volume_get_root_directory";
+	int result                                               = 0;
 
 	if( volume == NULL )
 	{
@@ -2461,6 +2522,21 @@ int libfsapfs_volume_get_root_directory(
 
 		return( -1 );
 	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	if( internal_volume->is_locked != 0 )
 	{
 		if( libfsapfs_internal_volume_unlock(
@@ -2508,6 +2584,9 @@ int libfsapfs_volume_get_root_directory(
 		}
 		if( libfsapfs_file_system_btree_initialize(
 		     &( internal_volume->file_system_btree ),
+		     internal_volume->data_block_vector,
+		     internal_volume->data_block_cache,
+		     object_map_descriptor->physical_address,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -2519,27 +2598,60 @@ int libfsapfs_volume_get_root_directory(
 
 			goto on_error;
 		}
-		if( libfsapfs_file_system_btree_read_block(
-		     internal_volume->file_system_btree,
-		     internal_volume->file_io_handle,
-		     internal_volume->data_block_vector,
-		     internal_volume->data_block_cache,
-		     object_map_descriptor->physical_address,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read file system B-tree block: %" PRIu64 ".",
-			 function,
-			 object_map_descriptor->physical_address );
-
-			goto on_error;
-		}
 	}
-/* TODO implement */
-	return( -1 );
+	if( internal_volume->root_directory_inode == NULL )
+	{
+		result = libfsapfs_file_system_btree_get_inode(
+		          internal_volume->file_system_btree,
+		          internal_volume->file_io_handle,
+		          2,
+		          &( internal_volume->root_directory_inode ),
+		          error );
+
+                if( result == -1 )
+                {
+                        libcerror_error_set(
+                         error,
+                         LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                         LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                         "%s: unable to retrieve root directory inode from file system B-tree.",
+                         function );
+
+                        goto on_error;
+                }
+	}
+	if( libfsapfs_file_entry_initialize(
+	     file_entry,
+	     internal_volume->file_io_handle,
+	     internal_volume->file_system_btree,
+	     internal_volume->root_directory_inode,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file entry.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
 
 on_error:
 	if( internal_volume->file_system_btree != NULL )
@@ -2548,6 +2660,11 @@ on_error:
 		 &( internal_volume->file_system_btree ),
 		 NULL );
 	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_volume->read_write_lock,
+	 NULL );
+#endif
 	return( -1 );
 }
 

@@ -317,6 +317,9 @@ int fsapfs_test_file_system_btree_initialize(
 	 */
 	result = libfsapfs_file_system_btree_initialize(
 	          &file_system_btree,
+	          NULL,
+	          NULL,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -353,6 +356,9 @@ int fsapfs_test_file_system_btree_initialize(
 	 */
 	result = libfsapfs_file_system_btree_initialize(
 	          NULL,
+	          NULL,
+	          NULL,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -371,6 +377,9 @@ int fsapfs_test_file_system_btree_initialize(
 
 	result = libfsapfs_file_system_btree_initialize(
 	          &file_system_btree,
+	          NULL,
+	          NULL,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -399,6 +408,9 @@ int fsapfs_test_file_system_btree_initialize(
 
 		result = libfsapfs_file_system_btree_initialize(
 		          &file_system_btree,
+		          NULL,
+		          NULL,
+		          0,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
@@ -441,6 +453,9 @@ int fsapfs_test_file_system_btree_initialize(
 
 		result = libfsapfs_file_system_btree_initialize(
 		          &file_system_btree,
+		          NULL,
+		          NULL,
+		          0,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
@@ -530,162 +545,6 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_file_system_btree_read_data function
- * Returns 1 if successful or 0 if not
- */
-int fsapfs_test_file_system_btree_read_data(
-     void )
-{
-	libcerror_error_t *error                         = NULL;
-	libfsapfs_file_system_btree_t *file_system_btree = NULL;
-	int result                                       = 0;
-
-	/* Initialize test
-	 */
-	result = libfsapfs_file_system_btree_initialize(
-	          &file_system_btree,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "file_system_btree",
-	 file_system_btree );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Test regular cases
-	 */
-	result = libfsapfs_file_system_btree_read_data(
-	          file_system_btree,
-	          fsapfs_test_file_system_btree_data1,
-	          4096,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	/* Test error cases
-	 */
-	result = libfsapfs_file_system_btree_read_data(
-	          NULL,
-	          fsapfs_test_file_system_btree_data1,
-	          4096,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_file_system_btree_read_data(
-	          file_system_btree,
-	          NULL,
-	          4096,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_file_system_btree_read_data(
-	          file_system_btree,
-	          fsapfs_test_file_system_btree_data1,
-	          (size_t) SSIZE_MAX + 1,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_file_system_btree_read_data(
-	          file_system_btree,
-	          fsapfs_test_file_system_btree_data1,
-	          0,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	/* Clean up
-	 */
-	result = libfsapfs_file_system_btree_free(
-	          &file_system_btree,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "file_system_btree",
-	 file_system_btree );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	return( 1 );
-
-on_error:
-	if( error != NULL )
-	{
-		libcerror_error_free(
-		 &error );
-	}
-	if( file_system_btree != NULL )
-	{
-		libfsapfs_file_system_btree_free(
-		 &file_system_btree,
-		 NULL );
-	}
-	return( 0 );
-}
-
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 /* The main program
@@ -713,11 +572,11 @@ int main(
 	 "libfsapfs_file_system_btree_free",
 	 fsapfs_test_file_system_btree_free );
 
-/* TODO add tests for libfsapfs_file_system_btree_read_block */
+/* TODO add tests for libfsapfs_file_system_btree_get_root_node */
 
-	FSAPFS_TEST_RUN(
-	 "libfsapfs_file_system_btree_read_data",
-	 fsapfs_test_file_system_btree_read_data );
+/* TODO add tests for libfsapfs_file_system_btree_get_inode */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_inode_from_node */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
