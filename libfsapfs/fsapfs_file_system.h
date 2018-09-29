@@ -116,10 +116,10 @@ struct fsapfs_file_system_btree_value_inode
 	 */
 	uint8_t creation_time[ 8 ];
 
-	/* The change date and time
+	/* The inode change date and time
 	 * Consists of 8 bytes
 	 */
-	uint8_t change_time[ 8 ];
+	uint8_t inode_change_time[ 8 ];
 
 	/* The access date and time
 	 * Consists of 8 bytes

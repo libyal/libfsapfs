@@ -240,12 +240,24 @@ int libfsapfs_inode_read_value_data(
 	 inode->creation_time );
 
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsapfs_file_system_btree_value_inode_t *) data )->change_time,
-	 inode->change_time );
+	 ( (fsapfs_file_system_btree_value_inode_t *) data )->inode_change_time,
+	 inode->inode_change_time );
 
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_file_system_btree_value_inode_t *) data )->access_time,
 	 inode->access_time );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_file_system_btree_value_inode_t *) data )->owner_identifier,
+	 inode->owner_identifier );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_file_system_btree_value_inode_t *) data )->group_identifier,
+	 inode->group_identifier );
+
+	byte_stream_copy_to_uint16_little_endian(
+	 ( (fsapfs_file_system_btree_value_inode_t *) data )->file_mode,
+	 inode->file_mode );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -300,8 +312,8 @@ int libfsapfs_inode_read_value_data(
 		}
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "change time\t\t\t\t",
-		     ( (fsapfs_file_system_btree_value_inode_t *) data )->change_time,
+		     "inode change time\t\t\t",
+		     ( (fsapfs_file_system_btree_value_inode_t *) data )->inode_change_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
@@ -380,29 +392,20 @@ int libfsapfs_inode_read_value_data(
 		 function,
 		 value_32bit );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_file_system_btree_value_inode_t *) data )->owner_identifier,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: owner identifier\t\t\t: %" PRIu32 "\n",
 		 function,
-		 value_32bit );
+		 inode->owner_identifier );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_file_system_btree_value_inode_t *) data )->group_identifier,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: group identifier\t\t\t: %" PRIu32 "\n",
 		 function,
-		 value_32bit );
+		 inode->group_identifier );
 
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_file_system_btree_value_inode_t *) data )->file_mode,
-		 value_16bit );
 		libcnotify_printf(
 		 "%s: file mode\t\t\t\t: %" PRIo16 "\n",
 		 function,
-		 value_16bit );
+		 inode->file_mode );
 
 		byte_stream_copy_to_uint16_little_endian(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->unknown3,
@@ -678,6 +681,265 @@ int libfsapfs_inode_get_identifier(
 		return( -1 );
 	}
 	*identifier = inode->identifier;
+
+	return( 1 );
+}
+
+/* Retrieves the creation time
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_creation_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_creation_time";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( posix_time == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid POSIX time.",
+		 function );
+
+		return( -1 );
+	}
+	*posix_time = inode->creation_time;
+
+	return( 1 );
+}
+
+/* Retrieves the modification time
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_modification_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_modification_time";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( posix_time == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid POSIX time.",
+		 function );
+
+		return( -1 );
+	}
+	*posix_time = inode->modification_time;
+
+	return( 1 );
+}
+
+/* Retrieves the inode change time
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_inode_change_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_inode_change_time";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( posix_time == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid POSIX time.",
+		 function );
+
+		return( -1 );
+	}
+	*posix_time = inode->inode_change_time;
+
+	return( 1 );
+}
+
+/* Retrieves the access time
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_access_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_access_time";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( posix_time == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid POSIX time.",
+		 function );
+
+		return( -1 );
+	}
+	*posix_time = inode->access_time;
+
+	return( 1 );
+}
+
+/* Retrieves the owner identifier
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_owner_identifier(
+     libfsapfs_inode_t *inode,
+     uint32_t *owner_identifier,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_owner_identifier";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( owner_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid owner identifier.",
+		 function );
+
+		return( -1 );
+	}
+	*owner_identifier = inode->owner_identifier;
+
+	return( 1 );
+}
+
+/* Retrieves the group identifier
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_group_identifier(
+     libfsapfs_inode_t *inode,
+     uint32_t *group_identifier,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_group_identifier";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( group_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid group identifier.",
+		 function );
+
+		return( -1 );
+	}
+	*group_identifier = inode->group_identifier;
+
+	return( 1 );
+}
+
+/* Retrieves the file mode
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_file_mode(
+     libfsapfs_inode_t *inode,
+     uint16_t *file_mode,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_file_mode";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( file_mode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file mode.",
+		 function );
+
+		return( -1 );
+	}
+	*file_mode = inode->file_mode;
 
 	return( 1 );
 }

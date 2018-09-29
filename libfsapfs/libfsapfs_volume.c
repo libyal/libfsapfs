@@ -2474,6 +2474,323 @@ on_error:
 	return( -1 );
 }
 
+/* Retrieves the next file entry identifier
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_get_next_file_entry_identifier(
+     libfsapfs_volume_t *volume,
+     uint64_t *identifier,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_next_file_entry_identifier";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+	if( identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid identifier.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	*identifier = internal_volume->superblock->next_file_system_object_identifier;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+}
+
+/* Determines the file system B-tree
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_volume_get_file_system_btree(
+     libfsapfs_internal_volume_t *internal_volume,
+     libcerror_error_t **error )
+{
+	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	static char *function                                    = "libfsapfs_internal_volume_get_file_system_btree";
+
+	if( internal_volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->is_locked != 0 )
+	{
+		if( libfsapfs_internal_volume_unlock(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to unlock volume.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
+	     internal_volume->object_map_btree,
+	     internal_volume->superblock->file_system_root_object_identifier,
+	     &object_map_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve object map descriptor for file system root object identifier: 0x08%" PRIx64 ".",
+		 function,
+		 internal_volume->superblock->file_system_root_object_identifier );
+
+		goto on_error;
+	}
+	if( object_map_descriptor == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid object map descriptor.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_system_btree_initialize(
+	     &( internal_volume->file_system_btree ),
+	     internal_volume->data_block_vector,
+	     internal_volume->data_block_cache,
+	     object_map_descriptor->physical_address,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file system B-tree.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( internal_volume->file_system_btree != NULL )
+	{
+		libfsapfs_file_system_btree_free(
+		 &( internal_volume->file_system_btree ),
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Retrieves a specific file entry
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_volume_get_file_entry_by_identifier(
+     libfsapfs_volume_t *volume,
+     uint64_t identifier,
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error )
+{
+	libfsapfs_inode_t *inode                     = NULL;
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_file_entry_by_identifier";
+	int result                                   = 0;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( *file_entry != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry value already set.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->file_system_btree == NULL )
+	{
+		if( libfsapfs_internal_volume_get_file_system_btree(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine file system B-tree.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	result = libfsapfs_file_system_btree_get_inode(
+	          internal_volume->file_system_btree,
+	          internal_volume->file_io_handle,
+	          identifier,
+	          &inode,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve inode: %" PRIu64 " from file system B-tree.",
+		 function,
+		 identifier );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		if( libfsapfs_file_entry_initialize(
+		     file_entry,
+		     internal_volume->file_io_handle,
+		     internal_volume->file_system_btree,
+		     inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create file entry.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_volume->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
 /* Retrieves the root directory file entry
  * Returns 1 if successful or -1 on error
  */
@@ -2537,63 +2854,17 @@ int libfsapfs_volume_get_root_directory(
 		return( -1 );
 	}
 #endif
-	if( internal_volume->is_locked != 0 )
+	if( internal_volume->file_system_btree == NULL )
 	{
-		if( libfsapfs_internal_volume_unlock(
+		if( libfsapfs_internal_volume_get_file_system_btree(
 		     internal_volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GENERIC,
-			 "%s: unable to unlock volume.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	if( internal_volume->file_system_btree == NULL )
-	{
-		if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
-		     internal_volume->object_map_btree,
-		     internal_volume->superblock->file_system_root_object_identifier,
-		     &object_map_descriptor,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve object map descriptor for file system root object identifier: 0x08%" PRIx64 ".",
-			 function,
-			 internal_volume->superblock->file_system_root_object_identifier );
-
-			goto on_error;
-		}
-		if( object_map_descriptor == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid object map descriptor.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_file_system_btree_initialize(
-		     &( internal_volume->file_system_btree ),
-		     internal_volume->data_block_vector,
-		     internal_volume->data_block_cache,
-		     object_map_descriptor->physical_address,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file system B-tree.",
+			 "%s: unable to determine file system B-tree.",
 			 function );
 
 			goto on_error;
@@ -2658,12 +2929,6 @@ int libfsapfs_volume_get_root_directory(
 	return( 1 );
 
 on_error:
-	if( internal_volume->file_system_btree != NULL )
-	{
-		libfsapfs_file_system_btree_free(
-		 &( internal_volume->file_system_btree ),
-		 NULL );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_write(
 	 internal_volume->read_write_lock,

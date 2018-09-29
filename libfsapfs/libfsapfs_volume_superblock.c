@@ -344,6 +344,10 @@ int libfsapfs_volume_superblock_read_data(
 	 ( (fsapfs_volume_superblock_t *) data )->file_system_root_object_identifier,
 	 volume_superblock->file_system_root_object_identifier );
 
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->next_file_system_object_identifier,
+	 volume_superblock->next_file_system_object_identifier );
+
 	if( memory_copy(
 	     volume_superblock->volume_identifier,
 	     ( (fsapfs_volume_superblock_t *) data )->volume_identifier,
@@ -590,13 +594,10 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown22,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown22\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: next file system object identifier\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->next_file_system_object_identifier );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown23,

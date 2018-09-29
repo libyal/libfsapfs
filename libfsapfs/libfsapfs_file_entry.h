@@ -82,6 +82,48 @@ int libfsapfs_file_entry_free(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_creation_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_modification_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_access_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_inode_change_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_owner_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *owner_identifier,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_group_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *group_identifier,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_file_mode(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *file_mode,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_utf8_name_size(
      libfsapfs_file_entry_t *file_entry,
      size_t *utf8_string_size,
@@ -107,6 +149,10 @@ int libfsapfs_file_entry_get_utf16_name(
      size_t utf16_string_size,
      libcerror_error_t **error );
 
+int libfsapfs_internal_file_entry_get_directory_entries(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error );
+
 LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_number_of_sub_file_entries(
      libfsapfs_file_entry_t *file_entry,
@@ -118,6 +164,10 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
      libfsapfs_file_entry_t *file_entry,
      int sub_file_entry_index,
      libfsapfs_file_entry_t **sub_file_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_file_entry_get_file_extents(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
@@ -152,6 +202,21 @@ LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_size(
      libfsapfs_file_entry_t *file_entry,
      size64_t *size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_extents(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_extents,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_extent_by_index(
+     libfsapfs_file_entry_t *file_entry,
+     int extent_index,
+     off64_t *extent_offset,
+     size64_t *extent_size,
+     uint32_t *extent_flags,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

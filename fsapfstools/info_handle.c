@@ -30,6 +30,7 @@
 #include "fsapfstools_libbfio.h"
 #include "fsapfstools_libcerror.h"
 #include "fsapfstools_libclocale.h"
+#include "fsapfstools_libfdatetime.h"
 #include "fsapfstools_libfguid.h"
 #include "fsapfstools_libfsapfs.h"
 #include "info_handle.h"
@@ -639,6 +640,127 @@ int info_handle_close_input(
 	return( 0 );
 }
 
+/* Prints a POSIX value
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_posix_time_value_fprint(
+     info_handle_t *info_handle,
+     const char *value_name,
+     uint64_t value_64bit,
+     libcerror_error_t **error )
+{
+	system_character_t date_time_string[ 32 ];
+
+	libfdatetime_posix_time_t *posix_time = NULL;
+	static char *function                 = "info_handle_posix_time_fprint";
+	int result                            = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( value_64bit == 0 )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "%s: Not set (0)\n",
+		 value_name );
+	}
+	else
+	{
+		if( libfdatetime_posix_time_initialize(
+		     &posix_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create POSIX time.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfdatetime_posix_time_copy_from_64bit(
+		     posix_time,
+		     value_64bit,
+		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to copy POSIX time from 64-bit.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfdatetime_posix_time_copy_to_utf16_string(
+			  posix_time,
+			  (uint16_t *) date_time_string,
+			  32,
+			  LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+			  error );
+#else
+		result = libfdatetime_posix_time_copy_to_utf8_string(
+			  posix_time,
+			  (uint8_t *) date_time_string,
+			  32,
+			  LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+			  error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to copy POSIX time to string.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "%s: %" PRIs_SYSTEM " UTC\n",
+		 value_name,
+		 date_time_string );
+
+		if( libfdatetime_posix_time_free(
+		     &posix_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free POSIX time.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	return( 1 );
+
+on_error:
+	if( posix_time != NULL )
+	{
+		libfdatetime_posix_time_free(
+		 &posix_time,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Prints an UUID value
  * Returns 1 if successful or -1 on error
  */
@@ -857,8 +979,6 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 
 			goto on_error;
 		}
-		/* Do not print the name of files that have an ADS but no default data stream.
-		 */
 		for( indentation_level_iterator = 0;
 		     indentation_level_iterator < indentation_level;
 		     indentation_level_iterator++ )
@@ -1095,6 +1215,699 @@ int info_handle_file_system_hierarchy_fprint(
 
 			goto on_error;
 		}
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
+	return( 1 );
+
+on_error:
+	if( file_entry != NULL )
+	{
+		libfsapfs_file_entry_free(
+		 &file_entry,
+		 NULL );
+	}
+	if( volume != NULL )
+	{
+		libfsapfs_volume_free(
+		 &volume,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Prints file entry information as part of the inode information
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int info_handle_inode_fprint_file_entry(
+     info_handle_t *info_handle,
+     libfsapfs_volume_t *volume,
+     int volume_index,
+     uint64_t inode_number,
+     libcerror_error_t **error )
+{
+	libfsapfs_file_entry_t *file_entry  = NULL;
+	system_character_t *file_entry_name = NULL;
+	static char *function               = "info_handle_inode_fprint_file_entry";
+	size_t file_entry_name_size         = 0;
+	uint64_t value_64bit                = 0;
+	uint32_t value_32bit                = 0;
+	uint16_t value_16bit                = 0;
+	int result                          = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	result = libfsapfs_volume_get_file_entry_by_identifier(
+	          volume,
+	          inode_number,
+	          &file_entry,
+	          error );
+
+	if( result == -1 )
+	{
+		if( ( error != NULL )
+		 && ( *error != NULL ) )
+		{
+			libcnotify_print_error_backtrace(
+			 *error );
+		}
+		libcerror_error_free(
+		 error );
+
+		fprintf(
+		 info_handle->notify_stream,
+		 "Error reading inode: %" PRIu64 "\n\n",
+		 inode_number );
+
+		return( 0 );
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "inode: %" PRIu64 " information:\n",
+	 inode_number );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfsapfs_file_entry_get_utf16_name_size(
+	          file_entry,
+	          &file_entry_name_size,
+	          error );
+#else
+	result = libfsapfs_file_entry_get_utf8_name_size(
+	          file_entry,
+	          &file_entry_name_size,
+	          error );
+#endif
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file entry name string size.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( result == 1 )
+	 && ( file_entry_name_size > 0 ) )
+	{
+		file_entry_name = system_string_allocate(
+		                   file_entry_name_size );
+
+		if( file_entry_name == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create file entry name string.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfsapfs_file_entry_get_utf16_name(
+		          file_entry,
+		          (uint16_t *) file_entry_name,
+		          file_entry_name_size,
+		          error );
+#else
+		result = libfsapfs_file_entry_get_utf8_name(
+		          file_entry,
+		          (uint8_t *) file_entry_name,
+		          file_entry_name_size,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file entry name string.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tName\t\t\t: %" PRIs_SYSTEM "\n",
+		 file_entry_name );
+
+		memory_free(
+		 file_entry_name );
+
+		file_entry_name = NULL;
+	}
+	if( libfsapfs_file_entry_get_creation_time(
+	     file_entry,
+	     &value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve creation time.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle_posix_time_value_fprint(
+	     info_handle,
+	     "\tCreation time\t\t",
+	     value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print POSIX time value.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_entry_get_modification_time(
+	     file_entry,
+	     &value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve modification time.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle_posix_time_value_fprint(
+	     info_handle,
+	     "\tModification time\t",
+	     value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print POSIX time value.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_entry_get_inode_change_time(
+	     file_entry,
+	     &value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve inode change time.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle_posix_time_value_fprint(
+	     info_handle,
+	     "\tInode change time\t",
+	     value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print POSIX time value.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_entry_get_access_time(
+	     file_entry,
+	     &value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve access time.",
+		 function );
+
+		goto on_error;
+	}
+	if( info_handle_posix_time_value_fprint(
+	     info_handle,
+	     "\tAccess time\t\t",
+	     value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print POSIX time value.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_entry_get_owner_identifier(
+	     file_entry,
+	     &value_32bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve owner identifier.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tOwner identifier\t: %" PRIu32 "\n",
+	 value_32bit );
+
+	if( libfsapfs_file_entry_get_group_identifier(
+	     file_entry,
+	     &value_32bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve group identifier.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tGroup identifier\t: %" PRIu32 "\n",
+	 value_32bit );
+
+	if( libfsapfs_file_entry_get_file_mode(
+	     file_entry,
+	     &value_16bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file mode.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tFile mode\t\t: %" PRIo16 "\n",
+	 value_16bit );
+
+/* TODO print semantic representation of file mode */
+
+	if( libfsapfs_file_entry_free(
+	     &file_entry,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file entry.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
+	return( 1 );
+
+on_error:
+	if( file_entry_name != NULL )
+	{
+		memory_free(
+		 file_entry_name );
+	}
+	if( file_entry != NULL )
+	{
+		libfsapfs_file_entry_free(
+		 &file_entry,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Prints the inode information
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int info_handle_inode_fprint(
+     info_handle_t *info_handle,
+     uint64_t inode_number,
+     libcerror_error_t **error )
+{
+	libfsapfs_volume_t *volume = NULL;
+	static char *function      = "info_handle_inode_fprint";
+	int result                 = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO add multi volume support */
+	if( libfsapfs_container_get_volume_by_index(
+	     info_handle->input_container,
+	     0,
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume: %d.",
+		 function,
+		 0 );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "Apple File System (APFS) information:\n\n" );
+
+	if( info_handle_inode_fprint_file_entry(
+	     info_handle,
+	     volume,
+	     0,
+	     inode_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print inode: %" PRIu64 ".",
+		 function,
+		 inode_number );
+
+		return( -1 );
+	}
+	if( libfsapfs_volume_free(
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free volume.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( volume != NULL )
+	{
+		libfsapfs_volume_free(
+		 &volume,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Prints the inodes information
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_inodes_fprint(
+     info_handle_t *info_handle,
+     libcerror_error_t **error )
+{
+	libfsapfs_volume_t *volume          = NULL;
+	static char *function               = "info_handle_inodes_fprint";
+	uint64_t inode_number               = 0;
+	uint64_t next_file_entry_identifier = 0;
+	int result                          = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO add multi volume support */
+	if( libfsapfs_container_get_volume_by_index(
+	     info_handle->input_container,
+	     0,
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume: %d.",
+		 function,
+		 0 );
+
+		goto on_error;
+	}
+	if( libfsapfs_volume_get_next_file_entry_identifier(
+	     volume,
+	     &next_file_entry_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve next file entry identifier.",
+		 function );
+
+		return( -1 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "Apple File System (APFS) information:\n\n" );
+
+	for( inode_number = 0;
+	     inode_number < next_file_entry_identifier;
+	     inode_number++ )
+	{
+		result = info_handle_inode_fprint_file_entry(
+		          info_handle,
+		          volume,
+		          0,
+		          inode_number,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print inode: %" PRIu64 ".",
+			 function,
+			 inode_number );
+
+			return( -1 );
+		}
+	}
+	if( libfsapfs_volume_free(
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free volume.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( volume != NULL )
+	{
+		libfsapfs_volume_free(
+		 &volume,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Prints the file entry information
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_file_entry_fprint(
+     info_handle_t *info_handle,
+     const system_character_t *path,
+     libcerror_error_t **error )
+{
+	libfsapfs_volume_t *volume          = NULL;
+	libfsapfs_file_entry_t *file_entry = NULL;
+	static char *function              = "info_handle_file_entry_fprint";
+	uint8_t *data                      = NULL;
+	size_t data_size                   = 0;
+	size_t path_length                 = 0;
+	uint64_t value_64bit               = 0;
+	uint32_t value_32bit               = 0;
+	int result                         = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+/* TODO add multi volume support */
+	if( libfsapfs_container_get_volume_by_index(
+	     info_handle->input_container,
+	     0,
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume: %d.",
+		 function,
+		 0 );
+
+		goto on_error;
+	}
+#ifdef TODO
+	path_length = system_string_length(
+	               path );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfsapfs_volume_get_file_entry_by_utf16_path(
+	          volume,
+	          (uint16_t *) path,
+	          path_length,
+	          &file_entry,
+	          error );
+#else
+	result = libfsapfs_volume_get_file_entry_by_utf8_path(
+	          volume,
+	          (uint8_t *) path,
+	          path_length,
+	          &file_entry,
+	          error );
+#endif
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file entry.",
+		 function );
+
+		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: file entry not found.",
+		 function );
+
+		goto on_error;
+	}
+#endif /* TODO */
+
+	fprintf(
+	 info_handle->notify_stream,
+	 "Apple File System (APFS) information:\n\n" );
+
+	fprintf(
+	 info_handle->notify_stream,
+	 "File entry:\n" );
+
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tPath\t\t\t\t: %" PRIs_SYSTEM "\n",
+	 path );
+
+/* TODO implement */
+
+	goto on_error;
+
+	if( libfsapfs_file_entry_free(
+	     &file_entry,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file entry.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_volume_free(
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free volume.",
+		 function );
+
+		goto on_error;
 	}
 	fprintf(
 	 info_handle->notify_stream,

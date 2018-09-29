@@ -233,9 +233,520 @@ int libfsapfs_file_entry_free(
 	return( result );
 }
 
+/* Retrieves the creation date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_creation_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_creation_time";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_creation_time(
+	     internal_file_entry->inode,
+	     posix_time,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve creation time.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the modification date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_modification_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_modification_time";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_modification_time(
+	     internal_file_entry->inode,
+	     posix_time,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve modification time.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the inode change date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_inode_change_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_inode_change_time";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_inode_change_time(
+	     internal_file_entry->inode,
+	     posix_time,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve inode change time.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the access date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_access_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_access_time";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_access_time(
+	     internal_file_entry->inode,
+	     posix_time,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve access time.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the owner identifier
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_owner_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *owner_identifier,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_owner_identifier";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_owner_identifier(
+	     internal_file_entry->inode,
+	     owner_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve owner identifier.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the group identifier
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_group_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *group_identifier,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_group_identifier";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_group_identifier(
+	     internal_file_entry->inode,
+	     group_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve group identifier.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves the file mode
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_file_mode(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *file_mode,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_file_mode";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_file_mode(
+	     internal_file_entry->inode,
+	     file_mode,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file mode.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
 /* Retrieves the size of the UTF-8 encoded name
+ * This value is retrieved from the inode
  * The returned size includes the end of string character
- * This value is retrieved from the directory entry $FILE_NAME attribute
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_utf8_name_size(
@@ -308,8 +819,8 @@ int libfsapfs_file_entry_get_utf8_name_size(
 }
 
 /* Retrieves the UTF-8 encoded name
+ * This value is retrieved from the inode
  * The size should include the end of string character
- * This value is retrieved from the directory entry $FILE_NAME attribute
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_utf8_name(
@@ -384,8 +895,8 @@ int libfsapfs_file_entry_get_utf8_name(
 }
 
 /* Retrieves the size of the UTF-16 encoded name
+ * This value is retrieved from the inode
  * The returned size includes the end of string character
- * This value is retrieved from the directory entry $FILE_NAME attribute
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_utf16_name_size(
@@ -458,8 +969,8 @@ int libfsapfs_file_entry_get_utf16_name_size(
 }
 
 /* Retrieves the UTF-16 encoded name
+ * This value is retrieved from the inode
  * The size should include the end of string character
- * This value is retrieved from the directory entry $FILE_NAME attribute
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_utf16_name(
@@ -533,6 +1044,98 @@ int libfsapfs_file_entry_get_utf16_name(
 	return( result );
 }
 
+/* Determines the directory entries
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_file_entry_get_directory_entries(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error )
+{
+	static char *function           = "libfsapfs_internal_file_entry_get_directory_entries";
+	uint64_t file_system_identifier = 0;
+	int result                      = 0;
+
+	if( internal_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->directory_entries != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry - directory entries value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_inode_get_identifier(
+	     internal_file_entry->inode,
+	     &file_system_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier from inode.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcdata_array_initialize(
+	     &( internal_file_entry->directory_entries ),
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create directory entries array.",
+		 function );
+
+		goto on_error;
+	}
+	result = libfsapfs_file_system_btree_get_directory_entries(
+		  internal_file_entry->file_system_btree,
+		  internal_file_entry->file_io_handle,
+		  file_system_identifier,
+		  internal_file_entry->directory_entries,
+		  error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve directory entries from file system B-tree.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( internal_file_entry->directory_entries != NULL )
+	{
+		libcdata_array_free(
+		 &( internal_file_entry->directory_entries ),
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_directory_record_free,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Retrieves the number of sub file entries
  * Returns 1 if successful or -1 on error
  */
@@ -541,10 +1144,8 @@ int libfsapfs_file_entry_get_number_of_sub_file_entries(
      int *number_of_sub_file_entries,
      libcerror_error_t **error )
 {
-	libcdata_array_t *directory_entries                  = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_number_of_sub_file_entries";
-	uint64_t file_system_identifier                      = 0;
 	int result                                           = 0;
 
 	if( file_entry == NULL )
@@ -577,54 +1178,19 @@ int libfsapfs_file_entry_get_number_of_sub_file_entries(
 #endif
 	if( internal_file_entry->directory_entries == NULL )
 	{
-		if( libfsapfs_inode_get_identifier(
-		     internal_file_entry->inode,
-		     &file_system_identifier,
+		if( libfsapfs_internal_file_entry_get_directory_entries(
+		     internal_file_entry,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve identifier from inode.",
+			 "%s: unable to determine directory entries.",
 			 function );
 
 			goto on_error;
 		}
-		if( libcdata_array_initialize(
-		     &directory_entries,
-		     0,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create directory entries array.",
-			 function );
-
-			goto on_error;
-		}
-		result = libfsapfs_file_system_btree_get_directory_entries(
-		          internal_file_entry->file_system_btree,
-		          internal_file_entry->file_io_handle,
-		          file_system_identifier,
-		          directory_entries,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve directory entries from file system B-tree.",
-			 function );
-
-			goto on_error;
-		}
-		internal_file_entry->directory_entries = directory_entries;
-		directory_entries                      = NULL;
 	}
 	if( libcdata_array_get_number_of_entries(
 	     internal_file_entry->directory_entries,
@@ -658,13 +1224,6 @@ int libfsapfs_file_entry_get_number_of_sub_file_entries(
 	return( 1 );
 
 on_error:
-	if( directory_entries != NULL )
-	{
-		libcdata_array_free(
-		 &directory_entries,
-		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_directory_record_free,
-		 NULL );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_write(
 	 internal_file_entry->read_write_lock,
@@ -682,7 +1241,6 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
      libfsapfs_file_entry_t **sub_file_entry,
      libcerror_error_t **error )
 {
-	libcdata_array_t *directory_entries                  = NULL;
 	libfsapfs_directory_record_t *directory_record       = NULL;
 	libfsapfs_inode_t *inode                             = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
@@ -742,54 +1300,19 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 #endif
 	if( internal_file_entry->directory_entries == NULL )
 	{
-		if( libfsapfs_inode_get_identifier(
-		     internal_file_entry->inode,
-		     &file_system_identifier,
+		if( libfsapfs_internal_file_entry_get_directory_entries(
+		     internal_file_entry,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve identifier from inode.",
+			 "%s: unable to determine directory entries.",
 			 function );
 
 			goto on_error;
 		}
-		if( libcdata_array_initialize(
-		     &directory_entries,
-		     0,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create directory entries array.",
-			 function );
-
-			goto on_error;
-		}
-		result = libfsapfs_file_system_btree_get_directory_entries(
-		          internal_file_entry->file_system_btree,
-		          internal_file_entry->file_io_handle,
-		          file_system_identifier,
-		          directory_entries,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve directory entries from file system B-tree.",
-			 function );
-
-			goto on_error;
-		}
-		internal_file_entry->directory_entries = directory_entries;
-		directory_entries                      = NULL;
 	}
 	if( libcdata_array_get_entry_by_index(
 	     internal_file_entry->directory_entries,
@@ -805,7 +1328,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 		 function,
 		 sub_file_entry_index );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libfsapfs_directory_record_get_identifier(
 	     directory_record,
@@ -881,13 +1404,6 @@ on_error:
 		 &inode,
 		 NULL );
 	}
-	if( directory_entries != NULL )
-	{
-		libcdata_array_free(
-		 &directory_entries,
-		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_directory_record_free,
-		 NULL );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_write(
 	 internal_file_entry->read_write_lock,
@@ -896,9 +1412,101 @@ on_error:
 	return( -1 );
 }
 
+/* Determines the file extents
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_file_entry_get_file_extents(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error )
+{
+	static char *function           = "libfsapfs_internal_file_entry_get_file_extents";
+	uint64_t file_system_identifier = 0;
+	int result                      = 0;
+
+	if( internal_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->file_extents != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry - file extents value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_inode_get_data_stream_identifier(
+	     internal_file_entry->inode,
+	     &file_system_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve data stream identifier from inode.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcdata_array_initialize(
+	     &( internal_file_entry->file_extents ),
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file extents array.",
+		 function );
+
+		goto on_error;
+	}
+	result = libfsapfs_file_system_btree_get_file_extents(
+		  internal_file_entry->file_system_btree,
+		  internal_file_entry->file_io_handle,
+		  file_system_identifier,
+		  internal_file_entry->file_extents,
+		  error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file extents from file system B-tree.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( internal_file_entry->file_extents != NULL )
+	{
+		libcdata_array_free(
+		 &( internal_file_entry->file_extents ),
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* TODO implement and add thread locks */
 
-/* Reads data at the current offset from the data stream object
+/* Reads data at the current offset
  * Returns the number of bytes read or -1 on error
  */
 ssize_t libfsapfs_file_entry_read_buffer(
@@ -929,7 +1537,7 @@ ssize_t libfsapfs_file_entry_read_buffer(
 	return( -1 );
 }
 
-/* Reads data at a specific offset from the data stream object
+/* Reads data at a specific offset
  * Returns the number of bytes read or -1 on error
  */
 ssize_t libfsapfs_file_entry_read_buffer_at_offset(
@@ -977,7 +1585,7 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
 	return( read_count );
 }
 
-/* Seeks a certain offset in the data stream object
+/* Seeks a certain offset
  * Returns the offset if seek is successful or -1 on error
  */
 off64_t libfsapfs_file_entry_seek_offset(
@@ -1007,7 +1615,7 @@ off64_t libfsapfs_file_entry_seek_offset(
 	return( -1 );
 }
 
-/* Retrieves the current offset of the data stream object
+/* Retrieves the current offset
  * Returns the offset if successful or -1 on error
  */
 int libfsapfs_file_entry_get_offset(
@@ -1044,10 +1652,8 @@ int libfsapfs_file_entry_get_size(
      size64_t *size,
      libcerror_error_t **error )
 {
-	libcdata_array_t *file_extents                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_size";
-	uint64_t file_system_identifier                      = 0;
 	int result                                           = 0;
 
 	if( file_entry == NULL )
@@ -1080,54 +1686,19 @@ int libfsapfs_file_entry_get_size(
 #endif
 	if( internal_file_entry->file_extents == NULL )
 	{
-		if( libfsapfs_inode_get_data_stream_identifier(
-		     internal_file_entry->inode,
-		     &file_system_identifier,
+		if( libfsapfs_internal_file_entry_get_file_extents(
+		     internal_file_entry,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream identifier from inode.",
+			 "%s: unable to determine file extents.",
 			 function );
 
 			goto on_error;
 		}
-		if( libcdata_array_initialize(
-		     &file_extents,
-		     0,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file extents array.",
-			 function );
-
-			goto on_error;
-		}
-		result = libfsapfs_file_system_btree_get_file_extents(
-		          internal_file_entry->file_system_btree,
-		          internal_file_entry->file_io_handle,
-		          file_system_identifier,
-		          file_extents,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file extents from file system B-tree.",
-			 function );
-
-			goto on_error;
-		}
-		internal_file_entry->file_extents = file_extents;
-		file_extents                      = NULL;
 	}
 /* TODO implement */
 
@@ -1149,13 +1720,255 @@ int libfsapfs_file_entry_get_size(
 	return( 1 );
 
 on_error:
-	if( file_extents != NULL )
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the number of extents
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_file_entry_get_number_of_extents(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_extents,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_number_of_extents";
+	int result                                           = 0;
+
+	if( file_entry == NULL )
 	{
-		libcdata_array_free(
-		 &file_extents,
-		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
-		 NULL );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
 	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->file_extents == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_file_extents(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine file extents.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libcdata_array_get_number_of_entries(
+	     internal_file_entry->file_extents,
+	     number_of_extents,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from array.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves a specific extent
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_file_entry_get_extent_by_index(
+     libfsapfs_file_entry_t *file_entry,
+     int extent_index,
+     off64_t *extent_offset,
+     size64_t *extent_size,
+     uint32_t *extent_flags,
+     libcerror_error_t **error )
+{
+	libfsapfs_file_extent_t *file_extent                 = NULL;
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_extent_by_index";
+	size64_t data_size                                   = 0;
+	uint32_t range_flags                                 = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+	if( extent_offset == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid extent offset.",
+		 function );
+
+		return( -1 );
+	}
+	if( extent_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid extent size.",
+		 function );
+
+		return( -1 );
+	}
+	if( extent_flags == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid extent flags.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->file_extents == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_file_extents(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine file extents.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libcdata_array_get_entry_by_index(
+	     internal_file_entry->file_extents,
+	     extent_index,
+	     (intptr_t **) &file_extent,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file extent: %d.",
+		 function,
+		 extent_index );
+
+		goto on_error;
+	}
+	if( file_extent == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing file extent: %d.",
+		 function,
+		 extent_index );
+
+		goto on_error;
+	}
+/* TODO change block number into offset */
+	*extent_offset = file_extent->block_number;
+	*extent_size   = file_extent->data_size;
+	*extent_flags  = 0;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_write(
 	 internal_file_entry->read_write_lock,

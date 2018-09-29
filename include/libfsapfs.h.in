@@ -474,6 +474,25 @@ int libfsapfs_volume_set_utf16_password(
      size_t utf16_string_length,
      libfsapfs_error_t **error );
 
+/* Retrieves the next file entry identifier
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_next_file_entry_identifier(
+     libfsapfs_volume_t *volume,
+     uint64_t *identifier,
+     libfsapfs_error_t **error );
+
+/* Retrieves a specific file entry
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_file_entry_by_identifier(
+     libfsapfs_volume_t *volume,
+     uint64_t identifier,
+     libfsapfs_file_entry_t **file_entry,
+     libfsapfs_error_t **error );
+
 /* Retrieves the root directory file entry
  * Returns 1 if successful or -1 on error
  */
@@ -495,6 +514,76 @@ int libfsapfs_file_entry_free(
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_error_t **error );
 
+/* Retrieves the creation date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_creation_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libfsapfs_error_t **error );
+
+/* Retrieves the modification date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_modification_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libfsapfs_error_t **error );
+
+/* Retrieves the inode change date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_inode_change_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libfsapfs_error_t **error );
+
+/* Retrieves the access date and time
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_access_time(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *posix_time,
+     libfsapfs_error_t **error );
+
+/* Retrieves the user identifier
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_owner_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *owner_identifier,
+     libfsapfs_error_t **error );
+
+/* Retrieves the group identifier
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_group_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *group_identifier,
+     libfsapfs_error_t **error );
+
+/* Retrieves the file mode
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_file_mode(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *file_mode,
+     libfsapfs_error_t **error );
+
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful, 0 if not available or -1 on error
@@ -506,6 +595,7 @@ int libfsapfs_file_entry_get_utf8_name_size(
      libfsapfs_error_t **error );
 
 /* Retrieves the UTF-8 encoded name
+ * This value is retrieved from the inode
  * The size should include the end of string character
  * Returns 1 if successful, 0 if not available or -1 on error
  */
@@ -517,6 +607,7 @@ int libfsapfs_file_entry_get_utf8_name(
      libfsapfs_error_t **error );
 
 /* Retrieves the size of the UTF-16 encoded name
+ * This value is retrieved from the inode
  * The returned size includes the end of string character
  * Returns 1 if successful, 0 if not available or -1 on error
  */
@@ -527,6 +618,7 @@ int libfsapfs_file_entry_get_utf16_name_size(
      libfsapfs_error_t **error );
 
 /* Retrieves the UTF-16 encoded name
+ * This value is retrieved from the inode
  * The size should include the end of string character
  * Returns 1 if successful, 0 if not available or -1 on error
  */
@@ -554,6 +646,27 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
      libfsapfs_file_entry_t *file_entry,
      int sub_file_entry_index,
      libfsapfs_file_entry_t **sub_file_entry,
+     libfsapfs_error_t **error );
+
+/* Retrieves the number of extents
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_extents(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_extents,
+     libfsapfs_error_t **error );
+
+/* Retrieves a specific extent
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_extent_by_index(
+     libfsapfs_file_entry_t *file_entry,
+     int extent_index,
+     off64_t *extent_offset,
+     size64_t *extent_size,
+     uint32_t *extent_flags,
      libfsapfs_error_t **error );
 
 #if defined( __cplusplus )

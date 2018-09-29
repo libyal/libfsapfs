@@ -46,7 +46,9 @@
 enum FSAPFSINFO_MODES
 {
 	FSAPFSINFO_MODE_CONTAINER,
-	FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY
+	FSAPFSINFO_MODE_FILE_ENTRY,
+	FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY,
+	FSAPFSINFO_MODE_INODE
 };
 
 info_handle_t *fsapfsinfo_info_handle = NULL;
@@ -64,11 +66,14 @@ void usage_fprint(
 	fprintf( stream, "Use fsapfsinfo to determine information about an Apple\n"
 	                 " File System (APFS).\n\n" );
 
-	fprintf( stream, "Usage: fsapfsinfo [ -o offset ] [ -p password ] [ -hHvV ]\n"
+	fprintf( stream, "Usage: fsapfsinfo [ -E inode_number ] [ -F file_entry ]\n"
+	                 "                  [ -o offset ] [ -p password ] [ -hHvV ]\n"
 	                 "                  source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
+	fprintf( stream, "\t-E:     show information about a specific inode or \"all\".\n" );
+	fprintf( stream, "\t-F:     show information about a specific file entry path.\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
 	fprintf( stream, "\t-H:     shows the file system hierarchy\n" );
 	fprintf( stream, "\t-o:     specify the volume offset\n" );
@@ -130,11 +135,15 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libfsapfs_error_t *error                 = NULL;
+	system_character_t *option_file_entry    = NULL;
+	system_character_t *option_inode_number  = NULL;
 	system_character_t *option_password      = NULL;
 	system_character_t *option_volume_offset = NULL;
 	system_character_t *source               = NULL;
 	char *program                            = "fsapfsinfo";
 	system_integer_t option                  = 0;
+	size_t string_length                     = 0;
+	uint64_t inode_number                    = 0;
 	int option_mode                          = FSAPFSINFO_MODE_CONTAINER;
 	int verbose                              = 0;
 
@@ -171,7 +180,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "hHo:p:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "E:F:hHo:p:vV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -186,6 +195,18 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_FAILURE );
+
+			case (system_integer_t) 'E':
+				option_mode         = FSAPFSINFO_MODE_INODE;
+				option_inode_number = optarg;
+
+				break;
+
+			case (system_integer_t) 'F':
+				option_mode       = FSAPFSINFO_MODE_FILE_ENTRY;
+				option_file_entry = optarg;
+
+				break;
 
 			case (system_integer_t) 'h':
 				usage_fprint(
@@ -297,6 +318,20 @@ int main( int argc, char * const argv[] )
 	}
 	switch( option_mode )
 	{
+		case FSAPFSINFO_MODE_FILE_ENTRY:
+			if( info_handle_file_entry_fprint(
+			     fsapfsinfo_info_handle,
+			     option_file_entry,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to print file entry information.\n" );
+
+				goto on_error;
+			}
+			break;
+
 		case FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY:
 			if( info_handle_file_system_hierarchy_fprint(
 			     fsapfsinfo_info_handle,
@@ -305,6 +340,72 @@ int main( int argc, char * const argv[] )
 				fprintf(
 				 stderr,
 				 "Unable to print file system hierarchy.\n" );
+
+				goto on_error;
+			}
+			break;
+
+		case FSAPFSINFO_MODE_INODE:
+			if( option_inode_number == NULL )
+			{
+				fprintf(
+				 stderr,
+				 "Mising inode number string.\n" );
+
+				goto on_error;
+			}
+			string_length = system_string_length(
+					 option_inode_number );
+
+			if( ( string_length == 3 )
+			 && ( system_string_compare(
+			       option_inode_number,
+			       _SYSTEM_STRING( "all" ),
+			       3 ) == 0 ) )
+			{
+				if( info_handle_inodes_fprint(
+				     fsapfsinfo_info_handle,
+				     &error ) != 1 )
+				{
+					fprintf(
+					 stderr,
+					 "Unable to print inodes.\n" );
+
+					goto on_error;
+				}
+			}
+			else if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
+			          option_inode_number,
+			          string_length + 1,
+			          &inode_number,
+			          &error ) == 1 )
+			{
+				if( inode_number > (uint64_t) 0x0fffffffffffffffUL )
+				{
+					fprintf(
+					 stderr,
+					 "Invalid inode number value out of bounds." );
+
+					goto on_error;
+				}
+				if( info_handle_inode_fprint(
+				     fsapfsinfo_info_handle,
+				     (uint32_t) inode_number,
+				     &error ) != 1 )
+				{
+					fprintf(
+					 stderr,
+					 "Unable to print inode: %" PRIu64 ".\n",
+					 inode_number );
+
+					goto on_error;
+				}
+			}
+			else
+			{
+				fprintf(
+				 stderr,
+				 "Unable to copy inode number string to 64-bit decimal.\n" );
 
 				goto on_error;
 			}

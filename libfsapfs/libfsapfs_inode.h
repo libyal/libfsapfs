@@ -55,13 +55,25 @@ struct libfsapfs_inode
 	 */
 	uint64_t creation_time;
 
-	/* Change time
+	/* Inode change time
 	 */
-	uint64_t change_time;
+	uint64_t inode_change_time;
 
 	/* Access time
 	 */
 	uint64_t access_time;
+
+	/* Owner identifier
+	 */
+	uint32_t owner_identifier;
+
+	/* Group identifier
+	 */
+	uint32_t group_identifier;
+
+	/* File mode
+	 */
+	uint16_t file_mode;
 
 	/* Name size
 	 */
@@ -90,6 +102,41 @@ int libfsapfs_inode_read_value_data(
 int libfsapfs_inode_get_identifier(
      libfsapfs_inode_t *inode,
      uint64_t *identifier,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_creation_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_modification_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_inode_change_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_access_time(
+     libfsapfs_inode_t *inode,
+     uint64_t *posix_time,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_owner_identifier(
+     libfsapfs_inode_t *inode,
+     uint32_t *owner_identifier,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_group_identifier(
+     libfsapfs_inode_t *inode,
+     uint32_t *group_identifier,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_file_mode(
+     libfsapfs_inode_t *inode,
+     uint16_t *file_mode,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_data_stream_identifier(

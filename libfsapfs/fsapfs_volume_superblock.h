@@ -169,10 +169,10 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t unknown21[ 8 ];
 
-	/* Unknown
+	/* The next file system object identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown22[ 8 ];
+	uint8_t next_file_system_object_identifier[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes

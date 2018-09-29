@@ -44,6 +44,10 @@ struct libfsapfs_volume_superblock
 	 */
 	uint64_t file_system_root_object_identifier;
 
+	/* The next file system object identifier
+	 */
+	uint64_t next_file_system_object_identifier;
+
 	/* The volume identifier
 	 */
 	uint8_t volume_identifier[ 16 ];

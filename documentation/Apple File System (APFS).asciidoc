@@ -1118,7 +1118,7 @@ Contains a block number relative to the start of the container of the <<object_m
 | 156 | 8 | | [yellow-background]*Unknown (apfs_snap_meta_tree_oid)*
 | 164 | 8 | | [yellow-background]*Unknown (apfs_revert_to_xid)*
 | 172 | 8 | | [yellow-background]*Unknown (apfs_revert_to_sblock_oid)*
-| 180 | 8 | | [yellow-background]*Unknown (apfs_next_obj_id)*
+| 180 | 8 | | Next (available) file system object identifier (apfs_next_obj_id)
 | 188 | 8 | | [yellow-background]*Unknown (apfs_num_files)*
 | 196 | 8 | | [yellow-background]*Unknown (apfs_num_directories)*
 | 204 | 8 | | [yellow-background]*Unknown (apfs_num_symlinks)*
@@ -1331,7 +1331,7 @@ The inode value data (APFS_TYPE_INVALID) is 8 bytes of size and consists of:
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
 | 24 | 8 | | Modification date and time (mod_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
-| 32 | 8 | | Change date and time (change_time) +
+| 32 | 8 | | Inode change date and time (change_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
 | 48 | 8 | | Access date and time (access_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
