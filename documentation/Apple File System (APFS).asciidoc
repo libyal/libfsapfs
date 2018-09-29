@@ -1542,6 +1542,11 @@ The directory record can have 2 different types of keys:
 * Key with name
 * Key with name and hash
 
+[NOTE]
+It apprears that current APFS file system use a key with name and hash.
+`[APPLE18]` does not indicate how to distinguishe between the two, but one
+method is to compare calculated and stored size of the key data.
+
 ==== Directory record key data with name
 
 The directory record key data with name (j_drec_key_t) is variable of size and
@@ -1550,9 +1555,11 @@ consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
+4+| _Object identifier and type (hdr)_
 | 0 | 60 bits | | File system object identifier (FSOID)
 | 7.4 | 4 bits | 0x9 | File system data type +
 See section: <<file_system_data_types,File system data types>>
+4+|
 | 8 | 2 | | Name string size (name_len) +
 Includes the size of the end-of-string character
 | 10 | ... | | Name string (name) +
@@ -1567,13 +1574,16 @@ variable of size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
+4+| _Object identifier and type (hdr)_
 | 0 | 60 bits | | File system object identifier (FSOID)
 | 7.4 | 4 bits | 0x9 | File system data type +
 See section: <<file_system_data_types,File system data types>>
 4+| _Name string size and hash (name_len_and_hash)_
 | 8 | 11 bits | | Name string size +
 Includes the size of the end-of-string character
-| 9.3 | 21 bits | | Name hash
+| 9.3 | 21 bits | | Name hash +
+See section: <<directory_entry_name_hash,Directory entry name hash>>
+4+|
 | 12 | ... | | Name string (name) +
 Contains an UTF-8 encoded string with an end-of-string character
 |===
@@ -1596,8 +1606,6 @@ See section: <<extended_fields,Extended fields>>
 |===
 
 ===== [[directory_entry_flags]]Directory entry flags
-
-[yellow-background]*TODO: complete this section.*
 
 [cols="1,1,5",options="header"]
 |===
@@ -1622,6 +1630,18 @@ A whiteout is a directory entry that covers up all entries of a particular name 
 | 0x000f | DREC_TYPE_MASK | Directory type bitmask
 | 0x0010 | RESERVED_10 | [yellow-background]*Unknown (reserved)*
 |===
+
+===== [[directory_entry_name_hash]]Directory entry name hash
+
+The name hash of a directory entry is calculated as following:
+
+* Represent the name as a normalized UTF-8 string including end-of-string character using canonical decomposition (NFD)
+* Represent the string as an UTF-32 string including end-of-string character
+* Calculate a CRC-32c checksum of the UTF-32 string
+* Calculate the [yellow-background]*1-complement* of the checksum.
+* The lower 22-bits of checksum form the hash
+
+[yellow-background]*TODO check if "complement the bits of the hash" refers to 1 or 2 complement*
 
 === Directory stats
 
@@ -1663,14 +1683,16 @@ The extended fields (xf_blob_t) consists of:
 |===
 | Offset | Size | Value | Description
 | 0 | 2 | | Number of extended fields (xf_num_exts)
-| 2 | 2 | | [yellow-background]*Unknown (xf_used_data)*
-| 4 | ... | | Array of extended fields (xf_data) +
-See section: <<extended_field,Extended field>>
+| 2 | 2 | | Extended field value data size (xf_used_data)
+4+| _Extended field data (xf_data)_
+| 4 | ... | | Array of extended field descriptors +
+See section: <<extended_field_descriptor,Extended field descriptor>>
+| ... | ... | | Extended field value data
 |===
 
-==== [[extended_field]]Extended field
+==== [[extended_field_descriptor]]Extended field descriptor
 
-An extended field (x_field_t) consists of:
+An extended field descriptor (x_field_t) is 4 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1680,10 +1702,7 @@ See section: <<extended_field_types,Extended field types>>
 | 1 | 1 | | Extended field flags (x_flags) +
 See section: <<extended_field_flags,Extended field flags>>
 | 2 | 2 | | Extended field data size (x_size)
-| 4 | ... | | Extended field data
 |===
-
-[yellow-background]*TODO determine if the extended field data is stored directly after x_field_t or after the array of x_field_t*
 
 ==== [[extended_field_types]]Extended field types
 
@@ -1716,7 +1735,7 @@ The extended field data contains a 64-bit integer value
 | 7 | INO_EXT_TYPE_FINDER_INFO | Finder information +
 The extended field data contains a 32-bit integer value
 | 8 | INO_EXT_TYPE_DSTREAM | Data stream +
-[yellow-background]*Unknown if this contains the object identifier of the data stream or a j_dstream_t structure*
+The extended field data contains a <<data_stream,data stream>>
 | 9 | INO_EXT_TYPE_RESERVED_9 | [yellow-background]*Unknown (Reserved)*
 | 10 | INO_EXT_TYPE_DIR_STATS_KEY | Direcotry statistics +
 [yellow-background]*Unknown if this contains the object identifier of the directory statisticts or a j_dir_stats_val_t structure*
@@ -1742,6 +1761,20 @@ The extended field data contains a 32-bit integer value
 | 0x20 | XF_SYSTEM_FIELD | [yellow-background]*Unknown*
 | 0x40 | XF_RESERVED_40 | [yellow-background]*Unknown*
 | 0x80 | XF_RESERVED_80 | [yellow-background]*Unknown*
+|===
+
+=== [[data_stream]]Data stream
+
+The data stream (j_dstream_t) is 40 bytes of size and constist of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Used size (size)
+| 8 | 8 | | Allocated size (alloced_size)
+| 16 | 8 | | Default encryption identifier (default_crypto_id)
+| 24 | 8 | | Total number of bytes written to data stream (total_bytes_written)
+| 32 | 8 | | Total number of bytes read from data stream (total_bytes_written)
 |===
 
 == [[efi_jumpstart]]EFI jumpstart

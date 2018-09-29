@@ -29,6 +29,7 @@
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_types.h"
@@ -52,6 +53,10 @@ struct libfsapfs_internal_file_entry
 	/* The file system B-tree
 	 */
 	libfsapfs_file_system_btree_t *file_system_btree;
+
+	/* The directory entries
+	 */
+	libcdata_array_t *directory_entries;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock

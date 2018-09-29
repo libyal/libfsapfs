@@ -390,12 +390,12 @@ int libfsapfs_volume_open(
 	     1,
 	     error ) != 1 )
 	{
-                libcerror_error_set(
-                 error,
-                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-                 "%s: unable to set track offsets read in file IO handle.",
-                 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set track offsets read in file IO handle.",
+		 function );
 
 		goto on_error;
 	}
@@ -409,12 +409,12 @@ int libfsapfs_volume_open(
 	     filename_length + 1,
 	     error ) != 1 )
 	{
-                libcerror_error_set(
-                 error,
-                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-                 "%s: unable to set filename in file IO handle.",
-                 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set filename in file IO handle.",
+		 function );
 
 		goto on_error;
 	}
@@ -475,7 +475,7 @@ on_error:
 		 &file_io_handle,
 		 NULL );
 	}
-        return( -1 );
+	return( -1 );
 }
 
 #if defined( HAVE_WIDE_CHARACTER_TYPE )
@@ -560,12 +560,12 @@ int libfsapfs_volume_open_wide(
 	     1,
 	     error ) != 1 )
 	{
-                libcerror_error_set(
-                 error,
-                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-                 "%s: unable to set track offsets read in file IO handle.",
-                 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set track offsets read in file IO handle.",
+		 function );
 
 		goto on_error;
 	}
@@ -579,12 +579,12 @@ int libfsapfs_volume_open_wide(
 	     filename_length + 1,
 	     error ) != 1 )
 	{
-                libcerror_error_set(
-                 error,
-                 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-                 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-                 "%s: unable to set filename in file IO handle.",
-                 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set filename in file IO handle.",
+		 function );
 
 		goto on_error;
 	}
@@ -645,7 +645,7 @@ on_error:
 		 &file_io_handle,
 		 NULL );
 	}
-        return( -1 );
+	return( -1 );
 }
 
 #endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
@@ -2608,33 +2608,37 @@ int libfsapfs_volume_get_root_directory(
 		          &( internal_volume->root_directory_inode ),
 		          error );
 
-                if( result == -1 )
-                {
-                        libcerror_error_set(
-                         error,
-                         LIBCERROR_ERROR_DOMAIN_RUNTIME,
-                         LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-                         "%s: unable to retrieve root directory inode from file system B-tree.",
-                         function );
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve root directory inode from file system B-tree.",
+			 function );
 
-                        goto on_error;
-                }
+			goto on_error;
+		}
 	}
-	if( libfsapfs_file_entry_initialize(
-	     file_entry,
-	     internal_volume->file_io_handle,
-	     internal_volume->file_system_btree,
-	     internal_volume->root_directory_inode,
-	     error ) != 1 )
+/* TODO return 0 if no root directory inode */
+	if( internal_volume->root_directory_inode != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create file entry.",
-		 function );
+		if( libfsapfs_file_entry_initialize(
+		     file_entry,
+		     internal_volume->file_io_handle,
+		     internal_volume->file_system_btree,
+		     internal_volume->root_directory_inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create file entry.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(

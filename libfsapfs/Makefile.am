@@ -49,6 +49,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_data_block.c libfsapfs_data_block.h \
 	libfsapfs_debug.c libfsapfs_debug.h \
 	libfsapfs_definitions.h \
+	libfsapfs_directory_record.c libfsapfs_directory_record.h \
 	libfsapfs_error.c libfsapfs_error.h \
 	libfsapfs_encryption_context.c libfsapfs_encryption_context.h \
 	libfsapfs_extern.h \

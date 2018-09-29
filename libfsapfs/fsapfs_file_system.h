@@ -64,14 +64,28 @@ struct fsapfs_file_system_btree_key_directory_record
 	uint8_t file_system_identifier[ 8 ];
 
 	/* The name size
-	 * Consists of 1 byte
+	 * Consists of 2 bytes
 	 */
-	uint8_t name_size[ 4 ];
+	uint8_t name_size[ 2 ];
 
-	/* Unknown
+	/* The name string
+	 * Contains an UTF-8 string with end-of-string character
+	 */
+};
+
+typedef struct fsapfs_file_system_btree_key_directory_record_with_hash fsapfs_file_system_btree_key_directory_record_with_hash_t;
+
+struct fsapfs_file_system_btree_key_directory_record_with_hash
+{
+	/* The file system identifier (FSID) and data type
+	 * Consists of 8 bytes
+	 */
+	uint8_t file_system_identifier[ 8 ];
+
+	/* The name size and hash
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 4 ];
+	uint8_t name_size_and_hash[ 4 ];
 
 	/* The name string
 	 * Contains an UTF-8 string with end-of-string character
@@ -161,6 +175,29 @@ struct fsapfs_file_system_btree_value_inode
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown4[ 8 ];
+
+	/* Extended fields
+	 */
+};
+
+typedef struct fsapfs_file_system_btree_value_directory_record fsapfs_file_system_btree_value_directory_record_t;
+
+struct fsapfs_file_system_btree_value_directory_record
+{
+	/* The file system identifier (FSID)
+	 * Consists of 8 bytes
+	 */
+	uint8_t file_system_identifier[ 8 ];
+
+	/* The added date and time
+	 * Consists of 8 bytes
+	 */
+	uint8_t added_time[ 8 ];
+
+	/* The directory entry flags
+	 * Consists of 2 bytes
+	 */
+	uint8_t directory_entry_flags[ 2 ];
 
 	/* Extended fields
 	 */

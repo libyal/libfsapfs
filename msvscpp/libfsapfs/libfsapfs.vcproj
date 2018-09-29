@@ -226,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_directory_record.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_encryption_context.c"
 				>
 			</File>
@@ -405,6 +409,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_definitions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_directory_record.h"
 				>
 			</File>
 			<File

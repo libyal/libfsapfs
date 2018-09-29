@@ -1096,6 +1096,10 @@ int info_handle_file_system_hierarchy_fprint(
 			goto on_error;
 		}
 	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
 	return( 1 );
 
 on_error:

@@ -33,6 +33,71 @@
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
+/* Prints the directory entry flags
+ */
+void libfsapfs_debug_print_directory_entry_flags(
+      uint16_t directory_entry_flags )
+{
+	switch( directory_entry_flags & 0x000f )
+	{
+		case 0x0000:
+			libcnotify_printf(
+			 "\t(DT_UNKNOWN)\n" );
+			break;
+
+		case 0x0001:
+			libcnotify_printf(
+			 "\t(DT_FIFO)\n" );
+			break;
+
+		case 0x0002:
+			libcnotify_printf(
+			 "\t(DT_CHR)\n" );
+			break;
+
+		case 0x0004:
+			libcnotify_printf(
+			 "\t(DT_DIR)\n" );
+			break;
+
+		case 0x0006:
+			libcnotify_printf(
+			 "\t(DT_BLK)\n" );
+			break;
+
+		case 0x0008:
+			libcnotify_printf(
+			 "\t(DT_REG)\n" );
+			break;
+
+		case 0x000a:
+			libcnotify_printf(
+			 "\t(DT_LNK)\n" );
+			break;
+
+		case 0x000c:
+			libcnotify_printf(
+			 "\t(DT_SOCK)\n" );
+			break;
+
+		case 0x000e:
+			libcnotify_printf(
+			 "\t(DT_WHT)\n" );
+			break;
+
+		default:
+			libcnotify_printf(
+			 "\tUnknown: 0x%04" PRIx16 "\n",
+			 directory_entry_flags & 0x000f );
+			break;
+	}
+	if( ( directory_entry_flags & 0x0010 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(RESERVED_10)\n" );
+	}
+}
+
 /* Prints the inode flags
  */
 void libfsapfs_debug_print_inode_flags(
@@ -123,6 +188,58 @@ void libfsapfs_debug_print_inode_flags(
 		libcnotify_printf(
 		 "\t(INODE_ALLOCATION_SPILLEDOVER)\n" );
 	}
+}
+
+/* Prints the inode extended field type
+ */
+const char *libfsapfs_debug_print_inode_extended_field_type(
+             uint8_t extended_field_type )
+{
+	switch( extended_field_type )
+	{
+		case 1:
+			return( "(INO_EXT_TYPE_SNAP_XID)" );
+
+		case 2:
+			return( "(INO_EXT_TYPE_DELTA_TREE_OID)" );
+
+		case 3:
+			return( "(INO_EXT_TYPE_DOCUMENT_ID)" );
+
+		case 4:
+			return( "(INO_EXT_TYPE_NAME)" );
+
+		case 5:
+			return( "(INO_EXT_TYPE_PREV_FSIZE)" );
+
+		case 6:
+			return( "(INO_EXT_TYPE_RESERVED_6)" );
+
+		case 7:
+			return( "(INO_EXT_TYPE_FINDER_INFO)" );
+
+		case 8:
+			return( "(INO_EXT_TYPE_DSTREAM)" );
+
+		case 9:
+			return( "(INO_EXT_TYPE_RESERVED_9)" );
+
+		case 10:
+			return( "(INO_EXT_TYPE_DIR_STATS_KEY)" );
+
+		case 11:
+			return( "(INO_EXT_TYPE_FS_UUID)" );
+
+		case 12:
+			return( "(INO_EXT_TYPE_RESERVED_12)" );
+
+		case 13:
+			return( "(INO_EXT_TYPE_SPARSE_BYTES)" );
+
+		case 14:
+			return( "(INO_EXT_TYPE_RDEV)" );
+	}
+	return( "Unknown" );
 }
 
 /* Prints a POSIX value

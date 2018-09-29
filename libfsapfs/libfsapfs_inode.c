@@ -143,18 +143,19 @@ int libfsapfs_inode_free(
 	return( 1 );
 }
 
-/* Reads the inode
+/* Reads the inode value data
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_inode_read_data(
+int libfsapfs_inode_read_value_data(
      libfsapfs_inode_t *inode,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function              = "libfsapfs_inode_read_data";
+	static char *function              = "libfsapfs_inode_read_value_data";
 	size_t data_offset                 = 0;
-	size_t name_size                   = 0;
+	size_t value_data_offset           = 0;
+	size_t value_data_size             = 0;
 	uint16_t extended_field_index      = 0;
 	uint16_t number_of_extended_fields = 0;
 	uint8_t extended_field_type        = 0;
@@ -214,7 +215,7 @@ int libfsapfs_inode_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: inode data:\n",
+		 "%s: inode value data:\n",
 		 function );
 		libcnotify_print_data(
 		 data,
@@ -250,7 +251,7 @@ int libfsapfs_inode_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: parent identifier\t\t\t\t: %" PRIu64 "\n",
+		 "%s: parent identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 inode->parent_identifier );
 
@@ -261,7 +262,7 @@ int libfsapfs_inode_read_data(
 
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "modification time\t\t\t\t",
+		     "modification time\t\t\t",
 		     ( (fsapfs_file_system_btree_value_inode_t *) data )->modification_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
@@ -299,7 +300,7 @@ int libfsapfs_inode_read_data(
 		}
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "change time\t\t\t\t\t",
+		     "change time\t\t\t\t",
 		     ( (fsapfs_file_system_btree_value_inode_t *) data )->change_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
@@ -318,7 +319,7 @@ int libfsapfs_inode_read_data(
 		}
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "access time\t\t\t\t\t",
+		     "access time\t\t\t\t",
 		     ( (fsapfs_file_system_btree_value_inode_t *) data )->access_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
@@ -339,7 +340,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->inode_flags,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: inode flags\t\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: inode flags\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 		libfsapfs_debug_print_inode_flags(
@@ -351,7 +352,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->number_of_children,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: number of children\t\t\t\t: %" PRIu32 "\n",
+		 "%s: number of children\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -359,7 +360,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->unknown1,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown1\t\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -367,7 +368,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->unknown2,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown2\t\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown2\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -375,7 +376,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->bsd_flags,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: BSD flags\t\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: BSD flags\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -383,7 +384,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->owner_identifier,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: owner identifier\t\t\t\t: %" PRIu32 "\n",
+		 "%s: owner identifier\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -391,7 +392,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->group_identifier,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: group identifier\t\t\t\t: %" PRIu32 "\n",
+		 "%s: group identifier\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -399,7 +400,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->file_mode,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: file mode\t\t\t\t\t: %" PRIo16 "\n",
+		 "%s: file mode\t\t\t\t: %" PRIo16 "\n",
 		 function,
 		 value_16bit );
 
@@ -407,7 +408,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->unknown3,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: unknown3\t\t\t\t\t: 0x%04" PRIx16 "\n",
+		 "%s: unknown3\t\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
 		 value_16bit );
 
@@ -415,7 +416,7 @@ int libfsapfs_inode_read_data(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->unknown4,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown4\t\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown4\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 	}
@@ -444,7 +445,7 @@ int libfsapfs_inode_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: number of extended fields\t\t\t: %" PRIu16 "\n",
+			 "%s: number of extended fields\t\t: %" PRIu16 "\n",
 			 function,
 			 number_of_extended_fields );
 
@@ -452,26 +453,15 @@ int libfsapfs_inode_read_data(
 			 &( data[ data_offset + 2 ] ),
 			 value_16bit );
 			libcnotify_printf(
-			 "%s: unknown5\t\t\t\t\t: 0x%04" PRIx16 "\n",
+			 "%s: extended field value data size\t\t: %" PRIu16 "\n",
 			 function,
 			 value_16bit );
 		}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-		data_offset += 4;
+		data_offset      += 4;
+		value_data_offset = data_offset + ( number_of_extended_fields * 4 );
 
-/* TODO add support for multi extended fields */
-		if( number_of_extended_fields > 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported number of extended fields.",
-			 function );
-
-			return( -1 );
-		}
 		for( extended_field_index = 0;
 		     extended_field_index < number_of_extended_fields;
 		     extended_field_index++ )
@@ -493,16 +483,15 @@ int libfsapfs_inode_read_data(
 			if( libcnotify_verbose != 0 )
 			{
 				libcnotify_printf(
-				 "\n" );
-
-				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " type\t\t\t: %" PRIu8 "\n",
+				 "%s: extended field: %" PRIu16 " type\t\t\t: %" PRIu8 " %s\n",
 				 function,
 				 extended_field_index,
-				 extended_field_type );
+				 extended_field_type,
+				 libfsapfs_debug_print_inode_extended_field_type(
+				  extended_field_type ) );
 
 				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " flags\t\t\t: 0x%04" PRIx16 "\n",
+				 "%s: extended field: %" PRIu16 " flags\t\t: 0x%04" PRIx16 "\n",
 				 function,
 				 extended_field_index,
 				 data[ data_offset + 1 ] );
@@ -511,72 +500,56 @@ int libfsapfs_inode_read_data(
 
 			data_offset += 4;
 
-/* TODO check bounds of data */
+			if( value_data_offset > data_size )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			value_data_size = 0;
+
 			switch( extended_field_type )
 			{
 				case 1:
 				case 2:
 				case 5:
 				case 13:
-					data_offset += 8;
+					value_data_size = 8;
 					break;
 
 				case 3:
 				case 7:
 				case 14:
-					data_offset += 4;
+					value_data_size = 4;
 					break;
 
 				case 4:
-					for( name_size = data_offset;
-					     name_size < data_size;
-					     name_size++ )
+					/* The size of a name value is variable */
+					for( value_data_size = value_data_offset;
+					     value_data_size < data_size;
+					     value_data_size++ )
 					{
-						if( data[ name_size ] == 0 )
+						if( data[ value_data_size ] == 0 )
 						{
-							name_size++;
+							value_data_size++;
 
 							break;
 						}
 					}
-					name_size -= data_offset;
+					value_data_size -= value_data_offset;
+					break;
 
-					inode->name = (uint8_t *) memory_allocate(
-					                           sizeof( uint8_t ) * name_size );
-
-					if( inode->name == NULL )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_MEMORY,
-						 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-						 "%s: unable to create name.",
-						 function );
-
-						goto on_error;
-					}
-					inode->name_size = name_size;
-
-					if( memory_copy(
-					     inode->name,
-					     &( data[ data_offset ] ),
-					     name_size ) == NULL )
-					{
-						libcerror_error_set(
-						 error,
-						 LIBCERROR_ERROR_DOMAIN_MEMORY,
-						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-						 "%s: unable to copy name.",
-						 function );
-
-						goto on_error;
-					}
-					data_offset += name_size;
-
+				case 8:
+					value_data_size = 40;
 					break;
 
 				case 11:
-					data_offset += 16;
+					value_data_size = 16;
 					break;
 
 				default:
@@ -590,15 +563,73 @@ int libfsapfs_inode_read_data(
 
 					return( -1 );
 			}
+			if( value_data_size > ( data_size - value_data_offset ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid value data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "%s: value data:\n",
+				 function );
+				libcnotify_print_data(
+				 &( data[ value_data_offset ] ),
+				 value_data_size,
+				 0 );
+			}
+#endif
+			if( extended_field_type == 4 )
+			{
+				inode->name = (uint8_t *) memory_allocate(
+				                           sizeof( uint8_t ) * value_data_size );
+
+				if( inode->name == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+					 "%s: unable to create name.",
+					 function );
+
+					goto on_error;
+				}
+				inode->name_size = value_data_size;
+
+				if( memory_copy(
+				     inode->name,
+				     &( data[ value_data_offset ] ),
+				     value_data_size ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+					 "%s: unable to copy name.",
+					 function );
+
+					goto on_error;
+				}
+			}
+			value_data_offset += value_data_size;
 		}
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
+	else if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
 		 "\n" );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	return( 1 );
 
 on_error:

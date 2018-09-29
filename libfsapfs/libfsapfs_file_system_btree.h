@@ -28,6 +28,7 @@
 #include "libfsapfs_btree_node.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
@@ -68,6 +69,21 @@ int libfsapfs_file_system_btree_get_root_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t **root_node,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_directory_entries(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t identifier,
+     libcdata_array_t *directory_entries,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_directory_entries_from_node(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t identifier,
+     libcdata_array_t *directory_entries,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_inode(

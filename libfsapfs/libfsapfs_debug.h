@@ -34,8 +34,14 @@ extern "C" {
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
+void libfsapfs_debug_print_directory_entry_flags(
+      uint16_t directory_entry_flags );
+
 void libfsapfs_debug_print_inode_flags(
       uint64_t inode_flags );
+
+const char *libfsapfs_debug_print_inode_extended_field_type(
+             uint8_t extended_field_type );
 
 int libfsapfs_debug_print_posix_time_value(
      const char *function_name,

@@ -1,5 +1,5 @@
 /*
- * Inode functions
+ * Directory record functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_INODE_H )
-#define _LIBFSAPFS_INODE_H
+#if !defined( _LIBFSAPFS_DIRECTORY_RECORD_H )
+#define _LIBFSAPFS_DIRECTORY_RECORD_H
 
 #include <common.h>
 #include <types.h>
@@ -31,37 +31,13 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_inode libfsapfs_inode_t;
+typedef struct libfsapfs_directory_record libfsapfs_directory_record_t;
 
-struct libfsapfs_inode
+struct libfsapfs_directory_record
 {
 	/* Identifier
 	 */
 	uint64_t identifier;
-
-	/* Parent identifier
-	 */
-	uint64_t parent_identifier;
-
-	/* Data stream identifier
-	 */
-	uint64_t data_stream_identifier;
-
-	/* Modification time
-	 */
-	uint64_t modification_time;
-
-	/* Creation time
-	 */
-	uint64_t creation_time;
-
-	/* Change time
-	 */
-	uint64_t change_time;
-
-	/* Access time
-	 */
-	uint64_t access_time;
 
 	/* Name size
 	 */
@@ -72,44 +48,49 @@ struct libfsapfs_inode
 	uint8_t *name;
 };
 
-int libfsapfs_inode_initialize(
-     libfsapfs_inode_t **inode,
-     uint64_t identifier,
+int libfsapfs_directory_record_initialize(
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
-int libfsapfs_inode_free(
-     libfsapfs_inode_t **inode,
+int libfsapfs_directory_record_free(
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
-int libfsapfs_inode_read_value_data(
-     libfsapfs_inode_t *inode,
+int libfsapfs_directory_record_read_key_data(
+     libfsapfs_directory_record_t *directory_record,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libfsapfs_inode_get_identifier(
-     libfsapfs_inode_t *inode,
+int libfsapfs_directory_record_read_value_data(
+     libfsapfs_directory_record_t *directory_record,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
+int libfsapfs_directory_record_get_identifier(
+     libfsapfs_directory_record_t *directory_record,
      uint64_t *identifier,
      libcerror_error_t **error );
 
-int libfsapfs_inode_get_utf8_name_size(
-     libfsapfs_inode_t *inode,
+int libfsapfs_directory_record_get_utf8_name_size(
+     libfsapfs_directory_record_t *directory_record,
      size_t *utf8_string_size,
      libcerror_error_t **error );
 
-int libfsapfs_inode_get_utf8_name(
-     libfsapfs_inode_t *inode,
+int libfsapfs_directory_record_get_utf8_name(
+     libfsapfs_directory_record_t *directory_record,
      uint8_t *utf8_string,
      size_t utf8_string_size,
      libcerror_error_t **error );
 
-int libfsapfs_inode_get_utf16_name_size(
-     libfsapfs_inode_t *inode,
+int libfsapfs_directory_record_get_utf16_name_size(
+     libfsapfs_directory_record_t *directory_record,
      size_t *utf16_string_size,
      libcerror_error_t **error );
 
-int libfsapfs_inode_get_utf16_name(
-     libfsapfs_inode_t *inode,
+int libfsapfs_directory_record_get_utf16_name(
+     libfsapfs_directory_record_t *directory_record,
      uint16_t *utf16_string,
      size_t utf16_string_size,
      libcerror_error_t **error );
@@ -118,5 +99,5 @@ int libfsapfs_inode_get_utf16_name(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_INODE_H ) */
+#endif /* !defined( _LIBFSAPFS_DIRECTORY_RECORD_H ) */
 
