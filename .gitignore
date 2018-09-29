@@ -134,6 +134,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_container_reaper
 /tests/fsapfs_test_container_space_manager
 /tests/fsapfs_test_container_superblock
+/tests/fsapfs_test_data_stream_descriptor
 /tests/fsapfs_test_directory_record
 /tests/fsapfs_test_error
 /tests/fsapfs_test_file_entry

@@ -1735,7 +1735,7 @@ The extended field data contains a 64-bit integer value
 | 7 | INO_EXT_TYPE_FINDER_INFO | Finder information +
 The extended field data contains a 32-bit integer value
 | 8 | INO_EXT_TYPE_DSTREAM | Data stream +
-The extended field data contains a <<data_stream,data stream>>
+The extended field data contains a <<data_stream_descriptor,data stream descriptor>>
 | 9 | INO_EXT_TYPE_RESERVED_9 | [yellow-background]*Unknown (Reserved)*
 | 10 | INO_EXT_TYPE_DIR_STATS_KEY | Direcotry statistics +
 [yellow-background]*Unknown if this contains the object identifier of the directory statisticts or a j_dir_stats_val_t structure*
@@ -1763,9 +1763,9 @@ The extended field data contains a 32-bit integer value
 | 0x80 | XF_RESERVED_80 | [yellow-background]*Unknown*
 |===
 
-=== [[data_stream]]Data stream
+=== [[data_stream_descriptor]]Data stream descriptor
 
-The data stream (j_dstream_t) is 40 bytes of size and constist of:
+The data stream descriptor (j_dstream_t) is 40 bytes of size and constist of:
 
 [cols="1,1,1,5",options="header"]
 |===

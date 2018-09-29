@@ -9,6 +9,7 @@ MSVSCPP_FILES = \
 	fsapfs_test_container_reaper/fsapfs_test_container_reaper.vcproj \
 	fsapfs_test_container_space_manager/fsapfs_test_container_space_manager.vcproj \
 	fsapfs_test_container_superblock/fsapfs_test_container_superblock.vcproj \
+	fsapfs_test_data_stream_descriptor/fsapfs_test_data_stream_descriptor.vcproj \
 	fsapfs_test_directory_record/fsapfs_test_directory_record.vcproj \
 	fsapfs_test_error/fsapfs_test_error.vcproj \
 	fsapfs_test_file_system_btree/fsapfs_test_file_system_btree.vcproj \

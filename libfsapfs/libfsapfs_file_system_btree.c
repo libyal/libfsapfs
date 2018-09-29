@@ -487,7 +487,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_node(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: identifier: %d\t\t: 0x%08" PRIx64 " (data type: 0x%" PRIx64 ")\n",
+			 "%s: B-tree entry: %d identifier: 0x%08" PRIx64 " (data type: 0x%" PRIx64 ")\n",
 			 function,
 			 btree_entry_index,
 			 file_system_identifier,
@@ -793,7 +793,7 @@ int libfsapfs_file_system_btree_get_inode_from_node(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: identifier: %d\t\t: 0x%08" PRIx64 " (data type: 0x%" PRIx64 ")\n",
+			 "%s: B-tree entry: %d identifier: 0x%08" PRIx64 " (data type: 0x%" PRIx64 ")\n",
 			 function,
 			 btree_entry_index,
 			 file_system_identifier,

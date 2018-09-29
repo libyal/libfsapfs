@@ -203,6 +203,36 @@ struct fsapfs_file_system_btree_value_directory_record
 	 */
 };
 
+typedef struct fsapfs_file_system_data_stream_descriptor fsapfs_file_system_data_stream_descriptor_t;
+
+struct fsapfs_file_system_data_stream_descriptor
+{
+	/* The size
+	 * Consists of 8 bytes
+	 */
+	uint8_t size[ 8 ];
+
+	/* The allocated size
+	 * Consists of 8 bytes
+	 */
+	uint8_t allocated_size[ 8 ];
+
+	/* The default encryption identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t default_encryption_identifier[ 8 ];
+
+	/* The total number of bytes written
+	 * Consists of 8 bytes
+	 */
+	uint8_t total_bytes_written[ 8 ];
+
+	/* The total number of bytes read
+	 * Consists of 8 bytes
+	 */
+	uint8_t total_bytes_read[ 8 ];
+};
+
 #if defined( __cplusplus )
 }
 #endif

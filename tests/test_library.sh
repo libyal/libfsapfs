@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-LIBRARY_TESTS="btree_entry btree_footer btree_header btree_node checkpoint_map checkpoint_map_entry container_reaper container_space_manager container_superblock directory_record error file_system_btree inode io_handle key_bag_entry key_bag_header notify object object_map object_map_btree object_map_descriptor";
+LIBRARY_TESTS="btree_entry btree_footer btree_header btree_node checkpoint_map checkpoint_map_entry container_reaper container_space_manager container_superblock data_stream_descriptor directory_record error file_system_btree inode io_handle key_bag_entry key_bag_header notify object object_map object_map_btree object_map_descriptor";
 LIBRARY_TESTS_WITH_INPUT="container support";
 OPTION_SETS="offset password";
 
