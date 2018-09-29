@@ -40,6 +40,9 @@ void libfsapfs_debug_print_directory_entry_flags(
 void libfsapfs_debug_print_inode_flags(
       uint64_t inode_flags );
 
+const char *libfsapfs_debug_print_file_system_data_type(
+             uint8_t file_system_data_type );
+
 const char *libfsapfs_debug_print_inode_extended_field_type(
              uint8_t extended_field_type );
 

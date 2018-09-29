@@ -92,6 +92,11 @@ int libfsapfs_inode_get_identifier(
      uint64_t *identifier,
      libcerror_error_t **error );
 
+int libfsapfs_inode_get_data_stream_identifier(
+     libfsapfs_inode_t *inode,
+     uint64_t *data_stream_identifier,
+     libcerror_error_t **error );
+
 int libfsapfs_inode_get_utf8_name_size(
      libfsapfs_inode_t *inode,
      size_t *utf8_string_size,

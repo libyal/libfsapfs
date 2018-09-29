@@ -476,6 +476,18 @@ int main(
 	 "libfsapfs_inode_read_value_data",
 	 fsapfs_test_inode_read_value_data );
 
+/* TODO add tests for libfsapfs_inode_get_identifier */
+
+/* TODO add tests for libfsapfs_inode_get_data_stream_identifier */
+
+/* TODO add tests for libfsapfs_inode_get_utf8_name_size */
+
+/* TODO add tests for libfsapfs_inode_get_utf8_name */
+
+/* TODO add tests for libfsapfs_inode_get_utf16_name_size */
+
+/* TODO add tests for libfsapfs_inode_get_utf16_name */
+
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );

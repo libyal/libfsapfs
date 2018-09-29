@@ -58,6 +58,10 @@ struct libfsapfs_internal_file_entry
 	 */
 	libcdata_array_t *directory_entries;
 
+	/* The file extents
+	 */
+	libcdata_array_t *file_extents;
+
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
 	 */
@@ -114,6 +118,40 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
      libfsapfs_file_entry_t *file_entry,
      int sub_file_entry_index,
      libfsapfs_file_entry_t **sub_file_entry,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_file_entry_read_buffer(
+         libfsapfs_file_entry_t *file_entry,
+         void *buffer,
+         size_t buffer_size,
+         libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_file_entry_read_buffer_at_offset(
+         libfsapfs_file_entry_t *file_entry,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+off64_t libfsapfs_file_entry_seek_offset(
+         libfsapfs_file_entry_t *file_entry,
+         off64_t offset,
+         int whence,
+         libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_offset(
+     libfsapfs_file_entry_t *file_entry,
+     off64_t *offset,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_size(
+     libfsapfs_file_entry_t *file_entry,
+     size64_t *size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

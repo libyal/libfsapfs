@@ -246,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_file_extent.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_file_system_btree.c"
 				>
 			</File>
@@ -437,6 +441,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_file_entry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_file_extent.h"
 				>
 			</File>
 			<File

@@ -55,6 +55,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_encryption_context.c libfsapfs_encryption_context.h \
 	libfsapfs_extern.h \
 	libfsapfs_file_entry.c libfsapfs_file_entry.h \
+	libfsapfs_file_extent.c libfsapfs_file_extent.h \
 	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
 	libfsapfs_inode.c libfsapfs_inode.h \
 	libfsapfs_io_handle.c libfsapfs_io_handle.h \

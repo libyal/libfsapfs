@@ -179,7 +179,8 @@ The object type (o_type) value consists of a type and flags.
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000000 | OBJECT_TYPE_INVALID | Invalid
+| 0x00000000 | OBJECT_TYPE_INVALID | Invalid +
+For a subtype this value represents not set or not specified
 | 0x00000001 | OBJECT_TYPE_NX_SUPERBLOCK | Container superblock +
 See section: <<container_superblock,Container superblock>>
 | 0x00000002 | OBJECT_TYPE_BTREE | B-Tree (root)
@@ -449,9 +450,9 @@ Contains size, in the number of blocks, of the metadata area
 | 108 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_data_blocks)* +
 Contains size, in the number of blocks, of the ??? B-tree
 | 112 | 8 | | Metadata area block number (nx_xp_desc_base) +
-Contains the block number of the metadata area
+Contains the block number relative to the start of the container of the metadata area
 | 120 | 8 | | [yellow-background]*??? block number (nx_xp_data_base)* +
-Contains the block number of the ??? B-tree
+Contains the block number relative to the start of the container of the ??? B-tree
 | 128 | 4 | | [yellow-background]*Unknown (nx_xp_desc_next)*
 | 132 | 4 | | [yellow-background]*Unknown (nx_xp_data_next)*
 | 136 | 4 | | [yellow-background]*Unknown (nx_xp_desc_index)*
@@ -461,8 +462,7 @@ Contains the block number of the ??? B-tree
 | 152 | 8 | | Space manager object identifier (nx_spaceman_oid) +
 Contains a object identifier that can be resolved in the checkpoint map
 | 160 | 8 | | Object map block number (nx_omap_oid) +
-Contains a block number relative to the start of the "physical" volume +
-See section: <<object_map,Object map>>
+Contains a block number relative to the start of the container of the <<object_map,object map>>
 | 168 | 8 | | Reaper object identifier (nx_reaper_oid) +
 Contains a object identifier that can be resolved in the checkpoint map
 | 176 | 4 | | [yellow-background]*Unknown (nx_test_type)*
@@ -478,11 +478,11 @@ Contains the maximum number of volumes supported by the container
 | 1262 | 8 | | [yellow-background]*Unknown (nx_flags)* +
 See section: <<container_flags,Container flags>>
 | 1270 | 8 | | [yellow-background]*Unknown (nx_efi_jumpstart)* +
-Contains a block number relative to the start of the "physical" volume +
+Contains a block number relative to the start of the container of the <<efi_jumpstart,EFI jumpstart>>
 | 1278 | 16 | | [yellow-background]*Unknown (nx_fusion_uuid)*
 4+| _Unknown (nx_keylocker)_
-| 1294 | 8 | | Container key bag data block number (nx_keybag_base)
-See section: <<key_bag,Key bag>>
+| 1294 | 8 | | Container key bag data block number (nx_keybag_base) +
+Contains a block number relative to the start of the container of the <<key_bag,Key bag>>
 | 1302 | 8 | | Contaner key bag data number of blocks (nx_keybag_blocks)
 4+|
 | 1310 | 4 x 8 = 40 | | [yellow-background]*Unknown (nx_ephemeral_info)*
@@ -600,7 +600,7 @@ Contains number of bytes
 | 16 | 8 | | File system object indentifier (cpm_fs_oid)
 | 24 | 8 | | (Container) object identifier (cpm_oid)
 | 32 | 8 | | Physical address (cpm_paddr) +
-Contains a block number relative to the start of the "physical" volume
+Contains a block number relative to the start of the container
 |===
 
 == [[object_map]]Object map
@@ -679,7 +679,7 @@ The object map B-tree value (omap_val_t) is 16 bytes of size and consists of:
 See section: <<object_map_btree_value_flags,Object map B-tree value flags>>
 | 4 | 4 | | Value object size (ov_size)
 | 8 | 8 | | Value object physical addresss (ov_paddr) +
-Contains a block number relative to the start of the "physical" volume
+Contains a block number relative to the start of the container
 |===
 
 ===== [[object_map_btree_value_flags]]Object map B-tree value flags
@@ -850,7 +850,7 @@ The reaper list entry is 40 bytes of size and consists of:
 | 12 | 4 | | Block size (blksize)
 | 16 | 8 | | Object identifier (oid)
 | 24 | 8 | | Physical address (paddr) +
-Contains a block number relative to the start of the "physical" volume
+Contains a block number relative to the start of the container
 | 32 | 8 | | Object transaction identifier (xid)
 |===
 
@@ -1112,8 +1112,7 @@ See section: <<object_types,Object types>>
 | 124 | 4 | | Snapshot metadata tree object type (apfs_snap_meta_tree_type) +
 See section: <<object_types,Object types>>
 | 132 | 8 | | Object map block number (apfs_omap_oid) +
-Contains a block number relative to the start of the "physical" volume +
-See section: <<object_map,Object map>>
+Contains a block number relative to the start of the container of the <<object_map,object map>>
 | 140 | 8 | | File system root tree object identifier (apfs_root_tree_oid)
 | 148 | 8 | | [yellow-background]*Unknown (apfs_extentref_tree_oid)*
 | 156 | 8 | | [yellow-background]*Unknown (apfs_snap_meta_tree_oid)*
@@ -1529,11 +1528,23 @@ of:
 | 0 | 7 | | Extent data size
 | 7 | 1 | | Flags +
 See section: <<file_extent_flags,File extent flags>>
-| 8 | 8 | | Physical block number (phys_block_num)
-| 16 | 8 | | Encryption identifier (crypto_id)
+| 8 | 8 | | Physical block number (phys_block_num) +
+Contains a block number relative to the start of the container
+| 16 | 8 | | Encryption identifier (crypto_id) +
+Contains the [yellow-background]*unknown* and 0 if not set
 |===
 
 ==== [[file_extent_flags]]File extent flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x01 | | [yellow-background]*Unknown (Is encrypted?)*
+|===
+
+[NOTE]
+According to `[APPLE18]` there are currently no flags defined. `[APPLE18]` also
+refers to `len_and_flags` as `len_and_kind` interchangeably.
 
 === Directory record
 

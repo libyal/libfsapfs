@@ -48,10 +48,10 @@ struct fsapfs_file_system_btree_key_file_extent
 	 */
 	uint8_t file_system_identifier[ 8 ];
 
-	/* Unknown
+	/* The logical address
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown1[ 8 ];
+	uint8_t logical_address[ 8 ];
 };
 
 typedef struct fsapfs_file_system_btree_key_directory_record fsapfs_file_system_btree_key_directory_record_t;
@@ -178,6 +178,26 @@ struct fsapfs_file_system_btree_value_inode
 
 	/* Extended fields
 	 */
+};
+
+typedef struct fsapfs_file_system_btree_value_file_extent fsapfs_file_system_btree_value_file_extent_t;
+
+struct fsapfs_file_system_btree_value_file_extent
+{
+	/* The data size and flags
+	 * Consists of 8 bytes
+	 */
+	uint8_t data_size_and_flags[ 8 ];
+
+	/* The physical block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t physical_block_number[ 8 ];
+
+	/* The encryption identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t encryption_identifier[ 8 ];
 };
 
 typedef struct fsapfs_file_system_btree_value_directory_record fsapfs_file_system_btree_value_directory_record_t;

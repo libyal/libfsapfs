@@ -682,6 +682,43 @@ int libfsapfs_inode_get_identifier(
 	return( 1 );
 }
 
+/* Retrieves the data stream identifier
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_data_stream_identifier(
+     libfsapfs_inode_t *inode,
+     uint64_t *data_stream_identifier,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_data_stream_identifier";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_stream_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid data stream identifier.",
+		 function );
+
+		return( -1 );
+	}
+	*data_stream_identifier = inode->data_stream_identifier;
+
+	return( 1 );
+}
+
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error

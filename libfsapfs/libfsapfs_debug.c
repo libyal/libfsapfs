@@ -190,6 +190,55 @@ void libfsapfs_debug_print_inode_flags(
 	}
 }
 
+/* Prints the file system data type
+ */
+const char *libfsapfs_debug_print_file_system_data_type(
+             uint8_t file_system_data_type )
+{
+	switch( file_system_data_type )
+	{
+		case 0:
+			return( "(APFS_TYPE_ANY)" );
+
+		case 1:
+			return( "(APFS_TYPE_SNAP_METADATA)" );
+
+		case 2:
+			return( "(APFS_TYPE_EXTENT)" );
+
+		case 3:
+			return( "(APFS_TYPE_INODE)" );
+
+		case 4:
+			return( "(APFS_TYPE_XATTR)" );
+
+		case 5:
+			return( "(APFS_TYPE_SIBLING_LINK)" );
+
+		case 6:
+			return( "(APFS_TYPE_DSTREAM_ID)" );
+
+		case 7:
+			return( "(APFS_TYPE_CRYPTO_STATE)" );
+
+		case 8:
+			return( "(APFS_TYPE_FILE_EXTENT)" );
+
+		case 9:
+			return( "(APFS_TYPE_DIR_REC)" );
+
+		case 10:
+			return( "(APFS_TYPE_DIR_STATS)" );
+
+		case 11:
+			return( "(APFS_TYPE_SNAP_NAME)" );
+
+		case 12:
+			return( "(APFS_TYPE_SIBLING_MAP)" );
+	}
+	return( "Unknown" );
+}
+
 /* Prints the inode extended field type
  */
 const char *libfsapfs_debug_print_inode_extended_field_type(
