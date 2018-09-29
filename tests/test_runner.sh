@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20180727
+# Version: 20180929
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -1088,11 +1088,13 @@ run_test_on_input_file()
 
 	if test -n "${TEST_DESCRIPTION}";
 	then
-		if test -z "${OPTION_SET}";
+		OPTIONS=`echo "${OPTIONS[*]}" | tr '\n' ' ' | sed 's/[ ]\$//'`;
+
+		if test -z "${OPTIONS}";
 		then
 			echo -n "${TEST_DESCRIPTION} with input: ${INPUT_FILE}";
 		else
-			echo -n "${TEST_DESCRIPTION} with option: ${OPTION_SET} and input: ${INPUT_FILE}";
+			echo -n "${TEST_DESCRIPTION} with options: '${OPTIONS}' and input: ${INPUT_FILE}";
 		fi
 
 		if test ${RESULT} -ne ${EXIT_SUCCESS};

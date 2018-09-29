@@ -44,8 +44,10 @@ check_PROGRAMS = \
 	fsapfs_test_container_reaper \
 	fsapfs_test_container_space_manager \
 	fsapfs_test_container_superblock \
+	fsapfs_test_directory_record \
 	fsapfs_test_error \
 	fsapfs_test_file_system_btree \
+	fsapfs_test_inode \
 	fsapfs_test_io_handle \
 	fsapfs_test_key_bag_entry \
 	fsapfs_test_key_bag_header \
@@ -235,6 +237,18 @@ fsapfs_test_container_superblock_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
+fsapfs_test_directory_record_SOURCES = \
+	fsapfs_test_directory_record.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_directory_record_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
 fsapfs_test_error_SOURCES = \
 	fsapfs_test_error.c \
 	fsapfs_test_libfsapfs.h \
@@ -263,6 +277,18 @@ fsapfs_test_file_system_btree_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_inode_SOURCES = \
+	fsapfs_test_inode.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_inode_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

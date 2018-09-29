@@ -1251,7 +1251,7 @@ int main(
 	while( ( option = fsapfs_test_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "o:" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "o:p:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -1267,6 +1267,9 @@ int main(
 			case (system_integer_t) 'o':
 				option_offset = optarg;
 
+				break;
+
+			case (system_integer_t) 'p':
 				break;
 		}
 	}

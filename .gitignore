@@ -134,9 +134,11 @@ stamp-h[1-9]
 /tests/fsapfs_test_container_reaper
 /tests/fsapfs_test_container_space_manager
 /tests/fsapfs_test_container_superblock
+/tests/fsapfs_test_directory_record
 /tests/fsapfs_test_error
 /tests/fsapfs_test_file_entry
 /tests/fsapfs_test_file_system_btree
+/tests/fsapfs_test_inode
 /tests/fsapfs_test_io_handle
 /tests/fsapfs_test_key_bag_entry
 /tests/fsapfs_test_key_bag_header

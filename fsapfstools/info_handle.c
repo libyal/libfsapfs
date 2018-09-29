@@ -1308,7 +1308,7 @@ int info_handle_container_fprint(
 
 	fprintf(
 	 info_handle->notify_stream,
-	 "\nContainer information:\n" );
+	 "Container information:\n" );
 
 	if( libfsapfs_container_get_identifier(
 	     info_handle->input_container,
