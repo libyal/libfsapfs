@@ -30,6 +30,7 @@
 #include "fsapfstools_libbfio.h"
 #include "fsapfstools_libcerror.h"
 #include "fsapfstools_libclocale.h"
+#include "fsapfstools_libcnotify.h"
 #include "fsapfstools_libfdatetime.h"
 #include "fsapfstools_libfguid.h"
 #include "fsapfstools_libfsapfs.h"
@@ -731,7 +732,7 @@ int info_handle_posix_time_value_fprint(
 		}
 		fprintf(
 		 info_handle->notify_stream,
-		 "%s: %" PRIs_SYSTEM " UTC\n",
+		 "%s: %" PRIs_SYSTEM "Z\n",
 		 value_name,
 		 date_time_string );
 
@@ -881,6 +882,8 @@ int info_handle_file_entry_value_fprint(
      libfsapfs_file_entry_t *file_entry,
      libcerror_error_t **error )
 {
+	char file_mode[ 11 ]                = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
+
 	system_character_t *file_entry_name = NULL;
 	static char *function               = "info_handle_file_entry_value_fprint";
 	size_t file_entry_name_size         = 0;
@@ -1141,12 +1144,76 @@ int info_handle_file_entry_value_fprint(
 
 		goto on_error;
 	}
+	if( ( value_16bit & 0x0001 ) != 0 )
+	{
+		file_mode[ 9 ] = 'x';
+	}
+	if( ( value_16bit & 0x0002 ) != 0 )
+	{
+		file_mode[ 8 ] = 'w';
+	}
+	if( ( value_16bit & 0x0004 ) != 0 )
+	{
+		file_mode[ 7 ] = 'r';
+	}
+	if( ( value_16bit & 0x0008 ) != 0 )
+	{
+		file_mode[ 6 ] = 'x';
+	}
+	if( ( value_16bit & 0x0010 ) != 0 )
+	{
+		file_mode[ 5 ] = 'w';
+	}
+	if( ( value_16bit & 0x0020 ) != 0 )
+	{
+		file_mode[ 4 ] = 'r';
+	}
+	if( ( value_16bit & 0x0040 ) != 0 )
+	{
+		file_mode[ 3 ] = 'x';
+	}
+	if( ( value_16bit & 0x0080 ) != 0 )
+	{
+		file_mode[ 2 ] = 'w';
+	}
+	if( ( value_16bit & 0x0100 ) != 0 )
+	{
+		file_mode[ 1 ] = 'r';
+	}
+	switch( value_16bit & 0xf000 )
+	{
+		case 0x1000:
+			file_mode[ 0 ] = 'p';
+			break;
+
+		case 0x2000:
+			file_mode[ 0 ] = 'c';
+			break;
+
+		case 0x4000:
+			file_mode[ 0 ] = 'd';
+			break;
+
+		case 0x6000:
+			file_mode[ 0 ] = 'b';
+			break;
+
+		case 0xa000:
+			file_mode[ 0 ] = 'l';
+			break;
+
+		case 0xc000:
+			file_mode[ 0 ] = 's';
+			break;
+
+		default:
+			break;
+	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tFile mode\t\t: %" PRIo16 "\n",
+	 "\tFile mode\t\t: %s (%07" PRIo16 ")\n",
+	 file_mode,
 	 value_16bit );
-
-/* TODO print semantic representation of file mode */
 
 	return( 1 );
 
@@ -1635,7 +1702,6 @@ int info_handle_inode_fprint(
 {
 	libfsapfs_volume_t *volume = NULL;
 	static char *function      = "info_handle_inode_fprint";
-	int result                 = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1829,12 +1895,8 @@ int info_handle_file_entry_fprint(
 {
 	libfsapfs_file_entry_t *file_entry = NULL;
 	libfsapfs_volume_t *volume         = NULL;
-	uint8_t *data                      = NULL;
 	static char *function              = "info_handle_file_entry_fprint";
-	size_t data_size                   = 0;
 	size_t path_length                 = 0;
-	uint64_t value_64bit               = 0;
-	uint32_t value_32bit               = 0;
 	int result                         = 0;
 
 	if( info_handle == NULL )

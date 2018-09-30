@@ -1399,15 +1399,15 @@ The inode file content has some space allocated outside of the preferred storage
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0170000 | S_IFMT | File type bitmask
-| 0010000 | S_IFIFO | Named pipe
-| 0020000 | S_IFCHR | Character-special file (Character device)
-| 0040000 | S_IFDIR | Directory
-| 0060000 | S_IFBLK | Block-special file (Block device)
-| 0100000 | S_IFREG | Regular file
-| 0120000 | S_IFLNK | Symbolic link
-| 0140000 | S_IFSOCK | Socket
-| 0160000 | S_IFWHT | Whiteout +
+| 0xf000 (0170000) | S_IFMT | File type bitmask
+| 0x1000 (0010000) | S_IFIFO | Named pipe
+| 0x2000 (0020000) | S_IFCHR | Character-special file (Character device)
+| 0x4000 (0040000) | S_IFDIR | Directory
+| 0x6000 (0060000) | S_IFBLK | Block-special file (Block device)
+| 0x8000 (0100000) | S_IFREG | Regular file
+| 0xa000 (0120000) | S_IFLNK | Symbolic link
+| 0xc000 (0140000) | S_IFSOCK | Socket
+| 0xe000 (0160000) | S_IFWHT | Whiteout +
 A whiteout is a file entry that covers up all entries of a particular name from lower branches
 |===
 
