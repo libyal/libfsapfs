@@ -37,8 +37,7 @@
 
 uint8_t fsapfs_test_btree_header_data1[ 24 ] = {
 	0x07, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x01, 0x20, 0x00, 0xa0, 0x0d,
-	0x00, 0x00, 0x10, 0x00, 0x10, 0x00, 0x10, 0x00
-};
+	0x00, 0x00, 0x10, 0x00, 0x10, 0x00, 0x10, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
@@ -118,6 +117,8 @@ int fsapfs_test_btree_header_initialize(
 	          &btree_header,
 	          &error );
 
+	btree_header = NULL;
+
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -129,8 +130,6 @@ int fsapfs_test_btree_header_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	btree_header = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 

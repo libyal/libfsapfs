@@ -37,13 +37,11 @@
 
 uint8_t fsapfs_test_directory_record_key_data1[ 24 ] = {
 	0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x0b, 0x14, 0xbe, 0x9c, 0x2e, 0x66, 0x73, 0x65,
-	0x76, 0x65, 0x6e, 0x74, 0x73, 0x64, 0x00
-};
+	0x76, 0x65, 0x6e, 0x74, 0x73, 0x64, 0x00 };
 
 uint8_t fsapfs_test_directory_record_value_data1[ 18 ] = {
 	0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x43, 0xe3, 0x85, 0x4a, 0x54, 0x55, 0x52, 0x15,
-	0x04, 0x00
-};
+	0x04, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
@@ -53,14 +51,14 @@ uint8_t fsapfs_test_directory_record_value_data1[ 18 ] = {
 int fsapfs_test_directory_record_initialize(
      void )
 {
-	libcerror_error_t *error               = NULL;
+	libcerror_error_t *error                       = NULL;
 	libfsapfs_directory_record_t *directory_record = NULL;
-	int result                             = 0;
+	int result                                     = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests        = 1;
-	int number_of_memset_fail_tests        = 1;
-	int test_number                        = 0;
+	int number_of_malloc_fail_tests                = 1;
+	int number_of_memset_fail_tests                = 1;
+	int test_number                                = 0;
 #endif
 
 	/* Test regular cases
@@ -123,6 +121,8 @@ int fsapfs_test_directory_record_initialize(
 	          &directory_record,
 	          &error );
 
+	directory_record = NULL;
+
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -134,8 +134,6 @@ int fsapfs_test_directory_record_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	directory_record = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 

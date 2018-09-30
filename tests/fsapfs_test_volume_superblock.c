@@ -292,8 +292,7 @@ uint8_t fsapfs_test_volume_superblock_data1[ 4096 ] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
@@ -303,14 +302,14 @@ uint8_t fsapfs_test_volume_superblock_data1[ 4096 ] = {
 int fsapfs_test_volume_superblock_initialize(
      void )
 {
-	libcerror_error_t *error                               = NULL;
+	libcerror_error_t *error                         = NULL;
 	libfsapfs_volume_superblock_t *volume_superblock = NULL;
-	int result                                             = 0;
+	int result                                       = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                        = 1;
-	int number_of_memset_fail_tests                        = 1;
-	int test_number                                        = 0;
+	int number_of_malloc_fail_tests                  = 1;
+	int number_of_memset_fail_tests                  = 1;
+	int test_number                                  = 0;
 #endif
 
 	/* Test regular cases
@@ -373,6 +372,8 @@ int fsapfs_test_volume_superblock_initialize(
 	          &volume_superblock,
 	          &error );
 
+	volume_superblock = NULL;
+
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -384,8 +385,6 @@ int fsapfs_test_volume_superblock_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	volume_superblock = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -536,10 +535,10 @@ on_error:
 int fsapfs_test_volume_superblock_read_file_io_handle(
      void )
 {
-	libbfio_handle_t *file_io_handle                       = NULL;
-	libcerror_error_t *error                               = NULL;
+	libbfio_handle_t *file_io_handle                 = NULL;
+	libcerror_error_t *error                         = NULL;
 	libfsapfs_volume_superblock_t *volume_superblock = NULL;
-	int result                                             = 0;
+	int result                                       = 0;
 
 	/* Initialize test
 	 */
@@ -771,9 +770,9 @@ on_error:
 int fsapfs_test_volume_superblock_read_data(
      void )
 {
-	libcerror_error_t *error                               = NULL;
+	libcerror_error_t *error                         = NULL;
 	libfsapfs_volume_superblock_t *volume_superblock = NULL;
-	int result                                             = 0;
+	int result                                       = 0;
 
 	/* Initialize test
 	 */

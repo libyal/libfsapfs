@@ -429,8 +429,6 @@ int main(
 	 "libfsapfs_io_handle_clear",
 	 fsapfs_test_io_handle_clear );
 
-	/* TODO: add tests for libfsapfs_io_handle_read_volume_header */
-
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );

@@ -36,12 +36,10 @@
 #include "../libfsapfs/libfsapfs_object_map_descriptor.h"
 
 uint8_t fsapfs_test_object_map_descriptor_btree_key_data1[ 16 ] = {
-	0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+	0x02, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 uint8_t fsapfs_test_object_map_descriptor_btree_value_data1[ 16 ] = {
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x6e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
@@ -51,14 +49,14 @@ uint8_t fsapfs_test_object_map_descriptor_btree_value_data1[ 16 ] = {
 int fsapfs_test_object_map_descriptor_initialize(
      void )
 {
-	libcerror_error_t *error                                             = NULL;
+	libcerror_error_t *error                                 = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	int result                                                           = 0;
+	int result                                               = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                                      = 1;
-	int number_of_memset_fail_tests                                      = 1;
-	int test_number                                                      = 0;
+	int number_of_malloc_fail_tests                          = 1;
+	int number_of_memset_fail_tests                          = 1;
+	int test_number                                          = 0;
 #endif
 
 	/* Test regular cases
@@ -121,6 +119,8 @@ int fsapfs_test_object_map_descriptor_initialize(
 	          &object_map_descriptor,
 	          &error );
 
+	object_map_descriptor = NULL;
+
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -132,8 +132,6 @@ int fsapfs_test_object_map_descriptor_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	object_map_descriptor = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -284,9 +282,9 @@ on_error:
 int fsapfs_test_object_map_descriptor_read_btree_key_data(
      void )
 {
-	libcerror_error_t *error                                             = NULL;
+	libcerror_error_t *error                                 = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	int result                                                           = 0;
+	int result                                               = 0;
 
 	/* Initialize test
 	 */
@@ -440,9 +438,9 @@ on_error:
 int fsapfs_test_object_map_descriptor_read_btree_value_data(
      void )
 {
-	libcerror_error_t *error                                             = NULL;
+	libcerror_error_t *error                                 = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	int result                                                           = 0;
+	int result                                               = 0;
 
 	/* Initialize test
 	 */

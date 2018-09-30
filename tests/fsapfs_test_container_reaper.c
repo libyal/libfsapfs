@@ -1,6 +1,7 @@
 /*
  * Library container_reaper type test program
- * * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
+ *
+ * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -291,8 +292,7 @@ uint8_t fsapfs_test_container_reaper_data1[ 4096 ] = {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
@@ -302,14 +302,14 @@ uint8_t fsapfs_test_container_reaper_data1[ 4096 ] = {
 int fsapfs_test_container_reaper_initialize(
      void )
 {
-	libcerror_error_t *error                                   = NULL;
+	libcerror_error_t *error                       = NULL;
 	libfsapfs_container_reaper_t *container_reaper = NULL;
-	int result                                                 = 0;
+	int result                                     = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                            = 1;
-	int number_of_memset_fail_tests                            = 1;
-	int test_number                                            = 0;
+	int number_of_malloc_fail_tests                = 1;
+	int number_of_memset_fail_tests                = 1;
+	int test_number                                = 0;
 #endif
 
 	/* Test regular cases
@@ -372,6 +372,8 @@ int fsapfs_test_container_reaper_initialize(
 	          &container_reaper,
 	          &error );
 
+	container_reaper = NULL;
+
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -383,8 +385,6 @@ int fsapfs_test_container_reaper_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	container_reaper = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -535,10 +535,10 @@ on_error:
 int fsapfs_test_container_reaper_read_file_io_handle(
      void )
 {
-	libbfio_handle_t *file_io_handle                           = NULL;
-	libcerror_error_t *error                                   = NULL;
+	libbfio_handle_t *file_io_handle               = NULL;
+	libcerror_error_t *error                       = NULL;
 	libfsapfs_container_reaper_t *container_reaper = NULL;
-	int result                                                 = 0;
+	int result                                     = 0;
 
 	/* Initialize test
 	 */
@@ -770,9 +770,9 @@ on_error:
 int fsapfs_test_container_reaper_read_data(
      void )
 {
-	libcerror_error_t *error                                   = NULL;
+	libcerror_error_t *error                       = NULL;
 	libfsapfs_container_reaper_t *container_reaper = NULL;
-	int result                                                 = 0;
+	int result                                     = 0;
 
 	/* Initialize test
 	 */

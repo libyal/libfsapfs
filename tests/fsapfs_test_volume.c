@@ -49,15 +49,35 @@
 #define FSAPFS_TEST_VOLUME_VERBOSE
  */
 
+#if !defined( LIBFSAPFS_HAVE_BFIO )
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_volume_signature_file_io_handle(
+     libbfio_handle_t *file_io_handle,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_open_file_io_handle(
+     libfsapfs_volume_t *volume,
+     libbfio_handle_t *file_io_handle,
+     int access_flags,
+     libfsapfs_error_t **error );
+
+#endif /* !defined( LIBFSAPFS_HAVE_BFIO ) */
+
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 /* Creates and opens a source volume
  * Returns 1 if successful or -1 on error
  */
 int fsapfs_test_volume_open_source(
      libfsapfs_volume_t **volume,
-     const system_character_t *source,
+     libbfio_handle_t *file_io_handle,
+     const system_character_t *password,
      libcerror_error_t **error )
 {
 	static char *function = "fsapfs_test_volume_open_source";
+	size_t string_length  = 0;
 	int result            = 0;
 
 	if( volume == NULL )
@@ -71,13 +91,13 @@ int fsapfs_test_volume_open_source(
 
 		return( -1 );
 	}
-	if( source == NULL )
+	if( file_io_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid source.",
+		 "%s: invalid file IO handle.",
 		 function );
 
 		return( -1 );
@@ -86,7 +106,7 @@ int fsapfs_test_volume_open_source(
 	     volume,
 	     NULL,
 	     NULL,
-	     0,
+	     4194304,
 	     4096,
 	     error ) != 1 )
 	{
@@ -99,19 +119,42 @@ int fsapfs_test_volume_open_source(
 
 		goto on_error;
 	}
+	if( password != NULL )
+	{
+		string_length = system_string_length(
+		                 password );
+
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-	result = libfsapfs_volume_open_wide(
-	          *volume,
-	          source,
-	          LIBFSAPFS_OPEN_READ,
-	          error );
+		result = libfsapfs_volume_set_utf16_password(
+		          *volume,
+		          (uint16_t *) password,
+		          string_length,
+		          error );
 #else
-	result = libfsapfs_volume_open(
+		result = libfsapfs_volume_set_utf8_password(
+		          *volume,
+		          (uint8_t *) password,
+		          string_length,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set password.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	result = libfsapfs_volume_open_file_io_handle(
 	          *volume,
-	          source,
+	          file_io_handle,
 	          LIBFSAPFS_OPEN_READ,
 	          error );
-#endif
+
 	if( result != 1 )
 	{
 		libcerror_error_set(
@@ -134,6 +177,8 @@ on_error:
 	}
 	return( -1 );
 }
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 /* Closes and frees a source volume
  * Returns 1 if successful or -1 on error
@@ -185,6 +230,8 @@ int fsapfs_test_volume_close_source(
 	return( result );
 }
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 /* Tests the libfsapfs_volume_initialize function
  * Returns 1 if successful or 0 if not
  */
@@ -203,11 +250,14 @@ int fsapfs_test_volume_initialize(
 
 	/* Test regular cases
 	 */
+#ifdef TODO
+/* TODO create file_io_handle of container */
+
 	result = libfsapfs_volume_initialize(
 	          &volume,
 	          NULL,
 	          NULL,
-	          0,
+	          4194304,
 	          4096,
 	          &error );
 
@@ -241,13 +291,15 @@ int fsapfs_test_volume_initialize(
 	 "error",
 	 error );
 
+#endif /* TODO */
+
 	/* Test error cases
 	 */
 	result = libfsapfs_volume_initialize(
 	          NULL,
 	          NULL,
 	          NULL,
-	          0,
+	          4194304,
 	          4096,
 	          &error );
 
@@ -269,6 +321,48 @@ int fsapfs_test_volume_initialize(
 	          &volume,
 	          NULL,
 	          NULL,
+	          4194304,
+	          4096,
+	          &error );
+
+	volume = NULL;
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_volume_initialize(
+	          &volume,
+	          NULL,
+	          NULL,
+	          4194304,
+	          4096,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_volume_initialize(
+	          &volume,
+	          NULL,
+	          NULL,
 	          0,
 	          4096,
 	          &error );
@@ -285,7 +379,28 @@ int fsapfs_test_volume_initialize(
 	libcerror_error_free(
 	 &error );
 
-	volume = NULL;
+	result = libfsapfs_volume_initialize(
+	          &volume,
+	          NULL,
+	          NULL,
+	          4194304,
+	          0,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+#ifdef TODO
+/* TODO create file_io_handle of container */
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -301,7 +416,7 @@ int fsapfs_test_volume_initialize(
 		          &volume,
 		          NULL,
 		          NULL,
-		          0,
+		          4194304,
 		          4096,
 		          &error );
 
@@ -347,7 +462,7 @@ int fsapfs_test_volume_initialize(
 		          &volume,
 		          NULL,
 		          NULL,
-		          0,
+		          4194304,
 		          4096,
 		          &error );
 
@@ -383,6 +498,8 @@ int fsapfs_test_volume_initialize(
 	}
 #endif /* defined( HAVE_FSAPFS_TEST_MEMORY ) */
 
+#endif /* TODO */
+
 	return( 1 );
 
 on_error:
@@ -399,6 +516,8 @@ on_error:
 	}
 	return( 0 );
 }
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 /* Tests the libfsapfs_volume_free function
  * Returns 1 if successful or 0 if not
@@ -438,6 +557,8 @@ on_error:
 	return( 0 );
 }
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 /* Tests the libfsapfs_volume_open function
  * Returns 1 if successful or 0 if not
  */
@@ -471,7 +592,7 @@ int fsapfs_test_volume_open(
 	          &volume,
 	          NULL,
 	          NULL,
-	          0,
+	          4194304,
 	          4096,
 	          &error );
 
@@ -596,7 +717,7 @@ int fsapfs_test_volume_open_wide(
 	          &volume,
 	          NULL,
 	          NULL,
-	          0,
+	          4194304,
 	          4096,
 	          &error );
 
@@ -742,7 +863,7 @@ int fsapfs_test_volume_open_close(
 	          &volume,
 	          NULL,
 	          NULL,
-	          0,
+	          4194304,
 	          4096,
 	          &error );
 
@@ -924,6 +1045,8 @@ on_error:
 	return( 0 );
 }
 
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
+
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
@@ -936,16 +1059,21 @@ int main(
      char * const argv[] )
 #endif
 {
-	libcerror_error_t *error   = NULL;
-	libfsapfs_volume_t *volume = NULL;
-	system_character_t *source = NULL;
-	system_integer_t option    = 0;
-	int result                 = 0;
+	libbfio_handle_t *file_io_handle    = NULL;
+	libcerror_error_t *error            = NULL;
+	libfsapfs_volume_t *volume          = NULL;
+	system_character_t *option_offset   = NULL;
+	system_character_t *option_password = NULL;
+	system_character_t *source          = NULL;
+	system_integer_t option             = 0;
+	size_t string_length                = 0;
+	off64_t volume_offset               = 0;
+	int result                          = 0;
 
 	while( ( option = fsapfs_test_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "o:p:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -957,11 +1085,41 @@ int main(
 				 argv[ optind - 1 ] );
 
 				return( EXIT_FAILURE );
+
+			case (system_integer_t) 'o':
+				option_offset = optarg;
+
+				break;
+
+			case (system_integer_t) 'p':
+				option_password = optarg;
+
+				break;
 		}
 	}
 	if( optind < argc )
 	{
 		source = argv[ optind ];
+	}
+	if( option_offset != NULL )
+	{
+		string_length = system_string_length(
+		                 option_offset );
+
+		result = fsapfs_test_system_string_copy_from_64_bit_in_decimal(
+		          option_offset,
+		          string_length + 1,
+		          (uint64_t *) &volume_offset,
+		          &error );
+
+		FSAPFS_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        FSAPFS_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
 	}
 #if defined( HAVE_DEBUG_OUTPUT ) && defined( FSAPFS_TEST_VOLUME_VERBOSE )
 	libfsapfs_notify_set_verbose(
@@ -971,16 +1129,95 @@ int main(
 	 NULL );
 #endif
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_volume_initialize",
 	 fsapfs_test_volume_initialize );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_volume_free",
 	 fsapfs_test_volume_free );
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 #if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
 	if( source != NULL )
+	{
+		result = libbfio_file_range_initialize(
+		          &file_io_handle,
+		          &error );
+
+		FSAPFS_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	         "file_io_handle",
+	         file_io_handle );
+
+	        FSAPFS_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
+
+		string_length = system_string_length(
+		                 source );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libbfio_file_range_set_name_wide(
+		          file_io_handle,
+		          source,
+		          string_length,
+		          &error );
+#else
+		result = libbfio_file_range_set_name(
+		          file_io_handle,
+		          source,
+		          string_length,
+		          &error );
+#endif
+		FSAPFS_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        FSAPFS_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
+
+		result = libbfio_file_range_set(
+		          file_io_handle,
+		          volume_offset,
+		          0,
+		          &error );
+
+		FSAPFS_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+	        FSAPFS_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
+
+		result = libfsapfs_check_volume_signature_file_io_handle(
+		          file_io_handle,
+		          &error );
+
+		FSAPFS_TEST_ASSERT_NOT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		FSAPFS_TEST_ASSERT_IS_NULL(
+		 "error",
+		 error );
+	}
+	if( ( result != 0 )
+	 && ( volume_offset == 0 ) )
 	{
 		FSAPFS_TEST_RUN_WITH_ARGS(
 		 "libfsapfs_volume_open",
@@ -1015,7 +1252,8 @@ int main(
 		 */
 		result = fsapfs_test_volume_open_source(
 		          &volume,
-		          source,
+		          file_io_handle,
+		          option_password,
 		          &error );
 
 		FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1070,8 +1308,27 @@ int main(
 	        FSAPFS_TEST_ASSERT_IS_NULL(
 	         "error",
 	         error );
+
+		result = libbfio_handle_free(
+		          &file_io_handle,
+		          &error );
+
+		FSAPFS_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 1 );
+
+		FSAPFS_TEST_ASSERT_IS_NULL(
+	         "file_io_handle",
+	         file_io_handle );
+
+	        FSAPFS_TEST_ASSERT_IS_NULL(
+	         "error",
+	         error );
 	}
 #endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
@@ -1085,6 +1342,12 @@ on_error:
 	{
 		fsapfs_test_volume_close_source(
 		 &volume,
+		 NULL );
+	}
+	if( file_io_handle != NULL )
+	{
+		libbfio_handle_free(
+		 &file_io_handle,
 		 NULL );
 	}
 	return( EXIT_FAILURE );

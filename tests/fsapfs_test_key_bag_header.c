@@ -36,8 +36,7 @@
 #include "../libfsapfs/libfsapfs_key_bag_header.h"
 
 uint8_t fsapfs_test_key_bag_header_data1[ 16 ] = {
-	0x02, 0x00, 0x02, 0x00, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
-};
+	0x02, 0x00, 0x02, 0x00, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
@@ -47,14 +46,14 @@ uint8_t fsapfs_test_key_bag_header_data1[ 16 ] = {
 int fsapfs_test_key_bag_header_initialize(
      void )
 {
-	libcerror_error_t *error                 = NULL;
+	libcerror_error_t *error                   = NULL;
 	libfsapfs_key_bag_header_t *key_bag_header = NULL;
-	int result                               = 0;
+	int result                                 = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests          = 1;
-	int number_of_memset_fail_tests          = 1;
-	int test_number                          = 0;
+	int number_of_malloc_fail_tests            = 1;
+	int number_of_memset_fail_tests            = 1;
+	int test_number                            = 0;
 #endif
 
 	/* Test regular cases
@@ -117,6 +116,8 @@ int fsapfs_test_key_bag_header_initialize(
 	          &key_bag_header,
 	          &error );
 
+	key_bag_header = NULL;
+
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -128,8 +129,6 @@ int fsapfs_test_key_bag_header_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	key_bag_header = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 
@@ -280,9 +279,9 @@ on_error:
 int fsapfs_test_key_bag_header_read_data(
      void )
 {
-	libcerror_error_t *error                 = NULL;
+	libcerror_error_t *error                   = NULL;
 	libfsapfs_key_bag_header_t *key_bag_header = NULL;
-	int result                               = 0;
+	int result                                 = 0;
 
 	/* Initialize test
 	 */

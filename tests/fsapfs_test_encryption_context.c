@@ -1,5 +1,5 @@
 /*
- * Library file_entry type test program
+ * Library encryption_context type test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,16 +33,14 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_file_entry.h"
+#include "../libfsapfs/libfsapfs_encryption_context.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
-
-/* Tests the libfsapfs_file_entry_free function
+/* Tests the libfsapfs_encryption_context_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_file_entry_free(
+int fsapfs_test_encryption_context_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -50,7 +48,7 @@ int fsapfs_test_file_entry_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_file_entry_free(
+	result = libfsapfs_encryption_context_free(
 	          NULL,
 	          &error );
 
@@ -77,6 +75,8 @@ on_error:
 	return( 0 );
 }
 
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
+
 /* The main program
  */
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
@@ -94,53 +94,15 @@ int main(
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-	/* TODO: add tests for libfsapfs_file_entry_initialize */
+	FSAPFS_TEST_RUN(
+	 "libfsapfs_encryption_context_free",
+	 fsapfs_test_encryption_context_free );
+
+	/* TODO: add tests for libfsapfs_encryption_context_set_keys */
+
+	/* TODO: add tests for libfsapfs_encryption_context_crypt */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
-
-	FSAPFS_TEST_RUN(
-	 "libfsapfs_file_entry_free",
-	 fsapfs_test_file_entry_free );
-
-	/* TODO: add tests for libfsapfs_file_entry_get_creation_time */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_modification_time */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_access_time */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_inode_change_time */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_owner_identifier */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_group_identifier */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_file_mode */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_utf8_name_size */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_utf8_name */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_utf16_name_size */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_utf16_name */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_number_of_sub_file_entries */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_sub_file_entry_by_index */
-
-	/* TODO: add tests for libfsapfs_file_entry_read_buffer */
-
-	/* TODO: add tests for libfsapfs_file_entry_read_buffer_at_offset */
-
-	/* TODO: add tests for libfsapfs_file_entry_seek_offset */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_offset */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_size */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_number_of_extents */
-
-	/* TODO: add tests for libfsapfs_file_entry_get_extent_by_index */
 
 	return( EXIT_SUCCESS );
 

@@ -674,7 +674,7 @@ int fsapfs_test_container_open_file_io_handle(
 {
 	libbfio_handle_t *file_io_handle = NULL;
 	libcerror_error_t *error         = NULL;
-	libfsapfs_container_t *container       = NULL;
+	libfsapfs_container_t *container = NULL;
 	size_t string_length             = 0;
 	int result                       = 0;
 

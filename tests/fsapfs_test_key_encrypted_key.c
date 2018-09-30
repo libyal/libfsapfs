@@ -1,5 +1,5 @@
 /*
- * Library btree_entry type test program
+ * Library key_encrypted_key type test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,30 +33,30 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_btree_entry.h"
+#include "../libfsapfs/libfsapfs_key_encrypted_key.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_btree_entry_initialize function
+/* Tests the libfsapfs_key_encrypted_key_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_entry_initialize(
+int fsapfs_test_key_encrypted_key_initialize(
      void )
 {
-	libcerror_error_t *error             = NULL;
-	libfsapfs_btree_entry_t *btree_entry = NULL;
-	int result                           = 0;
+	libcerror_error_t *error                         = NULL;
+	libfsapfs_key_encrypted_key_t *key_encrypted_key = NULL;
+	int result                                       = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests      = 1;
-	int number_of_memset_fail_tests      = 1;
-	int test_number                      = 0;
+	int number_of_malloc_fail_tests                  = 1;
+	int number_of_memset_fail_tests                  = 1;
+	int test_number                                  = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_btree_entry_initialize(
-	          &btree_entry,
+	result = libfsapfs_key_encrypted_key_initialize(
+	          &key_encrypted_key,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -65,15 +65,15 @@ int fsapfs_test_btree_entry_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "btree_entry",
-	 btree_entry );
+	 "key_encrypted_key",
+	 key_encrypted_key );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsapfs_btree_entry_free(
-	          &btree_entry,
+	result = libfsapfs_key_encrypted_key_free(
+	          &key_encrypted_key,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -82,8 +82,8 @@ int fsapfs_test_btree_entry_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "btree_entry",
-	 btree_entry );
+	 "key_encrypted_key",
+	 key_encrypted_key );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -91,7 +91,7 @@ int fsapfs_test_btree_entry_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_entry_initialize(
+	result = libfsapfs_key_encrypted_key_initialize(
 	          NULL,
 	          &error );
 
@@ -107,13 +107,13 @@ int fsapfs_test_btree_entry_initialize(
 	libcerror_error_free(
 	 &error );
 
-	btree_entry = (libfsapfs_btree_entry_t *) 0x12345678UL;
+	key_encrypted_key = (libfsapfs_key_encrypted_key_t *) 0x12345678UL;
 
-	result = libfsapfs_btree_entry_initialize(
-	          &btree_entry,
+	result = libfsapfs_key_encrypted_key_initialize(
+	          &key_encrypted_key,
 	          &error );
 
-	btree_entry = NULL;
+	key_encrypted_key = NULL;
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -133,22 +133,22 @@ int fsapfs_test_btree_entry_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_btree_entry_initialize with malloc failing
+		/* Test libfsapfs_key_encrypted_key_initialize with malloc failing
 		 */
 		fsapfs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsapfs_btree_entry_initialize(
-		          &btree_entry,
+		result = libfsapfs_key_encrypted_key_initialize(
+		          &key_encrypted_key,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsapfs_test_malloc_attempts_before_fail = -1;
 
-			if( btree_entry != NULL )
+			if( key_encrypted_key != NULL )
 			{
-				libfsapfs_btree_entry_free(
-				 &btree_entry,
+				libfsapfs_key_encrypted_key_free(
+				 &key_encrypted_key,
 				 NULL );
 			}
 		}
@@ -160,8 +160,8 @@ int fsapfs_test_btree_entry_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "btree_entry",
-			 btree_entry );
+			 "key_encrypted_key",
+			 key_encrypted_key );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -175,22 +175,22 @@ int fsapfs_test_btree_entry_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_btree_entry_initialize with memset failing
+		/* Test libfsapfs_key_encrypted_key_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_btree_entry_initialize(
-		          &btree_entry,
+		result = libfsapfs_key_encrypted_key_initialize(
+		          &key_encrypted_key,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
 		{
 			fsapfs_test_memset_attempts_before_fail = -1;
 
-			if( btree_entry != NULL )
+			if( key_encrypted_key != NULL )
 			{
-				libfsapfs_btree_entry_free(
-				 &btree_entry,
+				libfsapfs_key_encrypted_key_free(
+				 &key_encrypted_key,
 				 NULL );
 			}
 		}
@@ -202,8 +202,8 @@ int fsapfs_test_btree_entry_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "btree_entry",
-			 btree_entry );
+			 "key_encrypted_key",
+			 key_encrypted_key );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -223,19 +223,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( btree_entry != NULL )
+	if( key_encrypted_key != NULL )
 	{
-		libfsapfs_btree_entry_free(
-		 &btree_entry,
+		libfsapfs_key_encrypted_key_free(
+		 &key_encrypted_key,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_btree_entry_free function
+/* Tests the libfsapfs_key_encrypted_key_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_entry_free(
+int fsapfs_test_key_encrypted_key_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -243,7 +243,7 @@ int fsapfs_test_btree_entry_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_entry_free(
+	result = libfsapfs_key_encrypted_key_free(
 	          NULL,
 	          &error );
 
@@ -290,12 +290,18 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_entry_initialize",
-	 fsapfs_test_btree_entry_initialize );
+	 "libfsapfs_key_encrypted_key_initialize",
+	 fsapfs_test_key_encrypted_key_initialize );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_entry_free",
-	 fsapfs_test_btree_entry_free );
+	 "libfsapfs_key_encrypted_key_free",
+	 fsapfs_test_key_encrypted_key_free );
+
+	/* TODO: add tests for libfsapfs_key_encrypted_key_read_data */
+
+	/* TODO: add tests for libfsapfs_key_encrypted_key_unlock_with_password */
+
+	/* TODO: add tests for libfsapfs_key_encrypted_key_unlock_with_volume_key */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

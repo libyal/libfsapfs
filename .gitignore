@@ -134,15 +134,19 @@ stamp-h[1-9]
 /tests/fsapfs_test_container_reaper
 /tests/fsapfs_test_container_space_manager
 /tests/fsapfs_test_container_superblock
+/tests/fsapfs_test_data_block
 /tests/fsapfs_test_data_stream_descriptor
 /tests/fsapfs_test_directory_record
+/tests/fsapfs_test_encryption_context
 /tests/fsapfs_test_error
 /tests/fsapfs_test_file_entry
+/tests/fsapfs_test_file_extent
 /tests/fsapfs_test_file_system_btree
 /tests/fsapfs_test_inode
 /tests/fsapfs_test_io_handle
 /tests/fsapfs_test_key_bag_entry
 /tests/fsapfs_test_key_bag_header
+/tests/fsapfs_test_key_encrypted_key
 /tests/fsapfs_test_notify
 /tests/fsapfs_test_object
 /tests/fsapfs_test_object_map
@@ -150,6 +154,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_object_map_descriptor
 /tests/fsapfs_test_support
 /tests/fsapfs_test_volume
+/tests/fsapfs_test_volume_data_handle
 /tests/fsapfs_test_volume_key_bag
 /tests/fsapfs_test_volume_superblock
 /tests/input

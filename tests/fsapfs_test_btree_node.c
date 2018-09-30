@@ -118,6 +118,8 @@ int fsapfs_test_btree_node_initialize(
 	          &btree_node,
 	          &error );
 
+	btree_node = NULL;
+
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
@@ -129,8 +131,6 @@ int fsapfs_test_btree_node_initialize(
 
 	libcerror_error_free(
 	 &error );
-
-	btree_node = NULL;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
 

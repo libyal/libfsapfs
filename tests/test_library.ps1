@@ -6,8 +6,8 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "btree_entry btree_footer btree_header btree_node checkpoint_map checkpoint_map_entry container_reaper container_space_manager container_superblock data_stream_descriptor directory_record error file_system_btree inode io_handle key_bag_entry key_bag_header notify object object_map object_map_btree object_map_descriptor"
-$LibraryTestsWithInput = "container support"
+$LibraryTests = "btree_entry btree_footer btree_header btree_node checkpoint_map checkpoint_map_entry container_key_bag container_reaper container_space_manager container_superblock data_block data_stream_descriptor directory_record encryption_context error file_extent file_system_btree inode io_handle key_bag_entry key_bag_header key_encrypted_key notify object object_map object_map_btree object_map_descriptor volume_data_handle volume_key_bag"
+$LibraryTestsWithInput = "container support volume"
 
 $InputGlob = "*"
 
