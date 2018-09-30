@@ -120,6 +120,7 @@ stamp-h[1-9]
 /libfsapfs.spec
 /libfsapfs/libfsapfs.rc
 /libfsapfs/libfsapfs_definitions.h
+/pyfsapfs-python[23]/*.[ch]
 /fsapfstools/*.exe
 /fsapfstools/fsapfsinfo
 /tests/*.exe

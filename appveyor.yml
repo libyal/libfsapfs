@@ -29,6 +29,8 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     VisualStudioVersion: 15.0
     configuration: Release
+  - TARGET: python27
+  - TARGET: python36
   - TARGET: cygwin
   - TARGET: cygwin64
   - TARGET: mingw
@@ -37,6 +39,10 @@ environment:
 install:
 - cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
 - cmd: git clone https://github.com/libyal/vstools.git ..\vstools
+- cmd: if [%TARGET%]==[cygwin] (
+    C:\cygwin\setup-x86.exe -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s http://cygwin.mirror.constant.com -P python2-devel -P python3-devel )
+- cmd: if [%TARGET%]==[cygwin64] (
+    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P python2-devel -P python3-devel )
 
 build_script:
 - ps: .\synclibs.ps1
@@ -64,6 +70,10 @@ build_script:
     C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 --with-dokany msvscpp\libfsapfs.sln &&
     msbuild /verbosity:quiet vs2017\libfsapfs.sln /property:Platform=Win32 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
     msbuild /verbosity:quiet vs2017\libfsapfs.sln /property:Platform=x64 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
+- cmd: if [%TARGET%]==[python27] (
+    C:\Python27\python.exe setup.py bdist_msi )
+- cmd: if [%TARGET%]==[python36] (
+    C:\Python36\python.exe setup.py bdist_msi )
 - cmd: if [%TARGET%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin\home\appveyor\libfsapfs &&
     C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )

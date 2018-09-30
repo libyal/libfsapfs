@@ -20,6 +20,9 @@ SUBDIRS = \
 	libhmac \
 	libcaes \
 	libfsapfs \
+	pyfsapfs \
+	pyfsapfs-python2 \
+	pyfsapfs-python3 \
 	fsapfstools \
 	po \
 	manuals \
@@ -35,6 +38,8 @@ DPKG_FILES = \
 	dpkg/rules \
 	dpkg/libfsapfs-dev.install \
 	dpkg/libfsapfs.install \
+	dpkg/libfsapfs-python.install \
+	dpkg/libfsapfs-python3.install \
 	dpkg/libfsapfs-tools.install \
 	dpkg/source/format
 
@@ -45,6 +50,9 @@ GETTEXT_FILES = \
 PKGCONFIG_FILES = \
 	libfsapfs.pc.in
 
+SETUP_PY_FILES = \
+	setup.py
+
 SPEC_FILES = \
 	libfsapfs.spec \
 	libfsapfs.spec.in
@@ -53,6 +61,7 @@ EXTRA_DIST = \
 	$(DPKG_FILES) \
 	$(GETTEXT_FILES) \
 	$(PKGCONFIG_FILES) \
+	$(SETUP_PY_FILES) \
 	$(SPEC_FILES)
 
 MAINTAINERCLEANFILES = \

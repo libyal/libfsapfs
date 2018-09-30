@@ -21,6 +21,24 @@ Requires: libfsapfs = %{version}-%{release}
 %description devel
 Header files and libraries for developing applications for libfsapfs.
 
+%package python
+Summary: Python 2 bindings for libfsapfs
+Group: System Environment/Libraries
+Requires: libfsapfs = %{version}-%{release} python
+BuildRequires: python-devel
+
+%description python
+Python 2 bindings for libfsapfs
+
+%package python3
+Summary: Python 3 bindings for libfsapfs
+Group: System Environment/Libraries
+Requires: libfsapfs = %{version}-%{release} python3
+BuildRequires: python3-devel
+
+%description python3
+Python 3 bindings for libfsapfs
+
 %package tools
 Summary: Several tools for reading Apple File System (APFS) volumes
 Group: Applications/System
@@ -33,7 +51,7 @@ Several tools for reading Apple File System (APFS) volumes
 %setup -q
 
 %build
-%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir}
+%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir} --enable-python2 --enable-python3
 make %{?_smp_mflags}
 
 %install
@@ -63,6 +81,22 @@ rm -rf %{buildroot}
 %{_libdir}/pkgconfig/libfsapfs.pc
 %{_includedir}/*
 %{_mandir}/man3/*
+
+%files python
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
+%{_libdir}/python2*/site-packages/*.a
+%{_libdir}/python2*/site-packages/*.la
+%{_libdir}/python2*/site-packages/*.so
+
+%files python3
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
+%{_libdir}/python3*/site-packages/*.a
+%{_libdir}/python3*/site-packages/*.la
+%{_libdir}/python3*/site-packages/*.so
 
 %files tools
 %defattr(644,root,root,755)

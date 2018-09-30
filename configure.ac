@@ -111,6 +111,22 @@ AX_LIBCAES_CHECK_ENABLE
 dnl Check if libfsapfs required headers and functions are available
 AX_LIBFSAPFS_CHECK_LOCAL
 
+dnl Check if libfsapfs Python bindings (pyfsapfs) required headers and functions are available
+AX_PYTHON_CHECK_ENABLE
+
+AS_IF(
+  [test "x${ac_cv_enable_python}" != xno || test "x${ac_cv_enable_python2}" != xno || test "x${ac_cv_enable_python3}" != xno],
+  [dnl Headers included in pyfsapfs/pyfsapfs_error.c
+  AC_CHECK_HEADERS([stdarg.h varargs.h])
+
+  AS_IF(
+    [test "x$ac_cv_header_stdarg_h" != xyes && test "x$ac_cv_header_varargs_h" != xyes],
+    [AC_MSG_FAILURE(
+      [Missing headers: stdarg.h and varargs.h],
+      [1])
+    ])
+  ])
+
 dnl Check if fsapfstools required headers and functions are available
 AX_FSAPFSTOOLS_CHECK_LOCAL
 
@@ -183,6 +199,9 @@ AC_CONFIG_FILES([libfguid/Makefile])
 AC_CONFIG_FILES([libhmac/Makefile])
 AC_CONFIG_FILES([libcaes/Makefile])
 AC_CONFIG_FILES([libfsapfs/Makefile])
+AC_CONFIG_FILES([pyfsapfs/Makefile])
+AC_CONFIG_FILES([pyfsapfs-python2/Makefile])
+AC_CONFIG_FILES([pyfsapfs-python3/Makefile])
 AC_CONFIG_FILES([fsapfstools/Makefile])
 AC_CONFIG_FILES([po/Makefile.in])
 AC_CONFIG_FILES([po/Makevars])
@@ -232,6 +251,7 @@ Features:
    Multi-threading support:                     $ac_cv_libcthreads_multi_threading
    Wide character type support:                 $ac_cv_enable_wide_character_type
    fsapfstools are build as static executables: $ac_cv_enable_static_executables
+   Python (pyfsapfs) support:                   $ac_cv_enable_python
    Verbose output:                              $ac_cv_enable_verbose_output
    Debug output:                                $ac_cv_enable_debug_output
 ]);

@@ -1,7 +1,7 @@
 Source: libfsapfs
 Priority: extra
 Maintainer: Joachim Metz <joachim.metz@gmail.com>
-Build-Depends: debhelper (>= 9), dh-autoreconf, pkg-config
+Build-Depends: debhelper (>= 9), dh-autoreconf, pkg-config, python-dev, python3-dev
 Standards-Version: 3.9.5
 Section: libs
 Homepage: https://github.com/libyal/libfsapfs
@@ -40,4 +40,34 @@ Architecture: any
 Depends: libfsapfs-tools (= ${binary:Version}), ${misc:Depends}
 Description: Debugging symbols for libfsapfs-tools
  Debugging symbols for libfsapfs-tools.
+
+Package: libfsapfs-python
+Section: python
+Architecture: any
+Depends: libfsapfs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Suggests: libfsapfs-python-dbg
+Description: Python 2 bindings for libfsapfs
+ Python 2 bindings for libfsapfs.
+
+Package: libfsapfs-python-dbg
+Section: debug
+Architecture: any
+Depends: libfsapfs-python (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libfsapfs-python
+ Debugging symbols for libfsapfs-python.
+
+Package: libfsapfs-python3
+Section: python
+Architecture: any
+Depends: libfsapfs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Suggests: libfsapfs-python3-dbg
+Description: Python 3 bindings for libfsapfs
+ Python 3 bindings for libfsapfs.
+
+Package: libfsapfs-python3-dbg
+Section: debug
+Architecture: any
+Depends: libfsapfs-python3 (= ${binary:Version}), ${misc:Depends}
+Description: Debugging symbols for libfsapfs-python3
+ Debugging symbols for libfsapfs-python3.
 

@@ -1,14 +1,19 @@
 TODO
-* add python bindings
 * add snapshot support
 
 library:
+* add libfsapfs_file_entry_get_sub_file_entry_by_utf8_name
+* add libfsapfs_file_entry_get_sub_file_entry_by_utf16_name
 * change container read bootstap as advised in documentation
 * refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 * Create libfsapfs_container_superblock_get_identifier
 * Create libfsapfs_volume_superblock_get_identifier
 * support opening container and file system
 * improve reading B-trees - add sub node support
+
+Python bindings:
+* add extents object
+* add support for posix time in nano seconds
 
 Tools:
 

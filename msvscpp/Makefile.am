@@ -50,6 +50,7 @@ MSVSCPP_FILES = \
 	libfsapfs/libfsapfs.vcproj \
 	libhmac/libhmac.vcproj \
 	libuna/libuna.vcproj \
+	pyfsapfs/pyfsapfs.vcproj \
 	libfsapfs.sln
 
 EXTRA_DIST = \

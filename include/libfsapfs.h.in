@@ -452,6 +452,14 @@ int libfsapfs_volume_get_utf16_name(
      size_t utf16_string_size,
      libfsapfs_error_t **error );
 
+/* Determines if the volume is locked
+ * Returns 1 if locked, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_is_locked(
+     libfsapfs_volume_t *volume,
+     libfsapfs_error_t **error );
+
 /* Sets an UTF-8 formatted password
  * This function needs to be used before one of the open functions
  * Returns 1 if successful, 0 if password is invalid or -1 on error
@@ -672,6 +680,77 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
      libfsapfs_file_entry_t *file_entry,
      int sub_file_entry_index,
      libfsapfs_file_entry_t **sub_file_entry,
+     libfsapfs_error_t **error );
+
+/* Retrieves the sub file entry for an UTF-8 encoded name
+ * Returns 1 if successful, 0 if the file entry does not contain such value or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
+     libfsapfs_file_entry_t *file_entry,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_file_entry_t **sub_file_entry,
+     libfsapfs_error_t **error );
+
+/* Retrieves the sub file entry for an UTF-16 encoded name
+ * Returns 1 if successful, 0 if the file entry does not contain such value or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
+     libfsapfs_file_entry_t *file_entry,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_file_entry_t **sub_file_entry,
+     libfsapfs_error_t **error );
+
+/* Reads data at the current offset
+ * Returns the number of bytes read or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_file_entry_read_buffer(
+         libfsapfs_file_entry_t *file_entry,
+         void *buffer,
+         size_t buffer_size,
+         libfsapfs_error_t **error );
+
+/* Reads data at a specific offset
+ * Returns the number of bytes read or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_file_entry_read_buffer_at_offset(
+         libfsapfs_file_entry_t *file_entry,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libfsapfs_error_t **error );
+
+/* Seeks a certain offset
+ * Returns the offset if seek is successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+off64_t libfsapfs_file_entry_seek_offset(
+         libfsapfs_file_entry_t *file_entry,
+         off64_t offset,
+         int whence,
+         libfsapfs_error_t **error );
+
+/* Retrieves the current offset
+ * Returns the offset if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_offset(
+     libfsapfs_file_entry_t *file_entry,
+     off64_t *offset,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_size(
+     libfsapfs_file_entry_t *file_entry,
+     size64_t *size,
      libfsapfs_error_t **error );
 
 /* Retrieves the number of extents

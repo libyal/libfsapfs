@@ -21,13 +21,21 @@ AM_CPPFLAGS = \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
+if HAVE_PYTHON_TESTS
+TESTS_PYFSAPFS = \
+	test_python_module.sh
+endif
+
 TESTS = \
 	test_library.sh \
-	test_fsapfsinfo.sh
+	test_fsapfsinfo.sh \
+	$(TESTS_PYFSAPFS)
 
 check_SCRIPTS = \
+	pyfsapfs_test_support.py \
 	test_fsapfsinfo.sh \
 	test_library.sh \
+	test_python_module.sh \
 	test_runner.sh
 
 EXTRA_DIST = \
