@@ -1,4 +1,4 @@
-.Dd September 21, 2018
+.Dd September 30, 2018
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -87,8 +87,6 @@ Available when compiled with libbfio support:
 .Pp
 Volume functions
 .Ft int
-.Fn libfsapfs_volume_initialize "libfsapfs_volume_t **volume, libfsapfs_error_t **error"
-.Ft int
 .Fn libfsapfs_volume_free "libfsapfs_volume_t **volume, libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_signal_abort "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
@@ -112,6 +110,16 @@ Volume functions
 .Fn libfsapfs_volume_set_utf8_password "libfsapfs_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_set_utf16_password "libfsapfs_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_next_file_entry_identifier "libfsapfs_volume_t *volume, uint64_t *identifier, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_file_entry_by_identifier "libfsapfs_volume_t *volume, uint64_t identifier, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_root_directory "libfsapfs_volume_t *volume, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_file_entry_by_utf8_path "libfsapfs_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_file_entry_by_utf16_path "libfsapfs_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
@@ -120,6 +128,40 @@ Available when compiled with wide character string support:
 Available when compiled with libbfio support:
 .Ft int
 .Fn libfsapfs_volume_open_file_io_handle "libfsapfs_volume_t *volume, libbfio_handle_t *file_io_handle, int access_flags, libfsapfs_error_t **error"
+.Pp
+File entry functions
+.Ft int
+.Fn libfsapfs_file_entry_free "libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_creation_time "libfsapfs_file_entry_t *file_entry, uint64_t *posix_time, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_modification_time "libfsapfs_file_entry_t *file_entry, uint64_t *posix_time, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_inode_change_time "libfsapfs_file_entry_t *file_entry, uint64_t *posix_time, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_access_time "libfsapfs_file_entry_t *file_entry, uint64_t *posix_time, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_owner_identifier "libfsapfs_file_entry_t *file_entry, uint32_t *owner_identifier, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_group_identifier "libfsapfs_file_entry_t *file_entry, uint32_t *group_identifier, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_file_mode "libfsapfs_file_entry_t *file_entry, uint16_t *file_mode, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_utf8_name_size "libfsapfs_file_entry_t *file_entry, size_t *utf8_name_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_utf8_name "libfsapfs_file_entry_t *file_entry, uint8_t *utf8_name, size_t utf8_name_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_utf16_name_size "libfsapfs_file_entry_t *file_entry, size_t *utf16_name_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_utf16_name "libfsapfs_file_entry_t *file_entry, uint16_t *utf16_name, size_t utf16_name_size, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_number_of_sub_file_entries "libfsapfs_file_entry_t *file_entry, int *number_of_sub_file_entries, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_sub_file_entry_by_index "libfsapfs_file_entry_t *file_entry, int sub_file_entry_index, libfsapfs_file_entry_t **sub_file_entry, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_number_of_extents "libfsapfs_file_entry_t *file_entry, int *number_of_extents, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_extent_by_index "libfsapfs_file_entry_t *file_entry, int extent_index, off64_t *extent_offset, size64_t *extent_size, uint32_t *extent_flags, libfsapfs_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libfsapfs_get_version

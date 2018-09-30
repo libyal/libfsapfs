@@ -63,6 +63,10 @@ enum LIBFSAPFS_ACCESS_FLAGS
 /* Reserved: not supported yet */
 #define LIBFSAPFS_OPEN_READ_WRITE				( LIBFSAPFS_ACCESS_FLAG_READ | LIBFSAPFS_ACCESS_FLAG_WRITE )
 
+/* The path segment separator
+ */
+#define LIBFSAPFS_SEPARATOR					'/'
+
 #endif /* !defined( HAVE_LOCAL_LIBFSAPFS ) */
 
 /* The encryption methods

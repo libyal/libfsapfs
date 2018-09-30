@@ -339,6 +339,8 @@ int libfsapfs_directory_record_read_key_data(
 
 		goto on_error;
 	}
+	directory_record->name_hash = name_hash;
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -605,7 +607,7 @@ int libfsapfs_directory_record_get_identifier(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid directory_record.",
+		 "%s: invalid directory record.",
 		 function );
 
 		return( -1 );
@@ -643,7 +645,7 @@ int libfsapfs_directory_record_get_utf8_name_size(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid directory_record.",
+		 "%s: invalid directory record.",
 		 function );
 
 		return( -1 );
@@ -684,7 +686,7 @@ int libfsapfs_directory_record_get_utf8_name(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid directory_record.",
+		 "%s: invalid directory record.",
 		 function );
 
 		return( -1 );
@@ -708,6 +710,53 @@ int libfsapfs_directory_record_get_utf8_name(
 	return( 1 );
 }
 
+/* Compares the name with an UTF-8 encoded string
+ * Returns 1 if the strings are equal, 0 if not or -1 on error
+ */
+int libfsapfs_directory_record_compare_name_with_utf8_string(
+     libfsapfs_directory_record_t *directory_record,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_directory_record_compare_name_with_utf8_string";
+	int result            = 0;
+
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record->name != NULL )
+	{
+		result = libuna_utf8_string_compare_with_utf8_stream(
+		          utf8_string,
+		          utf8_string_length,
+		          directory_record->name,
+		          directory_record->name_size,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to compare UTF-8 string with name.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	return( result );
+}
+
 /* Retrieves the size of the UTF-16 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error
@@ -725,7 +774,7 @@ int libfsapfs_directory_record_get_utf16_name_size(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid directory_record.",
+		 "%s: invalid directory record.",
 		 function );
 
 		return( -1 );
@@ -766,7 +815,7 @@ int libfsapfs_directory_record_get_utf16_name(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid directory_record.",
+		 "%s: invalid directory record.",
 		 function );
 
 		return( -1 );
@@ -788,5 +837,52 @@ int libfsapfs_directory_record_get_utf16_name(
 		return( -1 );
 	}
 	return( 1 );
+}
+
+/* Compares the name with an UTF-16 encoded string
+ * Returns 1 if the strings are equal, 0 if not or -1 on error
+ */
+int libfsapfs_directory_record_compare_name_with_utf16_string(
+     libfsapfs_directory_record_t *directory_record,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_directory_record_compare_name_with_utf16_string";
+	int result            = 0;
+
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record->name != NULL )
+	{
+		result = libuna_utf16_string_compare_with_utf8_stream(
+		          utf16_string,
+		          utf16_string_length,
+		          directory_record->name,
+		          directory_record->name_size,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to compare UTF-16 string with name.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	return( result );
 }
 

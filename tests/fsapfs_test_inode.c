@@ -35,6 +35,9 @@
 
 #include "../libfsapfs/libfsapfs_inode.h"
 
+uint8_t fsapfs_test_inode_key_data1[ 8 ] = {
+	0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x30 };
+
 uint8_t fsapfs_test_inode_value_data1[ 160 ] = {
 	0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x35, 0xa8, 0x88, 0x4a, 0x54, 0x55, 0x52, 0x15, 0x40, 0x3f, 0x48, 0xfd, 0x55, 0x55, 0x52, 0x15,
@@ -70,7 +73,6 @@ int fsapfs_test_inode_initialize(
 	 */
 	result = libfsapfs_inode_initialize(
 	          &inode,
-	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -107,7 +109,6 @@ int fsapfs_test_inode_initialize(
 	 */
 	result = libfsapfs_inode_initialize(
 	          NULL,
-	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -126,7 +127,6 @@ int fsapfs_test_inode_initialize(
 
 	result = libfsapfs_inode_initialize(
 	          &inode,
-	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -155,7 +155,6 @@ int fsapfs_test_inode_initialize(
 
 		result = libfsapfs_inode_initialize(
 		          &inode,
-		          0,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
@@ -198,7 +197,6 @@ int fsapfs_test_inode_initialize(
 
 		result = libfsapfs_inode_initialize(
 		          &inode,
-		          0,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
@@ -288,6 +286,162 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libfsapfs_inode_read_key_data function
+ * Returns 1 if successful or 0 if not
+ */
+int fsapfs_test_inode_read_key_data(
+     void )
+{
+	libcerror_error_t *error = NULL;
+	libfsapfs_inode_t *inode = NULL;
+	int result               = 0;
+
+	/* Initialize test
+	 */
+	result = libfsapfs_inode_initialize(
+	          &inode,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "inode",
+	 inode );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsapfs_inode_read_key_data(
+	          inode,
+	          fsapfs_test_inode_key_data1,
+	          8,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libfsapfs_inode_read_key_data(
+	          NULL,
+	          fsapfs_test_inode_key_data1,
+	          8,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_inode_read_key_data(
+	          inode,
+	          NULL,
+	          8,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_inode_read_key_data(
+	          inode,
+	          fsapfs_test_inode_key_data1,
+	          (size_t) SSIZE_MAX + 1,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_inode_read_key_data(
+	          inode,
+	          fsapfs_test_inode_key_data1,
+	          0,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_inode_free(
+	          &inode,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "inode",
+	 inode );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( inode != NULL )
+	{
+		libfsapfs_inode_free(
+		 &inode,
+		 NULL );
+	}
+	return( 0 );
+}
+
 /* Tests the libfsapfs_inode_read_value_data function
  * Returns 1 if successful or 0 if not
  */
@@ -302,7 +456,6 @@ int fsapfs_test_inode_read_value_data(
 	 */
 	result = libfsapfs_inode_initialize(
 	          &inode,
-	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -471,6 +624,10 @@ int main(
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_inode_free",
 	 fsapfs_test_inode_free );
+
+	FSAPFS_TEST_RUN(
+	 "libfsapfs_inode_read_key_data",
+	 fsapfs_test_inode_read_key_data );
 
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_inode_read_value_data",

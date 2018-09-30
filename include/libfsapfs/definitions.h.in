@@ -24,11 +24,11 @@
 
 #include <libfsapfs/types.h>
 
-#define LIBFSAPFS_VERSION					@VERSION@
+#define LIBFSAPFS_VERSION		@VERSION@
 
 /* The version string
  */
-#define LIBFSAPFS_VERSION_STRING			"@VERSION@"
+#define LIBFSAPFS_VERSION_STRING	"@VERSION@"
 
 /* The file access
  * bit 1        set to 1 for read access
@@ -37,18 +37,22 @@
  */
 enum LIBFSAPFS_ACCESS_FLAGS
 {
-	LIBFSAPFS_ACCESS_FLAG_READ			= 0x01,
+	LIBFSAPFS_ACCESS_FLAG_READ	= 0x01,
 /* Reserved: not supported yet */
-	LIBFSAPFS_ACCESS_FLAG_WRITE			= 0x02
+	LIBFSAPFS_ACCESS_FLAG_WRITE	= 0x02
 };
 
 /* The file access macros
  */
-#define LIBFSAPFS_OPEN_READ				( LIBFSAPFS_ACCESS_FLAG_READ )
+#define LIBFSAPFS_OPEN_READ		( LIBFSAPFS_ACCESS_FLAG_READ )
 /* Reserved: not supported yet */
-#define LIBFSAPFS_OPEN_WRITE				( LIBFSAPFS_ACCESS_FLAG_WRITE )
+#define LIBFSAPFS_OPEN_WRITE		( LIBFSAPFS_ACCESS_FLAG_WRITE )
 /* Reserved: not supported yet */
-#define LIBFSAPFS_OPEN_READ_WRITE			( LIBFSAPFS_ACCESS_FLAG_READ | LIBFSAPFS_ACCESS_FLAG_WRITE )
+#define LIBFSAPFS_OPEN_READ_WRITE	( LIBFSAPFS_ACCESS_FLAG_READ | LIBFSAPFS_ACCESS_FLAG_WRITE )
+
+/* The path segment separator
+ */
+#define LIBFSAPFS_SEPARATOR		'/'
 
 #endif /* !defined( _LIBFSAPFS_DEFINITIONS_H ) */
 

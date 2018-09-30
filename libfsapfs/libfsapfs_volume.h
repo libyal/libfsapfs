@@ -275,6 +275,22 @@ int libfsapfs_volume_get_root_directory(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_file_entry_by_utf8_path(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_file_entry_by_utf16_path(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

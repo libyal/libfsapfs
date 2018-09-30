@@ -502,6 +502,28 @@ int libfsapfs_volume_get_root_directory(
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_error_t **error );
 
+/* Retrieves the file entry for an UTF-8 encoded path
+ * Returns 1 if successful, 0 if no such file entry or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_file_entry_by_utf8_path(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_file_entry_t **file_entry,
+     libfsapfs_error_t **error );
+
+/* Retrieves the file entry for an UTF-16 encoded path
+ * Returns 1 if successful, 0 if no such file entry or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_file_entry_by_utf16_path(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_file_entry_t **file_entry,
+     libfsapfs_error_t **error );
+
 /* -------------------------------------------------------------------------
  * File entry functions
  * ------------------------------------------------------------------------- */
@@ -516,6 +538,7 @@ int libfsapfs_file_entry_free(
 
 /* Retrieves the creation date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -526,6 +549,7 @@ int libfsapfs_file_entry_get_creation_time(
 
 /* Retrieves the modification date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -536,6 +560,7 @@ int libfsapfs_file_entry_get_modification_time(
 
 /* Retrieves the inode change date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -546,6 +571,7 @@ int libfsapfs_file_entry_get_inode_change_time(
 
 /* Retrieves the access date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 LIBFSAPFS_EXTERN \

@@ -1,17 +1,16 @@
 TODO
-* complete library
-** get file entry by path
-** change container read bootstap as advised in documentation
-** refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
-** Create libfsapfs_container_superblock_get_identifier
-** Create libfsapfs_volume_superblock_get_identifier
-** support opening container and file system
-** improve reading B-trees - add sub node support
 * add python bindings
+* add snapshot support
 
-Tools
-* fsapfsinfo:
-** complete by get file entry by path functionality
+library:
+* change container read bootstap as advised in documentation
+* refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
+* Create libfsapfs_container_superblock_get_identifier
+* Create libfsapfs_volume_superblock_get_identifier
+* support opening container and file system
+* improve reading B-trees - add sub node support
+
+Tools:
 
 Tests:
 * test with copy of mounted file system

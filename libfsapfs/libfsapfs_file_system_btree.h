@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "libfsapfs_btree_node.h"
+#include "libfsapfs_directory_record.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
@@ -71,6 +72,35 @@ int libfsapfs_file_system_btree_get_root_node(
      libfsapfs_btree_node_t **root_node,
      libcerror_error_t **error );
 
+int libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t identifier,
+     uint8_t data_type,
+     libfsapfs_btree_entry_t **btree_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_directory_record_t **directory_record,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_directory_record_t **directory_record,
+     libcerror_error_t **error );
+
 int libfsapfs_file_system_btree_get_directory_entries(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
@@ -82,7 +112,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
-     uint64_t identifier,
+     uint64_t parent_identifier,
      libcdata_array_t *directory_entries,
      libcerror_error_t **error );
 
@@ -101,18 +131,28 @@ int libfsapfs_file_system_btree_get_file_extents_from_node(
      libcdata_array_t *file_extents,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_get_inode(
+int libfsapfs_file_system_btree_get_inode_by_identifier(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
      libfsapfs_inode_t **inode,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_get_inode_from_node(
+int libfsapfs_file_system_btree_get_inode_by_utf8_path(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
-     libfsapfs_btree_node_t *node,
-     uint64_t identifier,
+     uint64_t parent_identifier,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_inode_t **inode,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_inode_by_utf16_path(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t parent_identifier,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
      libfsapfs_inode_t **inode,
      libcerror_error_t **error );
 

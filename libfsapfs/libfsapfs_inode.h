@@ -86,11 +86,16 @@ struct libfsapfs_inode
 
 int libfsapfs_inode_initialize(
      libfsapfs_inode_t **inode,
-     uint64_t identifier,
      libcerror_error_t **error );
 
 int libfsapfs_inode_free(
      libfsapfs_inode_t **inode,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_read_key_data(
+     libfsapfs_inode_t *inode,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error );
 
 int libfsapfs_inode_read_value_data(

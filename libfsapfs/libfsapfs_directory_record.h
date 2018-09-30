@@ -46,6 +46,10 @@ struct libfsapfs_directory_record
 	/* Name
 	 */
 	uint8_t *name;
+
+	/* Name hash
+	 */
+	uint32_t name_hash;
 };
 
 int libfsapfs_directory_record_initialize(
@@ -84,6 +88,12 @@ int libfsapfs_directory_record_get_utf8_name(
      size_t utf8_string_size,
      libcerror_error_t **error );
 
+int libfsapfs_directory_record_compare_name_with_utf8_string(
+     libfsapfs_directory_record_t *directory_record,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libcerror_error_t **error );
+
 int libfsapfs_directory_record_get_utf16_name_size(
      libfsapfs_directory_record_t *directory_record,
      size_t *utf16_string_size,
@@ -93,6 +103,12 @@ int libfsapfs_directory_record_get_utf16_name(
      libfsapfs_directory_record_t *directory_record,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_directory_record_compare_name_with_utf16_string(
+     libfsapfs_directory_record_t *directory_record,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

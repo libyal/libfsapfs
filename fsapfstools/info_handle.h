@@ -119,6 +119,11 @@ int info_handle_uuid_value_fprint(
      const uint8_t *uuid_data,
      libcerror_error_t **error );
 
+int info_handle_file_entry_value_fprint(
+     info_handle_t *info_handle,
+     libfsapfs_file_entry_t *file_entry,
+     libcerror_error_t **error );
+
 int info_handle_file_system_hierarchy_fprint_file_entry(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,

@@ -235,6 +235,7 @@ int libfsapfs_file_entry_free(
 
 /* Retrieves the creation date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_creation_time(
@@ -308,6 +309,7 @@ int libfsapfs_file_entry_get_creation_time(
 
 /* Retrieves the modification date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_modification_time(
@@ -381,6 +383,7 @@ int libfsapfs_file_entry_get_modification_time(
 
 /* Retrieves the inode change date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_inode_change_time(
@@ -454,6 +457,7 @@ int libfsapfs_file_entry_get_inode_change_time(
 
 /* Retrieves the access date and time
  * This value is retrieved from the inode
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_entry_get_access_time(
@@ -1345,7 +1349,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_system_btree_get_inode(
+	if( libfsapfs_file_system_btree_get_inode_by_identifier(
 	     internal_file_entry->file_system_btree,
 	     internal_file_entry->file_io_handle,
 	     file_system_identifier,

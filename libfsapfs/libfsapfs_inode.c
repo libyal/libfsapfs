@@ -38,7 +38,6 @@
  */
 int libfsapfs_inode_initialize(
      libfsapfs_inode_t **inode,
-     uint64_t identifier,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_inode_initialize";
@@ -93,8 +92,6 @@ int libfsapfs_inode_initialize(
 
 		goto on_error;
 	}
-	( *inode )->identifier = identifier;
-
 	return( 1 );
 
 on_error:
@@ -140,6 +137,85 @@ int libfsapfs_inode_free(
 
 		*inode = NULL;
 	}
+	return( 1 );
+}
+
+/* Reads the inode key data
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_read_key_data(
+     libfsapfs_inode_t *inode,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_read_key_data";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid data.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+	 || ( data_size > (size_t) SSIZE_MAX ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: inode key data:\n",
+		 function );
+		libcnotify_print_data(
+		 data,
+		 data_size,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+	}
+#endif
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_file_system_btree_key_common_t *) data )->file_system_identifier,
+	 inode->identifier );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: identifier\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 inode->identifier );
+
+		libcnotify_printf(
+		 "\n" );
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+	inode->identifier &= (uint64_t) 0x0fffffffffffffffUL;
+
 	return( 1 );
 }
 
@@ -686,6 +762,7 @@ int libfsapfs_inode_get_identifier(
 }
 
 /* Retrieves the creation time
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_inode_get_creation_time(
@@ -723,6 +800,7 @@ int libfsapfs_inode_get_creation_time(
 }
 
 /* Retrieves the modification time
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_inode_get_modification_time(
@@ -760,6 +838,7 @@ int libfsapfs_inode_get_modification_time(
 }
 
 /* Retrieves the inode change time
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_inode_get_inode_change_time(
@@ -797,6 +876,7 @@ int libfsapfs_inode_get_inode_change_time(
 }
 
 /* Retrieves the access time
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_inode_get_access_time(
