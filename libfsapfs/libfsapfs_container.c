@@ -1097,7 +1097,9 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	file_offset += internal_container->superblock->block_size;
+	internal_container->io_handle->block_size = internal_container->superblock->block_size;
+
+	file_offset += internal_container->io_handle->block_size;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -1136,7 +1138,7 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	file_offset += internal_container->superblock->block_size;
+	file_offset += internal_container->io_handle->block_size;
 
 /* TODO read previous copies of superblock and physical map */
 
@@ -1216,7 +1218,7 @@ int libfsapfs_internal_container_open_read(
 
 				goto on_error;
 			}
-			file_offset = space_manager_block_number * internal_container->superblock->block_size;
+			file_offset = space_manager_block_number * internal_container->io_handle->block_size;
 
 			if( libfsapfs_container_space_manager_initialize(
 			     &container_space_manager,
@@ -1283,7 +1285,7 @@ int libfsapfs_internal_container_open_read(
 
 				goto on_error;
 			}
-			file_offset = reaper_block_number * internal_container->superblock->block_size;
+			file_offset = reaper_block_number * internal_container->io_handle->block_size;
 
 			if( libfsapfs_container_reaper_initialize(
 			     &container_reaper,
@@ -1342,7 +1344,7 @@ int libfsapfs_internal_container_open_read(
 			 "Reading object map:\n" );
 		}
 #endif
-		file_offset = internal_container->superblock->object_map_block_number * internal_container->superblock->block_size;
+		file_offset = internal_container->superblock->object_map_block_number * internal_container->io_handle->block_size;
 
 		if( libfsapfs_object_map_initialize(
 		     &object_map,
@@ -1383,7 +1385,7 @@ int libfsapfs_internal_container_open_read(
 				 "Reading object map B-tree:\n" );
 			}
 #endif
-			file_offset = object_map->object_map_btree_block_number * internal_container->superblock->block_size;
+			file_offset = object_map->object_map_btree_block_number * internal_container->io_handle->block_size;
 
 			if( libfsapfs_object_map_btree_initialize(
 			     &( internal_container->object_map_btree ),
@@ -1402,7 +1404,7 @@ int libfsapfs_internal_container_open_read(
 			     internal_container->object_map_btree,
 			     file_io_handle,
 			     file_offset,
-			     internal_container->superblock->block_size,
+			     internal_container->io_handle->block_size,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -1447,14 +1449,14 @@ int libfsapfs_internal_container_open_read(
 
 			goto on_error;
 		}
-		file_offset = internal_container->superblock->key_bag_block_number * internal_container->superblock->block_size;
+		file_offset = internal_container->superblock->key_bag_block_number * internal_container->io_handle->block_size;
 
 		if( libfsapfs_container_key_bag_read_file_io_handle(
 		     internal_container->key_bag,
 		     internal_container->io_handle,
 		     file_io_handle,
 		     file_offset,
-		     (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->superblock->block_size,
+		     (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->io_handle->block_size,
 		     internal_container->superblock->container_identifier,
 		     error ) != 1 )
 		{
@@ -1470,7 +1472,7 @@ int libfsapfs_internal_container_open_read(
 			goto on_error;
 		}
 	}
-	internal_container->size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->superblock->block_size;
+	internal_container->io_handle->container_size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->io_handle->block_size;
 
 	return( 1 );
 
@@ -1546,6 +1548,17 @@ int libfsapfs_container_get_size(
 	}
 	internal_container = (libfsapfs_internal_container_t *) container;
 
+	if( internal_container->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid container - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
 	if( internal_container->superblock == NULL )
 	{
 		libcerror_error_set(
@@ -1583,7 +1596,7 @@ int libfsapfs_container_get_size(
 		return( -1 );
 	}
 #endif
-	*size = internal_container->size;
+	*size = internal_container->io_handle->container_size;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -1909,10 +1922,9 @@ int libfsapfs_container_get_volume_by_index(
 	}
 	if( libfsapfs_volume_initialize(
 	     volume,
+	     internal_container->io_handle,
 	     internal_container->file_io_handle,
 	     internal_container->key_bag,
-	     internal_container->size,
-	     internal_container->superblock->block_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1924,7 +1936,7 @@ int libfsapfs_container_get_volume_by_index(
 
 		goto on_error;
 	}
-	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->superblock->block_size );
+	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->io_handle->block_size );
 
 	if( libfsapfs_internal_volume_open_read(
 	     (libfsapfs_internal_volume_t *) *volume,

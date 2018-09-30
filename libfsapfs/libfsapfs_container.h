@@ -48,10 +48,6 @@ struct libfsapfs_internal_container
 	 */
 	libfsapfs_container_superblock_t *superblock;
 
-	/* The container size
-	 */
-	size64_t size;
-
 	/* The container physical map
 	 */
 	libfsapfs_checkpoint_map_t *physical_map;

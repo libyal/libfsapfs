@@ -335,7 +335,7 @@ int libfsapfs_data_block_read(
 			libcnotify_print_data(
 			 read_buffer,
 			 data_block->data_size,
-			 0 );
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 		}
 #endif
 		if( libfsapfs_encryption_context_crypt(
@@ -372,7 +372,7 @@ int libfsapfs_data_block_read(
 		libcnotify_print_data(
 		 data_block->data,
 		 data_block->data_size,
-		 0 );
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
 	return( 1 );

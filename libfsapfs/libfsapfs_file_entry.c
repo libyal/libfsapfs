@@ -23,15 +23,18 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_data_stream_handle.h"
 #include "libfsapfs_directory_record.h"
 #include "libfsapfs_file_entry.h"
 #include "libfsapfs_file_extent.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
+#include "libfsapfs_libfdata.h"
 #include "libfsapfs_types.h"
 
 /* Creates a file entry
@@ -40,6 +43,7 @@
  */
 int libfsapfs_file_entry_initialize(
      libfsapfs_file_entry_t **file_entry,
+     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
@@ -123,6 +127,7 @@ int libfsapfs_file_entry_initialize(
 
 		return( -1 );
 	}
+	internal_file_entry->io_handle         = io_handle;
 	internal_file_entry->file_io_handle    = file_io_handle;
 	internal_file_entry->file_system_btree = file_system_btree;
 	internal_file_entry->inode             = inode;
@@ -199,33 +204,55 @@ int libfsapfs_file_entry_free(
 #endif
 		/* The file_io_handle and file_system_btree references are freed elsewhere
 		 */
-		if( libcdata_array_free(
-		     &( internal_file_entry->directory_entries ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_directory_record_free,
-		     error ) != 1 )
+		if( internal_file_entry->directory_entries != NULL )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free directory entries array.",
-			 function );
+			if( libcdata_array_free(
+			     &( internal_file_entry->directory_entries ),
+			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_directory_record_free,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free directory entries array.",
+				 function );
 
-			result = -1;
+				result = -1;
+			}
 		}
-		if( libcdata_array_free(
-		     &( internal_file_entry->file_extents ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
-		     error ) != 1 )
+		if( internal_file_entry->file_extents != NULL )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file extents array.",
-			 function );
+			if( libcdata_array_free(
+			     &( internal_file_entry->file_extents ),
+			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free file extents array.",
+				 function );
 
-			result = -1;
+				result = -1;
+			}
+		}
+		if( internal_file_entry->data_stream != NULL )
+		{
+			if( libfdata_stream_free(
+			     &( internal_file_entry->data_stream ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free data stream.",
+				 function );
+
+				result = -1;
+			}
 		}
 		memory_free(
 		 internal_file_entry );
@@ -1150,7 +1177,6 @@ int libfsapfs_file_entry_get_number_of_sub_file_entries(
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_number_of_sub_file_entries";
-	int result                                           = 0;
 
 	if( file_entry == NULL )
 	{
@@ -1250,7 +1276,6 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_sub_file_entry_by_index";
 	uint64_t file_system_identifier                      = 0;
-	int result                                           = 0;
 
 	if( file_entry == NULL )
 	{
@@ -1368,6 +1393,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 	}
 	if( libfsapfs_file_entry_initialize(
 	     sub_file_entry,
+	     internal_file_entry->io_handle,
 	     internal_file_entry->file_io_handle,
 	     internal_file_entry->file_system_btree,
 	     inode,
@@ -1508,9 +1534,191 @@ on_error:
 	return( -1 );
 }
 
-/* TODO implement and add thread locks */
+/* Determines the data stream
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_file_entry_get_data_stream(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error )
+{
+	libfsapfs_data_stream_handle_t *data_stream_handle = NULL;
+	libfsapfs_file_extent_t *file_extent               = NULL;
+	static char *function                              = "libfsapfs_internal_file_entry_get_data_stream";
+	int extent_index                                   = 0;
+	int number_of_extents                              = 0;
+	int segment_index                                  = 0;
 
-/* Reads data at the current offset
+	if( internal_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid internal file entry - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->data_stream != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry - data stream value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->file_extents == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_file_extents(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine file extents.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libfsapfs_data_stream_handle_initialize(
+	     &data_stream_handle,
+	     internal_file_entry->io_handle,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data stream handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdata_stream_initialize(
+	     &( internal_file_entry->data_stream ),
+	     (intptr_t *) data_stream_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_data_stream_handle_free,
+	     NULL,
+	     NULL,
+	     (ssize_t (*)(intptr_t *, intptr_t *, int, int, uint8_t *, size_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_data_stream_handle_read_segment_data,
+	     NULL,
+	     (off64_t (*)(intptr_t *, intptr_t *, int, int, off64_t, libcerror_error_t **)) &libfsapfs_data_stream_handle_seek_segment_offset,
+	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data stream.",
+		 function );
+
+		goto on_error;
+	}
+	data_stream_handle = NULL;
+
+	if( libcdata_array_get_number_of_entries(
+	     internal_file_entry->file_extents,
+	     &number_of_extents,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from array.",
+		 function );
+
+		goto on_error;
+	}
+	for( extent_index = 0;
+	     extent_index < number_of_extents;
+	     extent_index++ )
+	{
+		if( libcdata_array_get_entry_by_index(
+		     internal_file_entry->file_extents,
+		     extent_index,
+		     (intptr_t **) &file_extent,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file extent: %d.",
+			 function,
+			 extent_index );
+
+			goto on_error;
+		}
+		if( file_extent == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing file extent: %d.",
+			 function,
+			 extent_index );
+
+			goto on_error;
+		}
+		if( libfdata_stream_append_segment(
+		     internal_file_entry->data_stream,
+		     &segment_index,
+		     0,
+		     file_extent->block_number * internal_file_entry->io_handle->block_size,
+		     file_extent->data_size,
+		     0,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to append extent: %d as data stream segment.",
+			 function,
+			 extent_index );
+
+			goto on_error;
+		}
+	}
+	return( 1 );
+
+on_error:
+	if( data_stream_handle != NULL )
+	{
+		libfsapfs_data_stream_handle_free(
+		 &data_stream_handle,
+		 NULL );
+	}
+	if( internal_file_entry->data_stream != NULL )
+	{
+		libfdata_stream_free(
+		 &( internal_file_entry->data_stream ),
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Reads data at the current offset into a buffer
  * Returns the number of bytes read or -1 on error
  */
 ssize_t libfsapfs_file_entry_read_buffer(
@@ -1522,143 +1730,6 @@ ssize_t libfsapfs_file_entry_read_buffer(
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_read_buffer";
 	ssize_t read_count                                   = 0;
-
-	if( file_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
-
-/* TODO implement */
-
-	return( -1 );
-}
-
-/* Reads data at a specific offset
- * Returns the number of bytes read or -1 on error
- */
-ssize_t libfsapfs_file_entry_read_buffer_at_offset(
-         libfsapfs_file_entry_t *file_entry,
-         void *buffer,
-         size_t buffer_size,
-         off64_t offset,
-         libcerror_error_t **error )
-{
-	static char *function = "libfsapfs_file_entry_read_buffer_at_offset";
-	ssize_t read_count    = 0;
-
-	if( libfsapfs_file_entry_seek_offset(
-	     file_entry,
-	     offset,
-	     SEEK_SET,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek offset.",
-		 function );
-
-		return( -1 );
-	}
-	read_count = libfsapfs_file_entry_read_buffer(
-	              file_entry,
-	              buffer,
-	              buffer_size,
-	              error );
-
-	if( read_count <= -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read buffer.",
-		 function );
-
-		return( -1 );
-	}
-	return( read_count );
-}
-
-/* Seeks a certain offset
- * Returns the offset if seek is successful or -1 on error
- */
-off64_t libfsapfs_file_entry_seek_offset(
-         libfsapfs_file_entry_t *file_entry,
-         off64_t offset,
-         int whence,
-         libcerror_error_t **error )
-{
-	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	static char *function                                = "libfsapfs_file_entry_seek_offset";
-
-	if( file_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
-
-/* TODO implement */
-
-	return( -1 );
-}
-
-/* Retrieves the current offset
- * Returns the offset if successful or -1 on error
- */
-int libfsapfs_file_entry_get_offset(
-     libfsapfs_file_entry_t *file_entry,
-     off64_t *offset,
-     libcerror_error_t **error )
-{
-	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	static char *function                                = "libfsapfs_file_entry_get_offset";
-
-	if( file_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
-
-/* TODO implement */
-
-	return( -1 );
-}
-
-/* Retrieves the size of the data stream object
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_file_entry_get_size(
-     libfsapfs_file_entry_t *file_entry,
-     size64_t *size,
-     libcerror_error_t **error )
-{
-	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	static char *function                                = "libfsapfs_file_entry_get_size";
-	int result                                           = 0;
 
 	if( file_entry == NULL )
 	{
@@ -1688,9 +1759,9 @@ int libfsapfs_file_entry_get_size(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->file_extents == NULL )
+	if( internal_file_entry->data_stream == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_file_extents(
+		if( libfsapfs_internal_file_entry_get_data_stream(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -1698,14 +1769,423 @@ int libfsapfs_file_entry_get_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file extents.",
+			 "%s: unable to determine data stream.",
 			 function );
 
 			goto on_error;
 		}
 	}
-/* TODO implement */
+	read_count = libfdata_stream_read_buffer(
+	              internal_file_entry->data_stream,
+	              internal_file_entry->file_io_handle,
+	              (uint8_t *) buffer,
+	              buffer_size,
+	              0,
+	              error );
 
+	if( read_count < 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read buffer from data stream.",
+		 function );
+
+		read_count = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( read_count );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Reads data at a specific offset
+ * Returns the number of bytes read or -1 on error
+ */
+ssize_t libfsapfs_file_entry_read_buffer_at_offset(
+         libfsapfs_file_entry_t *file_entry,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_read_buffer_at_offset";
+	ssize_t read_count                                   = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->data_stream == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_data_stream(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine data stream.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	read_count = libfdata_stream_read_buffer(
+	              internal_file_entry->data_stream,
+	              internal_file_entry->file_io_handle,
+	              (uint8_t *) buffer,
+	              buffer_size,
+	              0,
+	              error );
+
+	if( read_count < 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read buffer at offset from data stream.",
+		 function );
+
+		read_count = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( read_count );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Seeks a certain offset
+ * Returns the offset if seek is successful or -1 on error
+ */
+off64_t libfsapfs_file_entry_seek_offset(
+         libfsapfs_file_entry_t *file_entry,
+         off64_t offset,
+         int whence,
+         libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_seek_offset";
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->data_stream == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_data_stream(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine data stream.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	offset = libfdata_stream_seek_offset(
+	          internal_file_entry->data_stream,
+	          offset,
+	          whence,
+	          error );
+
+	if( offset < 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_SEEK_FAILED,
+		 "%s: unable to seek offset in data stream.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( offset );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the current offset
+ * Returns the offset if successful or -1 on error
+ */
+int libfsapfs_file_entry_get_offset(
+     libfsapfs_file_entry_t *file_entry,
+     off64_t *offset,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_offset";
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->data_stream == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_data_stream(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine data stream.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libfdata_stream_get_offset(
+	     internal_file_entry->data_stream,
+	     offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve offset from data stream.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the size of the data stream object
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_file_entry_get_size(
+     libfsapfs_file_entry_t *file_entry,
+     size64_t *size,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_size";
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->data_stream == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_data_stream(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine data stream.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libfdata_stream_get_size(
+	     internal_file_entry->data_stream,
+	     size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve size from data stream.",
+		 function );
+
+		goto on_error;
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_file_entry->read_write_lock,
@@ -1742,7 +2222,6 @@ int libfsapfs_file_entry_get_number_of_extents(
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_number_of_extents";
-	int result                                           = 0;
 
 	if( file_entry == NULL )
 	{
@@ -1842,8 +2321,6 @@ int libfsapfs_file_entry_get_extent_by_index(
 	libfsapfs_file_extent_t *file_extent                 = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_extent_by_index";
-	size64_t data_size                                   = 0;
-	uint32_t range_flags                                 = 0;
 
 	if( file_entry == NULL )
 	{
@@ -1858,6 +2335,17 @@ int libfsapfs_file_entry_get_extent_by_index(
 	}
 	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
 
+	if( internal_file_entry->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid internal file entry - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
 	if( extent_offset == NULL )
 	{
 		libcerror_error_set(
@@ -1950,8 +2438,7 @@ int libfsapfs_file_entry_get_extent_by_index(
 
 		goto on_error;
 	}
-/* TODO change block number into offset */
-	*extent_offset = file_extent->block_number;
+	*extent_offset = file_extent->block_number * internal_file_entry->io_handle->block_size;
 	*extent_size   = file_extent->data_size;
 	*extent_flags  = 0;
 

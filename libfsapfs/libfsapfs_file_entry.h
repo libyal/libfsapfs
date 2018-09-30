@@ -28,6 +28,7 @@
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
@@ -42,9 +43,9 @@ typedef struct libfsapfs_internal_file_entry libfsapfs_internal_file_entry_t;
 
 struct libfsapfs_internal_file_entry
 {
-	/* Inode
+	/* The IO handle
 	 */
-	libfsapfs_inode_t *inode;
+	libfsapfs_io_handle_t *io_handle;
 
 	/* The file IO handle
 	 */
@@ -54,6 +55,10 @@ struct libfsapfs_internal_file_entry
 	 */
 	libfsapfs_file_system_btree_t *file_system_btree;
 
+	/* The inode
+	 */
+	libfsapfs_inode_t *inode;
+
 	/* The directory entries
 	 */
 	libcdata_array_t *directory_entries;
@@ -61,6 +66,10 @@ struct libfsapfs_internal_file_entry
 	/* The file extents
 	 */
 	libcdata_array_t *file_extents;
+
+	/* The data stream
+	 */
+	libfdata_stream_t *data_stream;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -71,6 +80,7 @@ struct libfsapfs_internal_file_entry
 
 int libfsapfs_file_entry_initialize(
      libfsapfs_file_entry_t **file_entry,
+     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
@@ -167,6 +177,10 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
      libcerror_error_t **error );
 
 int libfsapfs_internal_file_entry_get_file_extents(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_file_entry_get_data_stream(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error );
 

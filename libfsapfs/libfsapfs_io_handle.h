@@ -42,6 +42,14 @@ struct libfsapfs_io_handle
 	 */
 	uint16_t bytes_per_sector;
 
+	/* The block size
+	 */
+	uint32_t block_size;
+
+	/* The container size
+	 */
+	size64_t container_size;
+
 	/* Value to indicate if abort was signalled
 	 */
 	int abort;

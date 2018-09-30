@@ -47,6 +47,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_container_space_manager.c libfsapfs_container_space_manager.h \
 	libfsapfs_container_superblock.c libfsapfs_container_superblock.h \
 	libfsapfs_data_block.c libfsapfs_data_block.h \
+	libfsapfs_data_stream_handle.c libfsapfs_data_stream_handle.h \
 	libfsapfs_data_stream_descriptor.c libfsapfs_data_stream_descriptor.h \
 	libfsapfs_debug.c libfsapfs_debug.h \
 	libfsapfs_definitions.h \

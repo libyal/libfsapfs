@@ -49,14 +49,6 @@ typedef struct libfsapfs_internal_volume libfsapfs_internal_volume_t;
 
 struct libfsapfs_internal_volume
 {
-	/* The block size
-	 */
-	uint32_t block_size;
-
-	/* The container size
-	 */
-	size64_t container_size;
-
 	/* The volume superblock
 	 */
 	libfsapfs_volume_superblock_t *superblock;
@@ -138,10 +130,9 @@ struct libfsapfs_internal_volume
 
 int libfsapfs_volume_initialize(
      libfsapfs_volume_t **volume,
+     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfsapfs_container_key_bag_t *container_key_bag,
-     size64_t container_size,
-     uint32_t block_size,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

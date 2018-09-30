@@ -53,10 +53,9 @@
  */
 int libfsapfs_volume_initialize(
      libfsapfs_volume_t **volume,
+     libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
      libfsapfs_container_key_bag_t *container_key_bag,
-     size64_t container_size,
-     uint32_t block_size,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_volume_t *internal_volume = NULL;
@@ -84,6 +83,17 @@ int libfsapfs_volume_initialize(
 
 		return( -1 );
 	}
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
 	if( file_io_handle == NULL )
 	{
 		libcerror_error_set(
@@ -94,28 +104,6 @@ int libfsapfs_volume_initialize(
 		 function );
 
 		return( -1 );
-	}
-	if( container_size == 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid container size value out of bounds.",
-		 function );
-
-		goto on_error;
-	}
-	if( block_size == 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid block size value out of bounds.",
-		 function );
-
-		goto on_error;
 	}
 	internal_volume = memory_allocate_structure(
 	                   libfsapfs_internal_volume_t );
@@ -145,24 +133,10 @@ int libfsapfs_volume_initialize(
 
 		goto on_error;
 	}
-	if( libfsapfs_io_handle_initialize(
-	     &( internal_volume->io_handle ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create IO handle.",
-		 function );
-
-		goto on_error;
-	}
 /* TODO clone file_io_handle? */
+	internal_volume->io_handle         = io_handle;
 	internal_volume->file_io_handle    = file_io_handle;
 	internal_volume->container_key_bag = container_key_bag;
-	internal_volume->container_size    = container_size;
-	internal_volume->block_size        = block_size;
 	internal_volume->is_locked         = 1;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
@@ -252,19 +226,6 @@ int libfsapfs_volume_free(
 			result = -1;
 		}
 #endif
-		if( libfsapfs_io_handle_free(
-		     &( internal_volume->io_handle ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free IO handle.",
-			 function );
-
-			result = -1;
-		}
 		memory_free(
 		 internal_volume );
 	}
@@ -926,21 +887,7 @@ int libfsapfs_volume_close(
 		internal_volume->file_io_handle_created_in_library = 0;
 	}
 	internal_volume->file_io_handle = NULL;
-
-	if( libfsapfs_io_handle_clear(
-	     internal_volume->io_handle,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to clear IO handle.",
-		 function );
-
-		result = -1;
-	}
-	internal_volume->is_locked = 1;
+	internal_volume->is_locked      = 1;
 
 	if( internal_volume->user_password != NULL )
 	{
@@ -1229,7 +1176,7 @@ int libfsapfs_internal_volume_open_read(
 			 "Reading object map:\n" );
 		}
 #endif
-		file_offset = internal_volume->superblock->object_map_block_number * internal_volume->block_size;
+		file_offset = internal_volume->superblock->object_map_block_number * internal_volume->io_handle->block_size;
 
 		if( libfsapfs_object_map_initialize(
 		     &object_map,
@@ -1270,7 +1217,7 @@ int libfsapfs_internal_volume_open_read(
 				 "Reading object map B-tree:\n" );
 			}
 #endif
-			file_offset = object_map->object_map_btree_block_number * internal_volume->block_size;
+			file_offset = object_map->object_map_btree_block_number * internal_volume->io_handle->block_size;
 
 			if( libfsapfs_object_map_btree_initialize(
 			     &( internal_volume->object_map_btree ),
@@ -1289,7 +1236,7 @@ int libfsapfs_internal_volume_open_read(
 			     internal_volume->object_map_btree,
 			     file_io_handle,
 			     file_offset,
-			     internal_volume->block_size,
+			     internal_volume->io_handle->block_size,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -1367,14 +1314,14 @@ int libfsapfs_internal_volume_open_read(
 
 				goto on_error;
 			}
-			file_offset = key_bag_block_number * internal_volume->block_size;
+			file_offset = key_bag_block_number * internal_volume->io_handle->block_size;
 
 			if( libfsapfs_volume_key_bag_read_file_io_handle(
 			     internal_volume->key_bag,
 			     internal_volume->io_handle,
 			     file_io_handle,
 			     file_offset,
-			     (size64_t) key_bag_number_of_blocks * internal_volume->block_size,
+			     (size64_t) key_bag_number_of_blocks * internal_volume->io_handle->block_size,
 			     internal_volume->superblock->volume_identifier,
 			     error ) != 1 )
 			{
@@ -1419,7 +1366,7 @@ int libfsapfs_internal_volume_open_read(
 	}
 	if( libfdata_vector_initialize(
 	     &( internal_volume->data_block_vector ),
-	     (size64_t) internal_volume->block_size,
+	     (size64_t) internal_volume->io_handle->block_size,
 	     (intptr_t *) volume_data_handle,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
 	     NULL,
@@ -1445,7 +1392,7 @@ int libfsapfs_internal_volume_open_read(
 	     &element_index,
 	     0,
 	     0,
-	     internal_volume->container_size,
+	     internal_volume->io_handle->container_size,
 	     0,
 	     error ) != 1 )
 	{
@@ -2750,6 +2697,7 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 	{
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
+		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
 		     internal_volume->file_system_btree,
 		     inode,
@@ -2799,10 +2747,9 @@ int libfsapfs_volume_get_root_directory(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_internal_volume_t *internal_volume             = NULL;
-	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	static char *function                                    = "libfsapfs_volume_get_root_directory";
-	int result                                               = 0;
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_root_directory";
+	int result                                   = 0;
 
 	if( volume == NULL )
 	{
@@ -2896,6 +2843,7 @@ int libfsapfs_volume_get_root_directory(
 	{
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
+		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
 		     internal_volume->file_system_btree,
 		     internal_volume->root_directory_inode,
@@ -3042,6 +2990,7 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 	{
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
+		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
 		     internal_volume->file_system_btree,
 		     inode,
@@ -3188,6 +3137,7 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 	{
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
+		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
 		     internal_volume->file_system_btree,
 		     inode,

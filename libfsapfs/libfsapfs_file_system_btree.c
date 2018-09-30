@@ -1228,7 +1228,6 @@ int libfsapfs_file_system_btree_get_file_extents_from_node(
 	static char *function                = "libfsapfs_file_system_btree_get_file_extents_from_node";
 	uint64_t file_system_identifier      = 0;
 	uint64_t lookup_identifier           = 0;
-	uint8_t data_type                    = 0;
 	int btree_entry_index                = 0;
 	int entry_index                      = 0;
 	int number_of_entries                = 0;

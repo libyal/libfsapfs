@@ -106,8 +106,7 @@ int fsapfs_test_volume_open_source(
 	     volume,
 	     NULL,
 	     NULL,
-	     4194304,
-	     4096,
+	     NULL,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -257,8 +256,7 @@ int fsapfs_test_volume_initialize(
 	          &volume,
 	          NULL,
 	          NULL,
-	          4194304,
-	          4096,
+	          NULL,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -299,8 +297,7 @@ int fsapfs_test_volume_initialize(
 	          NULL,
 	          NULL,
 	          NULL,
-	          4194304,
-	          4096,
+	          NULL,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -321,71 +318,10 @@ int fsapfs_test_volume_initialize(
 	          &volume,
 	          NULL,
 	          NULL,
-	          4194304,
-	          4096,
+	          NULL,
 	          &error );
 
 	volume = NULL;
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_volume_initialize(
-	          &volume,
-	          NULL,
-	          NULL,
-	          4194304,
-	          4096,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_volume_initialize(
-	          &volume,
-	          NULL,
-	          NULL,
-	          0,
-	          4096,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_volume_initialize(
-	          &volume,
-	          NULL,
-	          NULL,
-	          4194304,
-	          0,
-	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -416,8 +352,7 @@ int fsapfs_test_volume_initialize(
 		          &volume,
 		          NULL,
 		          NULL,
-		          4194304,
-		          4096,
+		          NULL,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
@@ -462,8 +397,7 @@ int fsapfs_test_volume_initialize(
 		          &volume,
 		          NULL,
 		          NULL,
-		          4194304,
-		          4096,
+		          NULL,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
@@ -592,8 +526,7 @@ int fsapfs_test_volume_open(
 	          &volume,
 	          NULL,
 	          NULL,
-	          4194304,
-	          4096,
+	          NULL,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -717,8 +650,7 @@ int fsapfs_test_volume_open_wide(
 	          &volume,
 	          NULL,
 	          NULL,
-	          4194304,
-	          4096,
+	          NULL,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -863,8 +795,7 @@ int fsapfs_test_volume_open_close(
 	          &volume,
 	          NULL,
 	          NULL,
-	          4194304,
-	          4096,
+	          NULL,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
