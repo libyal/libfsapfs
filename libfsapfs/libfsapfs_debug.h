@@ -34,6 +34,15 @@ extern "C" {
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
+void libfsapfs_debug_print_btree_flags(
+      uint32_t btree_flags );
+
+void libfsapfs_debug_print_btree_node_flags(
+      uint16_t btree_node_flags );
+
+void libfsapfs_debug_print_checkpoint_flags(
+      uint32_t checkpoint_flags );
+
 void libfsapfs_debug_print_directory_entry_flags(
       uint16_t directory_entry_flags );
 

@@ -404,6 +404,14 @@ int libfsapfs_container_superblock_read_data(
 	 ( (fsapfs_container_superblock_t *) data )->key_bag_number_of_blocks,
 	 container_superblock->key_bag_number_of_blocks );
 
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_container_superblock_t *) data )->metadata_area_number_of_blocks,
+	 container_superblock->metadata_area_number_of_blocks );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_container_superblock_t *) data )->metadata_area_block_number,
+	 container_superblock->metadata_area_block_number );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -517,13 +525,10 @@ int libfsapfs_container_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->metadata_area_number_of_blocks,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: metadata area number of blocks\t: %" PRIu32 "\n",
 		 function,
-		 value_32bit );
+		 container_superblock->metadata_area_number_of_blocks );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_container_superblock_t *) data )->unknown5,
@@ -533,13 +538,10 @@ int libfsapfs_container_superblock_read_data(
 		 function,
 		 value_32bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->metadata_area_block_number,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: metadata area block number\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 container_superblock->metadata_area_block_number );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_container_superblock_t *) data )->unknown7,
@@ -766,6 +768,18 @@ int libfsapfs_container_superblock_read_data(
 		 "%s: unsupported block size: %" PRIu32 ".",
 		 function,
 		 container_superblock->block_size );
+
+		return( -1 );
+	}
+	if( container_superblock->metadata_area_block_number == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported metadata area block number: %" PRIu32 ".",
+		 function,
+		 container_superblock->metadata_area_block_number );
 
 		return( -1 );
 	}

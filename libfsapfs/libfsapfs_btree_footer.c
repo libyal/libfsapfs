@@ -25,6 +25,7 @@
 #include <types.h>
 
 #include "libfsapfs_btree_footer.h"
+#include "libfsapfs_debug.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 
@@ -211,20 +212,20 @@ int libfsapfs_btree_footer_read_data(
 	 ( (fsapfs_btree_footer_t *) data )->maximum_value_size,
 	 btree_footer->maximum_value_size );
 
-	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsapfs_btree_footer_t *) data )->number_of_entries,
-	 btree_footer->number_of_entries );
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_btree_footer_t *) data )->unknown1,
+		 ( (fsapfs_btree_footer_t *) data )->flags,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: flags\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
+		libfsapfs_debug_print_btree_flags(
+		 value_32bit );
+		libcnotify_printf(
+		 "\n" );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_btree_footer_t *) data )->node_size,
@@ -254,16 +255,19 @@ int libfsapfs_btree_footer_read_data(
 		 function,
 		 btree_footer->maximum_value_size );
 
-		libcnotify_printf(
-		 "%s: number of entries\t\t\t: %" PRIu64 "\n",
-		 function,
-		 btree_footer->number_of_entries );
-
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_btree_footer_t *) data )->number_of_nodes,
+		 ( (fsapfs_btree_footer_t *) data )->total_number_of_keys,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: number of nodes\t\t\t: %" PRIu64 "\n",
+		 "%s: total number of keys\t\t\t: %" PRIu64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_btree_footer_t *) data )->total_number_of_nodes,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: total number of nodes\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

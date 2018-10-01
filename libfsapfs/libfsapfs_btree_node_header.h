@@ -1,5 +1,5 @@
 /*
- * The B-tree header functions
+ * The B-tree node header functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_BTREE_HEADER_H )
-#define _LIBFSAPFS_BTREE_HEADER_H
+#if !defined( _LIBFSAPFS_BTREE_NODE_HEADER_H )
+#define _LIBFSAPFS_BTREE_NODE_HEADER_H
 
 #include <common.h>
 #include <types.h>
@@ -31,9 +31,9 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_btree_header libfsapfs_btree_header_t;
+typedef struct libfsapfs_btree_node_header libfsapfs_btree_node_header_t;
 
-struct libfsapfs_btree_header
+struct libfsapfs_btree_node_header
 {
 	/* The flags
 	 */
@@ -64,16 +64,16 @@ struct libfsapfs_btree_header
 	uint16_t unused_data_size;
 };
 
-int libfsapfs_btree_header_initialize(
-     libfsapfs_btree_header_t **btree_header,
+int libfsapfs_btree_node_header_initialize(
+     libfsapfs_btree_node_header_t **btree_node_header,
      libcerror_error_t **error );
 
-int libfsapfs_btree_header_free(
-     libfsapfs_btree_header_t **btree_header,
+int libfsapfs_btree_node_header_free(
+     libfsapfs_btree_node_header_t **btree_node_header,
      libcerror_error_t **error );
 
-int libfsapfs_btree_header_read_data(
-     libfsapfs_btree_header_t *btree_header,
+int libfsapfs_btree_node_header_read_data(
+     libfsapfs_btree_node_header_t *btree_node_header,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
@@ -82,5 +82,5 @@ int libfsapfs_btree_header_read_data(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_BTREE_HEADER_H ) */
+#endif /* !defined( _LIBFSAPFS_BTREE_NODE_HEADER_H ) */
 

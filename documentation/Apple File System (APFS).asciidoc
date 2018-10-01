@@ -41,6 +41,7 @@ in the section entitled "GNU Free Documentation License".
 |===
 | Version | Author | Date | Comments
 | 0.0.1 | J.B. Metz | September 2018 | Initial version.
+| 0.0.2 | J.B. Metz | October 2018 | Additional format information.
 |===
 
 :numbered:
@@ -69,6 +70,7 @@ including Apple's reference documentation `[APPLE18]`.
 The following version of programs were used to test the information within this document:
 
 * macOS 10.13 (High Sierra)
+* macOS 10.14 (Mojave)
 
 === Terminology
 
@@ -122,7 +124,8 @@ The volume key bag is encrypted using the "volume identifier" of the
 corresponding key bag entry, as both the primary and tweak key. The sector
 number, relative to the start of the container, is used as the tweak value.
 
-The file system B-tree is encrypted using the ...
+The file system B-tree is encrypted using the volume master key and the sector
+number, relative to the start of the container, is used as the tweak value.
 
 [yellow-background]*TODO: complete this section.*
 
@@ -249,12 +252,18 @@ The object subtypes are the same as the <<object_types,Object types>>.
 A B-tree consists of:
 
 * B-tree (root or node) object
-* B-tree header
-* B-tree entries
-* crypto key data
+* B-tree node header
+* B-tree entries (table of contents)
+* keys data, where the first key is stored after the entries in increasing order
+* Optional key free list
 * unused data
-* values data
-* B-tree footer
+* Optional value free list
+* values data, where the first value is stored before the footer in descending order
+* Optional B-tree footer, which is only stored in the root node
+
+[NOTE]
+`[APPLE18]` combines the B-Tree object and B-tree node header into a single
+structure referred to as btree_node_phys_t.
 
 === B-tree object
 
@@ -263,7 +272,7 @@ A B-tree consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object header_
+4+| _Object header (btn_o)_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
@@ -280,7 +289,7 @@ See section: <<object_subtypes,Object subtypes>>
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object header_
+4+| _Object header (btn_o)_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
@@ -292,46 +301,53 @@ See section: <<object_types,Object types>>
 See section: <<object_subtypes,Object subtypes>>
 |===
 
-=== B-tree header
+=== B-tree node header
 
-The B-tree header is stored after the B-tree root or node object.
+The B-tree node header is stored after the B-tree root or node object.
 
-The B-tree header is 24 bytes of size and consists of:
+The B-tree node header is 24 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 2 | | Flags (flags) +
-See section: <<btree_flags,B-tree flags>>
-| 2 | 2 | | Level (level)
-| 4 | 4 | | Number of keys (key_count)
-| 8 | 2 | | Entries data offset (table_space_offset) +
-Contains an offset relative to the end of the B-tree header
-| 10 | 2 | | Entries data size (table_space_length)
-| 12 | 2 | | Unused data offset (free_space_offset) +
-Contains an offset relative to the end of the entries data
-| 14 | 2 | | Unused data size (free_space_length)
-| 16 | 2 | | [yellow-background]*Unknown (key_free_list_space_offset)* +
-Contains an offset relative to ??? or -1 (0xffff) if not set
-| 18 | 2 | | [yellow-background]*Unknown (key_free_list_space_length)*
-| 20 | 2 | | [yellow-background]*Unknown (val_free_list_space_offset)* +
-Contains an offset relative to ??? or -1 (0xffff) if not set
-| 22 | 2 | | [yellow-background]*Unknown (val_free_list_space_length)*
+| 0 | 2 | | Flags (btn_flags) +
+See section: <<btree_node_flags,B-tree node flags>>
+| 2 | 2 | | Level (btn_level)
+| 4 | 4 | | Number of keys in the node (btn_nkeys)
+4+| _Table space (btn_table_space)_
+| 8 | 2 | | Entries data offset +
+Contains an offset relative to the end of the B-tree node header or -1 (0xffff) if not set (invalid)
+| 10 | 2 | | Entries data size
+4+| _Free space (btn_free_space)_
+| 12 | 2 | | Unused data offset +
+Contains an offset relative to the end of the entries data or -1 (0xffff) if not set (invalid)
+| 14 | 2 | | Unused data size
+4+| _Key free list (btn_key_free_list)_
+| 16 | 2 | | Unused key list offset +
+Contains an offset relative to ??? or -1 (0xffff) if not set (invalid)
+| 18 | 2 | | Unused key list size
+4+| _Value free list (btn_val_free_list)_
+| 20 | 2 | | Unused value list offset +
+Contains an offset relative to ??? or -1 (0xffff) if not set (invalid)
+| 22 | 2 | | Unused value list size
 |===
 
-==== [[btree_flags]]B-tree flags
+==== [[btree_node_flags]]B-tree node flags
 
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x0001 | |  [yellow-background]*Unknown*
-| 0x0002 | |  [yellow-background]*Unknown*
-| 0x0004 | |  [yellow-background]*Unknown (Has fixed-size B-tree entry?)*
+| 0x0001 | BTNODE_ROOT | Is root
+| 0x0002 | BTNODE_LEAF | Is leaf
+| 0x0004 | BTNODE_FIXED_KV_SIZE | Has a fixed-size entry (key and value)
+| | |
+| 0x8000 | BTNODE_CHECK_KOFF_INVAL | In transient state +
+This flag is used for in-memory purposes only
 |===
 
 === B-tree entries
 
-The B-tree entries are stored after the B-tree header.
+The B-tree entries are stored after the B-tree node header.
 
 ==== Fixed-size B-tree entry
 
@@ -343,7 +359,7 @@ The fixed-size B-tree entry is 4 bytes of size and consists of:
 | 0 | 2 | | Key data offset (key_offs) +
 Contains an offset relative to the end of the entries data
 | 2 | 2 | | Value data offset (value_offs) +
-Contains a reversed offset relative to the startof the B-Tree footer
+Contains a reversed offset relative to the start of the B-Tree footer
 |===
 
 ==== Variable-size B-tree entry
@@ -357,29 +373,47 @@ The variable-size B-tree entry is 8 bytes of size and consists of:
 Contains an offset relative to the end of the entries data
 | 2 | 2 | | Key data size (key_len)
 | 4 | 2 | | Value data offset (value_offs) +
-Contains a reversed offset relative to the startof the B-Tree footer
+Contains a reversed offset relative to the start of the B-Tree footer
 | 6 | 2 | | Value data size (value_len)
 |===
 
 === B-tree footer
 
-The B-tree footer is stored at the end of the block.
+The B-tree footer is stored at the end of the block that contains the B-tree
+root boject.
 
-The B-tree footer is 40 bytes of size and consists of:
+The B-tree footer (btree_info_t) is 40 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 4 | | [yellow-background]*Unknown*
-| 4 | 4 | | Node size (nodesize)
-| 8 | 4 | | Key size (key_size) +
+4+| _Static information (btree_info_fixed_t)_
+| 0 | 4 | | Flags (bt_flags) +
+See section: <<btree_flags,B-tree flags>>
+| 4 | 4 | | Node size (bt_node_size)
+| 8 | 4 | | Key size (bt_key_size) +
 Set to 0 if key has a variable size
-| 12 | 4 | | Value size (val_size) +
+| 12 | 4 | | Value size (bt_val_size) +
 Set to 0 if value has a variable size
-| 16 | 4 | | Maximum key size (key_max_size)
-| 20 | 4 | | Maximum value size (val_max_size)
-| 24 | 8 | | Number of entries (entries_cnt)
-| 32 | 8 | | Number of nodes (nodes_cnt)
+4+|
+| 16 | 4 | | Maximum key size (bt_longest_key)
+| 20 | 4 | | Maximum value size (bt_longest_val)
+| 24 | 8 | | Total number of keys (bt_key_count)
+| 32 | 8 | | Total number of nodes (bt_node_count)
+|===
+
+==== [[btree_flags]]B-tree flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | BTREE_UINT64_KEYS | [yellow-background]*Unknown*
+| 0x00000002 | BTREE_SEQUENTIAL_INSERT | [yellow-background]*Unknown*
+| 0x00000004 | BTREE_ALLOW_GHOSTS | [yellow-background]*Unknown*
+| 0x00000008 | BTREE_EPHEMERAL | [yellow-background]*Unknown*
+| 0x00000010 | BTREE_PHYSICAL | [yellow-background]*Unknown*
+| 0x00000020 | BTREE_NONPERSISTENT | [yellow-background]*Unknown*
+| 0x00000040 | BTREE_KV_NONALIGNED | [yellow-background]*Unknown*
 |===
 
 == The container

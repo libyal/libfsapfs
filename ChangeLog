@@ -11,6 +11,8 @@ library:
 ** add libfsapfs_file_entry_get_sub_file_entry_by_utf8_name
 ** add libfsapfs_file_entry_get_sub_file_entry_by_utf16_name
 * change container read bootstap as advised in documentation
+** validate checksum
+** read backup container superblocks
 * refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 * Create libfsapfs_container_superblock_get_identifier
 * Create libfsapfs_volume_superblock_get_identifier
@@ -20,6 +22,8 @@ Python bindings:
 * add support for posix time in nano seconds
 
 Tools:
+* fsapfsinfo tool
+** add volume selection
 * add fsapfsmount tool
 
 Tests:

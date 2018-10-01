@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_btree_header"
-	ProjectGUID="{29DC3F04-F0C5-4868-92B1-9C5CB1AD051D}"
-	RootNamespace="fsapfs_test_btree_header"
+	Name="fsapfs_test_btree_node_header"
+	ProjectGUID="{E3F76744-7415-4C05-9D98-43A40BF7D010}"
+	RootNamespace="fsapfs_test_btree_node_header"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_btree_header.c"
+				RelativePath="..\..\tests\fsapfs_test_btree_node_header.c"
 				>
 			</File>
 			<File

@@ -1777,7 +1777,7 @@ ssize_t libfsapfs_file_entry_read_buffer(
 	}
 	read_count = libfdata_stream_read_buffer(
 	              internal_file_entry->data_stream,
-	              internal_file_entry->file_io_handle,
+	              (intptr_t *) internal_file_entry->file_io_handle,
 	              (uint8_t *) buffer,
 	              buffer_size,
 	              0,
@@ -1878,11 +1878,12 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
 			goto on_error;
 		}
 	}
-	read_count = libfdata_stream_read_buffer(
+	read_count = libfdata_stream_read_buffer_at_offset(
 	              internal_file_entry->data_stream,
-	              internal_file_entry->file_io_handle,
+	              (intptr_t *) internal_file_entry->file_io_handle,
 	              (uint8_t *) buffer,
 	              buffer_size,
+	              offset,
 	              0,
 	              error );
 

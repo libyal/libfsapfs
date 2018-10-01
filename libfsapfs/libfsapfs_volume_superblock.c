@@ -1027,7 +1027,7 @@ int libfsapfs_volume_superblock_read_data(
 		 ( (fsapfs_volume_superblock_t *) data )->next_document_identifier,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: next document identifier\t: %" PRIu32 "\n",
+		 "%s: next document identifier\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 

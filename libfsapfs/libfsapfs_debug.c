@@ -33,6 +33,88 @@
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
+/* Prints the B-tree flags
+ */
+void libfsapfs_debug_print_btree_flags(
+      uint32_t btree_flags )
+{
+	if( ( btree_flags & 0x00000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_UINT64_KEYS)\n" );
+	}
+	if( ( btree_flags & 0x00000002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_SEQUENTIAL_INSERT)\n" );
+	}
+	if( ( btree_flags & 0x00000004 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_ALLOW_GHOSTS)\n" );
+	}
+	if( ( btree_flags & 0x00000008 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_EPHEMERAL)\n" );
+	}
+	if( ( btree_flags & 0x00000010 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_PHYSICAL)\n" );
+	}
+	if( ( btree_flags & 0x00000020 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_NONPERSISTENT)\n" );
+	}
+	if( ( btree_flags & 0x00000040 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_KV_NONALIGNED)\n" );
+	}
+}
+
+/* Prints the B-tree node flags
+ */
+void libfsapfs_debug_print_btree_node_flags(
+      uint16_t btree_node_flags )
+{
+	if( ( btree_node_flags & 0x0001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tIs root (BTNODE_ROOT)\n" );
+	}
+	if( ( btree_node_flags & 0x0002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tIs leaf (BTNODE_LEAF)\n" );
+	}
+	if( ( btree_node_flags & 0x0004 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tHas fixed-size entry (BTNODE_FIXED_KV_SIZE)\n" );
+	}
+
+	if( ( btree_node_flags & 0x8000 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tIn transient state (BTNODE_CHECK_KOFF_INVAL)\n" );
+	}
+}
+
+/* Prints the checkpoint flags
+ */
+void libfsapfs_debug_print_checkpoint_flags(
+      uint32_t checkpoint_flags )
+{
+	if( ( checkpoint_flags & 0x00000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(CHECKPOINT_MAP_LAST)\n" );
+	}
+}
+
 /* Prints the directory entry flags
  */
 void libfsapfs_debug_print_directory_entry_flags(

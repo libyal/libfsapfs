@@ -48,6 +48,14 @@ struct libfsapfs_container_superblock
 	 */
 	uint8_t container_identifier[ 16 ];
 
+	/* The number of blocks of the metadata area
+	 */
+	uint32_t metadata_area_number_of_blocks;
+
+	/* The block number of the metadata area
+	 */
+	uint32_t metadata_area_block_number;
+
 	/* The space manager object identifier
 	 */
 	uint64_t space_manager_object_identifier;

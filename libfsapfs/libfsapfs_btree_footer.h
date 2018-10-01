@@ -50,10 +50,6 @@ struct libfsapfs_btree_footer
 	/* The maximum value size
 	 */
 	uint32_t maximum_value_size;
-
-	/* The number of entries
-	 */
-	uint64_t number_of_entries;
 };
 
 int libfsapfs_btree_footer_initialize(

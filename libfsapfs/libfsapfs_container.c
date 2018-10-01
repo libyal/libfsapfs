@@ -1099,8 +1099,6 @@ int libfsapfs_internal_container_open_read(
 	}
 	internal_container->io_handle->block_size = internal_container->superblock->block_size;
 
-	file_offset += internal_container->io_handle->block_size;
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -1121,6 +1119,8 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
+	file_offset = internal_container->superblock->metadata_area_block_number * internal_container->io_handle->block_size;
+
 	if( libfsapfs_checkpoint_map_read_file_io_handle(
 	     internal_container->physical_map,
 	     file_io_handle,
@@ -1138,8 +1138,6 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	file_offset += internal_container->io_handle->block_size;
-
 /* TODO read previous copies of superblock and physical map */
 
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1162,6 +1160,8 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
+	file_offset += internal_container->io_handle->block_size;
+
 	if( libfsapfs_container_superblock_read_file_io_handle(
 	     container_superblock,
 	     file_io_handle,

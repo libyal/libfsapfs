@@ -26,6 +26,7 @@
 
 #include "libfsapfs_checkpoint_map.h"
 #include "libfsapfs_checkpoint_map_entry.h"
+#include "libfsapfs_debug.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
@@ -406,6 +407,10 @@ int libfsapfs_checkpoint_map_read_data(
 		 "%s: flags\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
+		libfsapfs_debug_print_checkpoint_flags(
+		 value_32bit );
+		libcnotify_printf(
+		 "\n" );
 
 		libcnotify_printf(
 		 "%s: number of entries\t\t\t: %" PRIu32 "\n",

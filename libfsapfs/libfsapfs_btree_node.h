@@ -27,7 +27,7 @@
 
 #include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_footer.h"
-#include "libfsapfs_btree_header.h"
+#include "libfsapfs_btree_node_header.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 
@@ -49,7 +49,7 @@ struct libfsapfs_btree_node
 
 	/* The B-tree header
 	 */
-	libfsapfs_btree_header_t *header;
+	libfsapfs_btree_node_header_t *node_header;
 
 	/* The B-tree footer
 	 */

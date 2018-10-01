@@ -1,5 +1,5 @@
 /*
- * Library btree_header type test program
+ * Library btree_node_header type test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,22 +33,22 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_btree_header.h"
+#include "../libfsapfs/libfsapfs_btree_node_header.h"
 
-uint8_t fsapfs_test_btree_header_data1[ 24 ] = {
+uint8_t fsapfs_test_btree_node_header_data1[ 24 ] = {
 	0x07, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0xc0, 0x01, 0x20, 0x00, 0xa0, 0x0d,
 	0x00, 0x00, 0x10, 0x00, 0x10, 0x00, 0x10, 0x00 };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_btree_header_initialize function
+/* Tests the libfsapfs_btree_node_header_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_header_initialize(
+int fsapfs_test_btree_node_header_initialize(
      void )
 {
 	libcerror_error_t *error               = NULL;
-	libfsapfs_btree_header_t *btree_header = NULL;
+	libfsapfs_btree_node_header_t *btree_node_header = NULL;
 	int result                             = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
@@ -59,8 +59,8 @@ int fsapfs_test_btree_header_initialize(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_btree_header_initialize(
-	          &btree_header,
+	result = libfsapfs_btree_node_header_initialize(
+	          &btree_node_header,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -69,15 +69,15 @@ int fsapfs_test_btree_header_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "btree_header",
-	 btree_header );
+	 "btree_node_header",
+	 btree_node_header );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsapfs_btree_header_free(
-	          &btree_header,
+	result = libfsapfs_btree_node_header_free(
+	          &btree_node_header,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -86,8 +86,8 @@ int fsapfs_test_btree_header_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "btree_header",
-	 btree_header );
+	 "btree_node_header",
+	 btree_node_header );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -95,7 +95,7 @@ int fsapfs_test_btree_header_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_header_initialize(
+	result = libfsapfs_btree_node_header_initialize(
 	          NULL,
 	          &error );
 
@@ -111,13 +111,13 @@ int fsapfs_test_btree_header_initialize(
 	libcerror_error_free(
 	 &error );
 
-	btree_header = (libfsapfs_btree_header_t *) 0x12345678UL;
+	btree_node_header = (libfsapfs_btree_node_header_t *) 0x12345678UL;
 
-	result = libfsapfs_btree_header_initialize(
-	          &btree_header,
+	result = libfsapfs_btree_node_header_initialize(
+	          &btree_node_header,
 	          &error );
 
-	btree_header = NULL;
+	btree_node_header = NULL;
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -137,22 +137,22 @@ int fsapfs_test_btree_header_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_btree_header_initialize with malloc failing
+		/* Test libfsapfs_btree_node_header_initialize with malloc failing
 		 */
 		fsapfs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsapfs_btree_header_initialize(
-		          &btree_header,
+		result = libfsapfs_btree_node_header_initialize(
+		          &btree_node_header,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsapfs_test_malloc_attempts_before_fail = -1;
 
-			if( btree_header != NULL )
+			if( btree_node_header != NULL )
 			{
-				libfsapfs_btree_header_free(
-				 &btree_header,
+				libfsapfs_btree_node_header_free(
+				 &btree_node_header,
 				 NULL );
 			}
 		}
@@ -164,8 +164,8 @@ int fsapfs_test_btree_header_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "btree_header",
-			 btree_header );
+			 "btree_node_header",
+			 btree_node_header );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -179,22 +179,22 @@ int fsapfs_test_btree_header_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_btree_header_initialize with memset failing
+		/* Test libfsapfs_btree_node_header_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_btree_header_initialize(
-		          &btree_header,
+		result = libfsapfs_btree_node_header_initialize(
+		          &btree_node_header,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
 		{
 			fsapfs_test_memset_attempts_before_fail = -1;
 
-			if( btree_header != NULL )
+			if( btree_node_header != NULL )
 			{
-				libfsapfs_btree_header_free(
-				 &btree_header,
+				libfsapfs_btree_node_header_free(
+				 &btree_node_header,
 				 NULL );
 			}
 		}
@@ -206,8 +206,8 @@ int fsapfs_test_btree_header_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "btree_header",
-			 btree_header );
+			 "btree_node_header",
+			 btree_node_header );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -227,19 +227,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( btree_header != NULL )
+	if( btree_node_header != NULL )
 	{
-		libfsapfs_btree_header_free(
-		 &btree_header,
+		libfsapfs_btree_node_header_free(
+		 &btree_node_header,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_btree_header_free function
+/* Tests the libfsapfs_btree_node_header_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_header_free(
+int fsapfs_test_btree_node_header_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -247,7 +247,7 @@ int fsapfs_test_btree_header_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_header_free(
+	result = libfsapfs_btree_node_header_free(
 	          NULL,
 	          &error );
 
@@ -274,20 +274,20 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_btree_header_read_data function
+/* Tests the libfsapfs_btree_node_header_read_data function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_btree_header_read_data(
+int fsapfs_test_btree_node_header_read_data(
      void )
 {
 	libcerror_error_t *error               = NULL;
-	libfsapfs_btree_header_t *btree_header = NULL;
+	libfsapfs_btree_node_header_t *btree_node_header = NULL;
 	int result                             = 0;
 
 	/* Initialize test
 	 */
-	result = libfsapfs_btree_header_initialize(
-	          &btree_header,
+	result = libfsapfs_btree_node_header_initialize(
+	          &btree_node_header,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -296,8 +296,8 @@ int fsapfs_test_btree_header_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "btree_header",
-	 btree_header );
+	 "btree_node_header",
+	 btree_node_header );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -305,9 +305,9 @@ int fsapfs_test_btree_header_read_data(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_btree_header_read_data(
-	          btree_header,
-	          fsapfs_test_btree_header_data1,
+	result = libfsapfs_btree_node_header_read_data(
+	          btree_node_header,
+	          fsapfs_test_btree_node_header_data1,
 	          24,
 	          &error );
 
@@ -322,9 +322,9 @@ int fsapfs_test_btree_header_read_data(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_btree_header_read_data(
+	result = libfsapfs_btree_node_header_read_data(
 	          NULL,
-	          fsapfs_test_btree_header_data1,
+	          fsapfs_test_btree_node_header_data1,
 	          24,
 	          &error );
 
@@ -340,8 +340,8 @@ int fsapfs_test_btree_header_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_btree_header_read_data(
-	          btree_header,
+	result = libfsapfs_btree_node_header_read_data(
+	          btree_node_header,
 	          NULL,
 	          24,
 	          &error );
@@ -358,9 +358,9 @@ int fsapfs_test_btree_header_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_btree_header_read_data(
-	          btree_header,
-	          fsapfs_test_btree_header_data1,
+	result = libfsapfs_btree_node_header_read_data(
+	          btree_node_header,
+	          fsapfs_test_btree_node_header_data1,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
@@ -376,9 +376,9 @@ int fsapfs_test_btree_header_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_btree_header_read_data(
-	          btree_header,
-	          fsapfs_test_btree_header_data1,
+	result = libfsapfs_btree_node_header_read_data(
+	          btree_node_header,
+	          fsapfs_test_btree_node_header_data1,
 	          0,
 	          &error );
 
@@ -396,8 +396,8 @@ int fsapfs_test_btree_header_read_data(
 
 	/* Clean up
 	 */
-	result = libfsapfs_btree_header_free(
-	          &btree_header,
+	result = libfsapfs_btree_node_header_free(
+	          &btree_node_header,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -406,8 +406,8 @@ int fsapfs_test_btree_header_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "btree_header",
-	 btree_header );
+	 "btree_node_header",
+	 btree_node_header );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -421,10 +421,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( btree_header != NULL )
+	if( btree_node_header != NULL )
 	{
-		libfsapfs_btree_header_free(
-		 &btree_header,
+		libfsapfs_btree_node_header_free(
+		 &btree_node_header,
 		 NULL );
 	}
 	return( 0 );
@@ -450,16 +450,16 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_header_initialize",
-	 fsapfs_test_btree_header_initialize );
+	 "libfsapfs_btree_node_header_initialize",
+	 fsapfs_test_btree_node_header_initialize );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_header_free",
-	 fsapfs_test_btree_header_free );
+	 "libfsapfs_btree_node_header_free",
+	 fsapfs_test_btree_node_header_free );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_btree_header_read_data",
-	 fsapfs_test_btree_header_read_data );
+	 "libfsapfs_btree_node_header_read_data",
+	 fsapfs_test_btree_node_header_read_data );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

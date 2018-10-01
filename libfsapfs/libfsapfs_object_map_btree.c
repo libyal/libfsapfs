@@ -379,7 +379,7 @@ int libfsapfs_object_map_btree_read_data(
 
 		goto on_error;
 	}
-	if( btree_node->header->flags != 0x0007 )
+	if( ( btree_node->node_header->flags & 0x0005 ) != 0x0005 )
 	{
 		libcerror_error_set(
 		 error,
@@ -387,7 +387,7 @@ int libfsapfs_object_map_btree_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported flags: 0x%04" PRIx16 ".",
 		 function,
-		 btree_node->header->flags );
+		 btree_node->node_header->flags );
 
 		goto on_error;
 	}

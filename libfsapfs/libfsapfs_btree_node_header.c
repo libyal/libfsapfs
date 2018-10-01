@@ -1,5 +1,5 @@
 /*
- * The B-tree header functions
+ * The B-tree node header functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -24,69 +24,70 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsapfs_btree_header.h"
+#include "libfsapfs_btree_node_header.h"
+#include "libfsapfs_debug.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 
 #include "fsapfs_btree.h"
 #include "fsapfs_object.h"
 
-/* Creates a B-tree header
- * Make sure the value btree_header is referencing, is set to NULL
+/* Creates a B-tree node header
+ * Make sure the value btree_node_header is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_header_initialize(
-     libfsapfs_btree_header_t **btree_header,
+int libfsapfs_btree_node_header_initialize(
+     libfsapfs_btree_node_header_t **btree_node_header,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_header_initialize";
+	static char *function = "libfsapfs_btree_node_header_initialize";
 
-	if( btree_header == NULL )
+	if( btree_node_header == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree header.",
+		 "%s: invalid B-tree node header.",
 		 function );
 
 		return( -1 );
 	}
-	if( *btree_header != NULL )
+	if( *btree_node_header != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid B-tree header value already set.",
+		 "%s: invalid B-tree node header value already set.",
 		 function );
 
 		return( -1 );
 	}
-	*btree_header = memory_allocate_structure(
-	                 libfsapfs_btree_header_t );
+	*btree_node_header = memory_allocate_structure(
+	                 libfsapfs_btree_node_header_t );
 
-	if( *btree_header == NULL )
+	if( *btree_node_header == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create B-tree header.",
+		 "%s: unable to create B-tree node header.",
 		 function );
 
 		goto on_error;
 	}
 	if( memory_set(
-	     *btree_header,
+	     *btree_node_header,
 	     0,
-	     sizeof( libfsapfs_btree_header_t ) ) == NULL )
+	     sizeof( libfsapfs_btree_node_header_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear B-tree header.",
+		 "%s: unable to clear B-tree node header.",
 		 function );
 
 		goto on_error;
@@ -94,69 +95,69 @@ int libfsapfs_btree_header_initialize(
 	return( 1 );
 
 on_error:
-	if( *btree_header != NULL )
+	if( *btree_node_header != NULL )
 	{
 		memory_free(
-		 *btree_header );
+		 *btree_node_header );
 
-		*btree_header = NULL;
+		*btree_node_header = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees a B-tree header
+/* Frees a B-tree node header
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_header_free(
-     libfsapfs_btree_header_t **btree_header,
+int libfsapfs_btree_node_header_free(
+     libfsapfs_btree_node_header_t **btree_node_header,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_header_free";
+	static char *function = "libfsapfs_btree_node_header_free";
 
-	if( btree_header == NULL )
+	if( btree_node_header == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree header.",
+		 "%s: invalid B-tree node header.",
 		 function );
 
 		return( -1 );
 	}
-	if( *btree_header != NULL )
+	if( *btree_node_header != NULL )
 	{
 		memory_free(
-		 *btree_header );
+		 *btree_node_header );
 
-		*btree_header = NULL;
+		*btree_node_header = NULL;
 	}
 	return( 1 );
 }
 
-/* Reads the B-tree header
+/* Reads the B-tree node header
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_btree_header_read_data(
-     libfsapfs_btree_header_t *btree_header,
+int libfsapfs_btree_node_header_read_data(
+     libfsapfs_btree_node_header_t *btree_node_header,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_btree_header_read_data";
+	static char *function = "libfsapfs_btree_node_header_read_data";
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	size_t block_offset   = 0;
 	uint16_t value_16bit  = 0;
 #endif
 
-	if( btree_header == NULL )
+	if( btree_node_header == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid B-tree header.",
+		 "%s: invalid B-tree node header.",
 		 function );
 
 		return( -1 );
@@ -172,7 +173,7 @@ int libfsapfs_btree_header_read_data(
 
 		return( -1 );
 	}
-	if( ( data_size < sizeof( fsapfs_btree_header_t ) )
+	if( ( data_size < sizeof( fsapfs_btree_node_header_t ) )
 	 || ( data_size > (size_t) SSIZE_MAX ) )
 	{
 		libcerror_error_set(
@@ -188,94 +189,98 @@ int libfsapfs_btree_header_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: B-tree header data:\n",
+		 "%s: B-tree node header data:\n",
 		 function );
 		libcnotify_print_data(
 		 data,
-		 sizeof( fsapfs_btree_header_t ),
+		 sizeof( fsapfs_btree_node_header_t ),
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (fsapfs_btree_header_t *) data )->flags,
-	 btree_header->flags );
+	 ( (fsapfs_btree_node_header_t *) data )->flags,
+	 btree_node_header->flags );
 
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (fsapfs_btree_header_t *) data )->level,
-	 btree_header->level );
+	 ( (fsapfs_btree_node_header_t *) data )->level,
+	 btree_node_header->level );
 
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_btree_header_t *) data )->number_of_keys,
-	 btree_header->number_of_keys );
+	 ( (fsapfs_btree_node_header_t *) data )->number_of_keys,
+	 btree_node_header->number_of_keys );
 
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (fsapfs_btree_header_t *) data )->entries_data_offset,
-	 btree_header->entries_data_offset );
+	 ( (fsapfs_btree_node_header_t *) data )->entries_data_offset,
+	 btree_node_header->entries_data_offset );
 
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (fsapfs_btree_header_t *) data )->entries_data_size,
-	 btree_header->entries_data_size );
+	 ( (fsapfs_btree_node_header_t *) data )->entries_data_size,
+	 btree_node_header->entries_data_size );
 
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (fsapfs_btree_header_t *) data )->unused_data_offset,
-	 btree_header->unused_data_offset );
+	 ( (fsapfs_btree_node_header_t *) data )->unused_data_offset,
+	 btree_node_header->unused_data_offset );
 
 	byte_stream_copy_to_uint16_little_endian(
-	 ( (fsapfs_btree_header_t *) data )->unused_data_size,
-	 btree_header->unused_data_size );
+	 ( (fsapfs_btree_node_header_t *) data )->unused_data_size,
+	 btree_node_header->unused_data_size );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: flags\t\t\t\t\t: 0x%04" PRIx16 "\n",
+		 "%s: flags\t\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
-		 btree_header->flags );
+		 btree_node_header->flags );
+		libfsapfs_debug_print_btree_node_flags(
+		 btree_node_header->flags );
+		libcnotify_printf(
+		 "\n" );
 
 		libcnotify_printf(
-		 "%s: level\t\t\t\t\t: %" PRIu16 "\n",
+		 "%s: level\t\t\t\t: %" PRIu16 "\n",
 		 function,
-		 btree_header->level );
+		 btree_node_header->level );
 
 		libcnotify_printf(
 		 "%s: number of keys\t\t\t: %" PRIu32 "\n",
 		 function,
-		 btree_header->number_of_keys );
+		 btree_node_header->number_of_keys );
 
-		block_offset = sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_header_t );
-
-		libcnotify_printf(
-		 "%s: entries data offset\t\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
-		 function,
-		 btree_header->entries_data_offset,
-		 (size_t) btree_header->entries_data_offset + block_offset );
-
-		block_offset += btree_header->entries_data_offset;
+		block_offset = sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_node_header_t );
 
 		libcnotify_printf(
-		 "%s: entries data size\t\t\t: %" PRIu16 " (block offset: 0x%04" PRIzx ")\n",
+		 "%s: entries data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
 		 function,
-		 btree_header->entries_data_size,
-		 (size_t) btree_header->entries_data_size + block_offset );
+		 btree_node_header->entries_data_offset,
+		 (size_t) btree_node_header->entries_data_offset + block_offset );
 
-		block_offset += btree_header->entries_data_size;
+		block_offset += btree_node_header->entries_data_offset;
 
 		libcnotify_printf(
-		 "%s: unused data offset\t\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
+		 "%s: entries data size\t\t: %" PRIu16 " (block offset: 0x%04" PRIzx ")\n",
 		 function,
-		 btree_header->unused_data_offset,
-		 (size_t) btree_header->unused_data_offset + block_offset );
+		 btree_node_header->entries_data_size,
+		 (size_t) btree_node_header->entries_data_size + block_offset );
 
-		block_offset += btree_header->unused_data_offset;
+		block_offset += btree_node_header->entries_data_size;
+
+		libcnotify_printf(
+		 "%s: unused data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
+		 function,
+		 btree_node_header->unused_data_offset,
+		 (size_t) btree_node_header->unused_data_offset + block_offset );
+
+		block_offset += btree_node_header->unused_data_offset;
 
 		libcnotify_printf(
 		 "%s: unused data size\t\t\t: %" PRIu16 " (block offset: 0x%04" PRIzx ")\n",
 		 function,
-		 btree_header->unused_data_size,
-		 (size_t) btree_header->unused_data_size + block_offset );
+		 btree_node_header->unused_data_size,
+		 (size_t) btree_node_header->unused_data_size + block_offset );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_header_t *) data )->unknown5,
+		 ( (fsapfs_btree_node_header_t *) data )->unknown5,
 		 value_16bit );
 		libcnotify_printf(
 		 "%s: unknown5\t\t\t\t: 0x%04" PRIx16 "\n",
@@ -283,7 +288,7 @@ int libfsapfs_btree_header_read_data(
 		 value_16bit );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_header_t *) data )->unknown6,
+		 ( (fsapfs_btree_node_header_t *) data )->unknown6,
 		 value_16bit );
 		libcnotify_printf(
 		 "%s: unknown6\t\t\t\t: %" PRIu16 "\n",
@@ -291,7 +296,7 @@ int libfsapfs_btree_header_read_data(
 		 value_16bit );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_header_t *) data )->unknown7,
+		 ( (fsapfs_btree_node_header_t *) data )->unknown7,
 		 value_16bit );
 		libcnotify_printf(
 		 "%s: unknown7\t\t\t\t: 0x%04" PRIx16 "\n",
@@ -299,7 +304,7 @@ int libfsapfs_btree_header_read_data(
 		 value_16bit );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_header_t *) data )->unknown8,
+		 ( (fsapfs_btree_node_header_t *) data )->unknown8,
 		 value_16bit );
 		libcnotify_printf(
 		 "%s: unknown8\t\t\t\t: %" PRIu16 "\n",

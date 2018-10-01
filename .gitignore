@@ -126,8 +126,8 @@ stamp-h[1-9]
 /tests/*.exe
 /tests/fsapfs_test_btree_entry
 /tests/fsapfs_test_btree_footer
-/tests/fsapfs_test_btree_header
 /tests/fsapfs_test_btree_node
+/tests/fsapfs_test_btree_node_header
 /tests/fsapfs_test_checkpoint_map
 /tests/fsapfs_test_checkpoint_map_entry
 /tests/fsapfs_test_container

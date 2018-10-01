@@ -182,11 +182,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_btree_header.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_node.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_btree_node.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_node_header.c"
 				>
 			</File>
 			<File
@@ -376,11 +376,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_btree_header.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_node.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_btree_node.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_btree_node_header.h"
 				>
 			</File>
 			<File

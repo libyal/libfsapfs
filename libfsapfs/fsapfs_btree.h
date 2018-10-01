@@ -29,11 +29,11 @@
 extern "C" {
 #endif
 
-typedef struct fsapfs_btree_header fsapfs_btree_header_t;
+typedef struct fsapfs_btree_node_header fsapfs_btree_node_header_t;
 
-struct fsapfs_btree_header
+struct fsapfs_btree_node_header
 {
-	/* The flags
+	/* The node flags
 	 * Consists of 2 bytes
 	 */
 	uint8_t flags[ 2 ];
@@ -133,10 +133,10 @@ typedef struct fsapfs_btree_footer fsapfs_btree_footer_t;
 
 struct fsapfs_btree_footer
 {
-	/* Unknown
+	/* The flags
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 4 ];
+	uint8_t flags[ 4 ];
 
 	/* The node size
 	 * Consists of 4 bytes
@@ -163,15 +163,15 @@ struct fsapfs_btree_footer
 	 */
 	uint8_t maximum_value_size[ 4 ];
 
-	/* The number of entries
+	/* The total number of keys
 	 * Consists of 8 bytes
 	 */
-	uint8_t number_of_entries[ 8 ];
+	uint8_t total_number_of_keys[ 8 ];
 
-	/* The number of nodes
+	/* The total number of nodes
 	 * Consists of 8 bytes
 	 */
-	uint8_t number_of_nodes[ 8 ];
+	uint8_t total_number_of_nodes[ 8 ];
 };
 
 #if defined( __cplusplus )

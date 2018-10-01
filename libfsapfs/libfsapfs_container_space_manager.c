@@ -324,7 +324,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->object_checksum,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object checksum\t\t: 0x%08" PRIx64 "\n",
+		 "%s: object checksum\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -332,7 +332,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object identifier\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -345,12 +345,12 @@ int libfsapfs_container_space_manager_read_data(
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: object type\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object type\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_type );
 
 		libcnotify_printf(
-		 "%s: object subtype\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_subtype );
 
@@ -358,7 +358,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->block_size,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: block size\t\t\t: %" PRIu32 "\n",
+		 "%s: block size\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -366,7 +366,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->blocks_per_chunk,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: blocks per chunk\t\t: %" PRIu32 "\n",
+		 "%s: blocks per chunk\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -374,7 +374,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->chunks_per_cib,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: chunks per CIB\t\t: %" PRIu32 "\n",
+		 "%s: chunks per CIB\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -382,7 +382,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->cibs_per_cab,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: CIBs per CAB\t\t: %" PRIu32 "\n",
+		 "%s: CIBs per CAB\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -390,7 +390,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->number_of_blocks,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: number of blocks\t\t: %" PRIu64 "\n",
+		 "%s: number of blocks\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -398,7 +398,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->number_of_chunks,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: number of chunks\t\t: %" PRIu64 "\n",
+		 "%s: number of chunks\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -406,7 +406,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->number_of_cibs,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: number of CIBs\t\t: %" PRIu32 "\n",
+		 "%s: number of CIBs\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -414,7 +414,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->number_of_cabs,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: number of CABs\t\t: %" PRIu32 "\n",
+		 "%s: number of CABs\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -422,7 +422,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->number_of_unused_blocks,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: number of unused blocks\t: %" PRIu64 "\n",
+		 "%s: number of unused blocks\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -430,7 +430,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown1,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown1\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown1\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -438,7 +438,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown2,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown2\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown2\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -446,7 +446,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown3,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown3\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown3\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -454,7 +454,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown4,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown4\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown4\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -462,7 +462,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown5,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown5\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown5\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -470,7 +470,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown6,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown6\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown6\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -478,7 +478,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown7,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown7\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown7\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -486,7 +486,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown8,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown8\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown8\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -494,7 +494,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown9,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown9\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown9\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -502,7 +502,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown10,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown10\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown10\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -510,7 +510,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown11,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown11\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown11\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -518,7 +518,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown12,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown12\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown12\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -526,7 +526,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown13,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown13\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown13\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -534,7 +534,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown14,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown14\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown14\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -542,7 +542,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown15,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown15\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown15\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -550,7 +550,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown16,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown16\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown16\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -558,7 +558,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown17,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown17\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown17\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -566,7 +566,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown18,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown18\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown18\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -574,7 +574,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown19,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown19\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown19\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -582,7 +582,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown20,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown20\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown20\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -590,7 +590,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown21,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown21\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown21\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -598,7 +598,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown22,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown22\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown22\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -606,7 +606,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown23,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown23\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown23\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -614,7 +614,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown24,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown24\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown24\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -622,7 +622,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown25,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown25\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown25\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -630,7 +630,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown26,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown26\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown26\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -638,7 +638,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown27,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown27\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown27\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -646,7 +646,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown28,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown28\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown28\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -654,7 +654,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown29,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown29\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown29\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -662,7 +662,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown30,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown30\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown30\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -670,7 +670,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown31,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown31\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown31\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -678,7 +678,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown32,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown32\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown32\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -686,7 +686,7 @@ int libfsapfs_container_space_manager_read_data(
 		 ( (fsapfs_container_space_manager_t *) data )->unknown33,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown33\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown33\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 

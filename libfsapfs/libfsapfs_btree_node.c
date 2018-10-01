@@ -26,7 +26,7 @@
 
 #include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_footer.h"
-#include "libfsapfs_btree_header.h"
+#include "libfsapfs_btree_node_header.h"
 #include "libfsapfs_btree_node.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
@@ -150,17 +150,17 @@ int libfsapfs_btree_node_free(
 	}
 	if( *btree_node != NULL )
 	{
-		if( ( *btree_node )->header != NULL )
+		if( ( *btree_node )->node_header != NULL )
 		{
-			if( libfsapfs_btree_header_free(
-			     &( ( *btree_node )->header ),
+			if( libfsapfs_btree_node_header_free(
+			     &( ( *btree_node )->node_header ),
 			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free B-tree header.",
+				 "%s: unable to free B-tree node header.",
 				 function );
 
 				result = -1;
@@ -220,11 +220,11 @@ int libfsapfs_btree_node_read_data(
 	size_t data_offset                   = 0;
 	size_t minimum_data_size             = 0;
 	size_t remaining_data_size           = 0;
-	uint64_t map_entry_index             = 0;
 	uint16_t entries_data_offset         = 0;
 	uint16_t footer_offset               = 0;
 	uint16_t key_data_offset             = 0;
 	uint16_t key_data_size               = 0;
+	uint16_t map_entry_index             = 0;
 	uint16_t value_data_offset           = 0;
 	uint16_t value_data_size             = 0;
 	int entry_index                      = 0;
@@ -240,7 +240,7 @@ int libfsapfs_btree_node_read_data(
 
 		return( -1 );
 	}
-	if( btree_node->header != NULL )
+	if( btree_node->node_header != NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -273,7 +273,7 @@ int libfsapfs_btree_node_read_data(
 
 		return( -1 );
 	}
-	minimum_data_size = sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_header_t ) + sizeof( fsapfs_btree_footer_t );
+	minimum_data_size = sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_node_header_t ) + sizeof( fsapfs_btree_footer_t );
 
 	if( ( data_size < minimum_data_size )
 	 || ( data_size > (size_t) SSIZE_MAX ) )
@@ -316,39 +316,39 @@ int libfsapfs_btree_node_read_data(
 	}
 	data_offset = sizeof( fsapfs_object_t );
 
-	if( libfsapfs_btree_header_initialize(
-	     &( btree_node->header ),
+	if( libfsapfs_btree_node_header_initialize(
+	     &( btree_node->node_header ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create B-tree header.",
+		 "%s: unable to create B-tree node header.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsapfs_btree_header_read_data(
-	     btree_node->header,
+	if( libfsapfs_btree_node_header_read_data(
+	     btree_node->node_header,
 	     &( data[ data_offset ] ),
-	     sizeof( fsapfs_btree_header_t ),
+	     sizeof( fsapfs_btree_node_header_t ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read B-tree header.",
+		 "%s: unable to read B-tree node header.",
 		 function );
 
 		goto on_error;
 	}
-	data_offset += sizeof( fsapfs_btree_header_t );
+	data_offset += sizeof( fsapfs_btree_node_header_t );
 
 	remaining_data_size = data_size - minimum_data_size;
 
-	if( btree_node->header->entries_data_offset >= remaining_data_size )
+	if( btree_node->node_header->entries_data_offset >= remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -359,9 +359,9 @@ int libfsapfs_btree_node_read_data(
 
 		goto on_error;
 	}
-	remaining_data_size -= btree_node->header->entries_data_offset;
+	remaining_data_size -= btree_node->node_header->entries_data_offset;
 
-	if( btree_node->header->entries_data_size > remaining_data_size )
+	if( btree_node->node_header->entries_data_size > remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -372,9 +372,9 @@ int libfsapfs_btree_node_read_data(
 
 		goto on_error;
 	}
-	remaining_data_size -= btree_node->header->entries_data_size;
+	remaining_data_size -= btree_node->node_header->entries_data_size;
 
-	if( btree_node->header->unused_data_offset >= remaining_data_size )
+	if( btree_node->node_header->unused_data_offset >= remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -385,9 +385,9 @@ int libfsapfs_btree_node_read_data(
 
 		goto on_error;
 	}
-	remaining_data_size -= btree_node->header->unused_data_offset;
+	remaining_data_size -= btree_node->node_header->unused_data_offset;
 
-	if( btree_node->header->unused_data_size > remaining_data_size )
+	if( btree_node->node_header->unused_data_size > remaining_data_size )
 	{
 		libcerror_error_set(
 		 error,
@@ -428,7 +428,7 @@ int libfsapfs_btree_node_read_data(
 
 		goto on_error;
 	}
-	if( ( btree_node->header->flags & 0x0004 ) == 0 )
+	if( ( btree_node->node_header->flags & 0x0004 ) == 0 )
 	{
 		btree_entry_data_size = sizeof( fsapfs_btree_variable_size_entry_t );
 	}
@@ -436,29 +436,29 @@ int libfsapfs_btree_node_read_data(
 	{
 		btree_entry_data_size = sizeof( fsapfs_btree_fixed_size_entry_t );
 	}
-	if( btree_node->footer->number_of_entries > (uint64_t) ( btree_node->header->entries_data_size / btree_entry_data_size ) )
+	if( (size_t) btree_node->node_header->number_of_keys > (size_t) ( btree_node->node_header->entries_data_size / btree_entry_data_size ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid number of entries value out of bounds.",
+		 "%s: invalid number of keys value out of bounds.",
 		 function );
 
 		goto on_error;
 	}
-	data_offset += btree_node->header->entries_data_offset;
+	data_offset += btree_node->node_header->entries_data_offset;
 
-	entries_data_offset = btree_node->header->entries_data_offset + (uint16_t) ( sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_header_t ) );
+	entries_data_offset = btree_node->node_header->entries_data_offset + (uint16_t) ( sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_node_header_t ) );
 	footer_offset       = (uint16_t) ( data_size - sizeof( fsapfs_btree_footer_t ) );
 
 	for( map_entry_index = 0;
-	     map_entry_index < btree_node->footer->number_of_entries;
+	     map_entry_index < btree_node->node_header->number_of_keys;
 	     map_entry_index++ )
 	{
 		btree_node_entry = &( data[ data_offset ] );
 
-		if( ( btree_node->header->flags & 0x0004 ) == 0 )
+		if( ( btree_node->node_header->flags & 0x0004 ) == 0 )
 		{
 			byte_stream_copy_to_uint16_little_endian(
 			 ( (fsapfs_btree_variable_size_entry_t *) btree_node_entry )->key_data_offset,
@@ -494,27 +494,27 @@ int libfsapfs_btree_node_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %" PRIu64 " key data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
+			 "%s: entry: %" PRIu16 " key data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
 			 function,
 			 map_entry_index,
 			 key_data_offset,
-			 (size_t) key_data_offset + (size_t) entries_data_offset + (size_t) btree_node->header->entries_data_size );
+			 (size_t) key_data_offset + (size_t) entries_data_offset + (size_t) btree_node->node_header->entries_data_size );
 
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu64 " key data size\t\t\t: %" PRIu16 "\n",
+			 "%s: entry: %02" PRIu16 " key data size\t\t\t: %" PRIu16 "\n",
 			 function,
 			 map_entry_index,
 			 key_data_size );
 
 			libcnotify_printf(
-			 "%s: entry: %" PRIu64 " value data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
+			 "%s: entry: %" PRIu16 " value data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
 			 function,
 			 map_entry_index,
 			 value_data_offset,
 			 (size_t) footer_offset - (size_t) value_data_offset);
 
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu64 " value data size\t\t: %" PRIu16 "\n",
+			 "%s: entry: %02" PRIu16 " value data size\t\t: %" PRIu16 "\n",
 			 function,
 			 map_entry_index,
 			 value_data_size );
@@ -526,7 +526,7 @@ int libfsapfs_btree_node_read_data(
 
 		data_offset += btree_entry_data_size;
 
-		key_data_offset += entries_data_offset + btree_node->header->entries_data_size;
+		key_data_offset += entries_data_offset + btree_node->node_header->entries_data_size;
 
 		if( ( (size_t) key_data_offset > data_size )
 		 || ( (size_t) key_data_size > ( data_size - key_data_offset ) ) )
@@ -544,7 +544,7 @@ int libfsapfs_btree_node_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %" PRIu64 " key data:\n",
+			 "%s: entry: %" PRIu16 " key data:\n",
 			 function,
 			 map_entry_index );
 			libcnotify_print_data(
@@ -571,7 +571,7 @@ int libfsapfs_btree_node_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %" PRIu64 " value data:\n",
+			 "%s: entry: %" PRIu16 " value data:\n",
 			 function,
 			 map_entry_index );
 			libcnotify_print_data(
@@ -631,10 +631,10 @@ on_error:
 		 &( btree_node->footer ),
 		 NULL );
 	}
-	if( btree_node->header != NULL )
+	if( btree_node->node_header != NULL )
 	{
-		libfsapfs_btree_header_free(
-		 &( btree_node->header ),
+		libfsapfs_btree_node_header_free(
+		 &( btree_node->node_header ),
 		 NULL );
 	}
 	return( -1 );

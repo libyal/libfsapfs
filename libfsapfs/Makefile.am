@@ -37,8 +37,8 @@ libfsapfs_la_SOURCES = \
 	libfsapfs.c \
 	libfsapfs_btree_entry.c libfsapfs_btree_entry.h \
 	libfsapfs_btree_footer.c libfsapfs_btree_footer.h \
-	libfsapfs_btree_header.c libfsapfs_btree_header.h \
 	libfsapfs_btree_node.c libfsapfs_btree_node.h \
+	libfsapfs_btree_node_header.c libfsapfs_btree_node_header.h \
 	libfsapfs_checkpoint_map.c libfsapfs_checkpoint_map.h \
 	libfsapfs_checkpoint_map_entry.c libfsapfs_checkpoint_map_entry.h \
 	libfsapfs_container.c libfsapfs_container.h \
