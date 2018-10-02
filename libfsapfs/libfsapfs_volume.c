@@ -1478,6 +1478,7 @@ int libfsapfs_internal_volume_unlock(
 	uint8_t volume_master_key[ 32 ];
 
 	static char *function = "libfsapfs_internal_volume_unlock";
+	int result            = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -1512,14 +1513,15 @@ int libfsapfs_internal_volume_unlock(
 
 		return( -1 );
 	}
-	if( libfsapfs_volume_key_bag_get_volume_key_by_identifier(
-	     internal_volume->key_bag,
-	     internal_volume->superblock->volume_identifier,
-	     internal_volume->user_password,
-	     internal_volume->user_password_size - 1,
-	     volume_key,
-	     256,
-	     error ) != 1 )
+	result = libfsapfs_volume_key_bag_get_volume_key(
+	          internal_volume->key_bag,
+	          internal_volume->user_password,
+	          internal_volume->user_password_size - 1,
+	          volume_key,
+	          256,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1530,51 +1532,52 @@ int libfsapfs_internal_volume_unlock(
 
 		goto on_error;
 	}
-	if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
-	     internal_volume->container_key_bag,
-	     internal_volume->superblock->volume_identifier,
-	     volume_key,
-	     256,
-	     volume_master_key,
-	     256,
-	     error ) != 1 )
+	else if( result != 0 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume master key.",
-		 function );
+		if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
+		     internal_volume->container_key_bag,
+		     internal_volume->superblock->volume_identifier,
+		     volume_key,
+		     256,
+		     volume_master_key,
+		     256,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve volume master key.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+		memory_set(
+		 volume_key,
+		 0,
+		 32 );
+
+		if( libfsapfs_volume_data_handle_set_volume_master_key(
+		     internal_volume->volume_data_handle,
+		     volume_master_key,
+		     32,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set volume master key in volume data handle.",
+			 function );
+
+			goto on_error;
+		}
+		memory_set(
+		 volume_master_key,
+		 0,
+		 32 );
 	}
-	memory_set(
-	 volume_key,
-	 0,
-	 32 );
-
-	if( libfsapfs_volume_data_handle_set_volume_master_key(
-	     internal_volume->volume_data_handle,
-	     volume_master_key,
-	     32,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set volume master key in volume data handle.",
-		 function );
-
-		goto on_error;
-	}
-	memory_set(
-	 volume_master_key,
-	 0,
-	 32 );
-
-/* TODO return 0 to indicate volume could not be unlocked ? */
-	return( 1 );
+	return( result );
 
 on_error:
 	memory_set(

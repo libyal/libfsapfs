@@ -849,7 +849,7 @@ int libfsapfs_container_key_bag_get_volume_key_bag_extent_by_identifier(
 			continue;
 		}
 		if( memory_compare(
-		     bag_entry->volume_identifier,
+		     bag_entry->identifier,
 		     volume_identifier,
 		     16 ) != 0 )
 		{
@@ -1005,7 +1005,7 @@ int libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
 			continue;
 		}
 		if( memory_compare(
-		     bag_entry->volume_identifier,
+		     bag_entry->identifier,
 		     volume_identifier,
 		     16 ) != 0 )
 		{

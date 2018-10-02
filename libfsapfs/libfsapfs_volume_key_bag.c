@@ -737,12 +737,11 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the volume key for a specific volume
- * Returns 1 if successful, 0 if no such volume or -1 on error
+/* Retrieves the volume key that can be unlocked with the password
+ * Returns 1 if successful, 0 if no such volume key or -1 on error
  */
-int libfsapfs_volume_key_bag_get_volume_key_by_identifier(
+int libfsapfs_volume_key_bag_get_volume_key(
      libfsapfs_volume_key_bag_t *volume_key_bag,
-     const uint8_t *volume_identifier,
      const uint8_t *password,
      size_t password_length,
      uint8_t *key,
@@ -751,7 +750,7 @@ int libfsapfs_volume_key_bag_get_volume_key_by_identifier(
 {
 	libfsapfs_key_bag_entry_t *bag_entry             = NULL;
 	libfsapfs_key_encrypted_key_t *key_encrypted_key = NULL;
-	static char *function                            = "libfsapfs_volume_key_bag_get_volume_key_by_identifier";
+	static char *function                            = "libfsapfs_volume_key_bag_get_volume_key";
 	int entry_index                                  = 0;
 	int number_of_entries                            = 0;
 	int result                                       = 0;
@@ -763,17 +762,6 @@ int libfsapfs_volume_key_bag_get_volume_key_by_identifier(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid volume key bag.",
-		 function );
-
-		return( -1 );
-	}
-	if( volume_identifier == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume identifier.",
 		 function );
 
 		return( -1 );
@@ -825,13 +813,6 @@ int libfsapfs_volume_key_bag_get_volume_key_by_identifier(
 			goto on_error;
 		}
 		if( bag_entry->type != 3 )
-		{
-			continue;
-		}
-		if( memory_compare(
-		     bag_entry->volume_identifier,
-		     volume_identifier,
-		     16 ) != 0 )
 		{
 			continue;
 		}

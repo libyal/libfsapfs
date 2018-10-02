@@ -213,15 +213,15 @@ int libfsapfs_key_bag_entry_read_data(
 	}
 #endif
 	if( memory_copy(
-	     key_bag_entry->volume_identifier,
-	     ( (fsapfs_key_bag_entry_header_t *) data )->volume_identifier,
+	     key_bag_entry->identifier,
+	     ( (fsapfs_key_bag_entry_header_t *) data )->identifier,
 	     16 ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy volume identifier.",
+		 "%s: unable to copy identifier.",
 		 function );
 
 		goto on_error;
@@ -239,8 +239,8 @@ int libfsapfs_key_bag_entry_read_data(
 	{
 		if( libfsapfs_debug_print_guid_value(
 		     function,
-		     "volume identifier\t\t\t",
-		     ( (fsapfs_key_bag_entry_header_t *) data )->volume_identifier,
+		     "identifier\t\t\t\t",
+		     ( (fsapfs_key_bag_entry_header_t *) data )->identifier,
 		     16,
 		     LIBFGUID_ENDIAN_BIG,
 		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
@@ -312,7 +312,7 @@ int libfsapfs_key_bag_entry_read_data(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy volume identifier.",
+		 "%s: unable to copy key bag entry data.",
 		 function );
 
 		goto on_error;

@@ -58,11 +58,11 @@ typedef struct fsapfs_key_bag_entry_header fsapfs_key_bag_entry_header_t;
 
 struct fsapfs_key_bag_entry_header
 {
-	/* The volume identifier
+	/* The identifier
 	 * Consists of 16 bytes
 	 * Contains an UUID
 	 */
-	uint8_t volume_identifier[ 16 ];
+	uint8_t identifier[ 16 ];
 
 	/* The entry type
 	 * Consists of 2 bytes

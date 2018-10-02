@@ -39,9 +39,9 @@ struct libfsapfs_key_bag_entry
 	 */
 	size_t size;
 
-	/* The volume identifier
+	/* The identifier
 	 */
-	uint8_t volume_identifier[ 16 ];
+	uint8_t identifier[ 16 ];
 
 	/* The entry type
 	 */
