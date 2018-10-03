@@ -1,9 +1,12 @@
 TODO
+* rename volume data handle to container data handle?
+* improve reading object map B-tree
+* improve reading file system B-tree
 * add snapshot support
 
 library:
-* improve B-trees support
-** add sub node support
+* improve file system B-tree support
+** use libfdata to improve performance
 * improve file content read support
 ** encrypted file content read support
 ** compressed file content read support?

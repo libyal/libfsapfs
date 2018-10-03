@@ -280,34 +280,34 @@ int libfsapfs_btree_node_header_read_data(
 		 (size_t) btree_node_header->unused_data_size + block_offset );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_node_header_t *) data )->unknown5,
+		 ( (fsapfs_btree_node_header_t *) data )->key_free_list_offset,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: unknown5\t\t\t\t: 0x%04" PRIx16 "\n",
+		 "%s: key free list offset\t\t: 0x%04" PRIx16 "\n",
 		 function,
 		 value_16bit );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_node_header_t *) data )->unknown6,
+		 ( (fsapfs_btree_node_header_t *) data )->key_free_list_size,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: unknown6\t\t\t\t: %" PRIu16 "\n",
+		 "%s: key free list size\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_node_header_t *) data )->unknown7,
+		 ( (fsapfs_btree_node_header_t *) data )->value_free_list_offset,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: unknown7\t\t\t\t: 0x%04" PRIx16 "\n",
+		 "%s: value free list offset\t\t: 0x%04" PRIx16 "\n",
 		 function,
 		 value_16bit );
 
 		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_btree_node_header_t *) data )->unknown8,
+		 ( (fsapfs_btree_node_header_t *) data )->value_free_list_size,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: unknown8\t\t\t\t: %" PRIu16 "\n",
+		 "%s: value free list size\t\t: %" PRIu16 "\n",
 		 function,
 		 value_16bit );
 

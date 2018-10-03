@@ -68,25 +68,25 @@ struct fsapfs_btree_node_header
 	 */
 	uint8_t unused_data_size[ 2 ];
 
-	/* Unknown
+	/* The key free list offset
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown5[ 2 ];
+	uint8_t key_free_list_offset[ 2 ];
 
-	/* Unknown
+	/* The value free list size
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown6[ 2 ];
+	uint8_t key_free_list_size[ 2 ];
 
-	/* Unknown
+	/* The value free list offset
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown7[ 2 ];
+	uint8_t value_free_list_offset[ 2 ];
 
-	/* Unknown
+	/* The value free list size
 	 * Consists of 2 bytes
 	 */
-	uint8_t unknown8[ 2 ];
+	uint8_t value_free_list_size[ 2 ];
 };
 
 typedef struct fsapfs_btree_fixed_size_entry fsapfs_btree_fixed_size_entry_t;

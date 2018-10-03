@@ -26,14 +26,15 @@
 
 #include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_node.h"
+#include "libfsapfs_data_block.h"
 #include "libfsapfs_libbfio.h"
-#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
+#include "libfsapfs_libfcache.h"
+#include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
 
-#include "fsapfs_btree.h"
 #include "fsapfs_object.h"
 #include "fsapfs_object_map.h"
 
@@ -43,6 +44,9 @@
  */
 int libfsapfs_object_map_btree_initialize(
      libfsapfs_object_map_btree_t **object_map_btree,
+     libfdata_vector_t *data_block_vector,
+     libfcache_cache_t *data_block_cache,
+     uint64_t root_node_block_number,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_object_map_btree_initialize";
@@ -95,27 +99,12 @@ int libfsapfs_object_map_btree_initialize(
 		 "%s: unable to clear object map B-tree.",
 		 function );
 
-		memory_free(
-		 *object_map_btree );
-
-		*object_map_btree = NULL;
-
-		return( -1 );
-	}
-	if( libcdata_array_initialize(
-	     &( ( *object_map_btree )->descriptors_array ),
-	     0,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create descriptors array.",
-		 function );
-
 		goto on_error;
 	}
+	( *object_map_btree )->data_block_vector      = data_block_vector;
+	( *object_map_btree )->data_block_cache       = data_block_cache;
+	( *object_map_btree )->root_node_block_number = root_node_block_number;
+
 	return( 1 );
 
 on_error:
@@ -137,7 +126,6 @@ int libfsapfs_object_map_btree_free(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_object_map_btree_free";
-	int result            = 1;
 
 	if( object_map_btree == NULL )
 	{
@@ -152,41 +140,26 @@ int libfsapfs_object_map_btree_free(
 	}
 	if( *object_map_btree != NULL )
 	{
-		if( libcdata_array_free(
-		     &( ( *object_map_btree )->descriptors_array ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_object_map_descriptor_free,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free descriptors array.",
-			 function );
-
-			result = -1;
-		}
 		memory_free(
 		 *object_map_btree );
 
 		*object_map_btree = NULL;
 	}
-	return( result );
+	return( 1 );
 }
 
-/* Reads the object map B-tree
+/* Retrieves the object map B-tree root node
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_object_map_btree_read_file_io_handle(
+int libfsapfs_object_map_btree_get_root_node(
      libfsapfs_object_map_btree_t *object_map_btree,
      libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
-     uint32_t block_size,
+     uint64_t root_node_block_number,
+     libfsapfs_btree_node_t **root_node,
      libcerror_error_t **error )
 {
-	uint8_t *block_data   = NULL;
-	static char *function = "libfsapfs_object_map_btree_read_file_io_handle";
-	ssize_t read_count    = 0;
+	libfsapfs_data_block_t *data_block = NULL;
+	static char *function              = "libfsapfs_object_map_btree_get_root_node";
 
 	if( object_map_btree == NULL )
 	{
@@ -199,136 +172,61 @@ int libfsapfs_object_map_btree_read_file_io_handle(
 
 		return( -1 );
 	}
-#if ( SIZEOF_SIZE_T <= 4 )
-	if( block_size > (uint32_t) SSIZE_MAX )
+	if( root_node_block_number > (uint64_t) INT_MAX )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid block size value out of bounds.",
+		 "%s: invalid root node block number value out of bounds.",
 		 function );
 
 		return( -1 );
 	}
-#endif
-	block_data = (uint8_t *) memory_allocate(
-	                          sizeof( uint8_t ) * block_size );
-
-	if( block_data == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create object map B-tree.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: reading object map B-tree at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
-		 function,
-		 file_offset,
-		 file_offset );
-	}
-#endif
-	if( libbfio_handle_seek_offset(
-	     file_io_handle,
-	     file_offset,
-	     SEEK_SET,
-	     error ) == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek object map B-tree offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 file_offset,
-		 file_offset );
-
-		goto on_error;
-	}
-	read_count = libbfio_handle_read_buffer(
-	              file_io_handle,
-	              block_data,
-	              (size_t) block_size,
-	              error );
-
-	if( read_count != (ssize_t) block_size )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read object map B-tree data.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_object_map_btree_read_data(
-	     object_map_btree,
-	     block_data,
-	     (size_t) block_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read object map B-tree data.",
-		 function );
-
-		goto on_error;
-	}
-	memory_free(
-	 block_data );
-
-	return( 1 );
-
-on_error:
-	if( block_data != NULL )
-	{
-		memory_free(
-		 block_data );
-	}
-	return( -1 );
-}
-
-/* Reads the object map B-tree
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_object_map_btree_read_data(
-     libfsapfs_object_map_btree_t *object_map_btree,
-     const uint8_t *data,
-     size_t data_size,
-     libcerror_error_t **error )
-{
-	libfsapfs_btree_entry_t *btree_entry                     = NULL;
-	libfsapfs_btree_node_t *btree_node                       = NULL;
-	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	static char *function                                    = "libfsapfs_object_map_btree_read_data";
-	int btree_entry_index                                    = 0;
-	int entry_index                                          = 0;
-	int number_of_entries                                    = 0;
-
-	if( object_map_btree == NULL )
+	if( root_node == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid object map B-tree.",
+		 "%s: invalid root node.",
 		 function );
 
 		return( -1 );
 	}
+	if( libfdata_vector_get_element_value_by_index(
+	     object_map_btree->data_block_vector,
+	     (intptr_t *) file_io_handle,
+	     object_map_btree->data_block_cache,
+	     (int) root_node_block_number,
+	     (intptr_t **) &data_block,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve data block: %" PRIu64 ".",
+		 function,
+		 root_node_block_number );
+
+		goto on_error;
+	}
+	if( data_block == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid data block: %" PRIu64 ".",
+		 function,
+		 root_node_block_number );
+
+		goto on_error;
+	}
 	if( libfsapfs_btree_node_initialize(
-	     &btree_node,
+	     root_node,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -341,9 +239,9 @@ int libfsapfs_object_map_btree_read_data(
 		goto on_error;
 	}
 	if( libfsapfs_btree_node_read_data(
-	     btree_node,
-	     data,
-	     data_size,
+	     *root_node,
+	     data_block->data,
+	     data_block->data_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -355,7 +253,7 @@ int libfsapfs_object_map_btree_read_data(
 
 		goto on_error;
 	}
-	if( btree_node->object_type != 0x40000002UL )
+	if( ( *root_node )->object_type != 0x40000002UL )
 	{
 		libcerror_error_set(
 		 error,
@@ -363,11 +261,11 @@ int libfsapfs_object_map_btree_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: invalid object type: 0x%08" PRIx32 ".",
 		 function,
-		 btree_node->object_type );
+		 ( *root_node )->object_type );
 
 		goto on_error;
 	}
-	if( btree_node->object_subtype != 0x0000000bUL )
+	if( ( *root_node )->object_subtype != 0x0000000bUL )
 	{
 		libcerror_error_set(
 		 error,
@@ -375,11 +273,12 @@ int libfsapfs_object_map_btree_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
 		 function,
-		 btree_node->object_subtype );
+		 ( *root_node )->object_subtype );
 
 		goto on_error;
 	}
-	if( ( btree_node->node_header->flags & 0x0005 ) != 0x0005 )
+	if( ( ( ( *root_node )->node_header->flags & 0x0001 ) == 0 )
+	 || ( ( ( *root_node )->node_header->flags & 0x0004 ) == 0 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -387,11 +286,22 @@ int libfsapfs_object_map_btree_read_data(
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 		 "%s: unsupported flags: 0x%04" PRIx16 ".",
 		 function,
-		 btree_node->node_header->flags );
+		 ( *root_node )->node_header->flags );
 
 		goto on_error;
 	}
-	if( btree_node->footer->key_size != sizeof( fsapfs_object_map_btree_key_t ) )
+	if( ( *root_node )->footer->node_size != 4096 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid node size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( *root_node )->footer->key_size != sizeof( fsapfs_object_map_btree_key_t ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -402,7 +312,7 @@ int libfsapfs_object_map_btree_read_data(
 
 		goto on_error;
 	}
-	if( btree_node->footer->value_size != sizeof( fsapfs_object_map_btree_value_t ) )
+	if( ( *root_node )->footer->value_size != sizeof( fsapfs_object_map_btree_value_t ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -413,31 +323,223 @@ int libfsapfs_object_map_btree_read_data(
 
 		goto on_error;
 	}
+	return( 1 );
 
-	if( btree_node->footer->key_size != sizeof( fsapfs_object_map_btree_key_t ) )
+on_error:
+	if( *root_node != NULL )
+	{
+		libfsapfs_btree_node_free(
+		 root_node,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Retrieves a object map B-tree sub node
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_object_map_btree_get_sub_node(
+     libfsapfs_object_map_btree_t *object_map_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t sub_node_block_number,
+     libfsapfs_btree_node_t **sub_node,
+     libcerror_error_t **error )
+{
+	libfsapfs_data_block_t *data_block = NULL;
+	static char *function              = "libfsapfs_object_map_btree_get_sub_node";
+
+	if( object_map_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid object map B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( sub_node_block_number > (uint64_t) INT_MAX )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid key size value out of bounds.",
+		 "%s: invalid sub node block number value out of bounds.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
-	if( btree_node->footer->value_size != sizeof( fsapfs_object_map_btree_value_t ) )
+	if( sub_node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sub node.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfdata_vector_get_element_value_by_index(
+	     object_map_btree->data_block_vector,
+	     (intptr_t *) file_io_handle,
+	     object_map_btree->data_block_cache,
+	     (int) sub_node_block_number,
+	     (intptr_t **) &data_block,
+	     0,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid value size value out of bounds.",
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve data block: %" PRIu64 ".",
+		 function,
+		 sub_node_block_number );
+
+		goto on_error;
+	}
+	if( data_block == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid data block: %" PRIu64 ".",
+		 function,
+		 sub_node_block_number );
+
+		goto on_error;
+	}
+	if( libfsapfs_btree_node_initialize(
+	     sub_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create B-tree node.",
 		 function );
 
 		goto on_error;
 	}
+	if( libfsapfs_btree_node_read_data(
+	     *sub_node,
+	     data_block->data,
+	     data_block->data_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read B-tree node.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( *sub_node )->object_type != 0x40000003UL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid object type: 0x%08" PRIx32 ".",
+		 function,
+		 ( *sub_node )->object_type );
+
+		goto on_error;
+	}
+	if( ( *sub_node )->object_subtype != 0x0000000bUL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid object subtype: 0x%08" PRIx32 ".",
+		 function,
+		 ( *sub_node )->object_subtype );
+
+		goto on_error;
+	}
+	if( ( ( ( *sub_node )->node_header->flags & 0x0001 ) != 0 )
+	 || ( ( ( *sub_node )->node_header->flags & 0x0004 ) == 0 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported flags: 0x%04" PRIx16 ".",
+		 function,
+		 ( *sub_node )->node_header->flags );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( *sub_node != NULL )
+	{
+		libfsapfs_btree_node_free(
+		 sub_node,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Retrieves an entry for a specific identifier from the object map B-tree node
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
+     libfsapfs_object_map_btree_t *object_map_btree,
+     libfsapfs_btree_node_t *node,
+     uint64_t object_identifier,
+     libfsapfs_btree_entry_t **btree_entry,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_entry_t *entry          = NULL;
+	libfsapfs_btree_entry_t *previous_entry = NULL;
+	static char *function                   = "libfsapfs_object_map_btree_get_entry_from_node_by_identifier";
+	uint64_t object_map_identifier          = 0;
+	int btree_entry_index                   = 0;
+	int is_leaf_node                        = 0;
+	int number_of_entries                   = 0;
+
+	if( object_map_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid object map B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( btree_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid B-tree entry.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving B-tree entry identifier: %" PRIu64 ".\n",
+		 function,
+		 object_identifier );
+	}
+#endif
 	if( libfsapfs_btree_node_get_number_of_entries(
-	     btree_node,
+	     node,
 	     &number_of_entries,
 	     error ) != 1 )
 	{
@@ -448,16 +550,18 @@ int libfsapfs_object_map_btree_read_data(
 		 "%s: unable to retrieve number of entries from B-tree node.",
 		 function );
 
-		goto on_error;
+		return( -1 );
 	}
+	is_leaf_node = node->node_header->flags & 0x0002;
+
 	for( btree_entry_index = 0;
 	     btree_entry_index < number_of_entries;
 	     btree_entry_index++ )
 	{
 		if( libfsapfs_btree_node_get_entry_by_index(
-		     btree_node,
+		     node,
 		     btree_entry_index,
-		     &btree_entry,
+		     &entry,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -467,9 +571,9 @@ int libfsapfs_object_map_btree_read_data(
 			 "%s: unable to retrieve number of entries from B-tree node.",
 			 function );
 
-			goto on_error;
+			return( -1 );
 		}
-		if( btree_entry == NULL )
+		if( entry == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -479,73 +583,252 @@ int libfsapfs_object_map_btree_read_data(
 			 function,
 			 btree_entry_index );
 
-			goto on_error;
+			return( -1 );
 		}
-		if( libfsapfs_object_map_descriptor_initialize(
-		     &object_map_descriptor,
-		     error ) != 1 )
+		if( entry->key_data == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create object map descriptor.",
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 btree_entry_index );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 entry->key_data,
+		 object_map_identifier );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 "\n",
+			 function,
+			 btree_entry_index,
+			 object_map_identifier );
+		}
+#endif
+		if( object_map_identifier > object_identifier )
+		{
+			break;
+		}
+		if( is_leaf_node != 0 )
+		{
+			if( object_map_identifier == object_identifier )
+			{
+				*btree_entry = entry;
+
+				return( 1 );
+			}
+		}
+		else
+		{
+			if( object_map_identifier >= object_identifier )
+			{
+				if( object_map_identifier == object_identifier )
+				{
+					previous_entry = entry;
+				}
+				*btree_entry = previous_entry;
+
+				return( 1 );
+			}
+			previous_entry = entry;
+		}
+	}
+	if( is_leaf_node == 0 )
+	{
+		*btree_entry = previous_entry;
+
+		return( 1 );
+	}
+	return( 0 );
+}
+
+/* Retrieves an entry for a specific identifier from the object map B-tree
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_object_map_btree_get_entry_by_identifier(
+     libfsapfs_object_map_btree_t *object_map_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t object_identifier,
+     libfsapfs_btree_node_t **btree_node,
+     libfsapfs_btree_entry_t **btree_entry,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_entry_t *entry = NULL;
+	libfsapfs_btree_node_t *node   = NULL;
+	static char *function          = "libfsapfs_object_map_btree_get_entry_by_identifier";
+	uint64_t sub_node_block_number = 0;
+	int is_leaf_node               = 0;
+	int result                     = 0;
+
+	if( object_map_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid object map B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( btree_node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid B-tree node.",
+		 function );
+
+		return( -1 );
+	}
+	if( btree_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid B-tree entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_object_map_btree_get_root_node(
+	     object_map_btree,
+	     file_io_handle,
+	     object_map_btree->root_node_block_number,
+	     &node,
+	     error ) == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree root node.",
+		 function );
+
+		goto on_error;
+	}
+	do
+	{
+		is_leaf_node = node->node_header->flags & 0x0002;
+
+		result = libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
+		          object_map_btree,
+		          node,
+		          object_identifier,
+		          &entry,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve entry from B-tree node.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsapfs_object_map_descriptor_read_btree_key_data(
-		     object_map_descriptor,
-		     btree_entry->key_data,
-		     btree_entry->key_data_size,
-		     error ) != 1 )
+		else if( result == 0 )
+		{
+			break;
+		}
+		if( is_leaf_node != 0 )
+		{
+			*btree_node  = node;
+			*btree_entry = entry;
+
+			return( 1 );
+		}
+		if( entry == NULL )
 		{
 			libcerror_error_set(
 			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read entry: %d object map key data.",
-			 function,
-			 btree_entry_index );
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry.",
+			 function );
 
-			goto on_error;
+			return( -1 );
 		}
-		if( libfsapfs_object_map_descriptor_read_btree_value_data(
-		     object_map_descriptor,
-		     btree_entry->value_data,
-		     btree_entry->value_data_size,
-		     error ) != 1 )
+		if( entry->value_data == NULL )
 		{
 			libcerror_error_set(
 			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read entry: %d object map value data.",
-			 function,
-			 btree_entry_index );
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry - missing value data.",
+			 function );
 
 			goto on_error;
 		}
-		if( libcdata_array_append_entry(
-		     object_map_btree->descriptors_array,
-		     &entry_index,
-		     (intptr_t *) object_map_descriptor,
+		if( entry->value_data_size != 8 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: invalid B-tree entry - unsupported value data size.",
+			 function );
+
+			goto on_error;
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 entry->value_data,
+		 sub_node_block_number );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: B-tree sub node block number: %" PRIu64 "\n",
+			 function,
+			 sub_node_block_number );
+		}
+#endif
+		if( libfsapfs_btree_node_free(
+		     &node,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-			 "%s: unable to append object map descriptor: %d to array.",
-			 function,
-			 btree_entry_index );
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free B-tree node.",
+			 function );
 
 			goto on_error;
 		}
-		object_map_descriptor = NULL;
+		if( libfsapfs_object_map_btree_get_sub_node(
+		     object_map_btree,
+		     file_io_handle,
+		     sub_node_block_number,
+		     &node,
+		     error ) == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+			 function,
+			 sub_node_block_number );
+
+			goto on_error;
+		}
 	}
+	while( is_leaf_node == 0 );
+
 	if( libfsapfs_btree_node_free(
-	     &btree_node,
+	     &node,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -557,19 +840,13 @@ int libfsapfs_object_map_btree_read_data(
 
 		goto on_error;
 	}
-	return( 1 );
+	return( 0 );
 
 on_error:
-	if( object_map_descriptor != NULL )
-	{
-		libfsapfs_object_map_descriptor_free(
-		 &object_map_descriptor,
-		 NULL );
-	}
-	if( btree_node != NULL )
+	if( node != NULL )
 	{
 		libfsapfs_btree_node_free(
-		 &btree_node,
+		 &node,
 		 NULL );
 	}
 	return( -1 );
@@ -580,13 +857,15 @@ on_error:
  */
 int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
+     libbfio_handle_t *file_io_handle,
      uint64_t object_identifier,
      libfsapfs_object_map_descriptor_t **descriptor,
      libcerror_error_t **error )
 {
-	static char *function     = "libfsapfs_object_map_btree_get_descriptor_by_object_identifier";
-	int descriptor_index      = 0;
-	int number_of_descriptors = 0;
+	libfsapfs_btree_entry_t *entry = NULL;
+	libfsapfs_btree_node_t *node   = NULL;
+	static char *function          = "libfsapfs_object_map_btree_get_descriptor_by_object_identifier";
+	int result                     = 0;
 
 	if( object_map_btree == NULL )
 	{
@@ -610,58 +889,132 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 
 		return( -1 );
 	}
-	if( libcdata_array_get_number_of_entries(
-	     object_map_btree->descriptors_array,
-	     &number_of_descriptors,
-	     error ) != 1 )
+	if( *descriptor != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid descriptor value already set.",
+		 function );
+
+		return( -1 );
+	}
+	result = libfsapfs_object_map_btree_get_entry_by_identifier(
+	          object_map_btree,
+	          file_io_handle,
+	          object_identifier,
+	          &node,
+	          &entry,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from array.",
+		 "%s: unable to retrieve entry from B-tree.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	for( descriptor_index = 0;
-	     descriptor_index < number_of_descriptors;
-	     descriptor_index++ )
+	else if( result != 0 )
 	{
-		if( libcdata_array_get_entry_by_index(
-		     object_map_btree->descriptors_array,
-		     descriptor_index,
-		     (intptr_t **) descriptor,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve entry: %d from array.",
-			 function,
-			 descriptor_index );
-
-			return( -1 );
-		}
-		if( *descriptor == NULL )
+		if( node == NULL )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing entry: %d.",
-			 function,
-			 descriptor_index );
+			 "%s: invalid B-tree node.",
+			 function );
 
-			return( -1 );
+			goto on_error;
 		}
-		if( object_identifier == ( *descriptor )->identifier )
+		if( entry == NULL )
 		{
-			return( 1 );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry.",
+			 function );
+
+			goto on_error;
 		}
-		*descriptor = NULL;
+		if( libfsapfs_object_map_descriptor_initialize(
+		     descriptor,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create object map descriptor.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_object_map_descriptor_read_key_data(
+		     *descriptor,
+		     entry->key_data,
+		     (size_t) entry->key_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read object map descriptor key data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_object_map_descriptor_read_value_data(
+		     *descriptor,
+		     entry->value_data,
+		     (size_t) entry->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read object map descriptor value data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_btree_node_free(
+		     &node,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free B-tree node.",
+			 function );
+
+			goto on_error;
+		}
 	}
-	return( 0 );
+	return( result );
+
+on_error:
+	if( *descriptor != NULL )
+	{
+		libfsapfs_object_map_descriptor_free(
+		 descriptor,
+		 NULL );
+	}
+	if( node != NULL )
+	{
+		libfsapfs_btree_node_free(
+		 &node,
+		 NULL );
+	}
+	return( -1 );
 }
 

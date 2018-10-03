@@ -60,6 +60,18 @@ int libfsapfs_btree_entry_free(
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error );
 
+int libfsapfs_btree_entry_set_key_data(
+     libfsapfs_btree_entry_t *btree_entry,
+     const uint8_t *key_data,
+     size_t key_data_size,
+     libcerror_error_t **error );
+
+int libfsapfs_btree_entry_set_value_data(
+     libfsapfs_btree_entry_t *btree_entry,
+     const uint8_t *value_data,
+     size_t value_data_size,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

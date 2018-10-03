@@ -64,13 +64,13 @@ int libfsapfs_object_map_descriptor_free(
      libfsapfs_object_map_descriptor_t **object_map_descriptor,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_descriptor_read_btree_key_data(
+int libfsapfs_object_map_descriptor_read_key_data(
      libfsapfs_object_map_descriptor_t *object_map_descriptor,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_descriptor_read_btree_value_data(
+int libfsapfs_object_map_descriptor_read_value_data(
      libfsapfs_object_map_descriptor_t *object_map_descriptor,
      const uint8_t *data,
      size_t data_size,

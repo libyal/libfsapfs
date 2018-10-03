@@ -573,9 +573,27 @@ int main(
 
 /* TODO add tests for libfsapfs_file_system_btree_get_root_node */
 
-/* TODO add tests for libfsapfs_file_system_btree_get_inode */
+/* TODO add tests for libfsapfs_file_system_btree_get_sub_node */
 
-/* TODO add tests for libfsapfs_file_system_btree_get_inode_from_node */
+/* TODO add tests for libfsapfs_file_system_btree_get_entry_from_node_by_identifier */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_directory_entries */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_directory_entries_from_node */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_file_extents */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_file_extents_from_node */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_inode_by_identifier */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_inode_by_utf8_path */
+
+/* TODO add tests for libfsapfs_file_system_btree_get_inode_by_utf16_path */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

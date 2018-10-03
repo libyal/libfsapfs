@@ -924,6 +924,32 @@ int libfsapfs_container_close(
 			result = -1;
 		}
 	}
+	if( libfdata_vector_free(
+	     &( internal_container->data_block_vector ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free data block vector.",
+		 function );
+
+		result = -1;
+	}
+	if( libfcache_cache_free(
+	     &( internal_container->data_block_cache ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free data block cache.",
+		 function );
+
+		result = -1;
+	}
 	if( internal_container->object_map_btree != NULL )
 	{
 		if( libfsapfs_object_map_btree_free(
@@ -985,7 +1011,9 @@ int libfsapfs_internal_container_open_read(
 {
 	libfsapfs_container_superblock_t *container_superblock       = NULL;
 	libfsapfs_object_map_t *object_map                           = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle           = NULL;
 	static char *function                                        = "libfsapfs_internal_container_open_read";
+	int element_index                                            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libfsapfs_container_reaper_t *container_reaper               = NULL;
@@ -1000,7 +1028,7 @@ int libfsapfs_internal_container_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid internal container.",
+		 "%s: invalid container.",
 		 function );
 
 		return( -1 );
@@ -1011,7 +1039,7 @@ int libfsapfs_internal_container_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal container - missing IO handle.",
+		 "%s: invalid container - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -1022,7 +1050,7 @@ int libfsapfs_internal_container_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal container - superblock map value already set.",
+		 "%s: invalid container - superblock map value already set.",
 		 function );
 
 		return( -1 );
@@ -1033,7 +1061,29 @@ int libfsapfs_internal_container_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal container - physical map value already set.",
+		 "%s: invalid container - physical map value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_container->data_block_vector != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid container - data block vector already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_container->data_block_cache != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid container - data block cache already set.",
 		 function );
 
 		return( -1 );
@@ -1044,7 +1094,7 @@ int libfsapfs_internal_container_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal container - object map B-tree value already set.",
+		 "%s: invalid container - object map B-tree value already set.",
 		 function );
 
 		return( -1 );
@@ -1055,7 +1105,7 @@ int libfsapfs_internal_container_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal container - key bag value already set.",
+		 "%s: invalid container - key bag value already set.",
 		 function );
 
 		return( -1 );
@@ -1097,7 +1147,8 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	internal_container->io_handle->block_size = internal_container->superblock->block_size;
+	internal_container->io_handle->block_size     = internal_container->superblock->block_size;
+	internal_container->io_handle->container_size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->io_handle->block_size;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -1334,104 +1385,172 @@ int libfsapfs_internal_container_open_read(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-/* TODO refactor into function to read object map */
-	if( internal_container->superblock->object_map_block_number > 0 )
+	if( libfsapfs_volume_data_handle_initialize(
+	     &volume_data_handle,
+	     internal_container->io_handle,
+	     error ) != 1 )
 	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create volume data handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdata_vector_initialize(
+	     &( internal_container->data_block_vector ),
+	     (size64_t) internal_container->io_handle->block_size,
+	     (intptr_t *) volume_data_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
+	     NULL,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_sector,
+	     NULL,
+	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block vector.",
+		 function );
+
+		goto on_error;
+	}
+	internal_container->volume_data_handle = volume_data_handle;
+	volume_data_handle                     = NULL;
+
+	if( libfdata_vector_append_segment(
+	     internal_container->data_block_vector,
+	     &element_index,
+	     0,
+	     0,
+	     internal_container->io_handle->container_size,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+		 "%s: unable to append segment to data block vector.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfcache_cache_initialize(
+	     &( internal_container->data_block_cache ),
+	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_SECTORS,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block cache.",
+		 function );
+
+		goto on_error;
+	}
+/* TODO refactor into function to read object map */
+	if( internal_container->superblock->object_map_block_number == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing object map block number.",
+		 function );
+
+		goto on_error;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "Reading object map:\n" );
-		}
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading object map:\n" );
+	}
 #endif
-		file_offset = internal_container->superblock->object_map_block_number * internal_container->io_handle->block_size;
+	file_offset = internal_container->superblock->object_map_block_number * internal_container->io_handle->block_size;
 
-		if( libfsapfs_object_map_initialize(
-		     &object_map,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create object map.",
-			 function );
+	if( libfsapfs_object_map_initialize(
+	     &object_map,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create object map.",
+		 function );
 
-			goto on_error;
-		}
-		if( libfsapfs_object_map_read_file_io_handle(
-		     object_map,
-		     file_io_handle,
-		     file_offset,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read object map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-			 function,
-			 file_offset,
-			 file_offset );
+		goto on_error;
+	}
+	if( libfsapfs_object_map_read_file_io_handle(
+	     object_map,
+	     file_io_handle,
+	     file_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read object map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 file_offset,
+		 file_offset );
 
-			goto on_error;
-		}
-		if( object_map->object_map_btree_block_number > 0 )
-		{
+		goto on_error;
+	}
+	if( object_map->object_map_btree_block_number == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing object map B-tree block number.",
+		 function );
+
+		goto on_error;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "Reading object map B-tree:\n" );
-			}
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading object map B-tree:\n" );
+	}
 #endif
-			file_offset = object_map->object_map_btree_block_number * internal_container->io_handle->block_size;
+	if( libfsapfs_object_map_btree_initialize(
+	     &( internal_container->object_map_btree ),
+	     internal_container->data_block_vector,
+	     internal_container->data_block_cache,
+	     object_map->object_map_btree_block_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create object map B-tree.",
+		 function );
 
-			if( libfsapfs_object_map_btree_initialize(
-			     &( internal_container->object_map_btree ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create object map B-tree.",
-				 function );
+		goto on_error;
+	}
+	if( libfsapfs_object_map_free(
+	     &object_map,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free object map.",
+		 function );
 
-				goto on_error;
-			}
-			if( libfsapfs_object_map_btree_read_file_io_handle(
-			     internal_container->object_map_btree,
-			     file_io_handle,
-			     file_offset,
-			     internal_container->io_handle->block_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read object map B-tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-				 function,
-				 file_offset,
-				 file_offset );
-
-				goto on_error;
-			}
-		}
-		if( libfsapfs_object_map_free(
-		     &object_map,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free object map.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	if( ( internal_container->superblock->key_bag_block_number > 0 )
 	 && ( internal_container->superblock->key_bag_number_of_blocks > 0 ) )
@@ -1472,8 +1591,6 @@ int libfsapfs_internal_container_open_read(
 			goto on_error;
 		}
 	}
-	internal_container->io_handle->container_size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->io_handle->block_size;
-
 	return( 1 );
 
 on_error:
@@ -1493,6 +1610,12 @@ on_error:
 	{
 		libfsapfs_object_map_free(
 		 &object_map,
+		 NULL );
+	}
+	if( volume_data_handle != NULL )
+	{
+		libfsapfs_volume_data_handle_free(
+		 &volume_data_handle,
 		 NULL );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1895,6 +2018,7 @@ int libfsapfs_container_get_volume_by_index(
 #endif
 	if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 	     internal_container->object_map_btree,
+	     internal_container->file_io_handle,
 	     internal_container->superblock->volume_object_identifiers[ volume_index ],
 	     &object_map_descriptor,
 	     error ) != 1 )
@@ -1903,7 +2027,7 @@ int libfsapfs_container_get_volume_by_index(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for volume object identifier: 0x08%" PRIx64 ".",
+		 "%s: unable to retrieve object map descriptor for volume object identifier: %" PRIu64 ".",
 		 function,
 		 internal_container->superblock->volume_object_identifiers[ volume_index ] );
 
@@ -1938,6 +2062,19 @@ int libfsapfs_container_get_volume_by_index(
 	}
 	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_container->io_handle->block_size );
 
+	if( libfsapfs_object_map_descriptor_free(
+	     &object_map_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free object map descriptor.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfsapfs_internal_volume_open_read(
 	     (libfsapfs_internal_volume_t *) *volume,
 	     internal_container->file_io_handle,
@@ -1972,6 +2109,12 @@ int libfsapfs_container_get_volume_by_index(
 	return( 1 );
 
 on_error:
+	if( object_map_descriptor != NULL )
+	{
+		libfsapfs_object_map_descriptor_free(
+		 &object_map_descriptor,
+		 NULL );
+	}
 	if( *volume != NULL )
 	{
 		libfsapfs_volume_free(

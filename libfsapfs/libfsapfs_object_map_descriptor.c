@@ -136,13 +136,13 @@ int libfsapfs_object_map_descriptor_free(
 /* Reads the object map descriptor B-tree key data
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_object_map_descriptor_read_btree_key_data(
+int libfsapfs_object_map_descriptor_read_key_data(
      libfsapfs_object_map_descriptor_t *object_map_descriptor,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_object_map_descriptor_read_btree_key_data";
+	static char *function = "libfsapfs_object_map_descriptor_read_key_data";
 
 	if( object_map_descriptor == NULL )
 	{
@@ -202,7 +202,7 @@ int libfsapfs_object_map_descriptor_read_btree_key_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 object_map_descriptor->identifier );
 
@@ -222,13 +222,13 @@ int libfsapfs_object_map_descriptor_read_btree_key_data(
 /* Reads the object map descriptor B-tree value data
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_object_map_descriptor_read_btree_value_data(
+int libfsapfs_object_map_descriptor_read_value_data(
      libfsapfs_object_map_descriptor_t *object_map_descriptor,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_object_map_descriptor_read_btree_value_data";
+	static char *function = "libfsapfs_object_map_descriptor_read_value_data";
 
 	if( object_map_descriptor == NULL )
 	{
@@ -292,12 +292,12 @@ int libfsapfs_object_map_descriptor_read_btree_value_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: object flags\t\t: 0x%04" PRIx32 "\n",
+		 "%s: object flags\t\t\t: 0x%04" PRIx32 "\n",
 		 function,
 		 object_map_descriptor->flags );
 
 		libcnotify_printf(
-		 "%s: object size\t\t: %" PRIu32 "\n",
+		 "%s: object size\t\t\t: %" PRIu32 "\n",
 		 function,
 		 object_map_descriptor->size );
 

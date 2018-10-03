@@ -197,6 +197,10 @@ int libfsapfs_btree_footer_read_data(
 	}
 #endif
 	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_btree_footer_t *) data )->node_size,
+	 btree_footer->node_size );
+
+	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_btree_footer_t *) data )->key_size,
 	 btree_footer->key_size );
 
@@ -227,13 +231,10 @@ int libfsapfs_btree_footer_read_data(
 		libcnotify_printf(
 		 "\n" );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_btree_footer_t *) data )->node_size,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: node size\t\t\t\t: %" PRIu32 "\n",
 		 function,
-		 value_32bit );
+		 btree_footer->node_size );
 
 		libcnotify_printf(
 		 "%s: key size\t\t\t\t: %" PRIu32 "\n",

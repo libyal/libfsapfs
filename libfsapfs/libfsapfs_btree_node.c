@@ -34,6 +34,7 @@
 
 #include "fsapfs_btree.h"
 #include "fsapfs_object.h"
+#include "fsapfs_object_map.h"
 
 /* Creates a B-tree node
  * Make sure the value btree_node is referencing, is set to NULL
@@ -251,17 +252,6 @@ int libfsapfs_btree_node_read_data(
 
 		return( -1 );
 	}
-	if( btree_node->footer != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid B-tree node - footer value already set.",
-		 function );
-
-		return( -1 );
-	}
 	if( data == NULL )
 	{
 		libcerror_error_set(
@@ -400,33 +390,39 @@ int libfsapfs_btree_node_read_data(
 	}
 /* TODO sanity check other data_offset and data_size values */
 
-	if( libfsapfs_btree_footer_initialize(
-	     &( btree_node->footer ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create B-tree footer.",
-		 function );
+	footer_offset = (uint16_t) data_size;
 
-		goto on_error;
-	}
-	if( libfsapfs_btree_footer_read_data(
-	     btree_node->footer,
-	     &( data[ data_size - sizeof( fsapfs_btree_footer_t ) ] ),
-	     sizeof( fsapfs_btree_footer_t ),
-	     error ) != 1 )
+	if( ( btree_node->node_header->flags & 0x0001 ) != 0 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read B-tree footer.",
-		 function );
+		if( libfsapfs_btree_footer_initialize(
+		     &( btree_node->footer ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create B-tree footer.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+		if( libfsapfs_btree_footer_read_data(
+		     btree_node->footer,
+		     &( data[ data_size - sizeof( fsapfs_btree_footer_t ) ] ),
+		     sizeof( fsapfs_btree_footer_t ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read B-tree footer.",
+			 function );
+
+			goto on_error;
+		}
+		footer_offset -= (uint16_t) sizeof( fsapfs_btree_footer_t );
 	}
 	if( ( btree_node->node_header->flags & 0x0004 ) == 0 )
 	{
@@ -450,7 +446,6 @@ int libfsapfs_btree_node_read_data(
 	data_offset += btree_node->node_header->entries_data_offset;
 
 	entries_data_offset = btree_node->node_header->entries_data_offset + (uint16_t) ( sizeof( fsapfs_object_t ) + sizeof( fsapfs_btree_node_header_t ) );
-	footer_offset       = (uint16_t) ( data_size - sizeof( fsapfs_btree_footer_t ) );
 
 	for( map_entry_index = 0;
 	     map_entry_index < btree_node->node_header->number_of_keys;
@@ -482,13 +477,32 @@ int libfsapfs_btree_node_read_data(
 			 ( (fsapfs_btree_fixed_size_entry_t *) btree_node_entry )->key_data_offset,
 			 key_data_offset );
 
-			key_data_size = btree_node->footer->key_size;
-
 			byte_stream_copy_to_uint16_little_endian(
 			 ( (fsapfs_btree_fixed_size_entry_t *) btree_node_entry )->value_data_offset,
 			 value_data_offset );
 
-			value_data_size = btree_node->footer->value_size;
+			switch( btree_node->object_subtype )
+			{
+				case 0x0000000bUL:
+					key_data_size   = (uint16_t) sizeof( fsapfs_object_map_btree_key_t );
+					value_data_size = (uint16_t) sizeof( fsapfs_object_map_btree_value_t );
+					break;
+
+				default:
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+					 "%s: invalid object subtype: 0x%08" PRIx32 ".",
+					 function,
+					 btree_node->object_subtype );
+
+					goto on_error;
+			}
+			if( ( btree_node->node_header->flags & 0x0002 ) == 0 )
+			{
+				value_data_size = 8;
+			}
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
@@ -593,11 +607,36 @@ int libfsapfs_btree_node_read_data(
 
 			goto on_error;
 		}
-		btree_entry->key_data        = &( data[ key_data_offset ] );
-		btree_entry->key_data_size   = (size_t) key_data_size;
-		btree_entry->value_data      = &( data[ value_data_offset ] );
-		btree_entry->value_data_size = (size_t) value_data_size;
+		if( libfsapfs_btree_entry_set_key_data(
+		     btree_entry,
+		     &( data[ key_data_offset ] ),
+		     (size_t) key_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set key data in B-tree entry.",
+			 function );
 
+			goto on_error;
+		}
+		if( libfsapfs_btree_entry_set_value_data(
+		     btree_entry,
+		     &( data[ value_data_offset ] ),
+		     (size_t) value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set value data in B-tree entry.",
+			 function );
+
+			goto on_error;
+		}
 		if( libcdata_array_append_entry(
 		     btree_node->entries_array,
 		     &entry_index,
@@ -650,6 +689,7 @@ int libfsapfs_btree_node_read_object_data(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_btree_node_read_object_data";
+	uint32_t object_type  = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit  = 0;
@@ -705,7 +745,10 @@ int libfsapfs_btree_node_read_object_data(
 	 ( (fsapfs_object_t *) data )->type,
 	 btree_node->object_type );
 
-	if( ( btree_node->object_type & 0x0ffffffUL ) != 0x00000002UL )
+	object_type = btree_node->object_type & 0x0ffffffUL;
+
+	if( ( object_type != 0x00000002UL )
+	 && ( object_type != 0x00000003UL ) )
 	{
 		libcerror_error_set(
 		 error,

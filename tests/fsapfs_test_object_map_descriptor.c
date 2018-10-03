@@ -276,10 +276,10 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_object_map_descriptor_read_btree_key_data function
+/* Tests the libfsapfs_object_map_descriptor_read_key_data function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_object_map_descriptor_read_btree_key_data(
+int fsapfs_test_object_map_descriptor_read_key_data(
      void )
 {
 	libcerror_error_t *error                                 = NULL;
@@ -307,7 +307,7 @@ int fsapfs_test_object_map_descriptor_read_btree_key_data(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_object_map_descriptor_read_btree_key_data(
+	result = libfsapfs_object_map_descriptor_read_key_data(
 	          object_map_descriptor,
 	          fsapfs_test_object_map_descriptor_btree_key_data1,
 	          16,
@@ -324,7 +324,7 @@ int fsapfs_test_object_map_descriptor_read_btree_key_data(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_object_map_descriptor_read_btree_key_data(
+	result = libfsapfs_object_map_descriptor_read_key_data(
 	          NULL,
 	          fsapfs_test_object_map_descriptor_btree_key_data1,
 	          16,
@@ -342,7 +342,7 @@ int fsapfs_test_object_map_descriptor_read_btree_key_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_object_map_descriptor_read_btree_key_data(
+	result = libfsapfs_object_map_descriptor_read_key_data(
 	          object_map_descriptor,
 	          NULL,
 	          16,
@@ -360,7 +360,7 @@ int fsapfs_test_object_map_descriptor_read_btree_key_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_object_map_descriptor_read_btree_key_data(
+	result = libfsapfs_object_map_descriptor_read_key_data(
 	          object_map_descriptor,
 	          fsapfs_test_object_map_descriptor_btree_key_data1,
 	          (size_t) SSIZE_MAX + 1,
@@ -378,7 +378,7 @@ int fsapfs_test_object_map_descriptor_read_btree_key_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_object_map_descriptor_read_btree_key_data(
+	result = libfsapfs_object_map_descriptor_read_key_data(
 	          object_map_descriptor,
 	          fsapfs_test_object_map_descriptor_btree_key_data1,
 	          0,
@@ -432,10 +432,10 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_object_map_descriptor_read_btree_value_data function
+/* Tests the libfsapfs_object_map_descriptor_read_value_data function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_object_map_descriptor_read_btree_value_data(
+int fsapfs_test_object_map_descriptor_read_value_data(
      void )
 {
 	libcerror_error_t *error                                 = NULL;
@@ -463,7 +463,7 @@ int fsapfs_test_object_map_descriptor_read_btree_value_data(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_object_map_descriptor_read_btree_value_data(
+	result = libfsapfs_object_map_descriptor_read_value_data(
 	          object_map_descriptor,
 	          fsapfs_test_object_map_descriptor_btree_value_data1,
 	          16,
@@ -480,7 +480,7 @@ int fsapfs_test_object_map_descriptor_read_btree_value_data(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_object_map_descriptor_read_btree_value_data(
+	result = libfsapfs_object_map_descriptor_read_value_data(
 	          NULL,
 	          fsapfs_test_object_map_descriptor_btree_value_data1,
 	          16,
@@ -498,7 +498,7 @@ int fsapfs_test_object_map_descriptor_read_btree_value_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_object_map_descriptor_read_btree_value_data(
+	result = libfsapfs_object_map_descriptor_read_value_data(
 	          object_map_descriptor,
 	          NULL,
 	          16,
@@ -516,7 +516,7 @@ int fsapfs_test_object_map_descriptor_read_btree_value_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_object_map_descriptor_read_btree_value_data(
+	result = libfsapfs_object_map_descriptor_read_value_data(
 	          object_map_descriptor,
 	          fsapfs_test_object_map_descriptor_btree_value_data1,
 	          (size_t) SSIZE_MAX + 1,
@@ -534,7 +534,7 @@ int fsapfs_test_object_map_descriptor_read_btree_value_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_object_map_descriptor_read_btree_value_data(
+	result = libfsapfs_object_map_descriptor_read_value_data(
 	          object_map_descriptor,
 	          fsapfs_test_object_map_descriptor_btree_value_data1,
 	          0,
@@ -616,12 +616,12 @@ int main(
 	 fsapfs_test_object_map_descriptor_free );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_object_map_descriptor_read_btree_key_data",
-	 fsapfs_test_object_map_descriptor_read_btree_key_data );
+	 "libfsapfs_object_map_descriptor_read_key_data",
+	 fsapfs_test_object_map_descriptor_read_key_data );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_object_map_descriptor_read_btree_value_data",
-	 fsapfs_test_object_map_descriptor_read_btree_value_data );
+	 "libfsapfs_object_map_descriptor_read_value_data",
+	 fsapfs_test_object_map_descriptor_read_value_data );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

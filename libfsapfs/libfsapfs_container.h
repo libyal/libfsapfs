@@ -33,8 +33,11 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
+#include "libfsapfs_libfcache.h"
+#include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_types.h"
+#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -51,6 +54,18 @@ struct libfsapfs_internal_container
 	/* The container physical map
 	 */
 	libfsapfs_checkpoint_map_t *physical_map;
+
+	/* The volume data handle
+	 */
+	libfsapfs_volume_data_handle_t *volume_data_handle;
+
+	/* The data block vector
+	 */
+	libfdata_vector_t *data_block_vector;
+
+	/* The data block cache
+	 */
+	libfcache_cache_t *data_block_cache;
 
 	/* The container object map B-tree
 	 */

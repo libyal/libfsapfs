@@ -927,6 +927,32 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
+	if( libfdata_vector_free(
+	     &( internal_volume->data_block_vector ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free data block vector.",
+		 function );
+
+		result = -1;
+	}
+	if( libfcache_cache_free(
+	     &( internal_volume->data_block_cache ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free data block cache.",
+		 function );
+
+		result = -1;
+	}
 	if( internal_volume->object_map_btree != NULL )
 	{
 		if( libfsapfs_object_map_btree_free(
@@ -960,27 +986,14 @@ int libfsapfs_volume_close(
 		}
 	}
 	if( libfdata_vector_free(
-	     &( internal_volume->data_block_vector ),
+	     &( internal_volume->encrypted_data_block_vector ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free data block vector.",
-		 function );
-
-		result = -1;
-	}
-	if( libfcache_cache_free(
-	     &( internal_volume->data_block_cache ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free data block cache.",
+		 "%s: unable to free encrypted data block vector.",
 		 function );
 
 		result = -1;
@@ -1058,7 +1071,7 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid internal volume.",
+		 "%s: invalid volume.",
 		 function );
 
 		return( -1 );
@@ -1069,7 +1082,7 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal volume - missing IO handle.",
+		 "%s: invalid volume - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -1080,29 +1093,7 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal volume - superblock map value already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_volume->object_map_btree != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal volume - object map B-tree value already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_volume->key_bag != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid internal volume - key bag value already set.",
+		 "%s: invalid volume - superblock map value already set.",
 		 function );
 
 		return( -1 );
@@ -1113,7 +1104,7 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid file - data block vector already set.",
+		 "%s: invalid volume - data block vector already set.",
 		 function );
 
 		return( -1 );
@@ -1124,7 +1115,40 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid file - data block cache already set.",
+		 "%s: invalid volume - data block cache already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->object_map_btree != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - object map B-tree value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->key_bag != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - key bag value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->encrypted_data_block_vector != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - encrypted data block vector already set.",
 		 function );
 
 		return( -1 );
@@ -1166,104 +1190,172 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
-/* TODO refactor into function to read object map */
-	if( internal_volume->superblock->object_map_block_number > 0 )
+	if( libfsapfs_volume_data_handle_initialize(
+	     &volume_data_handle,
+	     internal_volume->io_handle,
+	     error ) != 1 )
 	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create volume data handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdata_vector_initialize(
+	     &( internal_volume->data_block_vector ),
+	     (size64_t) internal_volume->io_handle->block_size,
+	     (intptr_t *) volume_data_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
+	     NULL,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_sector,
+	     NULL,
+	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block vector.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->volume_data_handle = volume_data_handle;
+	volume_data_handle                  = NULL;
+
+	if( libfdata_vector_append_segment(
+	     internal_volume->data_block_vector,
+	     &element_index,
+	     0,
+	     0,
+	     internal_volume->io_handle->container_size,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+		 "%s: unable to append segment to data block vector.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfcache_cache_initialize(
+	     &( internal_volume->data_block_cache ),
+	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_SECTORS,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block cache.",
+		 function );
+
+		goto on_error;
+	}
+/* TODO refactor into function to read object map */
+	if( internal_volume->superblock->object_map_block_number == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing object map block number.",
+		 function );
+
+		goto on_error;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "Reading object map:\n" );
-		}
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading object map:\n" );
+	}
 #endif
-		file_offset = internal_volume->superblock->object_map_block_number * internal_volume->io_handle->block_size;
+	file_offset = internal_volume->superblock->object_map_block_number * internal_volume->io_handle->block_size;
 
-		if( libfsapfs_object_map_initialize(
-		     &object_map,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create object map.",
-			 function );
+	if( libfsapfs_object_map_initialize(
+	     &object_map,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create object map.",
+		 function );
 
-			goto on_error;
-		}
-		if( libfsapfs_object_map_read_file_io_handle(
-		     object_map,
-		     file_io_handle,
-		     file_offset,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read object map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-			 function,
-			 file_offset,
-			 file_offset );
+		goto on_error;
+	}
+	if( libfsapfs_object_map_read_file_io_handle(
+	     object_map,
+	     file_io_handle,
+	     file_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read object map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 file_offset,
+		 file_offset );
 
-			goto on_error;
-		}
-		if( object_map->object_map_btree_block_number > 0 )
-		{
+		goto on_error;
+	}
+	if( object_map->object_map_btree_block_number == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing object map B-tree block number.",
+		 function );
+
+		goto on_error;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "Reading object map B-tree:\n" );
-			}
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading object map B-tree:\n" );
+	}
 #endif
-			file_offset = object_map->object_map_btree_block_number * internal_volume->io_handle->block_size;
+	if( libfsapfs_object_map_btree_initialize(
+	     &( internal_volume->object_map_btree ),
+	     internal_volume->data_block_vector,
+	     internal_volume->data_block_cache,
+	     object_map->object_map_btree_block_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create object map B-tree.",
+		 function );
 
-			if( libfsapfs_object_map_btree_initialize(
-			     &( internal_volume->object_map_btree ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create object map B-tree.",
-				 function );
+		goto on_error;
+	}
+	if( libfsapfs_object_map_free(
+	     &object_map,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free object map.",
+		 function );
 
-				goto on_error;
-			}
-			if( libfsapfs_object_map_btree_read_file_io_handle(
-			     internal_volume->object_map_btree,
-			     file_io_handle,
-			     file_offset,
-			     internal_volume->io_handle->block_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read object map B-tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-				 function,
-				 file_offset,
-				 file_offset );
-
-				goto on_error;
-			}
-		}
-		if( libfsapfs_object_map_free(
-		     &object_map,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free object map.",
-			 function );
-
-			goto on_error;
-		}
+		goto on_error;
 	}
 	internal_volume->is_locked = 0;
 
@@ -1337,6 +1429,62 @@ int libfsapfs_internal_volume_open_read(
 				goto on_error;
 			}
 			internal_volume->is_locked = 1;
+
+			if( libfsapfs_volume_data_handle_initialize(
+			     &volume_data_handle,
+			     internal_volume->io_handle,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create encrypted volume data handle.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfdata_vector_initialize(
+			     &( internal_volume->encrypted_data_block_vector ),
+			     (size64_t) internal_volume->io_handle->block_size,
+			     (intptr_t *) volume_data_handle,
+			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
+			     NULL,
+			     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_sector,
+			     NULL,
+			     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create encrypted data block vector.",
+				 function );
+
+				goto on_error;
+			}
+			internal_volume->encrypted_volume_data_handle = volume_data_handle;
+			volume_data_handle                            = NULL;
+
+			if( libfdata_vector_append_segment(
+			     internal_volume->encrypted_data_block_vector,
+			     &element_index,
+			     0,
+			     0,
+			     internal_volume->io_handle->container_size,
+			     0,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+				 "%s: unable to append segment to encrypted data block vector.",
+				 function );
+
+				goto on_error;
+			}
 		}
 	}
 	if( internal_volume->superblock->file_system_root_object_identifier == 0 )
@@ -1350,94 +1498,13 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
-	if( libfsapfs_volume_data_handle_initialize(
-	     &volume_data_handle,
-	     internal_volume->io_handle,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create volume data handle.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfdata_vector_initialize(
-	     &( internal_volume->data_block_vector ),
-	     (size64_t) internal_volume->io_handle->block_size,
-	     (intptr_t *) volume_data_handle,
-	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
-	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_sector,
-	     NULL,
-	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data block vector.",
-		 function );
-
-		goto on_error;
-	}
-	internal_volume->volume_data_handle = volume_data_handle;
-	volume_data_handle                  = NULL;
-
-	if( libfdata_vector_append_segment(
-	     internal_volume->data_block_vector,
-	     &element_index,
-	     0,
-	     0,
-	     internal_volume->io_handle->container_size,
-	     0,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append segment to data block vector.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfcache_cache_initialize(
-	     &( internal_volume->data_block_cache ),
-	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_SECTORS,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data block cache.",
-		 function );
-
-		goto on_error;
-	}
 	return( 1 );
 
 on_error:
-	if( internal_volume->data_block_cache != NULL )
-	{
-		libfcache_cache_free(
-		 &( internal_volume->data_block_cache ),
-		 NULL );
-	}
-	if( internal_volume->data_block_vector != NULL )
+	if( internal_volume->encrypted_data_block_vector != NULL )
 	{
 		libfdata_vector_free(
-		 &( internal_volume->data_block_vector ),
-		 NULL );
-	}
-	if( volume_data_handle != NULL )
-	{
-		libfsapfs_volume_data_handle_free(
-		 &volume_data_handle,
+		 &( internal_volume->encrypted_data_block_vector ),
 		 NULL );
 	}
 	if( internal_volume->key_bag != NULL )
@@ -1456,6 +1523,24 @@ on_error:
 	{
 		libfsapfs_object_map_free(
 		 &object_map,
+		 NULL );
+	}
+	if( internal_volume->data_block_cache != NULL )
+	{
+		libfcache_cache_free(
+		 &( internal_volume->data_block_cache ),
+		 NULL );
+	}
+	if( internal_volume->data_block_vector != NULL )
+	{
+		libfdata_vector_free(
+		 &( internal_volume->data_block_vector ),
+		 NULL );
+	}
+	if( volume_data_handle != NULL )
+	{
+		libfsapfs_volume_data_handle_free(
+		 &volume_data_handle,
 		 NULL );
 	}
 	if( internal_volume->superblock != NULL )
@@ -1558,7 +1643,7 @@ int libfsapfs_internal_volume_unlock(
 		 32 );
 
 		if( libfsapfs_volume_data_handle_set_volume_master_key(
-		     internal_volume->volume_data_handle,
+		     internal_volume->encrypted_volume_data_handle,
 		     volume_master_key,
 		     32,
 		     error ) != 1 )
@@ -1567,7 +1652,7 @@ int libfsapfs_internal_volume_unlock(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set volume master key in volume data handle.",
+			 "%s: unable to set volume master key in encrypted volume data handle.",
 			 function );
 
 			goto on_error;
@@ -2501,6 +2586,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
      libfsapfs_internal_volume_t *internal_volume,
      libcerror_error_t **error )
 {
+	libfdata_vector_t *data_block_vector                     = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_get_file_system_btree";
 
@@ -2544,6 +2630,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	}
 	if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 	     internal_volume->object_map_btree,
+	     internal_volume->file_io_handle,
 	     internal_volume->superblock->file_system_root_object_identifier,
 	     &object_map_descriptor,
 	     error ) != 1 )
@@ -2552,7 +2639,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for file system root object identifier: 0x08%" PRIx64 ".",
+		 "%s: unable to retrieve object map descriptor for file system root object identifier: %" PRIu64 ".",
 		 function,
 		 internal_volume->superblock->file_system_root_object_identifier );
 
@@ -2569,10 +2656,19 @@ int libfsapfs_internal_volume_get_file_system_btree(
 
 		goto on_error;
 	}
+	if( internal_volume->encrypted_data_block_vector != NULL )
+	{
+		data_block_vector = internal_volume->encrypted_data_block_vector;
+	}
+	else
+	{
+		data_block_vector = internal_volume->data_block_vector;
+	}
 	if( libfsapfs_file_system_btree_initialize(
 	     &( internal_volume->file_system_btree ),
-	     internal_volume->data_block_vector,
+	     data_block_vector,
 	     internal_volume->data_block_cache,
+	     internal_volume->object_map_btree,
 	     object_map_descriptor->physical_address,
 	     error ) != 1 )
 	{
@@ -2585,9 +2681,28 @@ int libfsapfs_internal_volume_get_file_system_btree(
 
 		goto on_error;
 	}
+	if( libfsapfs_object_map_descriptor_free(
+	     &object_map_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free object map descriptor.",
+		 function );
+
+		goto on_error;
+	}
 	return( 1 );
 
 on_error:
+	if( object_map_descriptor != NULL )
+	{
+		libfsapfs_object_map_descriptor_free(
+		 &object_map_descriptor,
+		 NULL );
+	}
 	if( internal_volume->file_system_btree != NULL )
 	{
 		libfsapfs_file_system_btree_free(

@@ -64,7 +64,7 @@ int libfsapfs_object_map_initialize(
 		return( -1 );
 	}
 	*object_map = memory_allocate_structure(
-	                         libfsapfs_object_map_t );
+	               libfsapfs_object_map_t );
 
 	if( *object_map == NULL )
 	{
