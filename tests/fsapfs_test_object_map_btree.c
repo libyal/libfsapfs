@@ -316,6 +316,9 @@ int fsapfs_test_object_map_btree_initialize(
 	 */
 	result = libfsapfs_object_map_btree_initialize(
 	          &object_map_btree,
+	          NULL,
+	          NULL,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -352,6 +355,9 @@ int fsapfs_test_object_map_btree_initialize(
 	 */
 	result = libfsapfs_object_map_btree_initialize(
 	          NULL,
+	          NULL,
+	          NULL,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -370,6 +376,9 @@ int fsapfs_test_object_map_btree_initialize(
 
 	result = libfsapfs_object_map_btree_initialize(
 	          &object_map_btree,
+	          NULL,
+	          NULL,
+	          0,
 	          &error );
 
 	object_map_btree = NULL;
@@ -398,6 +407,9 @@ int fsapfs_test_object_map_btree_initialize(
 
 		result = libfsapfs_object_map_btree_initialize(
 		          &object_map_btree,
+		          NULL,
+		          NULL,
+		          0,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
@@ -440,6 +452,9 @@ int fsapfs_test_object_map_btree_initialize(
 
 		result = libfsapfs_object_map_btree_initialize(
 		          &object_map_btree,
+		          NULL,
+		          NULL,
+		          0,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )

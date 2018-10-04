@@ -1,7 +1,13 @@
 TODO
+* Improved sub node support:
+** complete libfsapfs_file_system_btree_get_inode_by_utf8_path
+** complete libfsapfs_file_system_btree_get_inode_by_utf16_path
+** complete libfsapfs_file_system_btree_get_file_extents
+* improve file entry support
+** add libfsapfs_file_entry_get_sub_file_entry_by_utf8_name
+** add libfsapfs_file_entry_get_sub_file_entry_by_utf16_name
+* Add container data handle? Add decryption support and use it to read container key bag?
 * rename volume data handle to container data handle?
-* improve reading object map B-tree
-* improve reading file system B-tree
 * add snapshot support
 
 library:
@@ -10,9 +16,6 @@ library:
 * improve file content read support
 ** encrypted file content read support
 ** compressed file content read support?
-* improve file entry support
-** add libfsapfs_file_entry_get_sub_file_entry_by_utf8_name
-** add libfsapfs_file_entry_get_sub_file_entry_by_utf16_name
 * change container read bootstap as advised in documentation
 ** validate checksum
 ** read backup container superblocks

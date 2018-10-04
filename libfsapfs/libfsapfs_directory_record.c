@@ -375,6 +375,8 @@ int libfsapfs_directory_record_read_value_data(
 {
 	static char *function              = "libfsapfs_directory_record_read_value_data";
 	size_t data_offset                 = 0;
+	size_t value_data_offset           = 0;
+	size_t value_data_size             = 0;
 	uint16_t extended_field_index      = 0;
 	uint16_t number_of_extended_fields = 0;
 	uint8_t extended_field_type        = 0;
@@ -497,7 +499,7 @@ int libfsapfs_directory_record_read_value_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: number of extended fields\t\t\t: %" PRIu16 "\n",
+			 "%s: number of extended fields\t\t: %" PRIu16 "\n",
 			 function,
 			 number_of_extended_fields );
 
@@ -505,26 +507,15 @@ int libfsapfs_directory_record_read_value_data(
 			 &( data[ data_offset + 2 ] ),
 			 value_16bit );
 			libcnotify_printf(
-			 "%s: unknown1\t\t\t\t\t: 0x%04" PRIx16 "\n",
+			 "%s: unknown1\t\t\t\t: 0x%04" PRIx16 "\n",
 			 function,
 			 value_16bit );
 		}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-		data_offset += 4;
+		data_offset      += 4;
+		value_data_offset = data_offset + ( number_of_extended_fields * 4 );
 
-/* TODO add support for extended fields */
-		if( number_of_extended_fields > 0 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported number of extended fields.",
-			 function );
-
-			return( -1 );
-		}
 		for( extended_field_index = 0;
 		     extended_field_index < number_of_extended_fields;
 		     extended_field_index++ )
@@ -546,13 +537,15 @@ int libfsapfs_directory_record_read_value_data(
 			if( libcnotify_verbose != 0 )
 			{
 				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " type\t\t\t: %" PRIu8 "\n",
+				 "%s: extended field: %" PRIu16 " type\t\t: %" PRIu8 " %s\n",
 				 function,
 				 extended_field_index,
-				 extended_field_type );
+				 extended_field_type,
+				 libfsapfs_debug_print_inode_extended_field_type(
+				  extended_field_type ) );
 
 				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " flags\t\t\t: 0x%04" PRIx16 "\n",
+				 "%s: extended field: %" PRIu16 " flags\t: 0x%04" PRIx16 "\n",
 				 function,
 				 extended_field_index,
 				 data[ data_offset + 1 ] );
@@ -561,11 +554,23 @@ int libfsapfs_directory_record_read_value_data(
 
 			data_offset += 4;
 
-/* TODO check bounds of data */
+			if( value_data_offset > data_size )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			value_data_size = 0;
+
 			switch( extended_field_type )
 			{
 				case 1:
-					data_offset += 8;
+					value_data_size = 8;
 					break;
 
 				default:
@@ -579,6 +584,31 @@ int libfsapfs_directory_record_read_value_data(
 
 					return( -1 );
 			}
+			if( value_data_size > ( data_size - value_data_offset ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid value data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "%s: extended field: %" PRIu16 " value data:\n",
+				 function,
+				 extended_field_index );
+				libcnotify_print_data(
+				 &( data[ value_data_offset ] ),
+				 value_data_size,
+				 0 );
+			}
+#endif
+			value_data_offset += value_data_size;
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )

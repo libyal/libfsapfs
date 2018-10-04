@@ -538,6 +538,21 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 		 object_identifier );
 	}
 #endif
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		return( -1 );
+	}
 	if( libfsapfs_btree_node_get_number_of_entries(
 	     node,
 	     &number_of_entries,
@@ -552,8 +567,6 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 
 		return( -1 );
 	}
-	is_leaf_node = node->node_header->flags & 0x0002;
-
 	for( btree_entry_index = 0;
 	     btree_entry_index < number_of_entries;
 	     btree_entry_index++ )
@@ -628,7 +641,8 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 		{
 			if( object_map_identifier >= object_identifier )
 			{
-				if( object_map_identifier == object_identifier )
+				if( ( previous_entry == NULL )
+				 || ( object_map_identifier == object_identifier ) )
 				{
 					previous_entry = entry;
 				}
@@ -717,8 +731,21 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
 	}
 	do
 	{
-		is_leaf_node = node->node_header->flags & 0x0002;
+		is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+		                node,
+		                error );
 
+		if( is_leaf_node == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine if B-tree node is a leaf node.",
+			 function );
+
+			goto on_error;
+		}
 		result = libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 		          object_map_btree,
 		          node,

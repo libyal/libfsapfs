@@ -657,8 +657,9 @@ int libfsapfs_inode_read_value_data(
 			if( libcnotify_verbose != 0 )
 			{
 				libcnotify_printf(
-				 "%s: value data:\n",
-				 function );
+				 "%s: extended field: %" PRIu16 " value data:\n",
+				 function,
+				 extended_field_index );
 				libcnotify_print_data(
 				 &( data[ value_data_offset ] ),
 				 value_data_size,

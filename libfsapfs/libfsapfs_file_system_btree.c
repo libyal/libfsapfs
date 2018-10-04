@@ -160,6 +160,158 @@ int libfsapfs_file_system_btree_free(
 	return( 1 );
 }
 
+/* Retrieves the sub node block number from a B-tree entry
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_entry_t *entry,
+     uint64_t *sub_node_block_number,
+     libcerror_error_t **error )
+{
+	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	static char *function                                    = "libfsapfs_file_system_btree_get_sub_node_block_number_from_entry";
+	uint64_t sub_node_object_identifier                      = 0;
+	int result                                               = 0;
+
+	if( file_system_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid B-tree entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( entry->value_data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid B-tree entry - missing value data.",
+		 function );
+
+		return( -1 );
+	}
+	if( entry->value_data_size != 8 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid B-tree entry - unsupported value data size.",
+		 function );
+
+		return( -1 );
+	}
+	if( sub_node_block_number == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid sub node block number.",
+		 function );
+
+		return( -1 );
+	}
+	byte_stream_copy_to_uint64_little_endian(
+	 entry->value_data,
+	 sub_node_object_identifier );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: sub node object identifier: %" PRIu64 "\n",
+		 function,
+		 sub_node_object_identifier );
+	}
+#endif
+	result = libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
+	          file_system_btree->object_map_btree,
+	          file_io_handle,
+	          sub_node_object_identifier,
+	          &object_map_descriptor,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve object map descriptor for sub node object identifier: %" PRIu64 ".",
+		 function,
+		 sub_node_object_identifier );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		if( object_map_descriptor == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid object map descriptor.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: sub node block number: %" PRIu64 "\n",
+			 function,
+			 object_map_descriptor->physical_address );
+		}
+#endif
+		*sub_node_block_number = object_map_descriptor->physical_address;
+
+		if( libfsapfs_object_map_descriptor_free(
+		     &object_map_descriptor,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free object map descriptor.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	return( result );
+
+on_error:
+	if( object_map_descriptor != NULL )
+	{
+		libfsapfs_object_map_descriptor_free(
+		 &object_map_descriptor,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Retrieves the file system B-tree root node
  * Returns 1 if successful or -1 on error
  */
@@ -569,6 +721,21 @@ int libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
 		  data_type ) );
 	}
 #endif
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		return( -1 );
+	}
 	if( libfsapfs_btree_node_get_number_of_entries(
 	     node,
 	     &number_of_entries,
@@ -584,7 +751,6 @@ int libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
 		return( -1 );
 	}
 	lookup_identifier = ( (uint64_t) data_type << 60 ) | identifier;
-	is_leaf_node      = node->node_header->flags & 0x0002;
 
 	for( btree_entry_index = 0;
 	     btree_entry_index < number_of_entries;
@@ -663,8 +829,9 @@ int libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
 
 			if( file_system_identifier >= identifier )
 			{
-				if( ( file_system_identifier == identifier )
-				 && ( file_system_data_type <= data_type ) )
+				if( ( previous_entry == NULL )
+				 || ( ( file_system_identifier == identifier )
+				  &&  ( file_system_data_type <= data_type ) ) )
 				{
 					previous_entry = entry;
 				}
@@ -696,13 +863,12 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *entry                           = NULL;
-	libfsapfs_btree_node_t *node                             = NULL;
-	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	static char *function                                    = "libfsapfs_file_system_btree_get_entry_by_identifier";
-	uint64_t sub_node_object_identifier                      = 0;
-	int is_leaf_node                                         = 0;
-	int result                                               = 0;
+	libfsapfs_btree_entry_t *entry = NULL;
+	libfsapfs_btree_node_t *node   = NULL;
+	static char *function          = "libfsapfs_file_system_btree_get_entry_by_identifier";
+	uint64_t sub_node_block_number = 0;
+	int is_leaf_node               = 0;
+	int result                     = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -755,8 +921,21 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 	}
 	do
 	{
-		is_leaf_node = node->node_header->flags & 0x0002;
+		is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+		                node,
+		                error );
 
+		if( is_leaf_node == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine if B-tree node is a leaf node.",
+			 function );
+
+			goto on_error;
+		}
 		result = libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
 		          file_system_btree,
 		          node,
@@ -787,52 +966,22 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 
 			return( 1 );
 		}
-		if( entry == NULL )
+		if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+		     file_system_btree,
+		     file_io_handle,
+		     entry,
+		     &sub_node_block_number,
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid B-tree entry.",
-			 function );
-
-			return( -1 );
-		}
-		if( entry->value_data == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid B-tree entry - missing value data.",
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine sub node block number.",
 			 function );
 
 			goto on_error;
 		}
-		if( entry->value_data_size != 8 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: invalid B-tree entry - unsupported value data size.",
-			 function );
-
-			goto on_error;
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 entry->value_data,
-		 sub_node_object_identifier );
-
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "%s: B-tree sub node object identifier: %" PRIu64 "\n",
-			 function,
-			 sub_node_object_identifier );
-		}
-#endif
 		if( libfsapfs_btree_node_free(
 		     &node,
 		     error ) != 1 )
@@ -846,47 +995,10 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 
 			goto on_error;
 		}
-		if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
-		     file_system_btree->object_map_btree,
-		     file_io_handle,
-		     sub_node_object_identifier,
-		     &object_map_descriptor,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve object map descriptor for sub node object identifier: 0x08%" PRIx64 ".",
-			 function,
-			 sub_node_object_identifier );
-
-			goto on_error;
-		}
-		if( object_map_descriptor == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid object map descriptor.",
-			 function );
-
-			goto on_error;
-		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "%s: B-tree sub node block number: %" PRIu64 "\n",
-			 function,
-			 object_map_descriptor->physical_address );
-		}
-#endif
 		if( libfsapfs_file_system_btree_get_sub_node(
 		     file_system_btree,
 		     file_io_handle,
-		     object_map_descriptor->physical_address,
+		     sub_node_block_number,
 		     &node,
 		     error ) == -1 )
 		{
@@ -896,20 +1008,7 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
 			 function,
-			 object_map_descriptor->physical_address );
-
-			goto on_error;
-		}
-		if( libfsapfs_object_map_descriptor_free(
-		     &object_map_descriptor,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free object map descriptor.",
-			 function );
+			 sub_node_block_number );
 
 			goto on_error;
 		}
@@ -932,12 +1031,6 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 	return( 0 );
 
 on_error:
-	if( object_map_descriptor != NULL )
-	{
-		libfsapfs_object_map_descriptor_free(
-		 &object_map_descriptor,
-		 NULL );
-	}
 	if( node != NULL )
 	{
 		libfsapfs_btree_node_free(
@@ -947,12 +1040,11 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves a directory record for an UTF-8 encoded name from the file system B-tree node
+/* Retrieves a directory record for an UTF-8 encoded name from the file system B-tree leaf node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
-int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
+int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name(
      libfsapfs_file_system_btree_t *file_system_btree,
-     libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t parent_identifier,
      const uint8_t *utf8_string,
@@ -960,14 +1052,19 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry                = NULL;
+	libfsapfs_btree_entry_t *entry                      = NULL;
 	libfsapfs_directory_record_t *safe_directory_record = NULL;
-	static char *function                               = "libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name";
+	static char *function                               = "libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name";
 	uint64_t file_system_identifier                     = 0;
 	uint64_t lookup_identifier                          = 0;
-	int btree_entry_index                               = 0;
+	int entry_index                                     = 0;
+	int is_leaf_node                                    = 0;
 	int number_of_entries                               = 0;
 	int result                                          = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint8_t file_system_data_type                       = 0;
+#endif
 
 	if( file_system_btree == NULL )
 	{
@@ -991,6 +1088,41 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
 
 		return( -1 );
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving directory record: %" PRIu64 "\n",
+		 function,
+		 parent_identifier );
+	}
+#endif
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	else if( is_leaf_node == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid node - not a leaf node.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfsapfs_btree_node_get_number_of_entries(
 	     node,
 	     &number_of_entries,
@@ -1007,14 +1139,14 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
 	}
 	lookup_identifier = ( (uint64_t) LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD << 60 ) | parent_identifier;
 
-	for( btree_entry_index = 0;
-	     btree_entry_index < number_of_entries;
-	     btree_entry_index++ )
+	for( entry_index = 0;
+	     entry_index < number_of_entries;
+	     entry_index++ )
 	{
 		if( libfsapfs_btree_node_get_entry_by_index(
 		     node,
-		     btree_entry_index,
-		     &btree_entry,
+		     entry_index,
+		     &entry,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1026,7 +1158,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
 
 			goto on_error;
 		}
-		if( btree_entry == NULL )
+		if( entry == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -1034,11 +1166,11 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d.",
 			 function,
-			 btree_entry_index );
+			 entry_index );
 
 			goto on_error;
 		}
-		if( btree_entry->key_data == NULL )
+		if( entry->key_data == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -1046,98 +1178,110 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d - missing key data.",
 			 function,
-			 btree_entry_index );
+			 entry_index );
 
 			goto on_error;
 		}
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
+		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
 		 file_system_identifier );
 
-/* TODO implement B-tree sub node support */
-
-		if( file_system_identifier != lookup_identifier )
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
 		{
-			continue;
+			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
+
+			libcnotify_printf(
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 function,
+			 entry_index,
+			 file_system_identifier & 0x0fffffffffffffffUL,
+			 file_system_data_type,
+			 libfsapfs_debug_print_file_system_data_type(
+			  file_system_data_type ) );
 		}
-		if( libfsapfs_directory_record_initialize(
-		     &safe_directory_record,
-		     error ) != 1 )
+#endif
+		if( file_system_identifier == lookup_identifier )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create directory record.",
-			 function );
+			if( libfsapfs_directory_record_initialize(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create directory record.",
+				 function );
 
-			goto on_error;
-		}
-		if( libfsapfs_directory_record_read_key_data(
-		     safe_directory_record,
-		     btree_entry->key_data,
-		     (size_t) btree_entry->key_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read directory record key data.",
-			 function );
-
-			goto on_error;
-		}
-		result = libfsapfs_directory_record_compare_name_with_utf8_string(
-		          safe_directory_record,
-		          utf8_string,
-		          utf8_string_length,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GENERIC,
-			 "%s: unable to compare UTF-8 string with name of directory record.",
-			 function );
-
-			goto on_error;
-		}
-		else if( result != 0 )
-		{
-			if( libfsapfs_directory_record_read_value_data(
+				goto on_error;
+			}
+			if( libfsapfs_directory_record_read_key_data(
 			     safe_directory_record,
-			     btree_entry->value_data,
-			     (size_t) btree_entry->value_data_size,
+			     entry->key_data,
+			     (size_t) entry->key_data_size,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_IO,
 				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read directory record value data.",
+				 "%s: unable to read directory record key data.",
 				 function );
 
 				goto on_error;
 			}
-			*directory_record = safe_directory_record;
+			result = libfsapfs_directory_record_compare_name_with_utf8_string(
+			          safe_directory_record,
+			          utf8_string,
+			          utf8_string_length,
+			          error );
 
-			return( 1 );
-		}
-		if( libfsapfs_directory_record_free(
-		     &safe_directory_record,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free directory record.",
-			 function );
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GENERIC,
+				 "%s: unable to compare UTF-8 string with name of directory record.",
+				 function );
 
-			goto on_error;
+				goto on_error;
+			}
+			else if( result != 0 )
+			{
+				if( libfsapfs_directory_record_read_value_data(
+				     safe_directory_record,
+				     entry->value_data,
+				     (size_t) entry->value_data_size,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
+					 "%s: unable to read directory record value data.",
+					 function );
+
+					goto on_error;
+				}
+				*directory_record = safe_directory_record;
+
+				return( 1 );
+			}
+			if( libfsapfs_directory_record_free(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free directory record.",
+				 function );
+
+				goto on_error;
+			}
 		}
 	}
 	return( 0 );
@@ -1152,12 +1296,311 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves a directory record for an UTF-16 encoded name from the file system B-tree node
+/* Retrieves a directory record for an UTF-8 encoded name from the file system B-tree branch node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
-int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
+int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_name(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_directory_record_t **directory_record,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_entry_t *entry          = NULL;
+	libfsapfs_btree_entry_t *previous_entry = NULL;
+	libfsapfs_btree_node_t *sub_node        = NULL;
+	static char *function                   = "libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_name";
+	uint64_t file_system_identifier         = 0;
+	uint64_t sub_node_block_number          = 0;
+	uint8_t file_system_data_type           = 0;
+	int entry_index                         = 0;
+	int is_leaf_node                        = 0;
+	int number_of_entries                   = 0;
+	int result                              = 0;
+
+	if( file_system_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving directory record: %" PRIu64 "\n",
+		 function,
+		 parent_identifier );
+	}
+#endif
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	else if( is_leaf_node != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid node - not a branch node.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_btree_node_get_number_of_entries(
+	     node,
+	     &number_of_entries,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from B-tree node.",
+		 function );
+
+		goto on_error;
+	}
+	for( entry_index = 0;
+	     entry_index < number_of_entries;
+	     entry_index++ )
+	{
+		if( libfsapfs_btree_node_get_entry_by_index(
+		     node,
+		     entry_index,
+		     &entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from B-tree node.",
+			 function );
+
+			goto on_error;
+		}
+		if( entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
+		 file_system_identifier );
+
+		file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 function,
+			 entry_index,
+			 file_system_identifier & 0x0fffffffffffffffUL,
+			 file_system_data_type,
+			 libfsapfs_debug_print_file_system_data_type(
+			  file_system_data_type ) );
+		}
+#endif
+		file_system_identifier &= 0x0fffffffffffffffUL;
+
+		if( file_system_identifier >= parent_identifier )
+		{
+/* TODO compare directory entry name */
+			if( ( previous_entry == NULL )
+			 || ( ( file_system_identifier == parent_identifier )
+			  &&  ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
+			{
+				previous_entry = entry;
+			}
+			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+			     file_system_btree,
+			     file_io_handle,
+			     previous_entry,
+			     &sub_node_block_number,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine sub node block number.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_file_system_btree_get_sub_node(
+			     file_system_btree,
+			     file_io_handle,
+			     sub_node_block_number,
+			     &sub_node,
+			     error ) == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+				 function,
+				 sub_node_block_number );
+
+				goto on_error;
+			}
+			is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+			                sub_node,
+			                error );
+
+			if( is_leaf_node == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine if B-tree sub node is a leaf node.",
+				 function );
+
+				goto on_error;
+			}
+			if( is_leaf_node != 0 )
+			{
+				result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name(
+					  file_system_btree,
+					  sub_node,
+					  parent_identifier,
+					  utf8_string,
+					  utf8_string_length,
+					  directory_record,
+					  error );
+			}
+			else
+			{
+				result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_name(
+					  file_system_btree,
+					  file_io_handle,
+					  sub_node,
+					  parent_identifier,
+					  utf8_string,
+					  utf8_string_length,
+					  directory_record,
+					  error );
+			}
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve directory entry by name.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_btree_node_free(
+			     &sub_node,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free B-tree sub node.",
+				 function );
+
+				goto on_error;
+			}
+			if( result != 0 )
+			{
+				break;
+			}
+		}
+		previous_entry = entry;
+	}
+	return( result );
+
+on_error:
+	if( *directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 directory_record,
+		 NULL );
+	}
+	if( sub_node != NULL )
+	{
+		libfsapfs_btree_node_free(
+		 &sub_node,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Retrieves a directory record for an UTF-16 encoded name from the file system B-tree leaf node
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name(
+     libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_btree_node_t *node,
      uint64_t parent_identifier,
      const uint16_t *utf16_string,
@@ -1165,14 +1608,19 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry                = NULL;
+	libfsapfs_btree_entry_t *entry                      = NULL;
 	libfsapfs_directory_record_t *safe_directory_record = NULL;
-	static char *function                               = "libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name";
+	static char *function                               = "libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name";
 	uint64_t file_system_identifier                     = 0;
 	uint64_t lookup_identifier                          = 0;
-	int btree_entry_index                               = 0;
+	int entry_index                                     = 0;
+	int is_leaf_node                                    = 0;
 	int number_of_entries                               = 0;
 	int result                                          = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint8_t file_system_data_type                       = 0;
+#endif
 
 	if( file_system_btree == NULL )
 	{
@@ -1196,6 +1644,41 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
 
 		return( -1 );
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving directory record: %" PRIu64 "\n",
+		 function,
+		 parent_identifier );
+	}
+#endif
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	else if( is_leaf_node == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid node - not a leaf node.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfsapfs_btree_node_get_number_of_entries(
 	     node,
 	     &number_of_entries,
@@ -1212,16 +1695,14 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
 	}
 	lookup_identifier = ( (uint64_t) LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD << 60 ) | parent_identifier;
 
-/* TODO implement B-tree sub node support */
-
-	for( btree_entry_index = 0;
-	     btree_entry_index < number_of_entries;
-	     btree_entry_index++ )
+	for( entry_index = 0;
+	     entry_index < number_of_entries;
+	     entry_index++ )
 	{
 		if( libfsapfs_btree_node_get_entry_by_index(
 		     node,
-		     btree_entry_index,
-		     &btree_entry,
+		     entry_index,
+		     &entry,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1233,7 +1714,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
 
 			goto on_error;
 		}
-		if( btree_entry == NULL )
+		if( entry == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -1241,11 +1722,11 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d.",
 			 function,
-			 btree_entry_index );
+			 entry_index );
 
 			goto on_error;
 		}
-		if( btree_entry->key_data == NULL )
+		if( entry->key_data == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -1253,98 +1734,110 @@ int libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d - missing key data.",
 			 function,
-			 btree_entry_index );
+			 entry_index );
 
 			goto on_error;
 		}
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
+		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
 		 file_system_identifier );
 
-/* TODO implement B-tree sub node support */
-
-		if( file_system_identifier != lookup_identifier )
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
 		{
-			continue;
+			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
+
+			libcnotify_printf(
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 function,
+			 entry_index,
+			 file_system_identifier & 0x0fffffffffffffffUL,
+			 file_system_data_type,
+			 libfsapfs_debug_print_file_system_data_type(
+			  file_system_data_type ) );
 		}
-		if( libfsapfs_directory_record_initialize(
-		     &safe_directory_record,
-		     error ) != 1 )
+#endif
+		if( file_system_identifier == lookup_identifier )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create directory record.",
-			 function );
+			if( libfsapfs_directory_record_initialize(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create directory record.",
+				 function );
 
-			goto on_error;
-		}
-		if( libfsapfs_directory_record_read_key_data(
-		     safe_directory_record,
-		     btree_entry->key_data,
-		     (size_t) btree_entry->key_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read directory record key data.",
-			 function );
-
-			goto on_error;
-		}
-		result = libfsapfs_directory_record_compare_name_with_utf16_string(
-		          safe_directory_record,
-		          utf16_string,
-		          utf16_string_length,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GENERIC,
-			 "%s: unable to compare UTF-16 string with name of directory record.",
-			 function );
-
-			goto on_error;
-		}
-		else if( result != 0 )
-		{
-			if( libfsapfs_directory_record_read_value_data(
+				goto on_error;
+			}
+			if( libfsapfs_directory_record_read_key_data(
 			     safe_directory_record,
-			     btree_entry->value_data,
-			     (size_t) btree_entry->value_data_size,
+			     entry->key_data,
+			     (size_t) entry->key_data_size,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_IO,
 				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read directory record value data.",
+				 "%s: unable to read directory record key data.",
 				 function );
 
 				goto on_error;
 			}
-			*directory_record = safe_directory_record;
+			result = libfsapfs_directory_record_compare_name_with_utf16_string(
+			          safe_directory_record,
+			          utf16_string,
+			          utf16_string_length,
+			          error );
 
-			return( 1 );
-		}
-		if( libfsapfs_directory_record_free(
-		     &safe_directory_record,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free directory record.",
-			 function );
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GENERIC,
+				 "%s: unable to compare UTF-16 string with name of directory record.",
+				 function );
 
-			goto on_error;
+				goto on_error;
+			}
+			else if( result != 0 )
+			{
+				if( libfsapfs_directory_record_read_value_data(
+				     safe_directory_record,
+				     entry->value_data,
+				     (size_t) entry->value_data_size,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
+					 "%s: unable to read directory record value data.",
+					 function );
+
+					goto on_error;
+				}
+				*directory_record = safe_directory_record;
+
+				return( 1 );
+			}
+			if( libfsapfs_directory_record_free(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free directory record.",
+				 function );
+
+				goto on_error;
+			}
 		}
 	}
 	return( 0 );
@@ -1354,6 +1847,306 @@ on_error:
 	{
 		libfsapfs_directory_record_free(
 		 &safe_directory_record,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Retrieves a directory record for an UTF-16 encoded name from the file system B-tree branch node
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_name(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_directory_record_t **directory_record,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_entry_t *entry          = NULL;
+	libfsapfs_btree_entry_t *previous_entry = NULL;
+	libfsapfs_btree_node_t *sub_node        = NULL;
+	static char *function                   = "libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_name";
+	uint64_t file_system_identifier         = 0;
+	uint64_t sub_node_block_number          = 0;
+	uint8_t file_system_data_type           = 0;
+	int entry_index                         = 0;
+	int is_leaf_node                        = 0;
+	int number_of_entries                   = 0;
+	int result                              = 0;
+
+	if( file_system_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving directory record: %" PRIu64 "\n",
+		 function,
+		 parent_identifier );
+	}
+#endif
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	else if( is_leaf_node != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid node - not a branch node.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_btree_node_get_number_of_entries(
+	     node,
+	     &number_of_entries,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from B-tree node.",
+		 function );
+
+		goto on_error;
+	}
+	for( entry_index = 0;
+	     entry_index < number_of_entries;
+	     entry_index++ )
+	{
+		if( libfsapfs_btree_node_get_entry_by_index(
+		     node,
+		     entry_index,
+		     &entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from B-tree node.",
+			 function );
+
+			goto on_error;
+		}
+		if( entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
+		 file_system_identifier );
+
+		file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 function,
+			 entry_index,
+			 file_system_identifier & 0x0fffffffffffffffUL,
+			 file_system_data_type,
+			 libfsapfs_debug_print_file_system_data_type(
+			  file_system_data_type ) );
+		}
+#endif
+		file_system_identifier &= 0x0fffffffffffffffUL;
+
+		if( file_system_identifier >= parent_identifier )
+		{
+/* TODO compare directory entry name */
+			if( ( previous_entry == NULL )
+			 || ( ( file_system_identifier == parent_identifier )
+			  &&  ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
+			{
+				previous_entry = entry;
+			}
+			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+			     file_system_btree,
+			     file_io_handle,
+			     previous_entry,
+			     &sub_node_block_number,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine sub node block number.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_file_system_btree_get_sub_node(
+			     file_system_btree,
+			     file_io_handle,
+			     sub_node_block_number,
+			     &sub_node,
+			     error ) == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+				 function,
+				 sub_node_block_number );
+
+				goto on_error;
+			}
+			is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+			                sub_node,
+			                error );
+
+			if( is_leaf_node == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine if B-tree sub node is a leaf node.",
+				 function );
+
+				goto on_error;
+			}
+			if( is_leaf_node != 0 )
+			{
+				result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name(
+					  file_system_btree,
+					  sub_node,
+					  parent_identifier,
+					  utf16_string,
+					  utf16_string_length,
+					  directory_record,
+					  error );
+			}
+			else
+			{
+				result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_name(
+					  file_system_btree,
+					  file_io_handle,
+					  sub_node,
+					  parent_identifier,
+					  utf16_string,
+					  utf16_string_length,
+					  directory_record,
+					  error );
+			}
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve directory entry by name.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_btree_node_free(
+			     &sub_node,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free B-tree sub node.",
+				 function );
+
+				goto on_error;
+			}
+			if( result != 0 )
+			{
+				break;
+			}
+		}
+		previous_entry = entry;
+	}
+	return( result );
+
+on_error:
+	if( *directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 directory_record,
+		 NULL );
+	}
+	if( sub_node != NULL )
+	{
+		libfsapfs_btree_node_free(
+		 &sub_node,
 		 NULL );
 	}
 	return( -1 );
@@ -1376,6 +2169,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 	uint64_t lookup_identifier                     = 0;
 	int btree_entry_index                          = 0;
 	int entry_index                                = 0;
+	int is_leaf_node                               = 0;
 	int number_of_entries                          = 0;
 	int result                                     = 0;
 
@@ -1405,18 +2199,22 @@ int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 
 		return( -1 );
 	}
-	if( node->node_header == NULL )
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid node - missing node header.",
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	if( ( node->node_header->flags & 0x0002 ) == 0 )
+	else if( is_leaf_node == 0 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1425,7 +2223,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 		 "%s: invalid node - not a leaf node.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libfsapfs_btree_node_get_number_of_entries(
 	     node,
@@ -1603,17 +2401,17 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
      libcdata_array_t *directory_entries,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *entry                           = NULL;
-	libfsapfs_btree_entry_t *previous_entry                  = NULL;
-	libfsapfs_btree_node_t *sub_node                         = NULL;
-	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	static char *function                                    = "libfsapfs_file_system_btree_get_directory_entries_from_branch_node";
-	uint64_t file_system_identifier                          = 0;
-	uint64_t sub_node_object_identifier                      = 0;
-	uint8_t file_system_data_type                            = 0;
-	int entry_index                                          = 0;
-	int number_of_entries                                    = 0;
-	int result                                               = 0;
+	libfsapfs_btree_entry_t *entry          = NULL;
+	libfsapfs_btree_entry_t *previous_entry = NULL;
+	libfsapfs_btree_node_t *sub_node        = NULL;
+	static char *function                   = "libfsapfs_file_system_btree_get_directory_entries_from_branch_node";
+	uint64_t file_system_identifier         = 0;
+	uint64_t sub_node_block_number          = 0;
+	uint8_t file_system_data_type           = 0;
+	int entry_index                         = 0;
+	int is_leaf_node                        = 0;
+	int number_of_entries                   = 0;
+	int result                              = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -1637,18 +2435,22 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 
 		return( -1 );
 	}
-	if( node->node_header == NULL )
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid node - missing node header.",
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	if( ( node->node_header->flags & 0x0002 ) != 0 )
+	else if( is_leaf_node != 0 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1657,7 +2459,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 		 "%s: invalid node - not a branch node.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libfsapfs_btree_node_get_number_of_entries(
 	     node,
@@ -1739,87 +2541,32 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 
 		if( file_system_identifier >= parent_identifier )
 		{
-			if( ( file_system_identifier == parent_identifier )
-			 && ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) )
+			if( ( previous_entry == NULL )
+			 || ( ( file_system_identifier == parent_identifier )
+			  &&  ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
 			{
 				previous_entry = entry;
 			}
-			if( previous_entry->value_data == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree entry - missing value data.",
-				 function );
-
-				goto on_error;
-			}
-			if( previous_entry->value_data_size != 8 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-				 "%s: invalid B-tree entry - unsupported value data size.",
-				 function );
-
-				goto on_error;
-			}
-			byte_stream_copy_to_uint64_little_endian(
-			 previous_entry->value_data,
-			 sub_node_object_identifier );
-
-#if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "%s: B-tree sub node object identifier: %" PRIu64 "\n",
-				 function,
-				 sub_node_object_identifier );
-			}
-#endif
-			if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
-			     file_system_btree->object_map_btree,
+			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+			     file_system_btree,
 			     file_io_handle,
-			     sub_node_object_identifier,
-			     &object_map_descriptor,
+			     previous_entry,
+			     &sub_node_block_number,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve object map descriptor for sub node object identifier: 0x08%" PRIx64 ".",
-				 function,
-				 sub_node_object_identifier );
-
-				goto on_error;
-			}
-			if( object_map_descriptor == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid object map descriptor.",
+				 "%s: unable to determine sub node block number.",
 				 function );
 
 				goto on_error;
 			}
-#if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "%s: B-tree sub node block number: %" PRIu64 "\n",
-				 function,
-				 object_map_descriptor->physical_address );
-			}
-#endif
 			if( libfsapfs_file_system_btree_get_sub_node(
 			     file_system_btree,
 			     file_io_handle,
-			     object_map_descriptor->physical_address,
+			     sub_node_block_number,
 			     &sub_node,
 			     error ) == -1 )
 			{
@@ -1829,24 +2576,26 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
 				 function,
-				 object_map_descriptor->physical_address );
+				 sub_node_block_number );
 
 				goto on_error;
 			}
-			if( libfsapfs_object_map_descriptor_free(
-			     &object_map_descriptor,
-			     error ) != 1 )
+			is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+			                sub_node,
+			                error );
+
+			if( is_leaf_node == -1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free object map descriptor.",
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine if B-tree sub node is a leaf node.",
 				 function );
 
 				goto on_error;
 			}
-			if( ( sub_node->node_header->flags & 0x0002 ) != 0 )
+			if( is_leaf_node != 0 )
 			{
 				result = libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 				          file_system_btree,
@@ -1896,12 +2645,6 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 	return( result );
 
 on_error:
-	if( object_map_descriptor != NULL )
-	{
-		libfsapfs_object_map_descriptor_free(
-		 &object_map_descriptor,
-		 NULL );
-	}
 	if( sub_node != NULL )
 	{
 		libfsapfs_btree_node_free(
@@ -1928,6 +2671,7 @@ int libfsapfs_file_system_btree_get_directory_entries(
 {
 	libfsapfs_btree_node_t *root_node = NULL;
 	static char *function             = "libfsapfs_file_system_btree_get_directory_entries";
+	int is_leaf_node                  = 0;
 	int result                        = 0;
 
 	if( file_system_btree == NULL )
@@ -1966,7 +2710,6 @@ int libfsapfs_file_system_btree_get_directory_entries(
 
 		goto on_error;
 	}
-/* TODO create get node flags function */
 	if( root_node == NULL )
 	{
 		libcerror_error_set(
@@ -1978,18 +2721,22 @@ int libfsapfs_file_system_btree_get_directory_entries(
 
 		goto on_error;
 	}
-	if( root_node->node_header == NULL )
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                root_node,
+	                error );
+
+	if( is_leaf_node == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid B-tree root node - missing node header.",
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree root node is a leaf node.",
 		 function );
 
 		goto on_error;
 	}
-	if( ( root_node->node_header->flags & 0x0002 ) != 0 )
+	if( is_leaf_node != 0 )
 	{
 		result = libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 		          file_system_btree,
@@ -2528,6 +3275,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 	size_t utf8_string_index                       = 0;
 	size_t utf8_string_segment_length              = 0;
 	uint64_t lookup_identifier                     = 0;
+	int is_leaf_node                               = 0;
 	int result                                     = 0;
 
 	if( file_system_btree == NULL )
@@ -2601,6 +3349,21 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 
 		goto on_error;
 	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                root_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree root node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
 	lookup_identifier = parent_identifier;
 
 	if( utf8_string_length > 0 )
@@ -2654,9 +3417,20 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 		{
 			result = 0;
 		}
+		else if( is_leaf_node != 0 )
+		{
+			result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name(
+				  file_system_btree,
+				  root_node,
+				  lookup_identifier,
+				  utf8_string_segment,
+				  utf8_string_segment_length,
+				  &directory_record,
+				  error );
+		}
 		else
 		{
-			result = libfsapfs_file_system_btree_get_directory_record_from_node_by_utf8_name(
+			result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_name(
 				  file_system_btree,
 				  file_io_handle,
 				  root_node,
@@ -2872,6 +3646,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 	size_t utf16_string_index                      = 0;
 	size_t utf16_string_segment_length             = 0;
 	uint64_t lookup_identifier                     = 0;
+	int is_leaf_node                               = 0;
 	int result                                     = 0;
 
 	if( file_system_btree == NULL )
@@ -2945,6 +3720,21 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 
 		goto on_error;
 	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                root_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree root node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
 	lookup_identifier = parent_identifier;
 
 	if( utf16_string_length > 0 )
@@ -2998,9 +3788,20 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 		{
 			result = 0;
 		}
+		else if( is_leaf_node != 0 )
+		{
+			result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name(
+				  file_system_btree,
+				  root_node,
+				  lookup_identifier,
+				  utf16_string_segment,
+				  utf16_string_segment_length,
+				  &directory_record,
+				  error );
+		}
 		else
 		{
-			result = libfsapfs_file_system_btree_get_directory_record_from_node_by_utf16_name(
+			result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_name(
 				  file_system_btree,
 				  file_io_handle,
 				  root_node,

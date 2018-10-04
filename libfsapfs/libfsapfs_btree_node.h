@@ -80,6 +80,10 @@ int libfsapfs_btree_node_read_object_data(
      size_t data_size,
      libcerror_error_t **error );
 
+int libfsapfs_btree_node_is_leaf_node(
+     libfsapfs_btree_node_t *btree_node,
+     libcerror_error_t **error );
+
 int libfsapfs_btree_node_get_number_of_entries(
      libfsapfs_btree_node_t *btree_node,
      int *number_of_entries,

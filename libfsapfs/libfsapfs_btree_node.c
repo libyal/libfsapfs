@@ -247,7 +247,7 @@ int libfsapfs_btree_node_read_data(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid B-tree node - header value already set.",
+		 "%s: invalid B-tree node - node header value already set.",
 		 function );
 
 		return( -1 );
@@ -256,8 +256,8 @@ int libfsapfs_btree_node_read_data(
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid data.",
 		 function );
 
@@ -508,27 +508,27 @@ int libfsapfs_btree_node_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %" PRIu16 " key data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
+			 "%s: entry: %03" PRIu16 " key data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
 			 function,
 			 map_entry_index,
 			 key_data_offset,
 			 (size_t) key_data_offset + (size_t) entries_data_offset + (size_t) btree_node->node_header->entries_data_size );
 
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu16 " key data size\t\t\t: %" PRIu16 "\n",
+			 "%s: entry: %03" PRIu16 " key data size\t\t: %" PRIu16 "\n",
 			 function,
 			 map_entry_index,
 			 key_data_size );
 
 			libcnotify_printf(
-			 "%s: entry: %" PRIu16 " value data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
+			 "%s: entry: %03" PRIu16 " value data offset\t\t: 0x%04" PRIx16 " (block offset: 0x%04" PRIzx ")\n",
 			 function,
 			 map_entry_index,
 			 value_data_offset,
 			 (size_t) footer_offset - (size_t) value_data_offset);
 
 			libcnotify_printf(
-			 "%s: entry: %02" PRIu16 " value data size\t\t: %" PRIu16 "\n",
+			 "%s: entry: %03" PRIu16 " value data size\t\t: %" PRIu16 "\n",
 			 function,
 			 map_entry_index,
 			 value_data_size );
@@ -558,7 +558,7 @@ int libfsapfs_btree_node_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %" PRIu16 " key data:\n",
+			 "%s: entry: %03" PRIu16 " key data:\n",
 			 function,
 			 map_entry_index );
 			libcnotify_print_data(
@@ -585,7 +585,7 @@ int libfsapfs_btree_node_read_data(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: entry: %" PRIu16 " value data:\n",
+			 "%s: entry: %03" PRIu16 " value data:\n",
 			 function,
 			 map_entry_index );
 			libcnotify_print_data(
@@ -710,8 +710,8 @@ int libfsapfs_btree_node_read_object_data(
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid data.",
 		 function );
 
@@ -807,6 +807,40 @@ int libfsapfs_btree_node_read_object_data(
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
 	return( 1 );
+}
+
+/* Determines if the node is a leaf node
+ * Returns 1 if the node is a leaf node, 0 if not or -1 on error
+ */
+int libfsapfs_btree_node_is_leaf_node(
+     libfsapfs_btree_node_t *btree_node,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_btree_node_is_leaf_node";
+
+	if( btree_node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid B-tree node.",
+		 function );
+
+		return( -1 );
+	}
+	if( btree_node->node_header == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid B-tree node - missing node header.",
+		 function );
+
+		return( -1 );
+	}
+	return( btree_node->node_header->flags & 0x0002 );
 }
 
 /* Retrieves the number of B-tree entries

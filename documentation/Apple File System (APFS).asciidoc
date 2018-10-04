@@ -1535,6 +1535,9 @@ consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
+| 0 | 8 | | Object identifier (xattr_obj_id)
+| 8 | 48 | | Data stream descriptor +
+See section: <<data_stream_descriptor,data stream descriptor>>
 |===
 
 [yellow-background]*TODO: complete this section.*
