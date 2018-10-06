@@ -133,6 +133,8 @@ File entry functions
 .Ft int
 .Fn libfsapfs_file_entry_free "libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
 .Ft int
+.Fn libfsapfs_file_entry_get_identifier "libfsapfs_file_entry_t *file_entry, uint64_t *identifier, libfsapfs_error_t **error"
+.Ft int
 .Fn libfsapfs_file_entry_get_creation_time "libfsapfs_file_entry_t *file_entry, uint64_t *posix_time, libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_modification_time "libfsapfs_file_entry_t *file_entry, uint64_t *posix_time, libfsapfs_error_t **error"

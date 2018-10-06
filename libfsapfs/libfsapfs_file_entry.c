@@ -260,10 +260,83 @@ int libfsapfs_file_entry_free(
 	return( result );
 }
 
+/* Retrieves the identifier
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_file_entry_get_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *identifier,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_identifier";
+	int result                                           = 1;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_identifier(
+	     internal_file_entry->inode,
+	     identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
 /* Retrieves the creation date and time
  * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_creation_time(
      libfsapfs_file_entry_t *file_entry,
@@ -337,7 +410,7 @@ int libfsapfs_file_entry_get_creation_time(
 /* Retrieves the modification date and time
  * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_modification_time(
      libfsapfs_file_entry_t *file_entry,
@@ -411,7 +484,7 @@ int libfsapfs_file_entry_get_modification_time(
 /* Retrieves the inode change date and time
  * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_inode_change_time(
      libfsapfs_file_entry_t *file_entry,
@@ -485,7 +558,7 @@ int libfsapfs_file_entry_get_inode_change_time(
 /* Retrieves the access date and time
  * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_access_time(
      libfsapfs_file_entry_t *file_entry,
@@ -558,7 +631,7 @@ int libfsapfs_file_entry_get_access_time(
 
 /* Retrieves the owner identifier
  * This value is retrieved from the inode
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_owner_identifier(
      libfsapfs_file_entry_t *file_entry,
@@ -631,7 +704,7 @@ int libfsapfs_file_entry_get_owner_identifier(
 
 /* Retrieves the group identifier
  * This value is retrieved from the inode
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_group_identifier(
      libfsapfs_file_entry_t *file_entry,
@@ -704,7 +777,7 @@ int libfsapfs_file_entry_get_group_identifier(
 
 /* Retrieves the file mode
  * This value is retrieved from the inode
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_file_mode(
      libfsapfs_file_entry_t *file_entry,
@@ -778,7 +851,7 @@ int libfsapfs_file_entry_get_file_mode(
 /* Retrieves the size of the UTF-8 encoded name
  * This value is retrieved from the inode
  * The returned size includes the end of string character
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf8_name_size(
      libfsapfs_file_entry_t *file_entry,
@@ -852,7 +925,7 @@ int libfsapfs_file_entry_get_utf8_name_size(
 /* Retrieves the UTF-8 encoded name
  * This value is retrieved from the inode
  * The size should include the end of string character
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf8_name(
      libfsapfs_file_entry_t *file_entry,
@@ -928,7 +1001,7 @@ int libfsapfs_file_entry_get_utf8_name(
 /* Retrieves the size of the UTF-16 encoded name
  * This value is retrieved from the inode
  * The returned size includes the end of string character
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf16_name_size(
      libfsapfs_file_entry_t *file_entry,
@@ -1002,7 +1075,7 @@ int libfsapfs_file_entry_get_utf16_name_size(
 /* Retrieves the UTF-16 encoded name
  * This value is retrieved from the inode
  * The size should include the end of string character
- * Returns 1 if successful, 0 if not available or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf16_name(
      libfsapfs_file_entry_t *file_entry,

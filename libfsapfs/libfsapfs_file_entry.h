@@ -92,6 +92,12 @@ int libfsapfs_file_entry_free(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *identifier,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_creation_time(
      libfsapfs_file_entry_t *file_entry,
      uint64_t *posix_time,

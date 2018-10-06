@@ -45,6 +45,7 @@
 
 enum FSAPFSINFO_MODES
 {
+	FSAPFSINFO_MODE_BODYFILE,
 	FSAPFSINFO_MODE_CONTAINER,
 	FSAPFSINFO_MODE_FILE_ENTRY,
 	FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY,
@@ -66,12 +67,13 @@ void usage_fprint(
 	fprintf( stream, "Use fsapfsinfo to determine information about an Apple\n"
 	                 " File System (APFS).\n\n" );
 
-	fprintf( stream, "Usage: fsapfsinfo [ -E inode_number ] [ -F file_entry ]\n"
-	                 "                  [ -o offset ] [ -p password ] [ -hHvV ]\n"
-	                 "                  source\n\n" );
+	fprintf( stream, "Usage: fsapfsinfo [ -B bodyfile ] [ -E inode_number ]\n"
+	                 "                  [ -F file_entry ] [ -o offset ]\n"
+	                 "                  [ -p password ] [ -BhHvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
+	fprintf( stream, "\t-B:     output file system information as a bodyfile.\n" );
 	fprintf( stream, "\t-E:     show information about a specific inode or \"all\".\n" );
 	fprintf( stream, "\t-F:     show information about a specific file entry path.\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
@@ -135,6 +137,7 @@ int main( int argc, char * const argv[] )
 #endif
 {
 	libfsapfs_error_t *error                 = NULL;
+	system_character_t *option_bodyfile      = NULL;
 	system_character_t *option_file_entry    = NULL;
 	system_character_t *option_inode_number  = NULL;
 	system_character_t *option_password      = NULL;
@@ -180,7 +183,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "E:F:hHo:p:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "B:E:F:hHo:p:vV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -195,6 +198,12 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_FAILURE );
+
+			case (system_integer_t) 'B':
+				option_mode     = FSAPFSINFO_MODE_BODYFILE;
+				option_bodyfile = optarg;
+
+				break;
 
 			case (system_integer_t) 'E':
 				option_mode         = FSAPFSINFO_MODE_INODE;
@@ -318,6 +327,20 @@ int main( int argc, char * const argv[] )
 	}
 	switch( option_mode )
 	{
+		case FSAPFSINFO_MODE_BODYFILE:
+			if( info_handle_create_bodyfile(
+			     fsapfsinfo_info_handle,
+			     option_bodyfile,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to output to bodyfile.\n" );
+
+				goto on_error;
+			}
+			break;
+
 		case FSAPFSINFO_MODE_FILE_ENTRY:
 			if( info_handle_file_entry_fprint(
 			     fsapfsinfo_info_handle,

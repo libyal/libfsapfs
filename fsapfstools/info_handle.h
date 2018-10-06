@@ -127,7 +127,8 @@ int info_handle_file_entry_value_fprint(
 int info_handle_file_system_hierarchy_fprint_file_entry(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,
-     int indentation_level,
+     const system_character_t *path,
+     int level,
      libcerror_error_t **error );
 
 int info_handle_file_system_hierarchy_fprint(
@@ -163,6 +164,18 @@ int info_handle_volume_fprint(
 
 int info_handle_container_fprint(
      info_handle_t *info_handle,
+     libcerror_error_t **error );
+
+int info_handle_bodyfile_fprint_file_entry(
+     info_handle_t *info_handle,
+     libfsapfs_file_entry_t *file_entry,
+     const system_character_t *path,
+     int level,
+     libcerror_error_t **error );
+
+int info_handle_create_bodyfile(
+     info_handle_t *info_handle,
+     const system_character_t *bodyfile,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

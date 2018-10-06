@@ -27,6 +27,7 @@ fsapfsinfo_SOURCES = \
 	fsapfstools_libcerror.h \
 	fsapfstools_libclocale.h \
 	fsapfstools_libcnotify.h \
+	fsapfstools_libcpath.h \
 	fsapfstools_libfdatetime.h \
 	fsapfstools_libfguid.h \
 	fsapfstools_libfsapfs.h \

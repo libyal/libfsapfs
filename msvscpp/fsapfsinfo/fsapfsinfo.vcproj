@@ -226,6 +226,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\fsapfstools\fsapfstools_libcpath.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\fsapfstools\fsapfstools_libfdatetime.h"
 				>
 			</File>
