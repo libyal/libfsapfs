@@ -1720,9 +1720,9 @@ The name hash of a directory entry is calculated as following:
 * Calculate a CRC-32c checksum of the UTF-32 stream with an initial checkum of 0xffffffff (-1)
 * The lower 22-bits of checksum form the hash
 
-The CRC-32 using the Castagnoli polynomial of 0x1edc6f41, also known as CRC-32C.
-The CRC-32 calculation does not use the XOR with 0xffffffff before and after the
-calculation, which is also referred to as weak CRC-32 calculation.
+The CRC-32 calculation uses the Castagnoli polynomial of 0x1edc6f41, also known
+as CRC-32C. The CRC-32 calculation does not use the XOR with 0xffffffff before
+and after the calculation, which is also referred to as weak CRC-32 calculation.
 
 === Directory stats
 

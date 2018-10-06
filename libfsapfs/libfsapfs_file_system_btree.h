@@ -174,17 +174,24 @@ int libfsapfs_file_system_btree_get_directory_entries(
      libcdata_array_t *directory_entries,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_get_file_extents(
+int libfsapfs_file_system_btree_get_file_extents_from_leaf_node(
      libfsapfs_file_system_btree_t *file_system_btree,
-     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
      uint64_t identifier,
      libcdata_array_t *file_extents,
      libcerror_error_t **error );
 
-int libfsapfs_file_system_btree_get_file_extents_from_node(
+int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
+     uint64_t identifier,
+     libcdata_array_t *file_extents,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_file_extents(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
      uint64_t identifier,
      libcdata_array_t *file_extents,
      libcerror_error_t **error );
