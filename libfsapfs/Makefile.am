@@ -41,6 +41,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_btree_node_header.c libfsapfs_btree_node_header.h \
 	libfsapfs_checkpoint_map.c libfsapfs_checkpoint_map.h \
 	libfsapfs_checkpoint_map_entry.c libfsapfs_checkpoint_map_entry.h \
+	libfsapfs_checksum.c libfsapfs_checksum.h \
 	libfsapfs_container.c libfsapfs_container.h \
 	libfsapfs_container_key_bag.c libfsapfs_container_key_bag.h \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
@@ -76,6 +77,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_libfguid.h \
 	libfsapfs_libhmac.h \
 	libfsapfs_libuna.h \
+	libfsapfs_name_hash.c libfsapfs_name_hash.h \
 	libfsapfs_notify.c libfsapfs_notify.h \
 	libfsapfs_object.c libfsapfs_object.h \
 	libfsapfs_object_map.c libfsapfs_object_map.h \

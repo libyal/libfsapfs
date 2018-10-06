@@ -245,7 +245,7 @@ int libfsapfs_directory_record_read_key_data(
 		 name_hash );
 
 		name_size = name_hash & 0x000003ffUL;
-		name_hash = ( name_hash & 0xfffff400UL ) >> 10;
+		name_hash = ( name_hash & 0xfffffc00UL ) >> 10;
 
 		data_offset = sizeof( fsapfs_file_system_btree_key_directory_record_with_hash_t );
 	}
@@ -277,7 +277,7 @@ int libfsapfs_directory_record_read_key_data(
 			 ( (fsapfs_file_system_btree_key_directory_record_with_hash_t *) data )->name_size_and_hash,
 			 value_32bit );
 			libcnotify_printf(
-			 "%s: name size and hash\t\t: 0x%04" PRIx32 " (size: %" PRIu32 ", hash: 0x%04" PRIx32 ")\n",
+			 "%s: name size and hash\t\t: 0x%04" PRIx32 " (size: %" PRIu32 ", hash: 0x%06" PRIx32 ")\n",
 			 function,
 			 value_32bit,
 			 name_size,
@@ -340,14 +340,6 @@ int libfsapfs_directory_record_read_key_data(
 		goto on_error;
 	}
 	directory_record->name_hash = name_hash;
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "\n" );
-	}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
 	return( 1 );
 
@@ -741,12 +733,13 @@ int libfsapfs_directory_record_get_utf8_name(
 }
 
 /* Compares the name with an UTF-8 encoded string
- * Returns 1 if the strings are equal, 0 if not or -1 on error
+ * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_directory_record_compare_name_with_utf8_string(
      libfsapfs_directory_record_t *directory_record,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint32_t name_hash,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_directory_record_compare_name_with_utf8_string";
@@ -762,6 +755,18 @@ int libfsapfs_directory_record_compare_name_with_utf8_string(
 		 function );
 
 		return( -1 );
+	}
+	if( ( directory_record->name_hash != 0 )
+	 && ( name_hash != 0 ) )
+	{
+		if( directory_record->name_hash < name_hash )
+		{
+			return( LIBUNA_COMPARE_LESS );
+		}
+		else if( directory_record->name_hash > name_hash )
+		{
+			return( LIBUNA_COMPARE_GREATER );
+		}
 	}
 	if( directory_record->name != NULL )
 	{
@@ -870,12 +875,13 @@ int libfsapfs_directory_record_get_utf16_name(
 }
 
 /* Compares the name with an UTF-16 encoded string
- * Returns 1 if the strings are equal, 0 if not or -1 on error
+ * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_directory_record_compare_name_with_utf16_string(
      libfsapfs_directory_record_t *directory_record,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint32_t name_hash,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_directory_record_compare_name_with_utf16_string";
@@ -891,6 +897,18 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
 		 function );
 
 		return( -1 );
+	}
+	if( ( directory_record->name_hash != 0 )
+	 && ( name_hash != 0 ) )
+	{
+		if( directory_record->name_hash < name_hash )
+		{
+			return( LIBUNA_COMPARE_LESS );
+		}
+		else if( directory_record->name_hash > name_hash )
+		{
+			return( LIBUNA_COMPARE_GREATER );
+		}
 	}
 	if( directory_record->name != NULL )
 	{

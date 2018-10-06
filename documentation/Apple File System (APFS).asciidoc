@@ -1624,7 +1624,7 @@ The directory record can have 2 different types of keys:
 
 [NOTE]
 It apprears that current APFS file system use a key with name and hash.
-`[APPLE18]` does not indicate how to distinguishe between the two, but one
+`[APPLE18]` does not indicate how to distinguish between the two, but one
 method is to compare calculated and stored size of the key data.
 
 ==== Directory record key data with name
@@ -1715,13 +1715,14 @@ A whiteout is a directory entry that covers up all entries of a particular name 
 
 The name hash of a directory entry is calculated as following:
 
-* Represent the name as a normalized UTF-8 string including end-of-string character using canonical decomposition (NFD)
-* Represent the string as an UTF-32 string including end-of-string character
-* Calculate a CRC-32c checksum of the UTF-32 string
-* Calculate the [yellow-background]*1-complement* of the checksum.
+* Represent the name as an Unicode string in Normalization Form Canonical Decomposition (NFD)
+* Format the Unicode string as a little-endian UTF-32 stream without a byte-order-mark or end-of-string character
+* Calculate a CRC-32c checksum of the UTF-32 stream with an initial checkum of 0xffffffff (-1)
 * The lower 22-bits of checksum form the hash
 
-[yellow-background]*TODO check if "complement the bits of the hash" refers to 1 or 2 complement*
+The CRC-32 using the Castagnoli polynomial of 0x1edc6f41, also known as CRC-32C.
+The CRC-32 calculation does not use the XOR with 0xffffffff before and after the
+calculation, which is also referred to as weak CRC-32 calculation.
 
 === Directory stats
 

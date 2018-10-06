@@ -116,6 +116,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name
      uint64_t parent_identifier,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
@@ -126,6 +127,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
      uint64_t parent_identifier,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
@@ -135,6 +137,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_nam
      uint64_t parent_identifier,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
@@ -145,6 +148,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
      uint64_t parent_identifier,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 

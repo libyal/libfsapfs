@@ -1,11 +1,11 @@
 TODO
-* Improved sub node support:
-** complete libfsapfs_file_system_btree_get_inode_by_utf8_path
-** complete libfsapfs_file_system_btree_get_inode_by_utf16_path
+* Add support for Unicode Normalization Form Canonical Decomposition (NFD)
+* Improve sub node support:
 ** complete libfsapfs_file_system_btree_get_file_extents
 * improve file entry support
 ** add libfsapfs_file_entry_get_sub_file_entry_by_utf8_name
 ** add libfsapfs_file_entry_get_sub_file_entry_by_utf16_name
+* Improve metadata area support
 * Add container data handle? Add decryption support and use it to read container key bag?
 * rename volume data handle to container data handle?
 * add snapshot support
