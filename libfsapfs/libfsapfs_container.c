@@ -38,6 +38,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libcthreads.h"
+#include "libfsapfs_object.h"
 #include "libfsapfs_object_map.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
@@ -908,17 +909,17 @@ int libfsapfs_container_close(
 			result = -1;
 		}
 	}
-	if( internal_container->physical_map != NULL )
+	if( internal_container->checkpoint_map != NULL )
 	{
 		if( libfsapfs_checkpoint_map_free(
-		     &( internal_container->physical_map ),
+		     &( internal_container->checkpoint_map ),
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free container physical map.",
+			 "%s: unable to free checkpoint map.",
 			 function );
 
 			result = -1;
@@ -1010,9 +1011,13 @@ int libfsapfs_internal_container_open_read(
      libcerror_error_t **error )
 {
 	libfsapfs_container_superblock_t *container_superblock       = NULL;
+	libfsapfs_container_superblock_t *container_superblock_swap  = NULL;
+	libfsapfs_object_t *object                                   = NULL;
 	libfsapfs_object_map_t *object_map                           = NULL;
 	libfsapfs_volume_data_handle_t *volume_data_handle           = NULL;
 	static char *function                                        = "libfsapfs_internal_container_open_read";
+	uint64_t checkpoint_map_block_number                         = 0;
+	uint64_t metadata_block_index                                = 0;
 	int element_index                                            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1055,13 +1060,13 @@ int libfsapfs_internal_container_open_read(
 
 		return( -1 );
 	}
-	if( internal_container->physical_map != NULL )
+	if( internal_container->checkpoint_map != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid container - physical map value already set.",
+		 "%s: invalid container - checkpoint map value already set.",
 		 function );
 
 		return( -1 );
@@ -1154,94 +1159,183 @@ int libfsapfs_internal_container_open_read(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "Reading container physical map:\n" );
+		 "Scanning metadata area:\n" );
 	}
 #endif
-	if( libfsapfs_checkpoint_map_initialize(
-	     &( internal_container->physical_map ),
+	if( libfsapfs_object_initialize(
+	     &object,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create container physical map.",
+		 "%s: unable to create object.",
 		 function );
 
 		goto on_error;
 	}
 	file_offset = internal_container->superblock->metadata_area_block_number * internal_container->io_handle->block_size;
 
-	if( libfsapfs_checkpoint_map_read_file_io_handle(
-	     internal_container->physical_map,
-	     file_io_handle,
-	     file_offset,
-	     error ) != 1 )
+	for( metadata_block_index = 0;
+	     metadata_block_index <= internal_container->superblock->metadata_area_number_of_blocks;
+	     metadata_block_index++ )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read container physical map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 file_offset,
-		 file_offset );
+		if( libfsapfs_object_read_file_io_handle(
+		     object,
+		     file_io_handle,
+		     file_offset,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read object at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 function,
+			 file_offset,
+			 file_offset );
 
-		goto on_error;
-	}
-/* TODO read previous copies of superblock and physical map */
+			goto on_error;
+		}
+		switch( object->type )
+		{
+			case 0x00000000:
+			case 0x80000005:
+				break;
 
+			case 0x4000000c:
+				if( object->transaction_identifier == internal_container->superblock->object_transaction_identifier )
+				{
+					checkpoint_map_block_number = internal_container->superblock->metadata_area_block_number + metadata_block_index;
+				}
+				break;
+
+			case 0x80000001:
 #if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "Reading backup container superblock:\n" );
-	}
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "Reading container superblock:\n" );
+				}
 #endif
-	if( libfsapfs_container_superblock_initialize(
-	     &container_superblock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create backup container superblock.",
-		 function );
+				if( libfsapfs_container_superblock_initialize(
+				     &container_superblock,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+					 "%s: unable to create backup container superblock.",
+					 function );
 
-		goto on_error;
+					goto on_error;
+				}
+				if( libfsapfs_container_superblock_read_file_io_handle(
+				     container_superblock,
+				     file_io_handle,
+				     file_offset,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_IO,
+					 LIBCERROR_IO_ERROR_READ_FAILED,
+					 "%s: unable to read backup container superblock at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+					 function,
+					 file_offset,
+					 file_offset );
+
+					goto on_error;
+				}
+				if( container_superblock->object_transaction_identifier > internal_container->superblock->object_transaction_identifier )
+				{
+					container_superblock_swap      = internal_container->superblock;
+					internal_container->superblock = container_superblock;
+					container_superblock           = container_superblock_swap;
+				}
+				if( libfsapfs_container_superblock_free(
+				     &container_superblock,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+					 "%s: unable to free backup container superblock.",
+					 function );
+
+					goto on_error;
+				}
+				break;
+
+			default:
+#if defined( HAVE_DEBUG_OUTPUT )
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+				 "%s: unsupported object type: 0x%08" PRIx64 ".",
+				 function,
+				 object->type );
+
+				return( -1 );
+#else
+				break;
+#endif
+		}
+		file_offset += internal_container->io_handle->block_size;
 	}
-	file_offset += internal_container->io_handle->block_size;
-
-	if( libfsapfs_container_superblock_read_file_io_handle(
-	     container_superblock,
-	     file_io_handle,
-	     file_offset,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read backup container superblock at offset: %" PRIi64 " (0x%08" PRIx64 ").",
-		 function,
-		 file_offset,
-		 file_offset );
-
-		goto on_error;
-	}
-/* TODO compare backup superblock with superblock */
-
-	if( libfsapfs_container_superblock_free(
-	     &container_superblock,
+	if( libfsapfs_object_free(
+	     &object,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free backup container superblock.",
+		 "%s: unable to free object.",
 		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "Reading checkpoint map:\n" );
+	}
+#endif
+	if( libfsapfs_checkpoint_map_initialize(
+	     &( internal_container->checkpoint_map ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create checkpoint map.",
+		 function );
+
+		goto on_error;
+	}
+	file_offset = checkpoint_map_block_number * internal_container->io_handle->block_size;
+
+	if( libfsapfs_checkpoint_map_read_file_io_handle(
+	     internal_container->checkpoint_map,
+	     file_io_handle,
+	     file_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_READ_FAILED,
+		 "%s: unable to read checkpoint map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 function,
+		 file_offset,
+		 file_offset );
 
 		goto on_error;
 	}
@@ -1254,7 +1348,7 @@ int libfsapfs_internal_container_open_read(
 			 "Reading space manager:\n" );
 
 			if( libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
-			     internal_container->physical_map,
+			     internal_container->checkpoint_map,
 			     internal_container->superblock->space_manager_object_identifier,
 			     &space_manager_block_number,
 			     error ) != 1 )
@@ -1321,7 +1415,7 @@ int libfsapfs_internal_container_open_read(
 			 "Reading reaper:\n" );
 
 			if( libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
-			     internal_container->physical_map,
+			     internal_container->checkpoint_map,
 			     internal_container->superblock->reaper_object_identifier,
 			     &reaper_block_number,
 			     error ) != 1 )
@@ -1632,16 +1726,30 @@ on_error:
 		 NULL );
 	}
 #endif
-	if( internal_container->physical_map != NULL )
+	if( internal_container->checkpoint_map != NULL )
 	{
 		libfsapfs_checkpoint_map_free(
-		 &( internal_container->physical_map ),
+		 &( internal_container->checkpoint_map ),
 		 NULL );
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
 	if( container_superblock != NULL )
 	{
 		libfsapfs_container_superblock_free(
 		 &container_superblock,
+		 NULL );
+	}
+#endif
+	if( object != NULL )
+	{
+		libfsapfs_object_free(
+		 &object,
+		 NULL );
+	}
+	if( internal_container->superblock != NULL )
+	{
+		libfsapfs_container_superblock_free(
+		 &( internal_container->superblock ),
 		 NULL );
 	}
 	return( -1 );

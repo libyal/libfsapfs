@@ -36,6 +36,10 @@ typedef struct libfsapfs_container_superblock libfsapfs_container_superblock_t;
 
 struct libfsapfs_container_superblock
 {
+	/* The object transaction identifier
+	 */
+	uint64_t object_transaction_identifier;
+
 	/* The block size
 	 */
 	uint32_t block_size;

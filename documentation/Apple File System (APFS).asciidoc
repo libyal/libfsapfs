@@ -535,6 +535,9 @@ Contains a block number relative to the start of the container of the <<key_bag,
 Presumably NXSB is an abbreviation of NX superblock. At this point it is
 unclear what NX stands for.
 
+[NOTE]
+`[APPLE18]` refers to the metadata area as checkpoint description area.
+
 ==== [[container_flags]]Container flags
 
 [cols="1,1,5",options="header"]

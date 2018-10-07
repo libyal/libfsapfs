@@ -237,7 +237,6 @@ int libfsapfs_object_read_data(
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit  = 0;
-	uint32_t value_32bit  = 0;
 #endif
 
 	if( object == NULL )
@@ -286,6 +285,22 @@ int libfsapfs_object_read_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_object_t *) data )->identifier,
+	 object->identifier );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_object_t *) data )->transaction_identifier,
+	 object->transaction_identifier );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_object_t *) data )->type,
+	 object->type );
+
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_object_t *) data )->subtype,
+	 object->subtype );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -293,41 +308,29 @@ int libfsapfs_object_read_data(
 		 ( (fsapfs_object_t *) data )->checksum,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: checksum\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: checksum\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_t *) data )->identifier,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: identifier\t\t\t: %" PRIu64 "\n",
+		 "%s: identifier\t\t\t\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 object->identifier );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_t *) data )->version,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: version\t\t\t: %" PRIu64 "\n",
+		 "%s: transaction identifier\t\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 object->transaction_identifier );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_object_t *) data )->type,
-		 value_32bit );
 		libcnotify_printf(
-		 "%s: type\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: type\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 value_32bit );
+		 object->type );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_object_t *) data )->subtype,
-		 value_32bit );
 		libcnotify_printf(
-		 "%s: subtype\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: subtype\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 value_32bit );
+		 object->subtype );
 
 		libcnotify_printf(
 		 "\n" );

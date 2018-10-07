@@ -36,9 +36,21 @@ typedef struct libfsapfs_object libfsapfs_object_t;
 
 struct libfsapfs_object
 {
-	/* The block size
+	/* The identifier
 	 */
-	size_t block_size;
+	uint64_t identifier;
+
+	/* The transaction identifier
+	 */
+	uint64_t transaction_identifier;
+
+	/* The type
+	 */
+	uint32_t type;
+
+	/* The subtype
+	 */
+	uint32_t subtype;
 };
 
 int libfsapfs_object_initialize(

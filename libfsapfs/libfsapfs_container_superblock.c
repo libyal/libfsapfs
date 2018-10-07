@@ -292,6 +292,10 @@ int libfsapfs_container_superblock_read_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_container_superblock_t *) data )->object_transaction_identifier,
+	 container_superblock->object_transaction_identifier );
+
 	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_container_superblock_t *) data )->object_type,
 	 object_type );
@@ -431,13 +435,10 @@ int libfsapfs_container_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->object_transaction_identifier,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 container_superblock->object_transaction_identifier );
 
 		libcnotify_printf(
 		 "%s: object type\t\t\t\t: 0x%08" PRIx32 "\n",
@@ -547,7 +548,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown7,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown7\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown7 block number\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

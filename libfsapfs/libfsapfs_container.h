@@ -51,9 +51,9 @@ struct libfsapfs_internal_container
 	 */
 	libfsapfs_container_superblock_t *superblock;
 
-	/* The container physical map
+	/* The checkpoint map
 	 */
-	libfsapfs_checkpoint_map_t *physical_map;
+	libfsapfs_checkpoint_map_t *checkpoint_map;
 
 	/* The volume data handle
 	 */

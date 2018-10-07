@@ -43,10 +43,10 @@ struct fsapfs_object
 	 */
 	uint8_t identifier[ 8 ];
 
-	/* The version
+	/* The transaction identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t version[ 8 ];
+	uint8_t transaction_identifier[ 8 ];
 
 	/* The type
 	 * Consists of 4 bytes
