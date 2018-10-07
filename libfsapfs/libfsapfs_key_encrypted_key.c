@@ -30,6 +30,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libfguid.h"
+#include "libfsapfs_libhmac.h"
 #include "libfsapfs_password.h"
 
 #include "fsapfs_key_bag.h"
@@ -323,6 +324,26 @@ int libfsapfs_key_encrypted_key_read_data(
 
 			data_offset += 2;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: attribute value tag\t\t: 0x%02" PRIx8 "\n",
+			 function,
+			 value_tag );
+
+			libcnotify_printf(
+			 "%s: attribute value data size\t: %" PRIu16 "\n",
+			 function,
+			 value_data_size );
+		}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+		if( ( value_tag == 0 )
+		 && ( value_data_size == 0 ) )
+		{
+			break;
+		}
 		if( ( data_offset >= data_size )
 		 || ( value_data_size > ( data_size - data_offset ) ) )
 		{
@@ -338,16 +359,6 @@ int libfsapfs_key_encrypted_key_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-			libcnotify_printf(
-			 "%s: attribute value tag\t\t: 0x%02" PRIx8 "\n",
-			 function,
-			 value_tag );
-
-			libcnotify_printf(
-			 "%s: attribute value data size\t: %" PRIu16 "\n",
-			 function,
-			 value_data_size );
-
 			libcnotify_printf(
 			 "%s: attribute value data:\n",
 			 function );
@@ -557,6 +568,26 @@ int libfsapfs_key_encrypted_key_read_data(
 
 			data_offset += 2;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: attribute value tag\t\t: 0x%02" PRIx8 "\n",
+			 function,
+			 value_tag );
+
+			libcnotify_printf(
+			 "%s: attribute value data size\t: %" PRIu16 "\n",
+			 function,
+			 value_data_size );
+		}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
+		if( ( value_tag == 0 )
+		 && ( value_data_size == 0 ) )
+		{
+			break;
+		}
 		if( ( data_offset >= wrapped_kek_object_data_size )
 		 || ( value_data_size > ( wrapped_kek_object_data_size - data_offset ) ) )
 		{
@@ -572,15 +603,6 @@ int libfsapfs_key_encrypted_key_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-			libcnotify_printf(
-			 "%s: attribute value tag\t\t: 0x%02" PRIx8 "\n",
-			 function,
-			 value_tag );
-
-			libcnotify_printf(
-			 "%s: attribute value data size\t: %" PRIu16 "\n",
-			 function,
-			 value_data_size );
 
 			libcnotify_printf(
 			 "%s: attribute value data:\n",
@@ -601,9 +623,23 @@ int libfsapfs_key_encrypted_key_read_data(
 					 error,
 					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 					 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-					 "%s: unsupported volume identifier attribute value data size: %" PRIu16 ".",
+					 "%s: unsupported identifier attribute value data size: %" PRIu16 ".",
 					 function,
 					 value_data_size );
+
+					return( -1 );
+				}
+				if( memory_copy(
+				     key_encrypted_key->identifier,
+				     &( wrapped_kek_object_data[ data_offset ] ),
+				     16 ) == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+					 "%s: unable to copy identifier.",
+					 function );
 
 					return( -1 );
 				}
@@ -612,7 +648,7 @@ int libfsapfs_key_encrypted_key_read_data(
 				{
 					if( libfsapfs_debug_print_guid_value(
 					     function,
-					     "volume identifier\t\t",
+					     "identifier\t\t\t",
 					     &( wrapped_kek_object_data[ data_offset ] ),
 					     16,
 					     LIBFGUID_ENDIAN_BIG,
@@ -803,11 +839,13 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
      size_t key_size,
      libcerror_error_t **error )
 {
+	uint8_t password_key[ 32 ];
 	uint8_t wrapped_kek[ 40 ];
-	uint8_t passphrase_key[ 32 ];
 
-	static char *function = "libfsapfs_key_encrypted_key_unlock_with_password";
-	int result            = 0;
+	static char *function     = "libfsapfs_key_encrypted_key_unlock_with_password";
+	size_t password_key_size  = 0;
+	size_t used_kek_data_size = 0;
+	int result                = 0;
 
 	if( key_encrypted_key == NULL )
 	{
@@ -820,7 +858,20 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 
 		return( -1 );
 	}
-	if( key_encrypted_key->encryption_method != 0 )
+	if( ( key_encrypted_key->encryption_method == 0 )
+	 || ( key_encrypted_key->encryption_method == 16 ) )
+	{
+		password_key_size  = 32;
+		used_kek_data_size = 40;
+	}
+/* TODO need a test case
+	else if( key_encrypted_key->encryption_method == 2 )
+	{
+		password_key_size  = 16;
+		used_kek_data_size = 24;
+	}
+*/
+	else
 	{
 		libcerror_error_set(
 		 error,
@@ -859,8 +910,8 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 	     key_encrypted_key->salt,
 	     16,
 	     key_encrypted_key->number_of_iterations,
-	     passphrase_key,
-	     32,
+	     password_key,
+	     password_key_size,
 	     error ) == -1 )
 	{
 		libcerror_error_set(
@@ -876,21 +927,21 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: passphrase key:\n",
+		 "%s: password key:\n",
 		 function );
 		libcnotify_print_data(
-		 passphrase_key,
-		 32,
+		 password_key,
+		 password_key_size,
 		 0 );
 	}
 #endif
 	if( libfsapfs_encryption_aes_key_unwrap(
-	     passphrase_key,
-	     32 * 8,
+	     password_key,
+	     password_key_size * 8,
 	     key_encrypted_key->wrapped_kek,
-	     40,
+	     used_kek_data_size,
 	     wrapped_kek,
-	     40,
+	     used_kek_data_size,
 	     error ) == -1 )
 	{
 		libcerror_error_set(
@@ -903,7 +954,7 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 		goto on_error;
 	}
 	memory_set(
-	 passphrase_key,
+	 password_key,
 	 0,
 	 32 );
 
@@ -915,7 +966,7 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 		if( memory_copy(
 		     key,
 		     &( wrapped_kek[ 8 ] ),
-		     32 ) == NULL )
+		     password_key_size ) == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -926,6 +977,18 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 
 			goto on_error;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: volume key:\n",
+			 function );
+			libcnotify_print_data(
+			 key,
+			 key_size / 8,
+			 0 );
+		}
+#endif
 		result = 1;
 	}
 	memory_set(
@@ -942,7 +1005,7 @@ on_error:
 	 40 );
 
 	memory_set(
-	 passphrase_key,
+	 password_key,
 	 0,
 	 32 );
 
@@ -960,10 +1023,13 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
      size_t key_size,
      libcerror_error_t **error )
 {
+	uint8_t hash_buffer[ LIBHMAC_SHA256_HASH_SIZE ];
 	uint8_t wrapped_kek[ 40 ];
 
-	static char *function = "libfsapfs_key_encrypted_key_unlock_with_volume_key";
-	int result            = 0;
+	static char *function       = "libfsapfs_key_encrypted_key_unlock_with_volume_key";
+	size_t used_kek_data_size   = 0;
+	size_t used_volume_key_size = 0;
+	int result                  = 0;
 
 	if( key_encrypted_key == NULL )
 	{
@@ -976,7 +1042,17 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 
 		return( -1 );
 	}
-	if( key_encrypted_key->encryption_method != 0 )
+	if( key_encrypted_key->encryption_method == 0 )
+	{
+		used_kek_data_size   = 40;
+		used_volume_key_size = 32;
+	}
+	else if( key_encrypted_key->encryption_method == 2 )
+	{
+		used_kek_data_size   = 24;
+		used_volume_key_size = 16;
+	}
+	else
 	{
 		libcerror_error_set(
 		 error,
@@ -1045,11 +1121,11 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 #endif
 	if( libfsapfs_encryption_aes_key_unwrap(
 	     volume_key,
-	     volume_key_size,
+	     volume_key_size * 8,
 	     key_encrypted_key->wrapped_kek,
-	     40,
+	     used_kek_data_size,
 	     wrapped_kek,
-	     40,
+	     used_kek_data_size,
 	     error ) == -1 )
 	{
 		libcerror_error_set(
@@ -1069,7 +1145,7 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 		if( memory_copy(
 		     key,
 		     &( wrapped_kek[ 8 ] ),
-		     32 ) == NULL )
+		     volume_key_size ) == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -1080,6 +1156,69 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 
 			goto on_error;
 		}
+		if( key_encrypted_key->encryption_method == 2 )
+		{
+			if( memory_copy(
+			     &( key[ 16 ] ),
+			     key_encrypted_key->identifier,
+			     16 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy identifier to key.",
+				 function );
+
+				goto on_error;
+			}
+			if( libhmac_sha256_calculate(
+			     key,
+			     32,
+			     hash_buffer,
+			     LIBHMAC_SHA256_HASH_SIZE,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to calculate SHA-256 of tweak key data.",
+				 function );
+
+				goto on_error;
+			}
+			if( memory_copy(
+			     &( key[ 16 ] ),
+			     hash_buffer,
+			     16 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy SHA-256 hash to key.",
+				 function );
+
+				goto on_error;
+			}
+			memory_set(
+			 hash_buffer,
+			 0,
+			 LIBHMAC_SHA256_HASH_SIZE );
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: volume master key:\n",
+			 function );
+			libcnotify_print_data(
+			 key,
+			 key_size,
+			 0 );
+		}
+#endif
 		result = 1;
 	}
 	memory_set(
@@ -1094,6 +1233,11 @@ on_error:
 	 wrapped_kek,
 	 0,
 	 40 );
+
+	memory_set(
+	 hash_buffer,
+	 0,
+	 LIBHMAC_SHA256_HASH_SIZE );
 
 	return( -1 );
 }

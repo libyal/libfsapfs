@@ -35,6 +35,10 @@ typedef struct libfsapfs_key_encrypted_key libfsapfs_key_encrypted_key_t;
 
 struct libfsapfs_key_encrypted_key
 {
+	/* The identifier
+	 */
+	uint8_t identifier[ 16 ];
+
 	/* The HMAC
 	 */
 	uint8_t hmac[ 23 ];

@@ -1052,6 +1052,9 @@ Seen: 0x81
 [NOTE]
 The meaning of the value tags differ per packed object type.
 
+[NOTE]
+A packed value with a tag and size of 0 signifies the end of the packed values.
+
 ===== [[key_bag_kek_packed_object]]Key encrypted key (KEK) packed object
 
 The packed object value tag of a key encrypted key is 0x30 and contains the
@@ -1107,7 +1110,10 @@ See section: <<encryption_methods,Encryption methods>>
 | Value | Identifier | Description
 | 0 | | [yellow-background]*Unknown (AES-256)*
 | | |
-| 2 | | [yellow-background]*Unknown (AES-128 FVDE compatible)*
+| 2 | | [yellow-background]*Unknown (AES-128 FVDE (CoreStorage FileVault) compatible)*
+| | |
+| 16 | | [yellow-background]*Unknown (AES-256)* +
+Seen in combination with recovery password protected volume key
 |===
 
 ==== [[key_bag_data_extent]]Key bag data extent

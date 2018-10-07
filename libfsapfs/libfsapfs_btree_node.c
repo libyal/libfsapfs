@@ -377,6 +377,7 @@ int libfsapfs_btree_node_read_data(
 	}
 	remaining_data_size -= btree_node->node_header->unused_data_offset;
 
+/* TODO this check fails on some container
 	if( btree_node->node_header->unused_data_size > remaining_data_size )
 	{
 		libcerror_error_set(
@@ -388,6 +389,7 @@ int libfsapfs_btree_node_read_data(
 
 		goto on_error;
 	}
+*/
 /* TODO sanity check other data_offset and data_size values */
 
 	footer_offset = (uint16_t) data_size;

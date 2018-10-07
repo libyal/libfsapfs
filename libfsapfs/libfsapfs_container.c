@@ -1017,6 +1017,7 @@ int libfsapfs_internal_container_open_read(
 	libfsapfs_volume_data_handle_t *volume_data_handle           = NULL;
 	static char *function                                        = "libfsapfs_internal_container_open_read";
 	uint64_t checkpoint_map_block_number                         = 0;
+	uint64_t checkpoint_map_transaction_identifier               = 0;
 	uint64_t metadata_block_index                                = 0;
 	int element_index                                            = 0;
 
@@ -1200,14 +1201,11 @@ int libfsapfs_internal_container_open_read(
 		}
 		switch( object->type )
 		{
-			case 0x00000000:
-			case 0x80000005:
-				break;
-
 			case 0x4000000c:
-				if( object->transaction_identifier == internal_container->superblock->object_transaction_identifier )
+				if( object->transaction_identifier > checkpoint_map_transaction_identifier )
 				{
-					checkpoint_map_block_number = internal_container->superblock->metadata_area_block_number + metadata_block_index;
+					checkpoint_map_block_number           = internal_container->superblock->metadata_area_block_number + metadata_block_index;
+					checkpoint_map_transaction_identifier = object->transaction_identifier;
 				}
 				break;
 
@@ -1271,19 +1269,7 @@ int libfsapfs_internal_container_open_read(
 				break;
 
 			default:
-#if defined( HAVE_DEBUG_OUTPUT )
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-				 "%s: unsupported object type: 0x%08" PRIx64 ".",
-				 function,
-				 object->type );
-
-				return( -1 );
-#else
 				break;
-#endif
 		}
 		file_offset += internal_container->io_handle->block_size;
 	}

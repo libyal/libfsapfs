@@ -1,4 +1,5 @@
 TODO
+* Add support for FVDE to APFS encryption method
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * improve file entry support
 ** add libfsapfs_file_entry_get_sub_file_entry_by_utf8_name
