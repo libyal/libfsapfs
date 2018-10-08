@@ -864,13 +864,11 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 		password_key_size  = 32;
 		used_kek_data_size = 40;
 	}
-/* TODO need a test case
 	else if( key_encrypted_key->encryption_method == 2 )
 	{
 		password_key_size  = 16;
 		used_kek_data_size = 24;
 	}
-*/
 	else
 	{
 		libcerror_error_set(
@@ -1121,7 +1119,7 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 #endif
 	if( libfsapfs_encryption_aes_key_unwrap(
 	     volume_key,
-	     volume_key_size * 8,
+	     used_volume_key_size * 8,
 	     key_encrypted_key->wrapped_kek,
 	     used_kek_data_size,
 	     wrapped_kek,
@@ -1145,7 +1143,7 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 		if( memory_copy(
 		     key,
 		     &( wrapped_kek[ 8 ] ),
-		     volume_key_size ) == NULL )
+		     used_volume_key_size ) == NULL )
 		{
 			libcerror_error_set(
 			 error,
@@ -1215,7 +1213,7 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 			 function );
 			libcnotify_print_data(
 			 key,
-			 key_size,
+			 key_size / 8,
 			 0 );
 		}
 #endif
