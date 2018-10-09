@@ -431,7 +431,7 @@ int libfsapfs_encryption_context_crypt(
 		     bytes_per_sector,
 		     &( output_data[ data_offset ] ),
 		     bytes_per_sector,
-		     error ) == -1 )
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,

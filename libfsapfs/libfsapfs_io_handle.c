@@ -25,9 +25,10 @@
 
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_profiler.h"
 
 const char fsapfs_container_signature[ 4 ] = "NXSB";
-const char fsapfs_volume_signature[ 4 ] = "APSB";
+const char fsapfs_volume_signature[ 4 ]    = "APSB";
 
 /* Creates an IO handle
  * Make sure the value io_handle is referencing, is set to NULL
@@ -87,8 +88,43 @@ int libfsapfs_io_handle_initialize(
 		 "%s: unable to clear IO handle.",
 		 function );
 
+		memory_free(
+		 *io_handle );
+
+		*io_handle = NULL;
+
+		return( -1 );
+	}
+#if defined( HAVE_PROFILER )
+	if( libfsapfs_profiler_initialize(
+	     &( ( *io_handle )->profiler ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to initialize profiler.",
+		 function );
+
 		goto on_error;
 	}
+	if( libfsapfs_profiler_open(
+	     ( *io_handle )->profiler,
+	     "profiler.csv",
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open profiler.",
+		 function );
+
+		goto on_error;
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	( *io_handle )->bytes_per_sector = 512;
 	( *io_handle )->block_size       = 4096;
 
@@ -128,6 +164,35 @@ int libfsapfs_io_handle_free(
 	}
 	if( *io_handle != NULL )
 	{
+#if defined( HAVE_PROFILER )
+		if( libfsapfs_profiler_close(
+		     ( *io_handle )->profiler,
+		     error ) != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_CLOSE_FAILED,
+			 "%s: unable to close profiler.",
+			 function );
+
+			result = -1;
+		}
+		if( libfsapfs_profiler_free(
+		     &( ( *io_handle )->profiler ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free profiler.",
+			 function );
+
+			result = -1;
+		}
+#endif /* defined( HAVE_PROFILER ) */
+
 		memory_free(
 		 *io_handle );
 
@@ -143,7 +208,11 @@ int libfsapfs_io_handle_clear(
      libfsapfs_io_handle_t *io_handle,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_io_handle_clear";
+	static char *function          = "libfsapfs_io_handle_clear";
+
+#if defined( HAVE_PROFILER )
+	libfsapfs_profiler_t *profiler = NULL;
+#endif
 
 	if( io_handle == NULL )
 	{
@@ -156,6 +225,9 @@ int libfsapfs_io_handle_clear(
 
 		return( -1 );
 	}
+#if defined( HAVE_PROFILER )
+	profiler = io_handle->profiler;
+#endif
 	if( memory_set(
 	     io_handle,
 	     0,
@@ -173,6 +245,9 @@ int libfsapfs_io_handle_clear(
 	io_handle->bytes_per_sector = 512;
 	io_handle->block_size       = 4096;
 
+#if defined( HAVE_PROFILER )
+	io_handle->profiler = profiler;
+#endif
 	return( 1 );
 }
 

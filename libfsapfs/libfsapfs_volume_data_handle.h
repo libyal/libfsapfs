@@ -64,7 +64,7 @@ int libfsapfs_volume_data_handle_set_volume_master_key(
      size_t volume_master_key_size,
      libcerror_error_t **error );
 
-int libfsapfs_volume_data_handle_read_sector(
+int libfsapfs_volume_data_handle_read_data_block(
      libfsapfs_volume_data_handle_t *volume_data_handle,
      libbfio_handle_t *file_io_handle,
      libfdata_vector_t *vector,

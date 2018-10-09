@@ -313,7 +313,7 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 	if( libfsapfs_encryption_context_initialize(
 	     &encryption_context,
 	     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -330,7 +330,7 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 	     16,
 	     volume_identifier,
 	     16,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -350,7 +350,7 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 	     data_size,
 	     (uint64_t) ( file_offset / io_handle->bytes_per_sector ),
 	     io_handle->bytes_per_sector,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -363,7 +363,7 @@ int libfsapfs_volume_key_bag_read_file_io_handle(
 	}
 	if( libfsapfs_encryption_context_free(
 	     &encryption_context,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -845,12 +845,12 @@ int libfsapfs_volume_key_bag_get_volume_key(
 			goto on_error;
 		}
 		result = libfsapfs_key_encrypted_key_unlock_with_password(
-		         key_encrypted_key,
-		         password,
-		         password_length,
-		         key,
-		         key_size,
-		         error );
+		          key_encrypted_key,
+		          password,
+		          password_length,
+		          key,
+		          key_size,
+		          error );
 
 		if( result == -1 )
 		{

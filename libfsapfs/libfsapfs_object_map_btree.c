@@ -718,7 +718,7 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
 	     file_io_handle,
 	     object_map_btree->root_node_block_number,
 	     &node,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -839,7 +839,7 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
 		     file_io_handle,
 		     sub_node_block_number,
 		     &node,
-		     error ) == -1 )
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,

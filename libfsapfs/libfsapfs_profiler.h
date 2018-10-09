@@ -1,5 +1,5 @@
 /*
- * Input/Output (IO) handle functions
+ * The profiler functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,64 +19,65 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_IO_HANDLE_H )
-#define _LIBFSAPFS_IO_HANDLE_H
+#if !defined( _LIBFSAPFS_PROFILER_H )
+#define _LIBFSAPFS_PROFILER_H
 
 #include <common.h>
+#include <file_stream.h>
 #include <types.h>
 
 #include "libfsapfs_libcerror.h"
-#include "libfsapfs_profiler.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-extern const char fsapfs_container_signature[ 4 ];
-extern const char fsapfs_volume_signature[ 4 ];
-
-typedef struct libfsapfs_io_handle libfsapfs_io_handle_t;
-
-struct libfsapfs_io_handle
-{
-	/* The bytes per sector
-	 */
-	uint16_t bytes_per_sector;
-
-	/* The block size
-	 */
-	uint32_t block_size;
-
-	/* The container size
-	 */
-	size64_t container_size;
-
 #if defined( HAVE_PROFILER )
-	/* The profiler
-	 */
-	libfsapfs_profiler_t *profiler;
-#endif
 
-	/* Value to indicate if abort was signalled
+typedef struct libfsapfs_profiler libfsapfs_profiler_t;
+
+struct libfsapfs_profiler
+{
+	/* The output stream
 	 */
-	int abort;
+	FILE *output_stream;
 };
 
-int libfsapfs_io_handle_initialize(
-     libfsapfs_io_handle_t **io_handle,
+int libfsapfs_profiler_initialize(
+     libfsapfs_profiler_t **profiler,
      libcerror_error_t **error );
 
-int libfsapfs_io_handle_free(
-     libfsapfs_io_handle_t **io_handle,
+int libfsapfs_profiler_free(
+     libfsapfs_profiler_t **profiler,
      libcerror_error_t **error );
 
-int libfsapfs_io_handle_clear(
-     libfsapfs_io_handle_t *io_handle,
+int libfsapfs_profiler_open(
+     libfsapfs_profiler_t *profiler,
+     const char *filename,
      libcerror_error_t **error );
+
+int libfsapfs_profiler_close(
+     libfsapfs_profiler_t *profiler,
+     libcerror_error_t **error );
+
+int libfsapfs_profiler_start_timing(
+     libfsapfs_profiler_t *profiler,
+     int64_t *start_timestamp,
+     libcerror_error_t **error );
+
+int libfsapfs_profiler_stop_timing(
+     libfsapfs_profiler_t *profiler,
+     int64_t start_timestamp,
+     const char *name,
+     off64_t offset,
+     size64_t size,
+     libcerror_error_t **error );
+
+#endif /* defined( HAVE_PROFILER ) */
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_IO_HANDLE_H ) */
+#endif /* !defined( _LIBFSAPFS_PROFILER_H ) */
 

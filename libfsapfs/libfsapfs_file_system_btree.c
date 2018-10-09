@@ -33,6 +33,7 @@
 #include "libfsapfs_file_extent.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
@@ -53,6 +54,7 @@
  */
 int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
+     libfsapfs_io_handle_t *io_handle,
      libfdata_vector_t *data_block_vector,
      libfcache_cache_t *data_block_cache,
      libfsapfs_object_map_btree_t *object_map_btree,
@@ -111,6 +113,7 @@ int libfsapfs_file_system_btree_initialize(
 
 		goto on_error;
 	}
+	( *file_system_btree )->io_handle              = io_handle;
 	( *file_system_btree )->data_block_vector      = data_block_vector;
 	( *file_system_btree )->data_block_cache       = data_block_cache;
 	( *file_system_btree )->object_map_btree       = object_map_btree;
@@ -326,6 +329,10 @@ int libfsapfs_file_system_btree_get_root_node(
 	libfsapfs_data_block_t *data_block = NULL;
 	static char *function              = "libfsapfs_file_system_btree_get_root_node";
 
+#if defined( HAVE_PROFILER )
+	int64_t profiler_start_timestamp   = 0;
+#endif
+
 	if( file_system_btree == NULL )
 	{
 		libcerror_error_set(
@@ -333,6 +340,17 @@ int libfsapfs_file_system_btree_get_root_node(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( file_system_btree->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid file system B-tree entry - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -359,6 +377,26 @@ int libfsapfs_file_system_btree_get_root_node(
 
 		return( -1 );
 	}
+#if defined( HAVE_PROFILER )
+	if( file_system_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_start_timing(
+		     file_system_btree->io_handle->profiler,
+		     &profiler_start_timestamp,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to start timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( libfdata_vector_get_element_value_by_index(
 	     file_system_btree->data_block_vector,
 	     (intptr_t *) file_io_handle,
@@ -378,6 +416,29 @@ int libfsapfs_file_system_btree_get_root_node(
 
 		goto on_error;
 	}
+#if defined( HAVE_PROFILER )
+	if( file_system_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_stop_timing(
+		     file_system_btree->io_handle->profiler,
+		     profiler_start_timestamp,
+		     function,
+		     root_node_block_number * file_system_btree->io_handle->block_size,
+		     file_system_btree->io_handle->block_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to stop timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( data_block == NULL )
 	{
 		libcerror_error_set(
@@ -514,6 +575,10 @@ int libfsapfs_file_system_btree_get_sub_node(
 	libfsapfs_data_block_t *data_block = NULL;
 	static char *function              = "libfsapfs_file_system_btree_get_sub_node";
 
+#if defined( HAVE_PROFILER )
+	int64_t profiler_start_timestamp   = 0;
+#endif
+
 	if( file_system_btree == NULL )
 	{
 		libcerror_error_set(
@@ -521,6 +586,17 @@ int libfsapfs_file_system_btree_get_sub_node(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( file_system_btree->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid file system B-tree entry - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -547,6 +623,26 @@ int libfsapfs_file_system_btree_get_sub_node(
 
 		return( -1 );
 	}
+#if defined( HAVE_PROFILER )
+	if( file_system_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_start_timing(
+		     file_system_btree->io_handle->profiler,
+		     &profiler_start_timestamp,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to start timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( libfdata_vector_get_element_value_by_index(
 	     file_system_btree->data_block_vector,
 	     (intptr_t *) file_io_handle,
@@ -566,6 +662,29 @@ int libfsapfs_file_system_btree_get_sub_node(
 
 		goto on_error;
 	}
+#if defined( HAVE_PROFILER )
+	if( file_system_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_stop_timing(
+		     file_system_btree->io_handle->profiler,
+		     profiler_start_timestamp,
+		     function,
+		     sub_node_block_number * file_system_btree->io_handle->block_size,
+		     file_system_btree->io_handle->block_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to stop timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( data_block == NULL )
 	{
 		libcerror_error_set(
@@ -909,7 +1028,7 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 	     file_io_handle,
 	     file_system_btree->root_node_block_number,
 	     &node,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1001,7 +1120,7 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 		     file_io_handle,
 		     sub_node_block_number,
 		     &node,
-		     error ) == -1 )
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -1570,7 +1689,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 				     file_io_handle,
 				     sub_node_block_number,
 				     &sub_node,
-				     error ) == -1 )
+				     error ) != 1 )
 				{
 					libcerror_error_set(
 					 error,
@@ -2207,7 +2326,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 				     file_io_handle,
 				     sub_node_block_number,
 				     &sub_node,
-				     error ) == -1 )
+				     error ) != 1 )
 				{
 					libcerror_error_set(
 					 error,
@@ -2749,7 +2868,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 			     file_io_handle,
 			     sub_node_block_number,
 			     &sub_node,
-			     error ) == -1 )
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
@@ -2880,7 +2999,7 @@ int libfsapfs_file_system_btree_get_directory_entries(
 	     file_io_handle,
 	     file_system_btree->root_node_block_number,
 	     &root_node,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -3401,7 +3520,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 			     file_io_handle,
 			     sub_node_block_number,
 			     &sub_node,
-			     error ) == -1 )
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
@@ -3532,7 +3651,7 @@ int libfsapfs_file_system_btree_get_file_extents(
 	     file_io_handle,
 	     file_system_btree->root_node_block_number,
 	     &root_node,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -3881,7 +4000,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 	     file_io_handle,
 	     file_system_btree->root_node_block_number,
 	     &root_node,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -4273,7 +4392,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 	     file_io_handle,
 	     file_system_btree->root_node_block_number,
 	     &root_node,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,

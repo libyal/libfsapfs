@@ -84,6 +84,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_object_map_btree.c libfsapfs_object_map_btree.h \
 	libfsapfs_object_map_descriptor.c libfsapfs_object_map_descriptor.h \
 	libfsapfs_password.c libfsapfs_password.h \
+	libfsapfs_profiler.c libfsapfs_profiler.h \
 	libfsapfs_support.c libfsapfs_support.h \
 	libfsapfs_types.h \
 	libfsapfs_unused.h \

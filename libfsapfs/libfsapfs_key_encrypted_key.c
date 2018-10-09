@@ -910,7 +910,7 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 	     key_encrypted_key->number_of_iterations,
 	     password_key,
 	     password_key_size,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -940,7 +940,7 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 	     used_kek_data_size,
 	     wrapped_kek,
 	     used_kek_data_size,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1124,7 +1124,7 @@ int libfsapfs_key_encrypted_key_unlock_with_volume_key(
 	     used_kek_data_size,
 	     wrapped_kek,
 	     used_kek_data_size,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,

@@ -1210,7 +1210,7 @@ int libfsapfs_internal_volume_open_read(
 	     (intptr_t *) volume_data_handle,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
 	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_sector,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
 	     NULL,
 	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
 	     error ) != 1 )
@@ -1450,7 +1450,7 @@ int libfsapfs_internal_volume_open_read(
 			     (intptr_t *) volume_data_handle,
 			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
 			     NULL,
-			     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_sector,
+			     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
 			     NULL,
 			     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
 			     error ) != 1 )
@@ -2666,6 +2666,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	}
 	if( libfsapfs_file_system_btree_initialize(
 	     &( internal_volume->file_system_btree ),
+	     internal_volume->io_handle,
 	     data_block_vector,
 	     internal_volume->data_block_cache,
 	     internal_volume->object_map_btree,

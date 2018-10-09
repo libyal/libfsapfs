@@ -30,6 +30,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
+#include "libfsapfs_profiler.h"
 #include "libfsapfs_unused.h"
 #include "libfsapfs_volume_data_handle.h"
 
@@ -147,7 +148,7 @@ int libfsapfs_volume_data_handle_free(
 		{
 			if( libfsapfs_encryption_context_free(
 			     &( ( *volume_data_handle )->encryption_context ),
-			     error ) == -1 )
+			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
@@ -225,7 +226,7 @@ int libfsapfs_volume_data_handle_set_volume_master_key(
 	if( libfsapfs_encryption_context_initialize(
 	     &( volume_data_handle->encryption_context ),
 	     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -242,7 +243,7 @@ int libfsapfs_volume_data_handle_set_volume_master_key(
 	     16,
 	     &( volume_master_key[ 16 ] ),
 	     16,
-	     error ) == -1 )
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -265,11 +266,11 @@ on_error:
 	return( -1 );
 }
 
-/* Reads a sector
- * Callback function for the volume vector
+/* Reads a data block
+ * Callback function for a data block vector
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_volume_data_handle_read_sector(
+int libfsapfs_volume_data_handle_read_data_block(
      libfsapfs_volume_data_handle_t *volume_data_handle,
      libbfio_handle_t *file_io_handle,
      libfdata_vector_t *vector,
@@ -283,7 +284,11 @@ int libfsapfs_volume_data_handle_read_sector(
      libcerror_error_t **error )
 {
 	libfsapfs_data_block_t *data_block = NULL;
-	static char *function              = "libfsapfs_volume_data_handle_read_sector";
+	static char *function              = "libfsapfs_volume_data_handle_read_data_block";
+
+#if defined( HAVE_PROFILER )
+	int64_t profiler_start_timestamp   = 0;
+#endif
 
 	LIBFSAPFS_UNREFERENCED_PARAMETER( element_data_file_index );
 	LIBFSAPFS_UNREFERENCED_PARAMETER( element_data_flags );
@@ -336,6 +341,26 @@ int libfsapfs_volume_data_handle_read_sector(
 
 		goto on_error;
 	}
+#if defined( HAVE_PROFILER )
+	if( volume_data_handle->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_start_timing(
+		     volume_data_handle->io_handle->profiler,
+		     &profiler_start_timestamp,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to start timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( libfsapfs_data_block_read(
 	     data_block,
 	     volume_data_handle->io_handle,
@@ -353,6 +378,29 @@ int libfsapfs_volume_data_handle_read_sector(
 
 		goto on_error;
 	}
+#if defined( HAVE_PROFILER )
+	if( volume_data_handle->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_stop_timing(
+		     volume_data_handle->io_handle->profiler,
+		     profiler_start_timestamp,
+		     function,
+		     element_data_offset,
+		     element_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to stop timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( libfdata_vector_set_element_value_by_index(
 	     vector,
 	     (intptr_t *) file_io_handle,
