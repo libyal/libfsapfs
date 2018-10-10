@@ -54,6 +54,10 @@ struct libfsapfs_object_map_btree
 	 */
 	libfcache_cache_t *data_block_cache;
 
+	/* The node cache
+	 */
+	libfcache_cache_t *node_cache;
+
 	/* Block number of B-tree root node
 	 */
 	uint64_t root_node_block_number;

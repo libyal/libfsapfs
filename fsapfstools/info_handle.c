@@ -1448,7 +1448,7 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 
 				goto on_error;
 			}
-			sub_path[ sub_path_size - 2 ] = (system_character_t) '/';
+			sub_path[ sub_path_size - 2 ] = (system_character_t) LIBFSAPFS_SEPARATOR;
 		}
 		sub_path[ sub_path_size - 1 ] = (system_character_t) 0;
 
@@ -1709,8 +1709,8 @@ int info_handle_file_system_hierarchy_fprint(
 
 			goto on_error;
 		}
-		uuid_string[ 0 ]  = (system_character_t) '/';
-		uuid_string[ 39 ] = (system_character_t) '/';
+		uuid_string[ 0 ]  = (system_character_t) LIBFSAPFS_SEPARATOR;
+		uuid_string[ 39 ] = (system_character_t) LIBFSAPFS_SEPARATOR;
 		uuid_string[ 40 ] = (system_character_t) 0;
 
 		if( libfguid_identifier_free(
@@ -3066,7 +3066,7 @@ int info_handle_bodyfile_fprint_file_entry(
 
 				goto on_error;
 			}
-			sub_path[ sub_path_size - 2 ] = (system_character_t) '/';
+			sub_path[ sub_path_size - 2 ] = (system_character_t) LIBFSAPFS_SEPARATOR;
 		}
 		sub_path[ sub_path_size - 1 ] = (system_character_t) 0;
 
@@ -3320,8 +3320,8 @@ int info_handle_create_bodyfile(
 
 			goto on_error;
 		}
-		uuid_string[ 0 ]  = (system_character_t) '/';
-		uuid_string[ 39 ] = (system_character_t) '/';
+		uuid_string[ 0 ]  = (system_character_t) LIBFSAPFS_SEPARATOR;
+		uuid_string[ 39 ] = (system_character_t) LIBFSAPFS_SEPARATOR;
 		uuid_string[ 40 ] = (system_character_t) 0;
 
 		if( libfguid_identifier_free(

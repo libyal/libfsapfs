@@ -56,6 +56,10 @@ struct libfsapfs_file_system_btree
 	 */
 	libfcache_cache_t *data_block_cache;
 
+	/* The node cache
+	 */
+	libfcache_cache_t *node_cache;
+
 	/* The volume object map B-tree
 	 */
 	libfsapfs_object_map_btree_t *object_map_btree;
@@ -208,12 +212,30 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
      libfsapfs_inode_t **inode,
      libcerror_error_t **error );
 
+int libfsapfs_file_system_btree_get_inode_by_utf8_name(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t parent_identifier,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_inode_t **inode,
+     libcerror_error_t **error );
+
 int libfsapfs_file_system_btree_get_inode_by_utf8_path(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t parent_identifier,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     libfsapfs_inode_t **inode,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_inode_by_utf16_name(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t parent_identifier,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
      libfsapfs_inode_t **inode,
      libcerror_error_t **error );
 

@@ -133,6 +133,14 @@ int libfsapfs_io_handle_initialize(
 on_error:
 	if( *io_handle != NULL )
 	{
+#if defined( HAVE_PROFILER )
+		if( ( *io_handle )->profiler != NULL )
+		{
+			libfsapfs_profiler_free(
+			 &( ( *io_handle )->profiler ),
+			 NULL );
+		}
+#endif
 		memory_free(
 		 *io_handle );
 
