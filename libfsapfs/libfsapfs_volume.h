@@ -33,7 +33,6 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
-#include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_volume_data_handle.h"
@@ -68,10 +67,6 @@ struct libfsapfs_internal_volume
 	/* The data block vector
 	 */
 	libfdata_vector_t *data_block_vector;
-
-	/* The data block cache
-	 */
-	libfcache_cache_t *data_block_cache;
 
 	/* The volume object map B-tree
 	 */

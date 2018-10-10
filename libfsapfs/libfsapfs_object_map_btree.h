@@ -27,6 +27,7 @@
 
 #include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_node.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
@@ -41,6 +42,10 @@ typedef struct libfsapfs_object_map_btree libfsapfs_object_map_btree_t;
 
 struct libfsapfs_object_map_btree
 {
+	/* The IO handle
+	 */
+	libfsapfs_io_handle_t *io_handle;
+
 	/* Data block vector
 	 */
 	libfdata_vector_t *data_block_vector;
@@ -56,8 +61,8 @@ struct libfsapfs_object_map_btree
 
 int libfsapfs_object_map_btree_initialize(
      libfsapfs_object_map_btree_t **object_map_btree,
+     libfsapfs_io_handle_t *io_handle,
      libfdata_vector_t *data_block_vector,
-     libfcache_cache_t *data_block_cache,
      uint64_t root_node_block_number,
      libcerror_error_t **error );
 

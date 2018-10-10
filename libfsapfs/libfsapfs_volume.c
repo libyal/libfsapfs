@@ -36,7 +36,6 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libcthreads.h"
-#include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_libuna.h"
 #include "libfsapfs_object_map.h"
@@ -940,19 +939,6 @@ int libfsapfs_volume_close(
 
 		result = -1;
 	}
-	if( libfcache_cache_free(
-	     &( internal_volume->data_block_cache ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free data block cache.",
-		 function );
-
-		result = -1;
-	}
 	if( internal_volume->object_map_btree != NULL )
 	{
 		if( libfsapfs_object_map_btree_free(
@@ -1109,17 +1095,6 @@ int libfsapfs_internal_volume_open_read(
 
 		return( -1 );
 	}
-	if( internal_volume->data_block_cache != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - data block cache already set.",
-		 function );
-
-		return( -1 );
-	}
 	if( internal_volume->object_map_btree != NULL )
 	{
 		libcerror_error_set(
@@ -1210,7 +1185,7 @@ int libfsapfs_internal_volume_open_read(
 	     (intptr_t *) volume_data_handle,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
 	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
 	     NULL,
 	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
 	     error ) != 1 )
@@ -1241,20 +1216,6 @@ int libfsapfs_internal_volume_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
 		 "%s: unable to append segment to data block vector.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfcache_cache_initialize(
-	     &( internal_volume->data_block_cache ),
-	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_SECTORS,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data block cache.",
 		 function );
 
 		goto on_error;
@@ -1330,8 +1291,8 @@ int libfsapfs_internal_volume_open_read(
 #endif
 	if( libfsapfs_object_map_btree_initialize(
 	     &( internal_volume->object_map_btree ),
+	     internal_volume->io_handle,
 	     internal_volume->data_block_vector,
-	     internal_volume->data_block_cache,
 	     object_map->object_map_btree_block_number,
 	     error ) != 1 )
 	{
@@ -1450,7 +1411,7 @@ int libfsapfs_internal_volume_open_read(
 			     (intptr_t *) volume_data_handle,
 			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
 			     NULL,
-			     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
+			     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
 			     NULL,
 			     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
 			     error ) != 1 )
@@ -1523,12 +1484,6 @@ on_error:
 	{
 		libfsapfs_object_map_free(
 		 &object_map,
-		 NULL );
-	}
-	if( internal_volume->data_block_cache != NULL )
-	{
-		libfcache_cache_free(
-		 &( internal_volume->data_block_cache ),
 		 NULL );
 	}
 	if( internal_volume->data_block_vector != NULL )
@@ -2668,7 +2623,6 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	     &( internal_volume->file_system_btree ),
 	     internal_volume->io_handle,
 	     data_block_vector,
-	     internal_volume->data_block_cache,
 	     internal_volume->object_map_btree,
 	     object_map_descriptor->physical_address,
 	     error ) != 1 )

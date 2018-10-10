@@ -404,7 +404,7 @@ int libfsapfs_volume_data_handle_read_data_block(
 	if( libfdata_vector_set_element_value_by_index(
 	     vector,
 	     (intptr_t *) file_io_handle,
-	     cache,
+	     (libfdata_cache_t *) cache,
 	     element_index,
 	     (intptr_t *) data_block,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_data_block_free,

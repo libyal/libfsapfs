@@ -27,6 +27,8 @@
 #include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_node.h"
 #include "libfsapfs_data_block.h"
+#include "libfsapfs_definitions.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
@@ -44,8 +46,8 @@
  */
 int libfsapfs_object_map_btree_initialize(
      libfsapfs_object_map_btree_t **object_map_btree,
+     libfsapfs_io_handle_t *io_handle,
      libfdata_vector_t *data_block_vector,
-     libfcache_cache_t *data_block_cache,
      uint64_t root_node_block_number,
      libcerror_error_t **error )
 {
@@ -99,10 +101,29 @@ int libfsapfs_object_map_btree_initialize(
 		 "%s: unable to clear object map B-tree.",
 		 function );
 
+		memory_free(
+		 *object_map_btree );
+
+		*object_map_btree = NULL;
+
+		return( -1 );
+	}
+	if( libfcache_cache_initialize(
+	     &( ( *object_map_btree )->data_block_cache ),
+	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_DATA_BLOCKS,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block cache.",
+		 function );
+
 		goto on_error;
 	}
+	( *object_map_btree )->io_handle              = io_handle;
 	( *object_map_btree )->data_block_vector      = data_block_vector;
-	( *object_map_btree )->data_block_cache       = data_block_cache;
 	( *object_map_btree )->root_node_block_number = root_node_block_number;
 
 	return( 1 );
@@ -126,6 +147,7 @@ int libfsapfs_object_map_btree_free(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_object_map_btree_free";
+	int result            = 1;
 
 	if( object_map_btree == NULL )
 	{
@@ -140,12 +162,27 @@ int libfsapfs_object_map_btree_free(
 	}
 	if( *object_map_btree != NULL )
 	{
+		/* The data_block_vector is referenced and freed elsewhere
+		 */
+		if( libfcache_cache_free(
+		     &( ( *object_map_btree )->data_block_cache ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free data block cache.",
+			 function );
+
+			result = -1;
+		}
 		memory_free(
 		 *object_map_btree );
 
 		*object_map_btree = NULL;
 	}
-	return( 1 );
+	return( result );
 }
 
 /* Retrieves the object map B-tree root node
@@ -160,6 +197,10 @@ int libfsapfs_object_map_btree_get_root_node(
 {
 	libfsapfs_data_block_t *data_block = NULL;
 	static char *function              = "libfsapfs_object_map_btree_get_root_node";
+
+#if defined( HAVE_PROFILER )
+	int64_t profiler_start_timestamp   = 0;
+#endif
 
 	if( object_map_btree == NULL )
 	{
@@ -194,10 +235,30 @@ int libfsapfs_object_map_btree_get_root_node(
 
 		return( -1 );
 	}
+#if defined( HAVE_PROFILER )
+	if( object_map_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_start_timing(
+		     object_map_btree->io_handle->profiler,
+		     &profiler_start_timestamp,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to start timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( libfdata_vector_get_element_value_by_index(
 	     object_map_btree->data_block_vector,
 	     (intptr_t *) file_io_handle,
-	     object_map_btree->data_block_cache,
+	     (libfdata_cache_t *) object_map_btree->data_block_cache,
 	     (int) root_node_block_number,
 	     (intptr_t **) &data_block,
 	     0,
@@ -213,6 +274,29 @@ int libfsapfs_object_map_btree_get_root_node(
 
 		goto on_error;
 	}
+#if defined( HAVE_PROFILER )
+	if( object_map_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_stop_timing(
+		     object_map_btree->io_handle->profiler,
+		     profiler_start_timestamp,
+		     function,
+		     root_node_block_number * object_map_btree->io_handle->block_size,
+		     object_map_btree->io_handle->block_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to stop timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( data_block == NULL )
 	{
 		libcerror_error_set(
@@ -348,6 +432,10 @@ int libfsapfs_object_map_btree_get_sub_node(
 	libfsapfs_data_block_t *data_block = NULL;
 	static char *function              = "libfsapfs_object_map_btree_get_sub_node";
 
+#if defined( HAVE_PROFILER )
+	int64_t profiler_start_timestamp   = 0;
+#endif
+
 	if( object_map_btree == NULL )
 	{
 		libcerror_error_set(
@@ -381,10 +469,30 @@ int libfsapfs_object_map_btree_get_sub_node(
 
 		return( -1 );
 	}
+#if defined( HAVE_PROFILER )
+	if( object_map_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_start_timing(
+		     object_map_btree->io_handle->profiler,
+		     &profiler_start_timestamp,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to start timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( libfdata_vector_get_element_value_by_index(
 	     object_map_btree->data_block_vector,
 	     (intptr_t *) file_io_handle,
-	     object_map_btree->data_block_cache,
+	     (libfdata_cache_t *) object_map_btree->data_block_cache,
 	     (int) sub_node_block_number,
 	     (intptr_t **) &data_block,
 	     0,
@@ -400,6 +508,29 @@ int libfsapfs_object_map_btree_get_sub_node(
 
 		goto on_error;
 	}
+#if defined( HAVE_PROFILER )
+	if( object_map_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_stop_timing(
+		     object_map_btree->io_handle->profiler,
+		     profiler_start_timestamp,
+		     function,
+		     sub_node_block_number * object_map_btree->io_handle->block_size,
+		     object_map_btree->io_handle->block_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to stop timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
 	if( data_block == NULL )
 	{
 		libcerror_error_set(

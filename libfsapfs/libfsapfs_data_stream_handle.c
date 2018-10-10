@@ -132,7 +132,7 @@ int libfsapfs_data_stream_handle_initialize(
 	     (intptr_t *) volume_data_handle,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
 	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfcache_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
 	     NULL,
 	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
 	     error ) != 1 )
@@ -169,7 +169,7 @@ int libfsapfs_data_stream_handle_initialize(
 	}
 	if( libfcache_cache_initialize(
 	     &( ( *data_stream_handle )->data_block_cache ),
-	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_SECTORS,
+	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_DATA_BLOCKS,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -361,7 +361,7 @@ ssize_t libfsapfs_data_stream_handle_read_segment_data(
 		if( libfdata_vector_get_element_value_by_index(
 		     data_stream_handle->data_block_vector,
 		     (intptr_t *) file_io_handle,
-		     data_stream_handle->data_block_cache,
+		     (libfdata_cache_t *) data_stream_handle->data_block_cache,
 		     block_number,
 		     (intptr_t **) &data_block,
 		     0,

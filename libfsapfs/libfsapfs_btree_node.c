@@ -789,7 +789,7 @@ int libfsapfs_btree_node_read_object_data(
 		 ( (fsapfs_object_t *) data )->transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 

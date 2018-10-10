@@ -56,7 +56,6 @@ int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
      libfsapfs_io_handle_t *io_handle,
      libfdata_vector_t *data_block_vector,
-     libfcache_cache_t *data_block_cache,
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t root_node_block_number,
      libcerror_error_t **error )
@@ -111,11 +110,29 @@ int libfsapfs_file_system_btree_initialize(
 		 "%s: unable to clear file system B-tree.",
 		 function );
 
+		memory_free(
+		 *file_system_btree );
+
+		*file_system_btree = NULL;
+
+		return( -1 );
+	}
+	if( libfcache_cache_initialize(
+	     &( ( *file_system_btree )->data_block_cache ),
+	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_DATA_BLOCKS,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data block cache.",
+		 function );
+
 		goto on_error;
 	}
 	( *file_system_btree )->io_handle              = io_handle;
 	( *file_system_btree )->data_block_vector      = data_block_vector;
-	( *file_system_btree )->data_block_cache       = data_block_cache;
 	( *file_system_btree )->object_map_btree       = object_map_btree;
 	( *file_system_btree )->root_node_block_number = root_node_block_number;
 
@@ -140,6 +157,7 @@ int libfsapfs_file_system_btree_free(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_file_system_btree_free";
+	int result            = 1;
 
 	if( file_system_btree == NULL )
 	{
@@ -154,14 +172,27 @@ int libfsapfs_file_system_btree_free(
 	}
 	if( *file_system_btree != NULL )
 	{
-		/* The data_block_vector and data_block_cache are referenced and freed elsewhere
+		/* The io_handle, data_block_vector iand object_map_btree are referenced and freed elsewhere
 		 */
+		if( libfcache_cache_free(
+		     &( ( *file_system_btree )->data_block_cache ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free data block cache.",
+			 function );
+
+			result = -1;
+		}
 		memory_free(
 		 *file_system_btree );
 
 		*file_system_btree = NULL;
 	}
-	return( 1 );
+	return( result );
 }
 
 /* Retrieves the sub node block number from a B-tree entry
@@ -400,7 +431,7 @@ int libfsapfs_file_system_btree_get_root_node(
 	if( libfdata_vector_get_element_value_by_index(
 	     file_system_btree->data_block_vector,
 	     (intptr_t *) file_io_handle,
-	     file_system_btree->data_block_cache,
+	     (libfdata_cache_t *) file_system_btree->data_block_cache,
 	     (int) root_node_block_number,
 	     (intptr_t **) &data_block,
 	     0,
@@ -646,7 +677,7 @@ int libfsapfs_file_system_btree_get_sub_node(
 	if( libfdata_vector_get_element_value_by_index(
 	     file_system_btree->data_block_vector,
 	     (intptr_t *) file_io_handle,
-	     file_system_btree->data_block_cache,
+	     (libfdata_cache_t *) file_system_btree->data_block_cache,
 	     (int) sub_node_block_number,
 	     (intptr_t **) &data_block,
 	     0,
