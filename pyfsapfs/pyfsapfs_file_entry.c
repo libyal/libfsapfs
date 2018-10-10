@@ -37,24 +37,31 @@
 
 PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 
+	{ "get_identifier",
+	  (PyCFunction) pyfsapfs_file_entry_get_identifier,
+	  METH_NOARGS,
+	  "get_identifier() -> Integer\n"
+	  "\n"
+	  "Retrieves the identifier." },
+
 	{ "get_creation_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_creation_time,
 	  METH_NOARGS,
-	  "get_creation_time() -> Integer or None\n"
+	  "get_creation_time() -> Integer\n"
 	  "\n"
 	  "Retrieves the creation date and time." },
 
 	{ "get_modification_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_modification_time,
 	  METH_NOARGS,
-	  "get_modification_time() -> Integer or None\n"
+	  "get_modification_time() -> Integer\n"
 	  "\n"
 	  "Retrieves the modification date and time." },
 
 	{ "get_access_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_access_time,
 	  METH_NOARGS,
-	  "get_access_time() -> Integer or None\n"
+	  "get_access_time() -> Integer\n"
 	  "\n"
 	  "Retrieves the access date and time." },
 
@@ -63,7 +70,7 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  METH_NOARGS,
 	  "get_inode_change_time() -> Integer\n"
 	  "\n"
-	  "Retrieves the extent." },
+	  "Retrieves the inode change date and time." },
 
 	{ "get_owner_identifier",
 	  (PyCFunction) pyfsapfs_file_entry_get_owner_identifier,
@@ -107,6 +114,13 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  "\n"
 	  "Retrieves the sub file entry specified by the index." },
 
+	{ "get_sub_file_entry_by_name",
+	  (PyCFunction) pyfsapfs_file_entry_get_sub_file_entry_by_name,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "get_sub_file_entry_by_name(name) -> Object\n"
+	  "\n"
+	  "Retrieves the sub file entry specified by the name." },
+
 	{ "read_buffer",
 	  (PyCFunction) pyfsapfs_file_entry_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
@@ -138,7 +152,7 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	{ "read",
 	  (PyCFunction) pyfsapfs_file_entry_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read(size) -> String\n"
+	  "read(size) -> Binary string\n"
 	  "\n"
 	  "Reads a buffer of data." },
 
@@ -182,6 +196,12 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 };
 
 PyGetSetDef pyfsapfs_file_entry_object_get_set_definitions[] = {
+
+	{ "identifier",
+	  (getter) pyfsapfs_file_entry_get_identifier,
+	  (setter) 0,
+	  "The identifier.",
+	  NULL },
 
 	{ "creation_time",
 	  (getter) pyfsapfs_file_entry_get_creation_time,
@@ -507,6 +527,58 @@ void pyfsapfs_file_entry_free(
 	 (PyObject*) pyfsapfs_file_entry );
 }
 
+/* Retrieves the identifier
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_identifier(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_identifier";
+	uint64_t value_64bit     = 0;
+	int result               = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_identifier(
+	          pyfsapfs_file_entry->file_entry,
+	          &value_64bit,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve identifier.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
+	                  (uint64_t) value_64bit );
+
+	return( integer_object );
+}
+
 /* Retrieves the creation date and time
  * Returns a Python object if successful or NULL on error
  */
@@ -540,7 +612,7 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
 
 	Py_END_ALLOW_THREADS
 
-	if( result == -1 )
+	if( result != 1 )
 	{
 		pyfsapfs_error_raise(
 		 error,
@@ -552,13 +624,6 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
 		 &error );
 
 		return( NULL );
-	}
-	else if( result == 0 )
-	{
-		Py_IncRef(
-		 Py_None );
-
-		return( Py_None );
 	}
 	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
 	                  (uint64_t) value_64bit );
@@ -599,7 +664,7 @@ PyObject *pyfsapfs_file_entry_get_modification_time(
 
 	Py_END_ALLOW_THREADS
 
-	if( result == -1 )
+	if( result != 1 )
 	{
 		pyfsapfs_error_raise(
 		 error,
@@ -611,13 +676,6 @@ PyObject *pyfsapfs_file_entry_get_modification_time(
 		 &error );
 
 		return( NULL );
-	}
-	else if( result == 0 )
-	{
-		Py_IncRef(
-		 Py_None );
-
-		return( Py_None );
 	}
 	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
 	                  (uint64_t) value_64bit );
@@ -658,7 +716,7 @@ PyObject *pyfsapfs_file_entry_get_access_time(
 
 	Py_END_ALLOW_THREADS
 
-	if( result == -1 )
+	if( result != 1 )
 	{
 		pyfsapfs_error_raise(
 		 error,
@@ -670,13 +728,6 @@ PyObject *pyfsapfs_file_entry_get_access_time(
 		 &error );
 
 		return( NULL );
-	}
-	else if( result == 0 )
-	{
-		Py_IncRef(
-		 Py_None );
-
-		return( Py_None );
 	}
 	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
 	                  (uint64_t) value_64bit );
@@ -1235,6 +1286,100 @@ PyObject *pyfsapfs_file_entry_get_sub_file_entries(
 		return( NULL );
 	}
 	return( sequence_object );
+}
+
+/* Retrieves the sub  specified by the name
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_sub_file_entry_by_name(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *file_entry_object            = NULL;
+	libcerror_error_t *error               = NULL;
+	libfsapfs_file_entry_t *sub_file_entry = NULL;
+	static char *function                  = "pyfsapfs_file_entry_get_sub_file_entry_by_name";
+	static char *keyword_list[]            = { "name", NULL };
+	char *utf8_name                        = NULL;
+	size_t utf8_name_length                = 0;
+	int result                             = 0;
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "s",
+	     keyword_list,
+	     &utf8_name ) == 0 )
+	{
+		goto on_error;
+	}
+	utf8_name_length = narrow_string_length(
+	                    utf8_name );
+
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
+	          pyfsapfs_file_entry->file_entry,
+	          (uint8_t *) utf8_name,
+	          utf8_name_length,
+	          &sub_file_entry,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve sub .",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	file_entry_object = pyfsapfs_file_entry_new(
+	                     sub_file_entry,
+	                     pyfsapfs_file_entry->parent_object );
+
+	if( file_entry_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create sub file entry object.",
+		 function );
+
+		goto on_error;
+	}
+	return( file_entry_object );
+
+on_error:
+	if( sub_file_entry != NULL )
+	{
+		libfsapfs_file_entry_free(
+		 &sub_file_entry,
+		 NULL );
+	}
+	return( NULL );
 }
 
 /* Reads data at the current offset into a buffer
