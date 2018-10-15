@@ -39,21 +39,6 @@ struct fsapfs_file_system_btree_key_common
 	uint8_t file_system_identifier[ 8 ];
 };
 
-typedef struct fsapfs_file_system_btree_key_file_extent fsapfs_file_system_btree_key_file_extent_t;
-
-struct fsapfs_file_system_btree_key_file_extent
-{
-	/* The file system identifier (FSID) and data type
-	 * Consists of 8 bytes
-	 */
-	uint8_t file_system_identifier[ 8 ];
-
-	/* The logical address
-	 * Consists of 8 bytes
-	 */
-	uint8_t logical_address[ 8 ];
-};
-
 typedef struct fsapfs_file_system_btree_key_directory_record fsapfs_file_system_btree_key_directory_record_t;
 
 struct fsapfs_file_system_btree_key_directory_record
@@ -90,6 +75,131 @@ struct fsapfs_file_system_btree_key_directory_record_with_hash
 	/* The name string
 	 * Contains an UTF-8 string with end-of-string character
 	 */
+};
+
+typedef struct fsapfs_file_system_btree_key_extended_attribute fsapfs_file_system_btree_key_extended_attribute_t;
+
+struct fsapfs_file_system_btree_key_extended_attribute
+{
+	/* The file system identifier (FSID) and data type
+	 * Consists of 8 bytes
+	 */
+	uint8_t file_system_identifier[ 8 ];
+
+	/* The name size
+	 * Consists of 2 bytes
+	 */
+	uint8_t name_size[ 2 ];
+
+	/* The name string
+	 * Contains an UTF-8 string with end-of-string character
+	 */
+};
+
+typedef struct fsapfs_file_system_btree_key_file_extent fsapfs_file_system_btree_key_file_extent_t;
+
+struct fsapfs_file_system_btree_key_file_extent
+{
+	/* The file system identifier (FSID) and data type
+	 * Consists of 8 bytes
+	 */
+	uint8_t file_system_identifier[ 8 ];
+
+	/* The logical address
+	 * Consists of 8 bytes
+	 */
+	uint8_t logical_address[ 8 ];
+};
+
+typedef struct fsapfs_file_system_btree_value_directory_record fsapfs_file_system_btree_value_directory_record_t;
+
+struct fsapfs_file_system_btree_value_directory_record
+{
+	/* The file system identifier (FSID)
+	 * Consists of 8 bytes
+	 */
+	uint8_t file_system_identifier[ 8 ];
+
+	/* The added date and time
+	 * Consists of 8 bytes
+	 */
+	uint8_t added_time[ 8 ];
+
+	/* The directory entry flags
+	 * Consists of 2 bytes
+	 */
+	uint8_t directory_entry_flags[ 2 ];
+
+	/* Extended fields
+	 */
+};
+
+typedef struct fsapfs_file_system_data_stream_descriptor fsapfs_file_system_data_stream_descriptor_t;
+
+struct fsapfs_file_system_data_stream_descriptor
+{
+	/* The size
+	 * Consists of 8 bytes
+	 */
+	uint8_t size[ 8 ];
+
+	/* The allocated size
+	 * Consists of 8 bytes
+	 */
+	uint8_t allocated_size[ 8 ];
+
+	/* The default encryption identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t default_encryption_identifier[ 8 ];
+
+	/* The total number of bytes written
+	 * Consists of 8 bytes
+	 */
+	uint8_t total_bytes_written[ 8 ];
+
+	/* The total number of bytes read
+	 * Consists of 8 bytes
+	 */
+	uint8_t total_bytes_read[ 8 ];
+};
+
+typedef struct fsapfs_file_system_btree_value_extended_attribute fsapfs_file_system_btree_value_extended_attribute_t;
+
+struct fsapfs_file_system_btree_value_extended_attribute
+{
+	/* The flags
+	 * Consists of 2 bytes
+	 */
+	uint8_t flags[ 2 ];
+
+	/* The data size
+	 * Consists of 2 bytes
+	 */
+	uint8_t data_size[ 2 ];
+
+	/* The data
+	 */
+};
+
+typedef struct fsapfs_file_system_btree_value_file_extent fsapfs_file_system_btree_value_file_extent_t;
+
+struct fsapfs_file_system_btree_value_file_extent
+{
+	/* The data size and flags
+	 * Consists of 8 bytes
+	 */
+	uint8_t data_size_and_flags[ 8 ];
+
+	/* The physical block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t physical_block_number[ 8 ];
+
+	/* The encryption identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t encryption_identifier[ 8 ];
 };
 
 typedef struct fsapfs_file_system_btree_value_inode fsapfs_file_system_btree_value_inode_t;
@@ -178,79 +288,6 @@ struct fsapfs_file_system_btree_value_inode
 
 	/* Extended fields
 	 */
-};
-
-typedef struct fsapfs_file_system_btree_value_file_extent fsapfs_file_system_btree_value_file_extent_t;
-
-struct fsapfs_file_system_btree_value_file_extent
-{
-	/* The data size and flags
-	 * Consists of 8 bytes
-	 */
-	uint8_t data_size_and_flags[ 8 ];
-
-	/* The physical block number
-	 * Consists of 8 bytes
-	 */
-	uint8_t physical_block_number[ 8 ];
-
-	/* The encryption identifier
-	 * Consists of 8 bytes
-	 */
-	uint8_t encryption_identifier[ 8 ];
-};
-
-typedef struct fsapfs_file_system_btree_value_directory_record fsapfs_file_system_btree_value_directory_record_t;
-
-struct fsapfs_file_system_btree_value_directory_record
-{
-	/* The file system identifier (FSID)
-	 * Consists of 8 bytes
-	 */
-	uint8_t file_system_identifier[ 8 ];
-
-	/* The added date and time
-	 * Consists of 8 bytes
-	 */
-	uint8_t added_time[ 8 ];
-
-	/* The directory entry flags
-	 * Consists of 2 bytes
-	 */
-	uint8_t directory_entry_flags[ 2 ];
-
-	/* Extended fields
-	 */
-};
-
-typedef struct fsapfs_file_system_data_stream_descriptor fsapfs_file_system_data_stream_descriptor_t;
-
-struct fsapfs_file_system_data_stream_descriptor
-{
-	/* The size
-	 * Consists of 8 bytes
-	 */
-	uint8_t size[ 8 ];
-
-	/* The allocated size
-	 * Consists of 8 bytes
-	 */
-	uint8_t allocated_size[ 8 ];
-
-	/* The default encryption identifier
-	 * Consists of 8 bytes
-	 */
-	uint8_t default_encryption_identifier[ 8 ];
-
-	/* The total number of bytes written
-	 * Consists of 8 bytes
-	 */
-	uint8_t total_bytes_written[ 8 ];
-
-	/* The total number of bytes read
-	 * Consists of 8 bytes
-	 */
-	uint8_t total_bytes_read[ 8 ];
 };
 
 #if defined( __cplusplus )

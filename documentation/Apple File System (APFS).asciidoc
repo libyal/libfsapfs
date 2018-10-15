@@ -1321,13 +1321,16 @@ See section: <<file_system_data_types,File system data types>>
 | 0x0 | APFS_TYPE_ANY | [yellow-background]*Unknown (Any)*
 | 0x1 | APFS_TYPE_SNAP_METADATA | Snapshot metadata
 | 0x2 | APFS_TYPE_EXTENT | Extent
-| 0x3 | APFS_TYPE_INODE | Inode
-| 0x4 | APFS_TYPE_XATTR | Extended attribute (xattr)
+| 0x3 | APFS_TYPE_INODE | Inode +
+See section: <<inode,Inode>>
+| 0x4 | APFS_TYPE_XATTR | Extended attribute (xattr) +
+See section: <<extended_attribute,Extended attribute>>
 | 0x5 | APFS_TYPE_SIBLING_LINK | Sibling link
 | 0x6 | APFS_TYPE_DSTREAM_ID | Data stream identifier
 | 0x7 | APFS_TYPE_CRYPTO_STATE | Encryption state
 | 0x8 | APFS_TYPE_FILE_EXTENT | File extent
-| 0x9 | APFS_TYPE_DIR_REC | Directory record
+| 0x9 | APFS_TYPE_DIR_REC | Directory record +
+See section: <<directory_record,Directory record>>
 | 0xa | APFS_TYPE_DIR_STATS | Directory stats
 | 0xb | APFS_TYPE_SNAP_NAME | Snapshot name
 | 0xc | APFS_TYPE_SIBLING_MAP | Sibling map
@@ -1379,7 +1382,7 @@ See section: <<file_system_data_types,File system data types>>
 | 16 | 4 | | Reference count (refcnt)
 |===
 
-=== Inode
+=== [[inode]]Inode
 
 ==== Inode key data
 
@@ -1490,7 +1493,7 @@ A whiteout is a file entry that covers up all entries of a particular name from 
 
 See the 'chflags(2)' man page and the '<sys/stat.h>' header file.
 
-=== Extended attribute
+=== [[extended_attribute]]Extended attribute
 
 ==== Extended attribute key data
 
@@ -1506,7 +1509,8 @@ See section: <<file_system_data_types,File system data types>>
 | 8 | 2 | | Name string size (name_len) +
 Includes the size of the end-of-string character
 | 10 | ... | | Name string (name) +
-Contains an UTF-8 encoded string with an end-of-string character
+Contains an UTF-8 encoded string with an end-of-string character +
+See section: <<extended_attribute_names,Extended attribute names>>
 |===
 
 ==== Extended attribute value data
@@ -1521,6 +1525,14 @@ consists of:
 See section: <<extended_attribute_flags,Extended attribute flags>>
 | 2 | 2 | | Extended attribute data size
 | 4 | ... | | Extended attribute data
+|===
+
+==== [[extended_attribute_names]]Extended attribute names
+
+[cols="1,1,5",options="header"]
+|===
+| Name | Description
+| com.apple.fs.symlink | Symbolic link
 |===
 
 ==== [[extended_attribute_flags]]Extended attribute flags
@@ -1624,7 +1636,7 @@ Contains the [yellow-background]*unknown* and 0 if not set
 According to `[APPLE18]` there are currently no flags defined. `[APPLE18]` also
 refers to `len_and_flags` as `len_and_kind` interchangeably.
 
-=== Directory record
+=== [[directory_record]]Directory record
 
 The directory record can have 2 different types of keys:
 

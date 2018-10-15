@@ -27,6 +27,7 @@
 
 #include "libfsapfs_btree_node.h"
 #include "libfsapfs_directory_record.h"
+#include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
@@ -181,6 +182,28 @@ int libfsapfs_file_system_btree_get_directory_entries(
      libbfio_handle_t *file_io_handle,
      uint64_t parent_identifier,
      libcdata_array_t *directory_entries,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     libcdata_array_t *extended_attributes,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     libcdata_array_t *extended_attributes,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_btree_get_extended_attributes(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t parent_identifier,
+     libcdata_array_t *extended_attributes,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_file_extents_from_leaf_node(

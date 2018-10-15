@@ -55,6 +55,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_directory_record.c libfsapfs_directory_record.h \
 	libfsapfs_error.c libfsapfs_error.h \
 	libfsapfs_encryption_context.c libfsapfs_encryption_context.h \
+	libfsapfs_extended_attribute.c libfsapfs_extended_attribute.h \
 	libfsapfs_extern.h \
 	libfsapfs_file_entry.c libfsapfs_file_entry.h \
 	libfsapfs_file_extent.c libfsapfs_file_extent.h \

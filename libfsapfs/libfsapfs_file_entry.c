@@ -1525,7 +1525,6 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
      libfsapfs_file_entry_t **sub_file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record       = NULL;
 	libfsapfs_inode_t *inode                             = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_sub_file_entry_by_utf8_name";
@@ -1678,7 +1677,6 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
      libfsapfs_file_entry_t **sub_file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record       = NULL;
 	libfsapfs_inode_t *inode                             = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_sub_file_entry_by_utf16_name";

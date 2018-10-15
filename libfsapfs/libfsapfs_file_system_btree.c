@@ -30,6 +30,7 @@
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_directory_record.h"
+#include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_extent.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
@@ -3262,6 +3263,683 @@ on_error:
 	return( -1 );
 }
 
+/* Retrieves extended attributes for a specific parent identifier from the file system B-tree leaf node
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     libcdata_array_t *extended_attributes,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_entry_t *btree_entry               = NULL;
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	static char *function                              = "libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node";
+	uint64_t file_system_identifier                    = 0;
+	uint64_t lookup_identifier                         = 0;
+	int btree_entry_index                              = 0;
+	int entry_index                                    = 0;
+	int is_leaf_node                                   = 0;
+	int number_of_entries                              = 0;
+	int result                                         = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint8_t file_system_data_type                      = 0;
+#endif
+
+	if( file_system_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	else if( is_leaf_node == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid node - not a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
+		 function,
+		 parent_identifier );
+	}
+#endif
+	if( libfsapfs_btree_node_get_number_of_entries(
+	     node,
+	     &number_of_entries,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from B-tree node.",
+		 function );
+
+		goto on_error;
+	}
+	lookup_identifier = ( (uint64_t) LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_EXTENDED_ATTRIBUTE << 60 ) | parent_identifier;
+
+	for( btree_entry_index = 0;
+	     btree_entry_index < number_of_entries;
+	     btree_entry_index++ )
+	{
+		if( libfsapfs_btree_node_get_entry_by_index(
+		     node,
+		     btree_entry_index,
+		     &btree_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from B-tree node.",
+			 function );
+
+			goto on_error;
+		}
+		if( btree_entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d.",
+			 function,
+			 btree_entry_index );
+
+			goto on_error;
+		}
+		if( btree_entry->key_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 btree_entry_index );
+
+			goto on_error;
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
+		 file_system_identifier );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
+
+			libcnotify_printf(
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 function,
+			 btree_entry_index,
+			 file_system_identifier & 0x0fffffffffffffffUL,
+			 file_system_data_type,
+			 libfsapfs_debug_print_file_system_data_type(
+			  file_system_data_type ) );
+		}
+#endif
+		if( ( file_system_identifier & 0x0fffffffffffffffUL ) > parent_identifier )
+		{
+			break;
+		}
+		if( file_system_identifier != lookup_identifier )
+		{
+			continue;
+		}
+		if( libfsapfs_extended_attribute_initialize(
+		     &extended_attribute,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_extended_attribute_read_key_data(
+		     extended_attribute,
+		     btree_entry->key_data,
+		     (size_t) btree_entry->key_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read extended attribute key data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_extended_attribute_read_value_data(
+		     extended_attribute,
+		     btree_entry->value_data,
+		     (size_t) btree_entry->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read extended attribute value data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libcdata_array_append_entry(
+		     extended_attributes,
+		     &entry_index,
+		     (intptr_t *) extended_attribute,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to append extended attribute to array.",
+			 function );
+
+			goto on_error;
+		}
+		extended_attribute = NULL;
+
+		result = 1;
+	}
+	return( result );
+
+on_error:
+	if( extended_attribute != NULL )
+	{
+		libfsapfs_extended_attribute_free(
+		 &extended_attribute,
+		 NULL );
+	}
+	libcdata_array_empty(
+	 extended_attributes,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_extended_attribute_free,
+	 NULL );
+
+	return( -1 );
+}
+
+/* Retrieves extended attributes for a specific parent identifier from the file system B-tree branch node
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_btree_node_t *node,
+     uint64_t parent_identifier,
+     libcdata_array_t *extended_attributes,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_entry_t *entry          = NULL;
+	libfsapfs_btree_entry_t *previous_entry = NULL;
+	libfsapfs_btree_node_t *sub_node        = NULL;
+	static char *function                   = "libfsapfs_file_system_btree_get_extended_attributes_from_branch_node";
+	uint64_t file_system_identifier         = 0;
+	uint64_t sub_node_block_number          = 0;
+	uint8_t file_system_data_type           = 0;
+	int entry_index                         = 0;
+	int is_leaf_node                        = 0;
+	int number_of_entries                   = 0;
+	int result                              = 0;
+
+	if( file_system_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+	if( node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	else if( is_leaf_node != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: invalid node - not a branch node.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
+		 function,
+		 parent_identifier );
+	}
+#endif
+	if( libfsapfs_btree_node_get_number_of_entries(
+	     node,
+	     &number_of_entries,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from B-tree node.",
+		 function );
+
+		goto on_error;
+	}
+	for( entry_index = 0;
+	     entry_index < number_of_entries;
+	     entry_index++ )
+	{
+		if( libfsapfs_btree_node_get_entry_by_index(
+		     node,
+		     entry_index,
+		     &entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from B-tree node.",
+			 function );
+
+			goto on_error;
+		}
+		if( entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
+		 file_system_identifier );
+
+		file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 function,
+			 entry_index,
+			 file_system_identifier & 0x0fffffffffffffffUL,
+			 file_system_data_type,
+			 libfsapfs_debug_print_file_system_data_type(
+			  file_system_data_type ) );
+		}
+#endif
+		file_system_identifier &= 0x0fffffffffffffffUL;
+
+		if( file_system_identifier >= parent_identifier )
+		{
+			if( ( previous_entry == NULL )
+			 || ( ( file_system_identifier == parent_identifier )
+			  &&  ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
+			{
+				previous_entry = entry;
+			}
+			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+			     file_system_btree,
+			     file_io_handle,
+			     previous_entry,
+			     &sub_node_block_number,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine sub node block number.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_file_system_btree_get_sub_node(
+			     file_system_btree,
+			     file_io_handle,
+			     sub_node_block_number,
+			     &sub_node,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+				 function,
+				 sub_node_block_number );
+
+				goto on_error;
+			}
+			is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+			                sub_node,
+			                error );
+
+			if( is_leaf_node == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine if B-tree sub node is a leaf node.",
+				 function );
+
+				goto on_error;
+			}
+			if( is_leaf_node != 0 )
+			{
+				result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+				          file_system_btree,
+				          sub_node,
+				          parent_identifier,
+				          extended_attributes,
+				          error );
+			}
+			else
+			{
+				result = libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+				          file_system_btree,
+				          file_io_handle,
+				          sub_node,
+				          parent_identifier,
+				          extended_attributes,
+				          error );
+			}
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree sub node.",
+				 function,
+				 parent_identifier );
+
+				goto on_error;
+			}
+			sub_node = NULL;
+		}
+		if( file_system_identifier > parent_identifier )
+		{
+			break;
+		}
+		previous_entry = entry;
+	}
+	return( result );
+
+on_error:
+	libcdata_array_empty(
+	 extended_attributes,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_extended_attribute_free,
+	 NULL );
+
+	return( -1 );
+}
+
+/* Retrieves extended attributes for a specific parent identifier from the file system B-tree
+ * Returns 1 if successful, 0 if not found or -1 on error
+ */
+int libfsapfs_file_system_btree_get_extended_attributes(
+     libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t parent_identifier,
+     libcdata_array_t *extended_attributes,
+     libcerror_error_t **error )
+{
+	libfsapfs_btree_node_t *root_node = NULL;
+	static char *function             = "libfsapfs_file_system_btree_get_extended_attributes";
+	int is_leaf_node                  = 0;
+	int result                        = 0;
+
+#if defined( HAVE_PROFILER )
+	int64_t profiler_start_timestamp  = 0;
+#endif
+
+	if( file_system_btree == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file system B-tree.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_PROFILER )
+	if( file_system_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_start_timing(
+		     file_system_btree->io_handle->profiler,
+		     &profiler_start_timestamp,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to start timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
+		 function,
+		 parent_identifier );
+	}
+#endif
+	if( libfsapfs_file_system_btree_get_root_node(
+	     file_system_btree,
+	     file_io_handle,
+	     file_system_btree->root_node_block_number,
+	     &root_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree root node.",
+		 function );
+
+		goto on_error;
+	}
+	if( root_node == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid B-tree root node.",
+		 function );
+
+		goto on_error;
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                root_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree root node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	if( is_leaf_node != 0 )
+	{
+		result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+		          file_system_btree,
+		          root_node,
+		          parent_identifier,
+		          extended_attributes,
+		          error );
+	}
+	else
+	{
+		result = libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+		          file_system_btree,
+		          file_io_handle,
+		          root_node,
+		          parent_identifier,
+		          extended_attributes,
+		          error );
+	}
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree root node.",
+		 function,
+		 parent_identifier );
+
+		goto on_error;
+	}
+#if defined( HAVE_PROFILER )
+	if( file_system_btree->io_handle->profiler != NULL )
+	{
+		if( libfsapfs_profiler_stop_timing(
+		     file_system_btree->io_handle->profiler,
+		     profiler_start_timestamp,
+		     function,
+		     0,
+		     0,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to stop timing.",
+			 function );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_PROFILER ) */
+
+	return( result );
+
+on_error:
+	libcdata_array_empty(
+	 extended_attributes,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_extended_attribute_free,
+	 NULL );
+
+	return( -1 );
+}
+
 /* Retrieves file extents for a specific identifier from the file system B-tree leaf node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
@@ -4088,8 +4766,6 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 	libfsapfs_btree_node_t *root_node              = NULL;
 	libfsapfs_directory_record_t *directory_record = NULL;
 	static char *function                          = "libfsapfs_file_system_btree_get_inode_by_utf8_name";
-	libuna_unicode_character_t unicode_character   = 0;
-	size_t utf8_string_index                       = 0;
 	uint64_t lookup_identifier                     = 0;
 	uint32_t name_hash                             = 0;
 	int is_leaf_node                               = 0;
@@ -4742,8 +5418,6 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 	libfsapfs_btree_node_t *root_node              = NULL;
 	libfsapfs_directory_record_t *directory_record = NULL;
 	static char *function                          = "libfsapfs_file_system_btree_get_inode_by_utf16_name";
-	libuna_unicode_character_t unicode_character   = 0;
-	size_t utf16_string_index                      = 0;
 	uint64_t lookup_identifier                     = 0;
 	uint32_t name_hash                             = 0;
 	int is_leaf_node                               = 0;
