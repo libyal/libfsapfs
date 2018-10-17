@@ -25,6 +25,7 @@
 
 #include "libfsapfs_data_stream_handle.h"
 #include "libfsapfs_directory_record.h"
+#include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_entry.h"
 #include "libfsapfs_file_extent.h"
 #include "libfsapfs_file_system_btree.h"
@@ -35,6 +36,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfdata.h"
+#include "libfsapfs_libuna.h"
 #include "libfsapfs_types.h"
 
 /* Creates a file entry
@@ -204,6 +206,23 @@ int libfsapfs_file_entry_free(
 #endif
 		/* The file_io_handle and file_system_btree references are freed elsewhere
 		 */
+		if( internal_file_entry->extended_attributes != NULL )
+		{
+			if( libcdata_array_free(
+			     &( internal_file_entry->extended_attributes ),
+			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free extended attributes array.",
+				 function );
+
+				result = -1;
+			}
+		}
 		if( internal_file_entry->directory_entries != NULL )
 		{
 			if( libcdata_array_free(
@@ -334,8 +353,8 @@ int libfsapfs_file_entry_get_identifier(
 }
 
 /* Retrieves the creation date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_creation_time(
@@ -408,8 +427,8 @@ int libfsapfs_file_entry_get_creation_time(
 }
 
 /* Retrieves the modification date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_modification_time(
@@ -482,8 +501,8 @@ int libfsapfs_file_entry_get_modification_time(
 }
 
 /* Retrieves the inode change date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_inode_change_time(
@@ -556,8 +575,8 @@ int libfsapfs_file_entry_get_inode_change_time(
 }
 
 /* Retrieves the access date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_access_time(
@@ -849,8 +868,8 @@ int libfsapfs_file_entry_get_file_mode(
 }
 
 /* Retrieves the size of the UTF-8 encoded name
- * This value is retrieved from the inode
  * The returned size includes the end of string character
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf8_name_size(
@@ -923,8 +942,8 @@ int libfsapfs_file_entry_get_utf8_name_size(
 }
 
 /* Retrieves the UTF-8 encoded name
- * This value is retrieved from the inode
  * The size should include the end of string character
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf8_name(
@@ -999,8 +1018,8 @@ int libfsapfs_file_entry_get_utf8_name(
 }
 
 /* Retrieves the size of the UTF-16 encoded name
- * This value is retrieved from the inode
  * The returned size includes the end of string character
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf16_name_size(
@@ -1073,8 +1092,8 @@ int libfsapfs_file_entry_get_utf16_name_size(
 }
 
 /* Retrieves the UTF-16 encoded name
- * This value is retrieved from the inode
  * The size should include the end of string character
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_file_entry_get_utf16_name(
@@ -1146,6 +1165,434 @@ int libfsapfs_file_entry_get_utf16_name(
 	}
 #endif
 	return( result );
+}
+
+/* Determines the extended attributes
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_file_entry_get_extended_attributes(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error )
+{
+	static char *function           = "libfsapfs_internal_file_entry_get_extended_attributes";
+	uint64_t file_system_identifier = 0;
+	int result                      = 0;
+
+	if( internal_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->extended_attributes != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry - extended attributes value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_inode_get_identifier(
+	     internal_file_entry->inode,
+	     &file_system_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier from inode.",
+		 function );
+
+		goto on_error;
+	}
+	if( libcdata_array_initialize(
+	     &( internal_file_entry->extended_attributes ),
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create extended attributes array.",
+		 function );
+
+		goto on_error;
+	}
+	result = libfsapfs_file_system_btree_get_extended_attributes(
+		  internal_file_entry->file_system_btree,
+		  internal_file_entry->file_io_handle,
+		  file_system_identifier,
+		  internal_file_entry->extended_attributes,
+		  error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve extended attributes from file system B-tree.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( internal_file_entry->extended_attributes != NULL )
+	{
+		libcdata_array_free(
+		 &( internal_file_entry->extended_attributes ),
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Retrieves the size of the UTF-8 encoded symbolic link name
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_utf8_symbolic_link_name_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf8_name_size,
+     libcerror_error_t **error )
+{
+	libfsapfs_extended_attribute_t *extended_attribute   = NULL;
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_name_size";
+	int extended_attribute_index                         = 0;
+	int number_of_extended_attributes                    = 0;
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->extended_attributes == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine extended attributes.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libcdata_array_get_number_of_entries(
+	     internal_file_entry->extended_attributes,
+	     &number_of_extended_attributes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from extended attributes array.",
+		 function );
+
+		goto on_error;
+	}
+	for( extended_attribute_index = 0;
+	     extended_attribute_index < number_of_extended_attributes;
+	     extended_attribute_index++ )
+	{
+		if( libcdata_array_get_entry_by_index(
+		     internal_file_entry->extended_attributes,
+		     extended_attribute_index,
+		     (intptr_t **) &extended_attribute,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve extended attribute: %d.",
+			 function,
+			 extended_attribute_index );
+
+			goto on_error;
+		}
+		if( extended_attribute == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing extended attribute: %d.",
+			 function,
+			 extended_attribute_index );
+
+			goto on_error;
+		}
+		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
+		          extended_attribute,
+		          (uint8_t *) "com.apple.fs.symlink",
+		          20,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to compare UTF-8 string with name of extended record.",
+			 function );
+
+			goto on_error;
+		}
+		else if( result == LIBUNA_COMPARE_EQUAL )
+		{
+/* TODO implement */
+		}
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the UTF-8 encoded symbolic link name
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_utf8_symbolic_link_name(
+     libfsapfs_file_entry_t *file_entry,
+     uint8_t *utf8_name,
+     size_t utf8_name_size,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_name";
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->extended_attributes == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine extended attributes.",
+			 function );
+
+			goto on_error;
+		}
+	}
+/* TODO implement */
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the number of extended attributes
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_number_of_extended_attributes(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_extended_attributes,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_number_of_extended_attributes";
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->extended_attributes == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine extended attributes.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( libcdata_array_get_number_of_entries(
+	     internal_file_entry->extended_attributes,
+	     number_of_extended_attributes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from extended attributes array.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
 }
 
 /* Determines the directory entries

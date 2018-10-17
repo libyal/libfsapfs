@@ -3498,13 +3498,13 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 on_error:
 	if( extended_attribute != NULL )
 	{
-		libfsapfs_extended_attribute_free(
-		 &extended_attribute,
+		libfsapfs_internal_extended_attribute_free(
+		 (libfsapfs_internal_extended_attribute_t **) &extended_attribute,
 		 NULL );
 	}
 	libcdata_array_empty(
 	 extended_attributes,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_extended_attribute_free,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
 	 NULL );
 
 	return( -1 );
@@ -3768,7 +3768,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 on_error:
 	libcdata_array_empty(
 	 extended_attributes,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_extended_attribute_free,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
 	 NULL );
 
 	return( -1 );
@@ -3934,7 +3934,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 on_error:
 	libcdata_array_empty(
 	 extended_attributes,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_extended_attribute_free,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
 	 NULL );
 
 	return( -1 );

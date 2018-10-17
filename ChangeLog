@@ -1,4 +1,7 @@
 TODO
+* file entry/inode info
+** API expose external attributes
+** print extended attributes
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * Add container data handle? Add decryption support and use it to read container key bag?
 * rename volume data handle to container data handle?

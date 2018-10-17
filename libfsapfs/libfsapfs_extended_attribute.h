@@ -25,35 +25,50 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_extern.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsapfs_extended_attribute libfsapfs_extended_attribute_t;
+typedef struct libfsapfs_internal_extended_attribute libfsapfs_internal_extended_attribute_t;
 
-struct libfsapfs_extended_attribute
+struct libfsapfs_internal_extended_attribute
 {
-	/* Identifier
+	/* The identifier
 	 */
 	uint64_t identifier;
 
-	/* Name size
+	/* The name size
 	 */
 	uint16_t name_size;
 
-	/* Name
+	/* The name
 	 */
 	uint8_t *name;
+
+	/* The data size
+	 */
+	uint16_t data_size;
+
+	/* The data
+	 */
+	uint8_t *data;
 };
 
 int libfsapfs_extended_attribute_initialize(
      libfsapfs_extended_attribute_t **extended_attribute,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_free(
      libfsapfs_extended_attribute_t **extended_attribute,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_extended_attribute_free(
+     libfsapfs_internal_extended_attribute_t **internal_extended_attribute,
      libcerror_error_t **error );
 
 int libfsapfs_extended_attribute_read_key_data(
@@ -68,16 +83,19 @@ int libfsapfs_extended_attribute_read_value_data(
      size_t data_size,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_get_identifier(
      libfsapfs_extended_attribute_t *extended_attribute,
      uint64_t *identifier,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_get_utf8_name_size(
      libfsapfs_extended_attribute_t *extended_attribute,
      size_t *utf8_string_size,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_get_utf8_name(
      libfsapfs_extended_attribute_t *extended_attribute,
      uint8_t *utf8_string,
@@ -90,11 +108,13 @@ int libfsapfs_extended_attribute_compare_name_with_utf8_string(
      size_t utf8_string_length,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_get_utf16_name_size(
      libfsapfs_extended_attribute_t *extended_attribute,
      size_t *utf16_string_size,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_get_utf16_name(
      libfsapfs_extended_attribute_t *extended_attribute,
      uint16_t *utf16_string,

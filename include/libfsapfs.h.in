@@ -555,8 +555,8 @@ int libfsapfs_file_entry_get_identifier(
      libfsapfs_error_t **error );
 
 /* Retrieves the creation date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -566,8 +566,8 @@ int libfsapfs_file_entry_get_creation_time(
      libfsapfs_error_t **error );
 
 /* Retrieves the modification date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -577,8 +577,8 @@ int libfsapfs_file_entry_get_modification_time(
      libfsapfs_error_t **error );
 
 /* Retrieves the inode change date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -588,8 +588,8 @@ int libfsapfs_file_entry_get_inode_change_time(
      libfsapfs_error_t **error );
 
 /* Retrieves the access date and time
- * This value is retrieved from the inode
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -639,8 +639,8 @@ int libfsapfs_file_entry_get_utf8_name_size(
      libfsapfs_error_t **error );
 
 /* Retrieves the UTF-8 encoded name
- * This value is retrieved from the inode
  * The size should include the end of string character
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -651,8 +651,8 @@ int libfsapfs_file_entry_get_utf8_name(
      libfsapfs_error_t **error );
 
 /* Retrieves the size of the UTF-16 encoded name
- * This value is retrieved from the inode
  * The returned size includes the end of string character
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -662,8 +662,8 @@ int libfsapfs_file_entry_get_utf16_name_size(
      libfsapfs_error_t **error );
 
 /* Retrieves the UTF-16 encoded name
- * This value is retrieved from the inode
  * The size should include the end of string character
+ * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -671,6 +671,61 @@ int libfsapfs_file_entry_get_utf16_name(
      libfsapfs_file_entry_t *file_entry,
      uint16_t *utf16_name,
      size_t utf16_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-8 encoded symbolic link name
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf8_symbolic_link_name_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf8_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-8 encoded symbolic link name
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf8_symbolic_link_name(
+     libfsapfs_file_entry_t *file_entry,
+     uint8_t *utf8_name,
+     size_t utf8_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-16 encoded symbolic link name
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf16_symbolic_link_name_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf16_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-16 encoded symbolic link name
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_utf16_symbolic_link_name(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *utf16_name,
+     size_t utf16_name_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the number of extended attributes
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_extended_attributes(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_extended_attributes,
      libfsapfs_error_t **error );
 
 /* Retrieves the number of sub file entries
@@ -782,6 +837,18 @@ int libfsapfs_file_entry_get_extent_by_index(
      off64_t *extent_offset,
      size64_t *extent_size,
      uint32_t *extent_flags,
+     libfsapfs_error_t **error );
+
+/* -------------------------------------------------------------------------
+ * Extended attribute functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees an extended attribute
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_free(
+     libfsapfs_extended_attribute_t **extended_attribute,
      libfsapfs_error_t **error );
 
 #if defined( __cplusplus )

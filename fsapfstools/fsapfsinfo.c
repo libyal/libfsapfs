@@ -45,7 +45,6 @@
 
 enum FSAPFSINFO_MODES
 {
-	FSAPFSINFO_MODE_BODYFILE,
 	FSAPFSINFO_MODE_CONTAINER,
 	FSAPFSINFO_MODE_FILE_ENTRY,
 	FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY,
@@ -200,7 +199,6 @@ int main( int argc, char * const argv[] )
 				return( EXIT_FAILURE );
 
 			case (system_integer_t) 'B':
-				option_mode     = FSAPFSINFO_MODE_BODYFILE;
 				option_bodyfile = optarg;
 
 				break;
@@ -281,6 +279,20 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+	if( option_bodyfile != NULL )
+	{
+		if( info_handle_set_bodyfile(
+		     fsapfsinfo_info_handle,
+		     option_bodyfile,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set bodyfile.\n" );
+
+			goto on_error;
+		}
+	}
 	if( option_password != NULL )
 	{
 		if( info_handle_set_password(
@@ -327,20 +339,6 @@ int main( int argc, char * const argv[] )
 	}
 	switch( option_mode )
 	{
-		case FSAPFSINFO_MODE_BODYFILE:
-			if( info_handle_create_bodyfile(
-			     fsapfsinfo_info_handle,
-			     option_bodyfile,
-			     &error ) != 1 )
-			{
-				fprintf(
-				 stderr,
-				 "Unable to output to bodyfile.\n" );
-
-				goto on_error;
-			}
-			break;
-
 		case FSAPFSINFO_MODE_FILE_ENTRY:
 			if( info_handle_file_entry_fprint(
 			     fsapfsinfo_info_handle,

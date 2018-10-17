@@ -61,6 +61,10 @@ struct info_handle
 	 */
 	libfsapfs_container_t *input_container;
 
+	/* The bodyfile output stream
+	 */
+	FILE *bodyfile_stream;
+
 	/* The notification output stream
 	 */
 	FILE *notify_stream;
@@ -86,6 +90,11 @@ int info_handle_free(
 
 int info_handle_signal_abort(
      info_handle_t *info_handle,
+     libcerror_error_t **error );
+
+int info_handle_set_bodyfile(
+     info_handle_t *info_handle,
+     const system_character_t *filename,
      libcerror_error_t **error );
 
 int info_handle_set_password(
@@ -122,6 +131,7 @@ int info_handle_uuid_value_fprint(
 int info_handle_file_entry_value_fprint(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,
+     const system_character_t *path,
      libcerror_error_t **error );
 
 int info_handle_file_system_hierarchy_fprint_file_entry(
@@ -164,18 +174,6 @@ int info_handle_volume_fprint(
 
 int info_handle_container_fprint(
      info_handle_t *info_handle,
-     libcerror_error_t **error );
-
-int info_handle_bodyfile_fprint_file_entry(
-     info_handle_t *info_handle,
-     libfsapfs_file_entry_t *file_entry,
-     const system_character_t *path,
-     int level,
-     libcerror_error_t **error );
-
-int info_handle_create_bodyfile(
-     info_handle_t *info_handle,
-     const system_character_t *bodyfile,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

@@ -253,6 +253,13 @@ int info_handle_initialize(
 on_error:
 	if( *info_handle != NULL )
 	{
+		if( ( *info_handle )->bodyfile_stream != NULL )
+		{
+			file_stream_close(
+			 ( *info_handle )->bodyfile_stream );
+
+			( *info_handle )->bodyfile_stream = NULL;
+		}
 		if( ( *info_handle )->input_file_io_handle != NULL )
 		{
 			libbfio_handle_free(
@@ -315,6 +322,22 @@ int info_handle_free(
 			 function );
 
 			result = -1;
+		}
+		if( ( *info_handle )->bodyfile_stream != NULL )
+		{
+			if( file_stream_close(
+			     ( *info_handle )->bodyfile_stream ) != 0 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_CLOSE_FAILED,
+				 "%s: unable to close bodyfile stream.",
+				 function );
+
+				result = -1;
+			}
+			( *info_handle )->bodyfile_stream = NULL;
 		}
 		if( ( *info_handle )->user_password != NULL )
 		{
@@ -383,6 +406,67 @@ int info_handle_signal_abort(
 
 			return( -1 );
 		}
+	}
+	return( 1 );
+}
+
+/* Sets the bodyfile
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_bodyfile(
+     info_handle_t *info_handle,
+     const system_character_t *filename,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_set_bodyfile";
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( info_handle->bodyfile_stream != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid info handle - bodyfile stream value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( filename == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid filename.",
+		 function );
+
+		return( -1 );
+	}
+	info_handle->bodyfile_stream = file_stream_open(
+	                                filename,
+	                                "wb" );
+
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open bodyfile stream.",
+		 function );
+
+		return( -1 );
 	}
 	return( 1 );
 }
@@ -881,6 +965,7 @@ on_error:
 int info_handle_file_entry_value_fprint(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,
+     const system_character_t *path,
      libcerror_error_t **error )
 {
 	char file_mode_string[ 11 ]         = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
@@ -896,6 +981,7 @@ int info_handle_file_entry_value_fprint(
 	uint32_t group_identifier           = 0;
 	uint32_t owner_identifier           = 0;
 	uint16_t file_mode                  = 0;
+	int number_of_extended_attributes   = 0;
 	int result                          = 0;
 
 	if( info_handle == NULL )
@@ -1151,94 +1237,163 @@ int info_handle_file_entry_value_fprint(
 		default:
 			break;
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tIdentifier\t\t: %" PRIu64 "\n",
-	 identifier );
+	if( libfsapfs_file_entry_get_number_of_extended_attributes(
+	     file_entry,
+	     &number_of_extended_attributes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of extended attributes.",
+		 function );
 
-	if( file_entry_name != NULL )
+		goto on_error;
+	}
+	if( info_handle->bodyfile_stream != NULL )
+	{
+		/* Colums in a Sleuthkit 3.x and later bodyfile
+		 * MD5|name|inode|mode_as_string|UID|GID|size|atime|mtime|ctime|crtime
+		 */
+		fprintf(
+		 info_handle->bodyfile_stream,
+		 "0|" );
+
+		if( path != NULL )
+		{
+			fprintf(
+			 info_handle->bodyfile_stream,
+			 "%" PRIs_SYSTEM "",
+			 path );
+		}
+		if( file_entry_name != NULL )
+		{
+			fprintf(
+			 info_handle->bodyfile_stream,
+			 "%" PRIs_SYSTEM "",
+			 file_entry_name );
+		}
+		fprintf(
+		 info_handle->bodyfile_stream,
+		 "|%" PRIu64 "|%s|%" PRIu32 "|%" PRIu32 "|%f|%f|%f|%f\n",
+		 identifier,
+		 file_mode_string,
+		 owner_identifier,
+		 group_identifier,
+		 (double) access_time / 1000000000,
+		 (double) modification_time / 1000000000,
+		 (double) inode_change_time / 1000000000,
+		 (double) creation_time / 1000000000 );
+	}
+	else
 	{
 		fprintf(
 		 info_handle->notify_stream,
-		 "\tName\t\t\t: %" PRIs_SYSTEM "\n",
-		 file_entry_name );
+		 "\tIdentifier\t\t: %" PRIu64 "\n",
+		 identifier );
+
+		if( file_entry_name != NULL )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tName\t\t\t: " );
+
+			if( path != NULL )
+			{
+				fprintf(
+				 info_handle->notify_stream,
+				 "%" PRIs_SYSTEM "",
+				 path );
+			}
+			fprintf(
+			 info_handle->notify_stream,
+			 "%" PRIs_SYSTEM "\n",
+			 file_entry_name );
+		}
+		if( info_handle_posix_time_value_fprint(
+		     info_handle,
+		     "\tCreation time\t\t",
+		     creation_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			goto on_error;
+		}
+		if( info_handle_posix_time_value_fprint(
+		     info_handle,
+		     "\tModification time\t",
+		     modification_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			goto on_error;
+		}
+		if( info_handle_posix_time_value_fprint(
+		     info_handle,
+		     "\tInode change time\t",
+		     inode_change_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			goto on_error;
+		}
+		if( info_handle_posix_time_value_fprint(
+		     info_handle,
+		     "\tAccess time\t\t",
+		     access_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print POSIX time value.",
+			 function );
+
+			goto on_error;
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tOwner identifier\t: %" PRIu32 "\n",
+		 owner_identifier );
+
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tGroup identifier\t: %" PRIu32 "\n",
+		 group_identifier );
+
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tFile mode\t\t: %s (%07" PRIo16 ")\n",
+		 file_mode_string,
+		 file_mode );
+
+		if( number_of_extended_attributes > 0 )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tExtended attributes:\n" );
+		}
 	}
-	if( info_handle_posix_time_value_fprint(
-	     info_handle,
-	     "\tCreation time\t\t",
-	     creation_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print POSIX time value.",
-		 function );
-
-		goto on_error;
-	}
-	if( info_handle_posix_time_value_fprint(
-	     info_handle,
-	     "\tModification time\t",
-	     modification_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print POSIX time value.",
-		 function );
-
-		goto on_error;
-	}
-	if( info_handle_posix_time_value_fprint(
-	     info_handle,
-	     "\tInode change time\t",
-	     inode_change_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print POSIX time value.",
-		 function );
-
-		goto on_error;
-	}
-	if( info_handle_posix_time_value_fprint(
-	     info_handle,
-	     "\tAccess time\t\t",
-	     access_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print POSIX time value.",
-		 function );
-
-		goto on_error;
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tOwner identifier\t: %" PRIu32 "\n",
-	 owner_identifier );
-
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tGroup identifier\t: %" PRIu32 "\n",
-	 group_identifier );
-
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tFile mode\t\t: %s (%07" PRIo16 ")\n",
-	 file_mode_string,
-	 file_mode );
-
 	if( file_entry_name != NULL )
 	{
 		memory_free(
@@ -1384,22 +1539,44 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 			}
 		}
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "%" PRIs_SYSTEM "",
-	 path );
-
-	if( file_entry_name != NULL )
+	if( info_handle->bodyfile_stream != NULL )
 	{
+		if( info_handle_file_entry_value_fprint(
+		     info_handle,
+		     file_entry,
+		     path,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print file entry.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else
+	{
+/* TODO move into info_handle_file_entry_value_fprint with print name only mode ? */
+
 		fprintf(
 		 info_handle->notify_stream,
 		 "%" PRIs_SYSTEM "",
-		 file_entry_name );
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
+		 path );
 
+		if( file_entry_name != NULL )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "%" PRIs_SYSTEM "",
+			 file_entry_name );
+		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "\n" );
+	}
 	if( number_of_sub_file_entries > 0 )
 	{
 		sub_path_size = path_length + file_entry_name_size + 1;
@@ -1873,6 +2050,7 @@ int info_handle_inode_fprint_file_entry(
 	if( info_handle_file_entry_value_fprint(
 	     info_handle,
 	     file_entry,
+	     NULL,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -2285,6 +2463,7 @@ int info_handle_file_entry_fprint(
 	if( info_handle_file_entry_value_fprint(
 	     info_handle,
 	     file_entry,
+	     NULL,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -2667,749 +2846,6 @@ int info_handle_container_fprint(
 	return( 1 );
 
 on_error:
-	if( volume != NULL )
-	{
-		libfsapfs_volume_free(
-		 &volume,
-		 NULL );
-	}
-	return( -1 );
-}
-
-/* Prints file entry information as part of the bodyfile
- * Returns 1 if successful or -1 on error
- */
-int info_handle_bodyfile_fprint_file_entry(
-     info_handle_t *info_handle,
-     libfsapfs_file_entry_t *file_entry,
-     const system_character_t *path,
-     int level,
-     libcerror_error_t **error )
-{
-	char file_mode_string[ 11 ]            = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
-
-	libfsapfs_file_entry_t *sub_file_entry = NULL;
-	system_character_t *file_entry_name    = NULL;
-	system_character_t *sub_path           = NULL;
-	static char *function                  = "info_handle_bodyfile_fprint_file_entry";
-	size_t file_entry_name_size            = 0;
-	size_t path_length                     = 0;
-	size_t sub_path_size                   = 0;
-	uint64_t access_time                   = 0;
-	uint64_t creation_time                 = 0;
-	uint64_t identifier                    = 0;
-	uint64_t inode_change_time             = 0;
-	uint64_t modification_time             = 0;
-	uint32_t group_identifier              = 0;
-	uint32_t owner_identifier              = 0;
-	uint16_t file_mode                     = 0;
-	int number_of_sub_file_entries         = 0;
-	int result                             = 0;
-	int sub_file_entry_index               = 0;
-
-	if( info_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid info handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( path == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid path.",
-		 function );
-
-		return( -1 );
-	}
-	if( libfsapfs_file_entry_get_number_of_sub_file_entries(
-	     file_entry,
-	     &number_of_sub_file_entries,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of sub file entries.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_get_identifier(
-	     file_entry,
-	     &identifier,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve identifier.",
-		 function );
-
-		goto on_error;
-	}
-	path_length = system_string_length(
-	               path );
-
-	if( level > 0 )
-	{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libfsapfs_file_entry_get_utf16_name_size(
-		          file_entry,
-		          &file_entry_name_size,
-		          error );
-#else
-		result = libfsapfs_file_entry_get_utf8_name_size(
-		          file_entry,
-		          &file_entry_name_size,
-		          error );
-#endif
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file entry name string size.",
-			 function );
-
-			goto on_error;
-		}
-		if( ( result == 1 )
-		 && ( file_entry_name_size > 0 ) )
-		{
-			file_entry_name = system_string_allocate(
-			                   file_entry_name_size );
-
-			if( file_entry_name == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-				 "%s: unable to create file entry name string.",
-				 function );
-
-				goto on_error;
-			}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			result = libfsapfs_file_entry_get_utf16_name(
-			          file_entry,
-			          (uint16_t *) file_entry_name,
-			          file_entry_name_size,
-			          error );
-#else
-			result = libfsapfs_file_entry_get_utf8_name(
-			          file_entry,
-			          (uint8_t *) file_entry_name,
-			          file_entry_name_size,
-			          error );
-#endif
-			if( result != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve file entry name string.",
-				 function );
-
-				goto on_error;
-			}
-		}
-	}
-	if( libfsapfs_file_entry_get_creation_time(
-	     file_entry,
-	     &creation_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve creation time.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_get_modification_time(
-	     file_entry,
-	     &modification_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve modification time.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_get_inode_change_time(
-	     file_entry,
-	     &inode_change_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve inode change time.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_get_access_time(
-	     file_entry,
-	     &access_time,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve access time.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_get_owner_identifier(
-	     file_entry,
-	     &owner_identifier,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve owner identifier.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_get_group_identifier(
-	     file_entry,
-	     &group_identifier,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve group identifier.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_get_file_mode(
-	     file_entry,
-	     &file_mode,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve file mode.",
-		 function );
-
-		goto on_error;
-	}
-/* TODO move into function */
-	if( ( file_mode & 0x0001 ) != 0 )
-	{
-		file_mode_string[ 9 ] = 'x';
-	}
-	if( ( file_mode & 0x0002 ) != 0 )
-	{
-		file_mode_string[ 8 ] = 'w';
-	}
-	if( ( file_mode & 0x0004 ) != 0 )
-	{
-		file_mode_string[ 7 ] = 'r';
-	}
-	if( ( file_mode & 0x0008 ) != 0 )
-	{
-		file_mode_string[ 6 ] = 'x';
-	}
-	if( ( file_mode & 0x0010 ) != 0 )
-	{
-		file_mode_string[ 5 ] = 'w';
-	}
-	if( ( file_mode & 0x0020 ) != 0 )
-	{
-		file_mode_string[ 4 ] = 'r';
-	}
-	if( ( file_mode & 0x0040 ) != 0 )
-	{
-		file_mode_string[ 3 ] = 'x';
-	}
-	if( ( file_mode & 0x0080 ) != 0 )
-	{
-		file_mode_string[ 2 ] = 'w';
-	}
-	if( ( file_mode & 0x0100 ) != 0 )
-	{
-		file_mode_string[ 1 ] = 'r';
-	}
-	switch( file_mode & 0xf000 )
-	{
-		case 0x1000:
-			file_mode_string[ 0 ] = 'p';
-			break;
-
-		case 0x2000:
-			file_mode_string[ 0 ] = 'c';
-			break;
-
-		case 0x4000:
-			file_mode_string[ 0 ] = 'd';
-			break;
-
-		case 0x6000:
-			file_mode_string[ 0 ] = 'b';
-			break;
-
-		case 0xa000:
-			file_mode_string[ 0 ] = 'l';
-			break;
-
-		case 0xc000:
-			file_mode_string[ 0 ] = 's';
-			break;
-
-		default:
-			break;
-	}
-	/* Colums in a Sleuthkit 3.x and later bodyfile
-	 * MD5|name|inode|mode_as_string|UID|GID|size|atime|mtime|ctime|crtime
-	 */
-	fprintf(
-	 info_handle->notify_stream,
-	 "0|%" PRIs_SYSTEM "",
-	 path );
-
-	if( file_entry_name != NULL )
-	{
-		fprintf(
-		 info_handle->notify_stream,
-		 "%" PRIs_SYSTEM "",
-		 file_entry_name );
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "|%" PRIu64 "|%s|%" PRIu32 "|%" PRIu32 "|%f|%f|%f|%f\n",
-	 identifier,
-	 file_mode_string,
-	 owner_identifier,
-	 group_identifier,
-	 (double) access_time / 1000000000,
-	 (double) modification_time / 1000000000,
-	 (double) inode_change_time / 1000000000,
-	 (double) creation_time / 1000000000 );
-
-	if( number_of_sub_file_entries > 0 )
-	{
-		sub_path_size = path_length + file_entry_name_size + 1;
-
-		sub_path = system_string_allocate(
-		            sub_path_size );
-
-		if( sub_path == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create sub path.",
-			 function );
-
-			goto on_error;
-		}
-		if( system_string_copy(
-		     sub_path,
-		     path,
-		     path_length ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy path to sub path.",
-			 function );
-
-			goto on_error;
-		}
-		if( file_entry_name != NULL )
-		{
-			if( system_string_copy(
-			     &( sub_path[ path_length ] ),
-			     file_entry_name,
-			     file_entry_name_size - 1 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy file entry name to sub path.",
-				 function );
-
-				goto on_error;
-			}
-			sub_path[ sub_path_size - 2 ] = (system_character_t) LIBFSAPFS_SEPARATOR;
-		}
-		sub_path[ sub_path_size - 1 ] = (system_character_t) 0;
-
-		for( sub_file_entry_index = 0;
-		     sub_file_entry_index < number_of_sub_file_entries;
-		     sub_file_entry_index++ )
-		{
-			if( libfsapfs_file_entry_get_sub_file_entry_by_index(
-			     file_entry,
-			     sub_file_entry_index,
-			     &sub_file_entry,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve sub file entry: %d.",
-				 function,
-				 sub_file_entry_index );
-
-				goto on_error;
-			}
-			if( info_handle_bodyfile_fprint_file_entry(
-			     info_handle,
-			     sub_file_entry,
-			     sub_path,
-			     level + 1,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print file entry: %d information.",
-				 function,
-				 sub_file_entry_index );
-
-				goto on_error;
-			}
-			if( libfsapfs_file_entry_free(
-			     &sub_file_entry,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free sub file entry: %d.",
-				 function,
-				 sub_file_entry_index );
-
-				goto on_error;
-			}
-		}
-	}
-	if( sub_path != NULL )
-	{
-		memory_free(
-		 sub_path );
-
-		sub_path = NULL;
-	}
-	if( file_entry_name != NULL )
-	{
-		memory_free(
-		 file_entry_name );
-
-		file_entry_name = NULL;
-	}
-	return( 1 );
-
-on_error:
-	if( sub_file_entry != NULL )
-	{
-		libfsapfs_file_entry_free(
-		 &sub_file_entry,
-		 NULL );
-	}
-	if( sub_path != NULL )
-	{
-		memory_free(
-		 sub_path );
-	}
-	if( file_entry_name != NULL )
-	{
-		memory_free(
-		 file_entry_name );
-	}
-	return( -1 );
-}
-
-/* Creates a bodyfile
- * Returns 1 if successful or -1 on error
- */
-int info_handle_create_bodyfile(
-     info_handle_t *info_handle,
-     const system_character_t *path,
-     libcerror_error_t **error )
-{
-	system_character_t uuid_string[ 48 ];
-	uint8_t uuid_data[ 16 ];
-
-	libfguid_identifier_t *uuid        = NULL;
-	libfsapfs_file_entry_t *file_entry = NULL;
-	libfsapfs_volume_t *volume         = NULL;
-	static char *function              = "info_handle_create_bodyfile";
-	int number_of_volumes              = 0;
-	int result                         = 0;
-	int volume_index                   = 0;
-
-	if( info_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid info handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( libfsapfs_container_get_number_of_volumes(
-	     info_handle->input_container,
-	     &number_of_volumes,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of volumes.",
-		 function );
-
-		goto on_error;
-	}
-	for( volume_index = 0;
-	     volume_index < number_of_volumes;
-	     volume_index++ )
-	{
-		if( libfsapfs_container_get_volume_by_index(
-		     info_handle->input_container,
-		     volume_index,
-		     &volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume: %d.",
-			 function,
-			 volume_index );
-
-			goto on_error;
-		}
-		if( info_handle->user_password != NULL )
-		{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			if( libfsapfs_volume_set_utf16_password(
-			     volume,
-			     (uint16_t *) info_handle->user_password,
-			     info_handle->user_password_size - 1,
-			     error ) != 1 )
-#else
-			if( libfsapfs_volume_set_utf8_password(
-			     volume,
-			     (uint8_t *) info_handle->user_password,
-			     info_handle->user_password_size - 1,
-			     error ) != 1 )
-#endif
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set password.",
-				 function );
-
-				goto on_error;
-			}
-/* TODO call unlock volume */
-		}
-		if( libfsapfs_volume_get_identifier(
-		     volume,
-		     uuid_data,
-		     16,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume identifier.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfguid_identifier_initialize(
-		     &uuid,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create UUID.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfguid_identifier_copy_from_byte_stream(
-		     uuid,
-		     uuid_data,
-		     16,
-		     LIBFGUID_ENDIAN_BIG,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-			 "%s: unable to copy byte stream to UUID.",
-			 function );
-
-			goto on_error;
-		}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libfguid_identifier_copy_to_utf16_string(
-			  uuid,
-			  (uint16_t *) &( uuid_string[ 1 ] ),
-			  48 - 1,
-			  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE | LIBFGUID_STRING_FORMAT_FLAG_USE_SURROUNDING_BRACES,
-			  error );
-#else
-		result = libfguid_identifier_copy_to_utf8_string(
-			  uuid,
-			  (uint8_t *) &( uuid_string[ 1 ] ),
-			  48 - 1,
-			  LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE | LIBFGUID_STRING_FORMAT_FLAG_USE_SURROUNDING_BRACES,
-			  error );
-#endif
-		if( result != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
-			 "%s: unable to copy UUID to string.",
-			 function );
-
-			goto on_error;
-		}
-		uuid_string[ 0 ]  = (system_character_t) LIBFSAPFS_SEPARATOR;
-		uuid_string[ 39 ] = (system_character_t) LIBFSAPFS_SEPARATOR;
-		uuid_string[ 40 ] = (system_character_t) 0;
-
-		if( libfguid_identifier_free(
-		     &uuid,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free UUID.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_volume_get_root_directory(
-		     volume,
-		     &file_entry,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve root directory file entry from volume: %d.",
-			 function,
-			 volume_index );
-
-			goto on_error;
-		}
-		if( info_handle_bodyfile_fprint_file_entry(
-		     info_handle,
-		     file_entry,
-		     uuid_string,
-		     0,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print root directory file entry information.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_file_entry_free(
-		     &file_entry,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file entry.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_volume_free(
-		     &volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free volume.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	return( 1 );
-
-on_error:
-	if( file_entry != NULL )
-	{
-		libfsapfs_file_entry_free(
-		 &file_entry,
-		 NULL );
-	}
-	if( uuid != NULL )
-	{
-		libfguid_identifier_free(
-		 &uuid,
-		 NULL );
-	}
 	if( volume != NULL )
 	{
 		libfsapfs_volume_free(
