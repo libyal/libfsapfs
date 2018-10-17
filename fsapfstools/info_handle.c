@@ -968,21 +968,23 @@ int info_handle_file_entry_value_fprint(
      const system_character_t *path,
      libcerror_error_t **error )
 {
-	char file_mode_string[ 11 ]         = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
+	char file_mode_string[ 11 ]              = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
 
-	system_character_t *file_entry_name = NULL;
-	static char *function               = "info_handle_file_entry_value_fprint";
-	size_t file_entry_name_size         = 0;
-	uint64_t access_time                = 0;
-	uint64_t creation_time              = 0;
-	uint64_t identifier                 = 0;
-	uint64_t inode_change_time          = 0;
-	uint64_t modification_time          = 0;
-	uint32_t group_identifier           = 0;
-	uint32_t owner_identifier           = 0;
-	uint16_t file_mode                  = 0;
-	int number_of_extended_attributes   = 0;
-	int result                          = 0;
+	system_character_t *file_entry_name      = NULL;
+	system_character_t *symbolic_link_target = NULL;
+	static char *function                    = "info_handle_file_entry_value_fprint";
+	size_t file_entry_name_size              = 0;
+	size_t symbolic_link_target_size         = 0;
+	uint64_t access_time                     = 0;
+	uint64_t creation_time                   = 0;
+	uint64_t identifier                      = 0;
+	uint64_t inode_change_time               = 0;
+	uint64_t modification_time               = 0;
+	uint32_t group_identifier                = 0;
+	uint32_t owner_identifier                = 0;
+	uint16_t file_mode                       = 0;
+	int number_of_extended_attributes        = 0;
+	int result                               = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1237,6 +1239,69 @@ int info_handle_file_entry_value_fprint(
 		default:
 			break;
 	}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	result = libfsapfs_file_entry_get_utf16_symbolic_link_target_size(
+	          file_entry,
+	          &symbolic_link_target_size,
+	          error );
+#else
+	result = libfsapfs_file_entry_get_utf8_symbolic_link_target_size(
+	          file_entry,
+	          &symbolic_link_target_size,
+	          error );
+#endif
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve symbolic link target string size.",
+		 function );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		symbolic_link_target = system_string_allocate(
+		                        symbolic_link_target_size );
+
+		if( symbolic_link_target == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create symbolic link target string.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfsapfs_file_entry_get_utf16_symbolic_link_target(
+		          file_entry,
+		          (uint16_t *) symbolic_link_target,
+		          symbolic_link_target_size,
+		          error );
+#else
+		result = libfsapfs_file_entry_get_utf8_symbolic_link_target(
+		          file_entry,
+		          (uint8_t *) symbolic_link_target,
+		          symbolic_link_target_size,
+		          error );
+#endif
+		if( result != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve symbolic link target string.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	if( libfsapfs_file_entry_get_number_of_extended_attributes(
 	     file_entry,
 	     &number_of_extended_attributes,
@@ -1387,12 +1452,26 @@ int info_handle_file_entry_value_fprint(
 		 file_mode_string,
 		 file_mode );
 
+		if( symbolic_link_target != NULL )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tSymbolic link target\t: %" PRIs_SYSTEM "\n",
+			 symbolic_link_target );
+		}
 		if( number_of_extended_attributes > 0 )
 		{
 			fprintf(
 			 info_handle->notify_stream,
 			 "\tExtended attributes:\n" );
 		}
+	}
+	if( symbolic_link_target != NULL )
+	{
+		memory_free(
+		 symbolic_link_target );
+
+		symbolic_link_target = NULL;
 	}
 	if( file_entry_name != NULL )
 	{
@@ -1404,6 +1483,11 @@ int info_handle_file_entry_value_fprint(
 	return( 1 );
 
 on_error:
+	if( symbolic_link_target != NULL )
+	{
+		memory_free(
+		 symbolic_link_target );
+	}
 	if( file_entry_name != NULL )
 	{
 		memory_free(

@@ -63,6 +63,10 @@ struct libfsapfs_internal_file_entry
 	 */
 	libcdata_array_t *extended_attributes;
 
+	/* The symbolic link extended attribute
+	 */
+	libfsapfs_extended_attribute_t *symbolic_link_extended_attribute;
+
 	/* The directory entries
 	 */
 	libcdata_array_t *directory_entries;
@@ -174,29 +178,29 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
-int libfsapfs_file_entry_get_utf8_symbolic_link_name_size(
+int libfsapfs_file_entry_get_utf8_symbolic_link_target_size(
      libfsapfs_file_entry_t *file_entry,
-     size_t *utf8_name_size,
+     size_t *utf8_string_size,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
-int libfsapfs_file_entry_get_utf8_symbolic_link_name(
+int libfsapfs_file_entry_get_utf8_symbolic_link_target(
      libfsapfs_file_entry_t *file_entry,
-     uint8_t *utf8_name,
-     size_t utf8_name_size,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
-int libfsapfs_file_entry_get_utf16_symbolic_link_name_size(
+int libfsapfs_file_entry_get_utf16_symbolic_link_target_size(
      libfsapfs_file_entry_t *file_entry,
-     size_t *utf16_name_size,
+     size_t *utf16_string_size,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
-int libfsapfs_file_entry_get_utf16_symbolic_link_name(
+int libfsapfs_file_entry_get_utf16_symbolic_link_target(
      libfsapfs_file_entry_t *file_entry,
-     uint16_t *utf16_name,
-     size_t utf16_name_size,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libcerror_error_t **error );
 
 int libfsapfs_internal_file_entry_get_directory_entries(

@@ -1,6 +1,7 @@
 TODO
 * file entry/inode info
 ** API expose external attributes
+** add thread lock to extended attribute
 ** print extended attributes
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * Add container data handle? Add decryption support and use it to read container key bag?

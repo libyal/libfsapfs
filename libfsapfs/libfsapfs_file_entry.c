@@ -1259,21 +1259,133 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the size of the UTF-8 encoded symbolic link name
+/* Determines the symbolic link extended attribute
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error )
+{
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	static char *function                              = "libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute";
+	int extended_attribute_index                       = 0;
+	int number_of_extended_attributes                  = 0;
+	int result                                         = 0;
+
+	if( internal_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry - symbolic link extended attribute value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->extended_attributes == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine extended attributes.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( libcdata_array_get_number_of_entries(
+	     internal_file_entry->extended_attributes,
+	     &number_of_extended_attributes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from extended attributes array.",
+		 function );
+
+		return( -1 );
+	}
+	for( extended_attribute_index = 0;
+	     extended_attribute_index < number_of_extended_attributes;
+	     extended_attribute_index++ )
+	{
+		if( libcdata_array_get_entry_by_index(
+		     internal_file_entry->extended_attributes,
+		     extended_attribute_index,
+		     (intptr_t **) &extended_attribute,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve extended attribute: %d.",
+			 function,
+			 extended_attribute_index );
+
+			return( -1 );
+		}
+		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
+		          extended_attribute,
+		          (uint8_t *) "com.apple.fs.symlink",
+		          20,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to compare UTF-8 string with name of extended record.",
+			 function );
+
+			return( -1 );
+		}
+		else if( result != LIBUNA_COMPARE_EQUAL )
+		{
+			continue;
+		}
+		internal_file_entry->symbolic_link_extended_attribute = extended_attribute;
+
+		break;
+	}
+	return( 1 );
+}
+
+/* Retrieves the size of the UTF-8 encoded symbolic link target
  * The size should include the end of string character
  * This value is retrieved from the com.apple.fs.symlink extended attribute
  * Returns 1 if successful, 0 if not available or -1 on error
  */
-int libfsapfs_file_entry_get_utf8_symbolic_link_name_size(
+int libfsapfs_file_entry_get_utf8_symbolic_link_target_size(
      libfsapfs_file_entry_t *file_entry,
-     size_t *utf8_name_size,
+     size_t *utf8_string_size,
      libcerror_error_t **error )
 {
-	libfsapfs_extended_attribute_t *extended_attribute   = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_name_size";
-	int extended_attribute_index                         = 0;
-	int number_of_extended_attributes                    = 0;
+	uint8_t *symbolic_link_data                          = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_target_size";
+	size_t symbolic_link_data_size                       = 0;
 	int result                                           = 0;
 
 	if( file_entry == NULL )
@@ -1304,9 +1416,9 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_name_size(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -1314,79 +1426,45 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_name_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine extended attributes.",
+			 "%s: unable to determine symbolic link extended attribute.",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( libcdata_array_get_number_of_entries(
-	     internal_file_entry->extended_attributes,
-	     &number_of_extended_attributes,
-	     error ) != 1 )
+	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from extended attributes array.",
-		 function );
-
-		goto on_error;
-	}
-	for( extended_attribute_index = 0;
-	     extended_attribute_index < number_of_extended_attributes;
-	     extended_attribute_index++ )
-	{
-		if( libcdata_array_get_entry_by_index(
-		     internal_file_entry->extended_attributes,
-		     extended_attribute_index,
-		     (intptr_t **) &extended_attribute,
+		if( libfsapfs_extended_attribute_get_data(
+		     internal_file_entry->symbolic_link_extended_attribute,
+		     &symbolic_link_data,
+		     &symbolic_link_data_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve extended attribute: %d.",
-			 function,
-			 extended_attribute_index );
-
-			goto on_error;
-		}
-		if( extended_attribute == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing extended attribute: %d.",
-			 function,
-			 extended_attribute_index );
-
-			goto on_error;
-		}
-		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
-		          extended_attribute,
-		          (uint8_t *) "com.apple.fs.symlink",
-		          20,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GENERIC,
-			 "%s: unable to compare UTF-8 string with name of extended record.",
+			 "%s: unable to retrieve symbolic link extended attribute data.",
 			 function );
 
 			goto on_error;
 		}
-		else if( result == LIBUNA_COMPARE_EQUAL )
+		if( libuna_utf8_string_size_from_utf8_stream(
+		     symbolic_link_data,
+		     symbolic_link_data_size,
+		     utf8_string_size,
+		     error ) != 1 )
 		{
-/* TODO implement */
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 string size.",
+			 function );
+
+			goto on_error;
 		}
+		result = 1;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -1403,7 +1481,7 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_name_size(
 		return( -1 );
 	}
 #endif
-	return( 1 );
+	return( result );
 
 on_error:
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
@@ -1414,19 +1492,22 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the UTF-8 encoded symbolic link name
+/* Retrieves the UTF-8 encoded symbolic link target
  * The size should include the end of string character
  * This value is retrieved from the com.apple.fs.symlink extended attribute
  * Returns 1 if successful, 0 if not available or -1 on error
  */
-int libfsapfs_file_entry_get_utf8_symbolic_link_name(
+int libfsapfs_file_entry_get_utf8_symbolic_link_target(
      libfsapfs_file_entry_t *file_entry,
-     uint8_t *utf8_name,
-     size_t utf8_name_size,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_name";
+	uint8_t *symbolic_link_data                          = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_target";
+	size_t symbolic_link_data_size                       = 0;
+	int result                                           = 0;
 
 	if( file_entry == NULL )
 	{
@@ -1456,9 +1537,9 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_name(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -1466,14 +1547,47 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_name(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine extended attributes.",
+			 "%s: unable to determine symbolic link extended attribute.",
 			 function );
 
 			goto on_error;
 		}
 	}
-/* TODO implement */
+	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	{
+		if( libfsapfs_extended_attribute_get_data(
+		     internal_file_entry->symbolic_link_extended_attribute,
+		     &symbolic_link_data,
+		     &symbolic_link_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve symbolic link extended attribute data.",
+			 function );
 
+			goto on_error;
+		}
+		if( libuna_utf8_string_copy_from_utf8_stream(
+		     utf8_string,
+		     utf8_string_size,
+		     symbolic_link_data,
+		     symbolic_link_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 string.",
+			 function );
+
+			goto on_error;
+		}
+		result = 1;
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_file_entry->read_write_lock,
@@ -1489,7 +1603,249 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_name(
 		return( -1 );
 	}
 #endif
-	return( 1 );
+	return( result );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the size of the UTF-16 encoded symbolic link target
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_utf16_symbolic_link_target_size(
+     libfsapfs_file_entry_t *file_entry,
+     size_t *utf16_string_size,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	uint8_t *symbolic_link_data                          = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_utf16_symbolic_link_target_size";
+	size_t symbolic_link_data_size                       = 0;
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine symbolic link extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	{
+		if( libfsapfs_extended_attribute_get_data(
+		     internal_file_entry->symbolic_link_extended_attribute,
+		     &symbolic_link_data,
+		     &symbolic_link_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve symbolic link extended attribute data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libuna_utf16_string_size_from_utf8_stream(
+		     symbolic_link_data,
+		     symbolic_link_data_size,
+		     utf16_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 string size.",
+			 function );
+
+			goto on_error;
+		}
+		result = 1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the UTF-16 encoded symbolic link target
+ * The size should include the end of string character
+ * This value is retrieved from the com.apple.fs.symlink extended attribute
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_file_entry_get_utf16_symbolic_link_target(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	uint8_t *symbolic_link_data                          = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_utf16_symbolic_link_target";
+	size_t symbolic_link_data_size                       = 0;
+	int result                                           = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine symbolic link extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	{
+		if( libfsapfs_extended_attribute_get_data(
+		     internal_file_entry->symbolic_link_extended_attribute,
+		     &symbolic_link_data,
+		     &symbolic_link_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve symbolic link extended attribute data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libuna_utf16_string_copy_from_utf8_stream(
+		     utf16_string,
+		     utf16_string_size,
+		     symbolic_link_data,
+		     symbolic_link_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 string.",
+			 function );
+
+			goto on_error;
+		}
+		result = 1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 
 on_error:
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )

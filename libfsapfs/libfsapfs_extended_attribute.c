@@ -91,8 +91,26 @@ int libfsapfs_extended_attribute_initialize(
 		 "%s: unable to clear extended attribute.",
 		 function );
 
+		memory_free(
+		 internal_extended_attribute );
+
+		return( -1 );
+	}
+#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+	if( libcthreads_read_write_lock_initialize(
+	     &( internal_extended_attribute->read_write_lock ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to intialize read/write lock.",
+		 function );
+
 		goto on_error;
 	}
+#endif
 	*extended_attribute = (libfsapfs_extended_attribute_t *) internal_extended_attribute;
 
 	return( 1 );
@@ -141,6 +159,7 @@ int libfsapfs_internal_extended_attribute_free(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_extended_attribute_free";
+	int result            = 1;
 
 	if( internal_extended_attribute == NULL )
 	{
@@ -155,6 +174,21 @@ int libfsapfs_internal_extended_attribute_free(
 	}
 	if( *internal_extended_attribute != NULL )
 	{
+#if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
+		if( libcthreads_read_write_lock_free(
+		     &( ( *internal_extended_attribute )->read_write_lock ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free read/write lock.",
+			 function );
+
+			result = -1;
+		}
+#endif
 		if( ( *internal_extended_attribute )->data != NULL )
 		{
 			memory_free(
@@ -170,7 +204,7 @@ int libfsapfs_internal_extended_attribute_free(
 
 		*internal_extended_attribute = NULL;
 	}
-	return( 1 );
+	return( result );
 }
 
 /* Reads the extended attribute key data
@@ -846,5 +880,58 @@ int libfsapfs_extended_attribute_compare_name_with_utf16_string(
 		}
 	}
 	return( result );
+}
+
+/* Retrieves the data
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_extended_attribute_get_data(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     uint8_t **data,
+     size_t *data_size,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
+	static char *function                                                = "libfsapfs_extended_attribute_get_data";
+
+	if( extended_attribute == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid extended attribute.",
+		 function );
+
+		return( -1 );
+	}
+	internal_extended_attribute = (libfsapfs_internal_extended_attribute_t *) extended_attribute;
+
+	if( data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid data.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid data size.",
+		 function );
+
+		return( -1 );
+	}
+	*data      = internal_extended_attribute->data;
+	*data_size = internal_extended_attribute->data_size;
+
+	return( 1 );
 }
 

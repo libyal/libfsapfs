@@ -101,6 +101,13 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  "\n"
 	  "Retrieves the name." },
 
+	{ "get_symbolic_link_target",
+	  (PyCFunction) pyfsapfs_file_entry_get_symbolic_link_target,
+	  METH_NOARGS,
+	  "get_symbolic_link_target() -> Unicode string or None\n"
+	  "\n"
+	  "Returns the symbolic link target." },
+
 	{ "get_number_of_sub_file_entries",
 	  (PyCFunction) pyfsapfs_file_entry_get_number_of_sub_file_entries,
 	  METH_NOARGS,
@@ -250,6 +257,12 @@ PyGetSetDef pyfsapfs_file_entry_object_get_set_definitions[] = {
 	  (getter) pyfsapfs_file_entry_get_name,
 	  (setter) 0,
 	  "The name.",
+	  NULL },
+
+	{ "symbolic_link_target",
+	  (getter) pyfsapfs_file_entry_get_symbolic_link_target,
+	  (setter) 0,
+	  "The symbolic link target.",
 	  NULL },
 
 	{ "number_of_sub_file_entries",
@@ -1066,6 +1079,120 @@ on_error:
 	{
 		PyMem_Free(
 		 utf8_string );
+	}
+	return( NULL );
+}
+
+/* Retrieves the symbolic link target
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_symbolic_link_target(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	PyObject *string_object  = NULL;
+	const char *errors       = NULL;
+	uint8_t *target          = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_symbolic_link_target";
+	size_t target_size       = 0;
+	int result               = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_utf8_symbolic_link_target_size(
+	          pyfsapfs_file_entry->file_entry,
+	          &target_size,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve symbolic link target size.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	else if( ( result == 0 )
+	      || ( target_size == 0 ) )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	target = (uint8_t *) PyMem_Malloc(
+	                      sizeof( uint8_t ) * target_size );
+
+	if( target == NULL )
+	{
+		PyErr_Format(
+		 PyExc_IOError,
+		 "%s: unable to create target.",
+		 function );
+
+		goto on_error;
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_utf8_symbolic_link_target(
+		  pyfsapfs_file_entry->file_entry,
+		  target,
+		  target_size,
+		  &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve symbolic link target.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	/* Pass the string length to PyUnicode_DecodeUTF8
+	 * otherwise it makes the end of string character is part
+	 * of the string
+	 */
+	string_object = PyUnicode_DecodeUTF8(
+			 (char *) target,
+			 (Py_ssize_t) target_size - 1,
+			 errors );
+
+	PyMem_Free(
+	 target );
+
+	return( string_object );
+
+on_error:
+	if( target != NULL )
+	{
+		PyMem_Free(
+		 target );
 	}
 	return( NULL );
 }

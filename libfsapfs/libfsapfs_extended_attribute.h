@@ -27,6 +27,7 @@
 
 #include "libfsapfs_extern.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcthreads.h"
 #include "libfsapfs_types.h"
 
 #if defined( __cplusplus )
@@ -56,6 +57,12 @@ struct libfsapfs_internal_extended_attribute
 	/* The data
 	 */
 	uint8_t *data;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	/* The read/write lock
+	 */
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
 };
 
 int libfsapfs_extended_attribute_initialize(
@@ -125,6 +132,12 @@ int libfsapfs_extended_attribute_compare_name_with_utf16_string(
      libfsapfs_extended_attribute_t *extended_attribute,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     libcerror_error_t **error );
+
+int libfsapfs_extended_attribute_get_data(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     uint8_t **data,
+     size_t *data_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

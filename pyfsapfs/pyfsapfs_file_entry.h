@@ -98,6 +98,10 @@ PyObject *pyfsapfs_file_entry_get_name(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
+PyObject *pyfsapfs_file_entry_get_symbolic_link_target(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_file_entry_get_number_of_sub_file_entries(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
