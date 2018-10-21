@@ -732,7 +732,7 @@ int info_handle_close_input(
 int info_handle_posix_time_value_fprint(
      info_handle_t *info_handle,
      const char *value_name,
-     uint64_t value_64bit,
+     int64_t value_64bit,
      libcerror_error_t **error )
 {
 	system_character_t date_time_string[ 32 ];
@@ -776,7 +776,7 @@ int info_handle_posix_time_value_fprint(
 		}
 		if( libfdatetime_posix_time_copy_from_64bit(
 		     posix_time,
-		     value_64bit,
+		     (uint64_t) value_64bit,
 		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
 		     error ) != 1 )
 		{
@@ -975,11 +975,11 @@ int info_handle_file_entry_value_fprint(
 	static char *function                    = "info_handle_file_entry_value_fprint";
 	size_t file_entry_name_size              = 0;
 	size_t symbolic_link_target_size         = 0;
-	uint64_t access_time                     = 0;
-	uint64_t creation_time                   = 0;
 	uint64_t identifier                      = 0;
-	uint64_t inode_change_time               = 0;
-	uint64_t modification_time               = 0;
+	int64_t access_time                      = 0;
+	int64_t creation_time                    = 0;
+	int64_t inode_change_time                = 0;
+	int64_t modification_time                = 0;
 	uint32_t group_identifier                = 0;
 	uint32_t owner_identifier                = 0;
 	uint16_t file_mode                       = 0;

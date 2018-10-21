@@ -119,7 +119,7 @@ int info_handle_close_input(
 int info_handle_posix_time_value_fprint(
      info_handle_t *info_handle,
      const char *value_name,
-     uint64_t value_64bit,
+     int64_t value_64bit,
      libcerror_error_t **error );
 
 int info_handle_uuid_value_fprint(

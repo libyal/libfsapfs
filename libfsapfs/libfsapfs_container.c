@@ -1010,6 +1010,7 @@ int libfsapfs_internal_container_open_read(
 	int element_index                                            = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
+	libfsapfs_checkpoint_map_t *checkpoint_map                   = NULL;
 	libfsapfs_container_reaper_t *container_reaper               = NULL;
 	libfsapfs_container_space_manager_t *container_space_manager = NULL;
 	uint64_t reaper_block_number                                 = 0;
@@ -1179,6 +1180,57 @@ int libfsapfs_internal_container_open_read(
 		switch( object->type )
 		{
 			case 0x4000000c:
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "Reading checkpoint map:\n" );
+
+					if( libfsapfs_checkpoint_map_initialize(
+					     &checkpoint_map,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+						 "%s: unable to create backup checkpoint map.",
+						 function );
+
+						goto on_error;
+					}
+					if( libfsapfs_checkpoint_map_read_file_io_handle(
+					     checkpoint_map,
+					     file_io_handle,
+					     file_offset,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_IO,
+						 LIBCERROR_IO_ERROR_READ_FAILED,
+						 "%s: unable to read backup checkpoint map at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+						 function,
+						 file_offset,
+						 file_offset );
+
+						goto on_error;
+					}
+					if( libfsapfs_checkpoint_map_free(
+					     &checkpoint_map,
+					     error ) != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+						 "%s: unable to free backup checkpoint map.",
+						 function );
+
+						goto on_error;
+					}
+				}
+#endif
 				if( object->transaction_identifier > checkpoint_map_transaction_identifier )
 				{
 					checkpoint_map_block_number           = internal_container->superblock->metadata_area_block_number + metadata_block_index;
@@ -1682,6 +1734,12 @@ on_error:
 		 NULL );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
+	if( checkpoint_map != NULL )
+	{
+		libfsapfs_checkpoint_map_free(
+		 &checkpoint_map,
+		 NULL );
+	}
 	if( container_superblock != NULL )
 	{
 		libfsapfs_container_superblock_free(

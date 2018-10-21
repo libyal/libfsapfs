@@ -768,7 +768,7 @@ int libfsapfs_inode_get_identifier(
  */
 int libfsapfs_inode_get_creation_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_inode_get_creation_time";
@@ -795,7 +795,7 @@ int libfsapfs_inode_get_creation_time(
 
 		return( -1 );
 	}
-	*posix_time = inode->creation_time;
+	*posix_time = (int64_t) inode->creation_time;
 
 	return( 1 );
 }
@@ -806,7 +806,7 @@ int libfsapfs_inode_get_creation_time(
  */
 int libfsapfs_inode_get_modification_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_inode_get_modification_time";
@@ -833,7 +833,7 @@ int libfsapfs_inode_get_modification_time(
 
 		return( -1 );
 	}
-	*posix_time = inode->modification_time;
+	*posix_time = (int64_t) inode->modification_time;
 
 	return( 1 );
 }
@@ -844,7 +844,7 @@ int libfsapfs_inode_get_modification_time(
  */
 int libfsapfs_inode_get_inode_change_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_inode_get_inode_change_time";
@@ -871,7 +871,7 @@ int libfsapfs_inode_get_inode_change_time(
 
 		return( -1 );
 	}
-	*posix_time = inode->inode_change_time;
+	*posix_time = (int64_t) inode->inode_change_time;
 
 	return( 1 );
 }
@@ -882,7 +882,7 @@ int libfsapfs_inode_get_inode_change_time(
  */
 int libfsapfs_inode_get_access_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_inode_get_access_time";
@@ -909,7 +909,7 @@ int libfsapfs_inode_get_access_time(
 
 		return( -1 );
 	}
-	*posix_time = inode->access_time;
+	*posix_time = (int64_t) inode->access_time;
 
 	return( 1 );
 }

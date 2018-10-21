@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #endif
 
+#include "pyfsapfs_datetime.h"
 #include "pyfsapfs_error.h"
 #include "pyfsapfs_file_entries.h"
 #include "pyfsapfs_file_entry.h"
@@ -48,30 +49,58 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	{ "get_creation_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_creation_time,
 	  METH_NOARGS,
-	  "get_creation_time() -> Integer\n"
+	  "get_creation_time() -> Datetime or None\n"
 	  "\n"
-	  "Retrieves the creation date and time." },
+	  "Returns the creation date and time." },
+
+	{ "get_creation_time_as_integer",
+	  (PyCFunction) pyfsapfs_file_entry_get_creation_time_as_integer,
+	  METH_NOARGS,
+	  "get_creation_time_as_integer() -> Integer or None\n"
+	  "\n"
+	  "Returns the creation date and time as a 64-bit integer containing an APFS timestamp value." },
 
 	{ "get_modification_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_modification_time,
 	  METH_NOARGS,
-	  "get_modification_time() -> Integer\n"
+	  "get_modification_time() -> Datetime or None\n"
 	  "\n"
-	  "Retrieves the modification date and time." },
+	  "Returns the modification date and time." },
+
+	{ "get_modification_time_as_integer",
+	  (PyCFunction) pyfsapfs_file_entry_get_modification_time_as_integer,
+	  METH_NOARGS,
+	  "get_modification_time_as_integer() -> Integer or None\n"
+	  "\n"
+	  "Returns the modification date and time as a 64-bit integer containing an APFS timestamp value." },
 
 	{ "get_access_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_access_time,
 	  METH_NOARGS,
-	  "get_access_time() -> Integer\n"
+	  "get_access_time() -> Datetime or None\n"
 	  "\n"
-	  "Retrieves the access date and time." },
+	  "Returns the access date and time." },
+
+	{ "get_access_time_as_integer",
+	  (PyCFunction) pyfsapfs_file_entry_get_access_time_as_integer,
+	  METH_NOARGS,
+	  "get_access_time_as_integer() -> Integer or None\n"
+	  "\n"
+	  "Returns the access date and time as a 64-bit integer containing an APFS timestamp value." },
 
 	{ "get_inode_change_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_inode_change_time,
 	  METH_NOARGS,
-	  "get_inode_change_time() -> Integer\n"
+	  "get_inode_change_time() -> Datetime or None\n"
 	  "\n"
-	  "Retrieves the inode change date and time." },
+	  "Returns the inode change date and time." },
+
+	{ "get_inode_change_time_as_integer",
+	  (PyCFunction) pyfsapfs_file_entry_get_inode_change_time_as_integer,
+	  METH_NOARGS,
+	  "get_inode_change_time_as_integer() -> Integer or None\n"
+	  "\n"
+	  "Returns the inode change date and time as a 64-bit integer containing an APFS timestamp value." },
 
 	{ "get_owner_identifier",
 	  (PyCFunction) pyfsapfs_file_entry_get_owner_identifier,
@@ -600,10 +629,69 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	PyObject *integer_object = NULL;
+	libcerror_error_t *error   = NULL;
+	PyObject *date_time_object = NULL;
+	static char *function      = "pyfsapfs_file_entry_get_creation_time";
+	int64_t posix_time         = 0;
+	int result                 = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_creation_time(
+	          pyfsapfs_file_entry->file_entry,
+	          &posix_time,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve creation time.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                    posix_time / 1000 );
+
+	return( date_time_object );
+}
+
+/* Retrieves the creation date and time as an integer
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_creation_time_as_integer(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
 	libcerror_error_t *error = NULL;
-	static char *function    = "pyfsapfs_file_entry_get_creation_time";
-	uint64_t value_64bit     = 0;
+	PyObject *integer_object = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_creation_time_as_integer";
+	int64_t posix_time       = 0;
 	int result               = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
@@ -621,17 +709,17 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
 
 	result = libfsapfs_file_entry_get_creation_time(
 	          pyfsapfs_file_entry->file_entry,
-	          &value_64bit,
+	          &posix_time,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve creation date and time.",
+		 "%s: unable to retrieve creation time.",
 		 function );
 
 		libcerror_error_free(
@@ -639,8 +727,15 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
 
 		return( NULL );
 	}
-	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
-	                  (uint64_t) value_64bit );
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	integer_object = pyfsapfs_integer_signed_new_from_64bit(
+	                  posix_time );
 
 	return( integer_object );
 }
@@ -652,10 +747,69 @@ PyObject *pyfsapfs_file_entry_get_modification_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	PyObject *integer_object = NULL;
+	libcerror_error_t *error   = NULL;
+	PyObject *date_time_object = NULL;
+	static char *function      = "pyfsapfs_file_entry_get_modification_time";
+	int64_t posix_time         = 0;
+	int result                 = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_modification_time(
+	          pyfsapfs_file_entry->file_entry,
+	          &posix_time,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve modification time.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                    posix_time / 1000 );
+
+	return( date_time_object );
+}
+
+/* Retrieves the modification date and time as an integer
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_modification_time_as_integer(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
 	libcerror_error_t *error = NULL;
-	static char *function    = "pyfsapfs_file_entry_get_modification_time";
-	uint64_t value_64bit     = 0;
+	PyObject *integer_object = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_modification_time_as_integer";
+	int64_t posix_time       = 0;
 	int result               = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
@@ -673,17 +827,17 @@ PyObject *pyfsapfs_file_entry_get_modification_time(
 
 	result = libfsapfs_file_entry_get_modification_time(
 	          pyfsapfs_file_entry->file_entry,
-	          &value_64bit,
+	          &posix_time,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve modification date and time.",
+		 "%s: unable to retrieve modification time.",
 		 function );
 
 		libcerror_error_free(
@@ -691,8 +845,15 @@ PyObject *pyfsapfs_file_entry_get_modification_time(
 
 		return( NULL );
 	}
-	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
-	                  (uint64_t) value_64bit );
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	integer_object = pyfsapfs_integer_signed_new_from_64bit(
+	                  posix_time );
 
 	return( integer_object );
 }
@@ -704,10 +865,69 @@ PyObject *pyfsapfs_file_entry_get_access_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	PyObject *integer_object = NULL;
+	libcerror_error_t *error   = NULL;
+	PyObject *date_time_object = NULL;
+	static char *function      = "pyfsapfs_file_entry_get_access_time";
+	int64_t posix_time         = 0;
+	int result                 = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_access_time(
+	          pyfsapfs_file_entry->file_entry,
+	          &posix_time,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve access time.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                    posix_time / 1000 );
+
+	return( date_time_object );
+}
+
+/* Retrieves the access date and time as an integer
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_access_time_as_integer(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
 	libcerror_error_t *error = NULL;
-	static char *function    = "pyfsapfs_file_entry_get_access_time";
-	uint64_t value_64bit     = 0;
+	PyObject *integer_object = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_access_time_as_integer";
+	int64_t posix_time       = 0;
 	int result               = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
@@ -725,17 +945,17 @@ PyObject *pyfsapfs_file_entry_get_access_time(
 
 	result = libfsapfs_file_entry_get_access_time(
 	          pyfsapfs_file_entry->file_entry,
-	          &value_64bit,
+	          &posix_time,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve access date and time.",
+		 "%s: unable to retrieve access time.",
 		 function );
 
 		libcerror_error_free(
@@ -743,8 +963,15 @@ PyObject *pyfsapfs_file_entry_get_access_time(
 
 		return( NULL );
 	}
-	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
-	                  (uint64_t) value_64bit );
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	integer_object = pyfsapfs_integer_signed_new_from_64bit(
+	                  posix_time );
 
 	return( integer_object );
 }
@@ -756,10 +983,69 @@ PyObject *pyfsapfs_file_entry_get_inode_change_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	PyObject *integer_object = NULL;
+	libcerror_error_t *error   = NULL;
+	PyObject *date_time_object = NULL;
+	static char *function      = "pyfsapfs_file_entry_get_inode_change_time";
+	int64_t posix_time         = 0;
+	int result                 = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_inode_change_time(
+	          pyfsapfs_file_entry->file_entry,
+	          &posix_time,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve inode change time.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                    posix_time / 1000 );
+
+	return( date_time_object );
+}
+
+/* Retrieves the inode change date and time as an integer
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_inode_change_time_as_integer(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
 	libcerror_error_t *error = NULL;
-	static char *function    = "pyfsapfs_file_entry_get_inode_change_time";
-	uint64_t value_64bit     = 0;
+	PyObject *integer_object = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_inode_change_time_as_integer";
+	int64_t posix_time       = 0;
 	int result               = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
@@ -777,17 +1063,17 @@ PyObject *pyfsapfs_file_entry_get_inode_change_time(
 
 	result = libfsapfs_file_entry_get_inode_change_time(
 	          pyfsapfs_file_entry->file_entry,
-	          &value_64bit,
+	          &posix_time,
 	          &error );
 
 	Py_END_ALLOW_THREADS
 
-	if( result != 1 )
+	if( result == -1 )
 	{
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve extent.",
+		 "%s: unable to retrieve inode change time.",
 		 function );
 
 		libcerror_error_free(
@@ -795,8 +1081,15 @@ PyObject *pyfsapfs_file_entry_get_inode_change_time(
 
 		return( NULL );
 	}
-	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
-	                  (uint64_t) value_64bit );
+	else if( result == 0 )
+	{
+		Py_IncRef(
+		 Py_None );
+
+		return( Py_None );
+	}
+	integer_object = pyfsapfs_integer_signed_new_from_64bit(
+	                  posix_time );
 
 	return( integer_object );
 }

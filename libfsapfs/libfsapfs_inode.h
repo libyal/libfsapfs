@@ -111,22 +111,22 @@ int libfsapfs_inode_get_identifier(
 
 int libfsapfs_inode_get_creation_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_modification_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_inode_change_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_access_time(
      libfsapfs_inode_t *inode,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_owner_identifier(

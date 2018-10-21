@@ -9,7 +9,7 @@ Analysis of APFS
 == Summary
 The Apple File System (APFS) is a volume and file system mainly used on
 the Apple platforms such as MacOS and iOS. APFS succeeds the Hierarchical
-File System (HFS) and Core Storage (CS).  This specification is based on
+File System (HFS) and Core Storage (CS). This specification is based on
 publicly availble work on the format and was enhanced by analyzing test data.
 
 This document is intended as a working document for the APFS format.

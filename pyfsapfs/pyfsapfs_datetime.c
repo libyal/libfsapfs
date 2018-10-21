@@ -504,7 +504,7 @@ PyObject *pyfsapfs_datetime_new_from_floatingtime(
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pyfsapfs_datetime_new_from_posix_time(
-           uint32_t posix_time )
+           int32_t posix_time )
 {
 	PyObject *datetime_object = NULL;
 	static char *function     = "pyfsapfs_datetime_new_from_posix_time";
@@ -532,7 +532,7 @@ PyObject *pyfsapfs_datetime_new_from_posix_time(
 	hours       = posix_time % 24;
 	posix_time /= 24;
 
-	/* Add 1 day to compensate that Jan 1 1601 is represented as 0
+	/* Add 1 day to compensate that Jan 1 1970 is represented as 0
 	 */
 	posix_time += 1;
 
@@ -646,6 +646,162 @@ PyObject *pyfsapfs_datetime_new_from_posix_time(
 	                                (int) minutes,
 	                                (int) seconds,
 	                                0 );
+
+	return( datetime_object );
+}
+
+/* Creates a new datetime object from a POSIX time in micro seconds
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+           int64_t posix_time )
+{
+	PyObject *datetime_object = NULL;
+	static char *function     = "pyfsapfs_datetime_new_from_posix_time_in_micro_seconds";
+	uint32_t micro_seconds    = 0;
+	uint16_t days_in_year     = 0;
+	uint16_t year             = 0;
+	uint8_t day_of_month      = 0;
+	uint8_t days_in_month     = 0;
+	uint8_t hours             = 0;
+	uint8_t minutes           = 0;
+	uint8_t month             = 0;
+	uint8_t seconds           = 0;
+
+	/* There are 1000000 micro seconds in a second correct the value to seconds
+	 */
+	micro_seconds = (uint32_t) ( posix_time % 1000000 );
+	posix_time   /= 1000000;
+
+	/* There are 60 seconds in a minute correct the value to minutes
+	 */
+	seconds     = posix_time % 60;
+	posix_time /= 60;
+
+	/* There are 60 minutes in an hour correct the value to hours
+	 */
+	minutes     = posix_time % 60;
+	posix_time /= 60;
+
+	/* There are 24 hours in a day correct the value to days
+	 */
+	hours       = posix_time % 24;
+	posix_time /= 24;
+
+	/* Add 1 day to compensate that Jan 1 1970 is represented as 0
+	 */
+	posix_time += 1;
+
+	/* Determine the number of years starting at '1 Jan 1970 00:00:00'
+	 * correct the value to days within the year
+	 */
+	year = 1970;
+
+	if( posix_time >= 10957 )
+	{
+		year = 2000;
+
+		posix_time -= 10957;
+	}
+	while( posix_time > 0 )
+	{
+		/* Check for a leap year
+		 * The year is ( ( dividable by 4 ) and ( not dividable by 100 ) ) or ( dividable by 400 )
+		 */
+		if( ( ( ( year % 4 ) == 0 )
+		  &&  ( ( year % 100 ) != 0 ) )
+		 || ( ( year % 400 ) == 0 ) )
+		{
+			days_in_year = 366;
+		}
+		else
+		{
+			days_in_year = 365;
+		}
+		if( posix_time <= days_in_year )
+		{
+			break;
+		}
+		posix_time -= days_in_year;
+
+		year += 1;
+	}
+	/* Determine the month correct the value to days within the month
+	 */
+	month = 1;
+
+	while( posix_time > 0 )
+	{
+		/* February (2)
+		 */
+		if( month == 2 )
+		{
+			if( ( ( ( year % 4 ) == 0 )
+			  &&  ( ( year % 100 ) != 0 ) )
+			 || ( ( year % 400 ) == 0 ) )
+			{
+				days_in_month = 29;
+			}
+			else
+			{
+				days_in_month = 28;
+			}
+		}
+		/* April (4), June (6), September (9), November (11)
+		 */
+		else if( ( month == 4 )
+		      || ( month == 6 )
+		      || ( month == 9 )
+		      || ( month == 11 ) )
+		{
+			days_in_month = 30;
+		}
+		/* Januari (1), March (3), May (5), July (7), August (8), October (10), December (12)
+		 */
+		else if( ( month == 1 )
+		      || ( month == 3 )
+		      || ( month == 5 )
+		      || ( month == 7 )
+		      || ( month == 8 )
+		      || ( month == 10 )
+		      || ( month == 12 ) )
+		{
+			days_in_month = 31;
+		}
+		/* This should never happen, but just in case
+		 */
+		else
+		{
+			PyErr_Format(
+			 PyExc_IOError,
+			 "%s: unsupported month: %" PRIu8 ".",
+			 function,
+			 month );
+
+			return( NULL );
+		}
+		if( posix_time <= days_in_month )
+		{
+			break;
+		}
+		posix_time -= days_in_month;
+
+		month += 1;
+	}
+	/* Determine the day
+	 */
+	day_of_month = (uint8_t) posix_time;
+
+	PyDateTime_IMPORT;
+
+	datetime_object = (PyObject *) PyDateTime_FromDateAndTime(
+	                                (int) year,
+	                                (int) month,
+	                                (int) day_of_month,
+	                                (int) hours,
+	                                (int) minutes,
+	                                (int) seconds,
+	                                (int) micro_seconds );
 
 	return( datetime_object );
 }

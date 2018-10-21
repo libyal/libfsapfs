@@ -359,7 +359,7 @@ int libfsapfs_file_entry_get_identifier(
  */
 int libfsapfs_file_entry_get_creation_time(
      libfsapfs_file_entry_t *file_entry,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
@@ -433,7 +433,7 @@ int libfsapfs_file_entry_get_creation_time(
  */
 int libfsapfs_file_entry_get_modification_time(
      libfsapfs_file_entry_t *file_entry,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
@@ -507,7 +507,7 @@ int libfsapfs_file_entry_get_modification_time(
  */
 int libfsapfs_file_entry_get_inode_change_time(
      libfsapfs_file_entry_t *file_entry,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
@@ -581,7 +581,7 @@ int libfsapfs_file_entry_get_inode_change_time(
  */
 int libfsapfs_file_entry_get_access_time(
      libfsapfs_file_entry_t *file_entry,
-     uint64_t *posix_time,
+     int64_t *posix_time,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;

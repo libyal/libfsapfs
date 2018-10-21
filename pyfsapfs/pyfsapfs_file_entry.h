@@ -70,7 +70,15 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
+PyObject *pyfsapfs_file_entry_get_creation_time_as_integer(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_file_entry_get_modification_time(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
+PyObject *pyfsapfs_file_entry_get_modification_time_as_integer(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
@@ -78,7 +86,15 @@ PyObject *pyfsapfs_file_entry_get_access_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
+PyObject *pyfsapfs_file_entry_get_access_time_as_integer(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_file_entry_get_inode_change_time(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
+PyObject *pyfsapfs_file_entry_get_inode_change_time_as_integer(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
