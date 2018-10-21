@@ -109,6 +109,11 @@ int libfsapfs_inode_get_identifier(
      uint64_t *identifier,
      libcerror_error_t **error );
 
+int libfsapfs_inode_get_parent_identifier(
+     libfsapfs_inode_t *inode,
+     uint64_t *parent_identifier,
+     libcerror_error_t **error );
+
 int libfsapfs_inode_get_creation_time(
      libfsapfs_inode_t *inode,
      int64_t *posix_time,

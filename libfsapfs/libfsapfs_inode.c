@@ -762,6 +762,43 @@ int libfsapfs_inode_get_identifier(
 	return( 1 );
 }
 
+/* Retrieves the parent identifier
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_parent_identifier(
+     libfsapfs_inode_t *inode,
+     uint64_t *parent_identifier,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_parent_identifier";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( parent_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid parent identifier.",
+		 function );
+
+		return( -1 );
+	}
+	*parent_identifier = inode->parent_identifier;
+
+	return( 1 );
+}
+
 /* Retrieves the creation time
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * Returns 1 if successful or -1 on error

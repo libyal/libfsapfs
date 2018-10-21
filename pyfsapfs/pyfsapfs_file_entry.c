@@ -46,6 +46,13 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  "\n"
 	  "Retrieves the identifier." },
 
+	{ "get_parent_identifier",
+	  (PyCFunction) pyfsapfs_file_entry_get_parent_identifier,
+	  METH_NOARGS,
+	  "get_parent_identifier() -> Integer\n"
+	  "\n"
+	  "Retrieves the parent identifier." },
+
 	{ "get_creation_time",
 	  (PyCFunction) pyfsapfs_file_entry_get_creation_time,
 	  METH_NOARGS,
@@ -238,6 +245,12 @@ PyGetSetDef pyfsapfs_file_entry_object_get_set_definitions[] = {
 	  (getter) pyfsapfs_file_entry_get_identifier,
 	  (setter) 0,
 	  "The identifier.",
+	  NULL },
+
+	{ "parent_identifier",
+	  (getter) pyfsapfs_file_entry_get_parent_identifier,
+	  (setter) 0,
+	  "The parent identifier.",
 	  NULL },
 
 	{ "creation_time",
@@ -617,7 +630,59 @@ PyObject *pyfsapfs_file_entry_get_identifier(
 		return( NULL );
 	}
 	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
-	                  (uint64_t) value_64bit );
+	                  value_64bit );
+
+	return( integer_object );
+}
+
+/* Retrieves the parent identifier
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_parent_identifier(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_parent_identifier";
+	uint64_t value_64bit     = 0;
+	int result               = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_parent_identifier(
+	          pyfsapfs_file_entry->file_entry,
+	          &value_64bit,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve parent identifier.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	integer_object = pyfsapfs_integer_unsigned_new_from_64bit(
+	                  value_64bit );
 
 	return( integer_object );
 }

@@ -66,6 +66,10 @@ PyObject *pyfsapfs_file_entry_get_identifier(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
+PyObject *pyfsapfs_file_entry_get_parent_identifier(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_file_entry_get_creation_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );

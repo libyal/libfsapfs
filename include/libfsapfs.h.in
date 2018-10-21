@@ -554,6 +554,16 @@ int libfsapfs_file_entry_get_identifier(
      uint64_t *identifier,
      libfsapfs_error_t **error );
 
+/* Retrieves the parent identifier (or inode number)
+ * This value is retrieved from the inode
+ * Returns 1 if successfulor -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_parent_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint64_t *parent_identifier,
+     libfsapfs_error_t **error );
+
 /* Retrieves the creation date and time
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * This value is retrieved from the inode
