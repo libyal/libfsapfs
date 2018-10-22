@@ -196,18 +196,9 @@ PyObject *pyfsapfs_file_entries_new(
 
 		goto on_error;
 	}
-	if( pyfsapfs_file_entries_init(
-	     sequence_object ) != 0 )
-	{
-		PyErr_Format(
-		 PyExc_MemoryError,
-		 "%s: unable to initialize sequence object.",
-		 function );
-
-		goto on_error;
-	}
 	sequence_object->parent_object     = parent_object;
 	sequence_object->get_item_by_index = get_item_by_index;
+	sequence_object->current_index     = 0;
 	sequence_object->number_of_items   = number_of_items;
 
 	Py_IncRef(
