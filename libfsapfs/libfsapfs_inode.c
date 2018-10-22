@@ -743,11 +743,11 @@ int libfsapfs_inode_read_value_data(
 			}
 			value_data_offset += value_data_size;
 
-			trailing_data_size = value_data_offset % 4;
+			trailing_data_size = value_data_offset % 8;
 
 			if( trailing_data_size > 0 )
 			{
-				trailing_data_size = 4 - trailing_data_size;
+				trailing_data_size = 8 - trailing_data_size;
 
 				if( value_data_offset > ( data_size - trailing_data_size ) )
 				{

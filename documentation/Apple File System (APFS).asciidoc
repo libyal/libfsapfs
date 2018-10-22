@@ -1793,7 +1793,7 @@ See section: <<extended_field_descriptor,Extended field descriptor>>
 |===
 
 [NOTE]
-The extended field values are stored 4-byte aligned in the extended field
+The extended field values are stored 8-byte aligned in the extended field
 value data.
 
 ==== [[extended_field_descriptor]]Extended field descriptor
