@@ -209,6 +209,19 @@ int libfsapfs_file_entry_get_utf16_symbolic_link_target(
      size_t utf16_string_size,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_extended_attributes(
+     libfsapfs_file_entry_t *file_entry,
+     int *number_of_extended_attributes,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_extended_attribute_by_index(
+     libfsapfs_file_entry_t *file_entry,
+     int extended_attribute_index,
+     libfsapfs_extended_attribute_t **extended_attribute,
+     libcerror_error_t **error );
+
 int libfsapfs_internal_file_entry_get_directory_entries(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error );

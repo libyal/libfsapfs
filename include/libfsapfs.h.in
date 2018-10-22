@@ -738,6 +738,16 @@ int libfsapfs_file_entry_get_number_of_extended_attributes(
      int *number_of_extended_attributes,
      libfsapfs_error_t **error );
 
+/* Retrieves the extended attribute for the specific index
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_extended_attribute_by_index(
+     libfsapfs_file_entry_t *file_entry,
+     int extended_attribute_index,
+     libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_error_t **error );
+
 /* Retrieves the number of sub file entries
  * Returns 1 if successful or -1 on error
  */

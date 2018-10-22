@@ -968,23 +968,26 @@ int info_handle_file_entry_value_fprint(
      const system_character_t *path,
      libcerror_error_t **error )
 {
-	char file_mode_string[ 11 ]              = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
+	char file_mode_string[ 11 ]                        = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
 
-	system_character_t *file_entry_name      = NULL;
-	system_character_t *symbolic_link_target = NULL;
-	static char *function                    = "info_handle_file_entry_value_fprint";
-	size_t file_entry_name_size              = 0;
-	size_t symbolic_link_target_size         = 0;
-	uint64_t identifier                      = 0;
-	int64_t access_time                      = 0;
-	int64_t creation_time                    = 0;
-	int64_t inode_change_time                = 0;
-	int64_t modification_time                = 0;
-	uint32_t group_identifier                = 0;
-	uint32_t owner_identifier                = 0;
-	uint16_t file_mode                       = 0;
-	int number_of_extended_attributes        = 0;
-	int result                               = 0;
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	system_character_t *file_entry_name                = NULL;
+	system_character_t *symbolic_link_target           = NULL;
+	static char *function                              = "info_handle_file_entry_value_fprint";
+	size64_t size                                      = 0;
+	size_t file_entry_name_size                        = 0;
+	size_t symbolic_link_target_size                   = 0;
+	uint64_t identifier                                = 0;
+	int64_t access_time                                = 0;
+	int64_t creation_time                              = 0;
+	int64_t inode_change_time                          = 0;
+	int64_t modification_time                          = 0;
+	uint32_t group_identifier                          = 0;
+	uint32_t owner_identifier                          = 0;
+	uint16_t file_mode                                 = 0;
+	int extended_attribute_index                       = 0;
+	int number_of_extended_attributes                  = 0;
+	int result                                         = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1316,6 +1319,20 @@ int info_handle_file_entry_value_fprint(
 
 		goto on_error;
 	}
+	if( libfsapfs_file_entry_get_size(
+	     file_entry,
+	     &size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve size.",
+		 function );
+
+		goto on_error;
+	}
 	if( info_handle->bodyfile_stream != NULL )
 	{
 		/* Colums in a Sleuthkit 3.x and later bodyfile
@@ -1341,11 +1358,12 @@ int info_handle_file_entry_value_fprint(
 		}
 		fprintf(
 		 info_handle->bodyfile_stream,
-		 "|%" PRIu64 "|%s|%" PRIu32 "|%" PRIu32 "|%f|%f|%f|%f\n",
+		 "|%" PRIu64 "|%s|%" PRIu32 "|%" PRIu32 "|%" PRIu64 "|%.9f|%.9f|%.9f|%.9f\n",
 		 identifier,
 		 file_mode_string,
 		 owner_identifier,
 		 group_identifier,
+		 size,
 		 (double) access_time / 1000000000,
 		 (double) modification_time / 1000000000,
 		 (double) inode_change_time / 1000000000,
@@ -1376,6 +1394,11 @@ int info_handle_file_entry_value_fprint(
 			 "%" PRIs_SYSTEM "\n",
 			 file_entry_name );
 		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tSize\t\t\t: %" PRIu64 "\n",
+		 size );
+
 		if( info_handle_posix_time_value_fprint(
 		     info_handle,
 		     "\tCreation time\t\t",
@@ -1464,6 +1487,43 @@ int info_handle_file_entry_value_fprint(
 			fprintf(
 			 info_handle->notify_stream,
 			 "\tExtended attributes:\n" );
+
+			for( extended_attribute_index = 0;
+			     extended_attribute_index < number_of_extended_attributes;
+			     extended_attribute_index++ )
+			{
+				if( libfsapfs_file_entry_get_extended_attribute_by_index(
+				     file_entry,
+				     extended_attribute_index,
+				     &extended_attribute,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+					 "%s: unable to retrieve extended attribute: %d.",
+					 function,
+					 extended_attribute_index );
+
+					goto on_error;
+				}
+/* TODO print attribute name */
+				if( libfsapfs_extended_attribute_free(
+				     &extended_attribute,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+					 "%s: unable to free extended attribute: %d.",
+					 function,
+					 extended_attribute_index );
+
+					goto on_error;
+				}
+			}
 		}
 	}
 	if( symbolic_link_target != NULL )
@@ -1483,6 +1543,12 @@ int info_handle_file_entry_value_fprint(
 	return( 1 );
 
 on_error:
+	if( extended_attribute != NULL )
+	{
+		libfsapfs_extended_attribute_free(
+		 &extended_attribute,
+		 NULL );
+	}
 	if( symbolic_link_target != NULL )
 	{
 		memory_free(

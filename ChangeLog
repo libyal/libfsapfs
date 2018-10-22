@@ -1,4 +1,5 @@
 TODO
+* make file data stream size work
 * file entry/inode info
 ** API expose external attributes
 ** add thread lock to extended attribute
