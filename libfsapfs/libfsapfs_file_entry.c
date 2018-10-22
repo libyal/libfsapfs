@@ -2917,6 +2917,7 @@ int libfsapfs_internal_file_entry_get_data_stream(
 	libfsapfs_data_stream_handle_t *data_stream_handle = NULL;
 	libfsapfs_file_extent_t *file_extent               = NULL;
 	static char *function                              = "libfsapfs_internal_file_entry_get_data_stream";
+	uint64_t data_stream_size                          = 0;
 	int extent_index                                   = 0;
 	int number_of_extents                              = 0;
 	int segment_index                                  = 0;
@@ -3072,6 +3073,34 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 			goto on_error;
 		}
+	}
+	if( libfsapfs_inode_get_data_stream_size(
+	     internal_file_entry->inode,
+	     &data_stream_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve data stream size.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdata_stream_set_mapped_size(
+	     internal_file_entry->data_stream,
+	     (size64_t) data_stream_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set mapped size.",
+		 function );
+
+		goto on_error;
 	}
 	return( 1 );
 

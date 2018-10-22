@@ -366,11 +366,14 @@ int libfsapfs_directory_record_read_value_data(
      libcerror_error_t **error )
 {
 	static char *function              = "libfsapfs_directory_record_read_value_data";
+	const uint8_t *value_data          = NULL;
 	size_t data_offset                 = 0;
+	size_t trailing_data_size          = 0;
 	size_t value_data_offset           = 0;
 	size_t value_data_size             = 0;
 	uint16_t extended_field_index      = 0;
 	uint16_t number_of_extended_fields = 0;
+	uint8_t extended_field_flags       = 0;
 	uint8_t extended_field_type        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -426,6 +429,10 @@ int libfsapfs_directory_record_read_value_data(
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_file_system_btree_value_directory_record_t *) data )->file_system_identifier,
 	 directory_record->identifier );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_file_system_btree_value_directory_record_t *) data )->added_time,
+	 directory_record->added_time );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -512,7 +519,7 @@ int libfsapfs_directory_record_read_value_data(
 		     extended_field_index < number_of_extended_fields;
 		     extended_field_index++ )
 		{
-			if( data_offset > ( data_size - 2 ) )
+			if( data_offset > ( data_size - 4 ) )
 			{
 				libcerror_error_set(
 				 error,
@@ -523,7 +530,12 @@ int libfsapfs_directory_record_read_value_data(
 
 				return( -1 );
 			}
-			extended_field_type = data[ data_offset ];
+			extended_field_type  = data[ data_offset ];
+			extended_field_flags = data[ data_offset + 1 ];
+
+			byte_stream_copy_to_uint16_little_endian(
+			 &( data[ data_offset + 2 ] ),
+			 value_data_size );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libcnotify_verbose != 0 )
@@ -540,7 +552,17 @@ int libfsapfs_directory_record_read_value_data(
 				 "%s: extended field: %" PRIu16 " flags\t: 0x%04" PRIx16 "\n",
 				 function,
 				 extended_field_index,
-				 data[ data_offset + 1 ] );
+				 extended_field_flags );
+				libfsapfs_debug_print_extended_field_flags(
+				 extended_field_flags );
+				libcnotify_printf(
+				 "\n" );
+
+				libcnotify_printf(
+				 "%s: extended field: %" PRIu16 " value data size\t: %" PRIu16 "\n",
+				 function,
+				 extended_field_index,
+				 value_data_size );
 			}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
@@ -557,12 +579,35 @@ int libfsapfs_directory_record_read_value_data(
 
 				return( -1 );
 			}
-			value_data_size = 0;
+			if( value_data_size > ( data_size - value_data_offset ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid value data size value out of bounds.",
+				 function );
 
+				return( -1 );
+			}
+			value_data = &( data[ value_data_offset ] );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "%s: extended field: %" PRIu16 " value data:\n",
+				 function,
+				 extended_field_index );
+				libcnotify_print_data(
+				 value_data,
+				 value_data_size,
+				 0 );
+			}
+#endif
 			switch( extended_field_type )
 			{
 				case 1:
-					value_data_size = 8;
 					break;
 
 				default:
@@ -576,31 +621,33 @@ int libfsapfs_directory_record_read_value_data(
 
 					return( -1 );
 			}
-			if( value_data_size > ( data_size - value_data_offset ) )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: invalid value data size value out of bounds.",
-				 function );
-
-				return( -1 );
-			}
-#if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " value data:\n",
-				 function,
-				 extended_field_index );
-				libcnotify_print_data(
-				 &( data[ value_data_offset ] ),
-				 value_data_size,
-				 0 );
-			}
-#endif
 			value_data_offset += value_data_size;
+
+			trailing_data_size = value_data_offset % 4;
+
+			if( trailing_data_size > 0 )
+			{
+				trailing_data_size = 4 - trailing_data_size;
+
+				if( value_data_offset > ( data_size - trailing_data_size ) )
+				{
+					trailing_data_size = data_size - value_data_offset;
+				}
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "%s: extended field: %" PRIu16 " trailing data:\n",
+					 function,
+					 extended_field_index );
+					libcnotify_print_data(
+					 &( data[ value_data_offset ] ),
+					 trailing_data_size,
+					 0 );
+				}
+#endif
+				value_data_offset += trailing_data_size;
+			}
 		}
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
@@ -932,5 +979,43 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
 		}
 	}
 	return( result );
+}
+
+/* Retrieves the added time
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_directory_record_get_added_time(
+     libfsapfs_directory_record_t *directory_record,
+     int64_t *posix_time,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_directory_record_get_added_time";
+
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( posix_time == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid POSIX time.",
+		 function );
+
+		return( -1 );
+	}
+	*posix_time = (int64_t) directory_record->added_time;
+
+	return( 1 );
 }
 

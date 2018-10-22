@@ -50,6 +50,10 @@ struct libfsapfs_directory_record
 	/* Name hash
 	 */
 	uint32_t name_hash;
+
+	/* Added time
+	 */
+	uint64_t added_time;
 };
 
 int libfsapfs_directory_record_initialize(
@@ -111,6 +115,11 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      uint32_t name_hash,
+     libcerror_error_t **error );
+
+int libfsapfs_directory_record_get_added_time(
+     libfsapfs_directory_record_t *directory_record,
+     int64_t *posix_time,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

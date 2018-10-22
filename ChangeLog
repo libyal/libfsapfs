@@ -1,9 +1,8 @@
 TODO
 * make file data stream size work
 * file entry/inode info
-** API expose external attributes
 ** add thread lock to extended attribute
-** print extended attributes
+** print extended attribute values
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * Add container data handle? Add decryption support and use it to read container key bag?
 * rename volume data handle to container data handle?
@@ -16,6 +15,7 @@ library:
 * change container read bootstap as advised in documentation
 ** validate checksum
 ** read backup container superblocks
+* expose directory entry added time
 * refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 * Create libfsapfs_container_superblock_get_identifier
 * Create libfsapfs_volume_superblock_get_identifier

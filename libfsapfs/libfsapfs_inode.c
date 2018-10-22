@@ -229,11 +229,14 @@ int libfsapfs_inode_read_value_data(
      libcerror_error_t **error )
 {
 	static char *function              = "libfsapfs_inode_read_value_data";
+	const uint8_t *value_data          = NULL;
 	size_t data_offset                 = 0;
+	size_t trailing_data_size          = 0;
 	size_t value_data_offset           = 0;
 	size_t value_data_size             = 0;
 	uint16_t extended_field_index      = 0;
 	uint16_t number_of_extended_fields = 0;
+	uint8_t extended_field_flags       = 0;
 	uint8_t extended_field_type        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -545,7 +548,7 @@ int libfsapfs_inode_read_value_data(
 		     extended_field_index < number_of_extended_fields;
 		     extended_field_index++ )
 		{
-			if( data_offset > ( data_size - 2 ) )
+			if( data_offset > ( data_size - 4 ) )
 			{
 				libcerror_error_set(
 				 error,
@@ -556,7 +559,12 @@ int libfsapfs_inode_read_value_data(
 
 				return( -1 );
 			}
-			extended_field_type = data[ data_offset ];
+			extended_field_type  = data[ data_offset ];
+			extended_field_flags = data[ data_offset + 1 ];
+
+			byte_stream_copy_to_uint16_little_endian(
+			 &( data[ data_offset + 2 ] ),
+			 value_data_size );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libcnotify_verbose != 0 )
@@ -570,10 +578,20 @@ int libfsapfs_inode_read_value_data(
 				  extended_field_type ) );
 
 				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " flags\t\t: 0x%04" PRIx16 "\n",
+				 "%s: extended field: %" PRIu16 " flags\t\t: 0x%02" PRIx8 "\n",
 				 function,
 				 extended_field_index,
-				 data[ data_offset + 1 ] );
+				 extended_field_flags );
+				libfsapfs_debug_print_extended_field_flags(
+				 extended_field_flags );
+				libcnotify_printf(
+				 "\n" );
+
+				libcnotify_printf(
+				 "%s: extended field: %" PRIu16 " value data size\t: %" PRIu16 "\n",
+				 function,
+				 extended_field_index,
+				 value_data_size );
 			}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
@@ -590,45 +608,126 @@ int libfsapfs_inode_read_value_data(
 
 				return( -1 );
 			}
-			value_data_size = 0;
+			if( value_data_size > ( data_size - value_data_offset ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid value data size value out of bounds.",
+				 function );
 
+				return( -1 );
+			}
+			value_data = &( data[ value_data_offset ] );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "%s: extended field: %" PRIu16 " value data:\n",
+				 function,
+				 extended_field_index );
+				libcnotify_print_data(
+				 value_data,
+				 value_data_size,
+				 0 );
+			}
+#endif
 			switch( extended_field_type )
 			{
 				case 1:
 				case 2:
-				case 5:
-				case 13:
-					value_data_size = 8;
-					break;
-
 				case 3:
+				case 5:
 				case 7:
+				case 11:
+				case 13:
 				case 14:
-					value_data_size = 4;
 					break;
 
 				case 4:
-					/* The size of a name value is variable */
-					for( value_data_size = value_data_offset;
-					     value_data_size < data_size;
-					     value_data_size++ )
-					{
-						if( data[ value_data_size ] == 0 )
-						{
-							value_data_size++;
+					inode->name = (uint8_t *) memory_allocate(
+					                           sizeof( uint8_t ) * value_data_size );
 
-							break;
-						}
+					if( inode->name == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+						 "%s: unable to create name.",
+						 function );
+
+						goto on_error;
 					}
-					value_data_size -= value_data_offset;
+					inode->name_size = value_data_size;
+
+					if( memory_copy(
+					     inode->name,
+					     value_data,
+					     value_data_size ) == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+						 "%s: unable to copy name.",
+						 function );
+
+						goto on_error;
+					}
 					break;
 
 				case 8:
-					value_data_size = 40;
-					break;
+					byte_stream_copy_to_uint64_little_endian(
+					 ( (fsapfs_file_system_data_stream_attribute_t *) value_data )->used_size,
+					 inode->data_stream_size );
 
-				case 11:
-					value_data_size = 16;
+#if defined( HAVE_DEBUG_OUTPUT )
+					if( libcnotify_verbose != 0 )
+					{
+						libcnotify_printf(
+						 "%s: used size\t\t\t\t: %" PRIu64 "\n",
+						 function,
+						 inode->data_stream_size );
+
+						byte_stream_copy_to_uint64_little_endian(
+						 ( (fsapfs_file_system_data_stream_attribute_t *) value_data )->allocated_size,
+						 value_64bit );
+						libcnotify_printf(
+						 "%s: allocated size\t\t\t\t: %" PRIu64 "\n",
+						 function,
+						 value_64bit );
+
+						byte_stream_copy_to_uint64_little_endian(
+						 ( (fsapfs_file_system_data_stream_attribute_t *) value_data )->encryption_identifier,
+						 value_64bit );
+						libcnotify_printf(
+						 "%s: encryption identifier\t\t\t: %" PRIu64 "\n",
+						 function,
+						 value_64bit );
+
+						byte_stream_copy_to_uint64_little_endian(
+						 ( (fsapfs_file_system_data_stream_attribute_t *) value_data )->number_of_bytes_written,
+						 value_64bit );
+						libcnotify_printf(
+						 "%s: number of bytes written\t\t: %" PRIu64 "\n",
+						 function,
+						 value_64bit );
+
+						byte_stream_copy_to_uint64_little_endian(
+						 ( (fsapfs_file_system_data_stream_attribute_t *) value_data )->number_of_bytes_read,
+						 value_64bit );
+						libcnotify_printf(
+						 "%s: number of bytes read\t\t\t: %" PRIu64 "\n",
+						 function,
+						 value_64bit );
+
+						libcnotify_printf(
+						 "\n" );
+					}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 					break;
 
 				default:
@@ -642,64 +741,33 @@ int libfsapfs_inode_read_value_data(
 
 					return( -1 );
 			}
-			if( value_data_size > ( data_size - value_data_offset ) )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-				 "%s: invalid value data size value out of bounds.",
-				 function );
-
-				return( -1 );
-			}
-#if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " value data:\n",
-				 function,
-				 extended_field_index );
-				libcnotify_print_data(
-				 &( data[ value_data_offset ] ),
-				 value_data_size,
-				 0 );
-			}
-#endif
-			if( extended_field_type == 4 )
-			{
-				inode->name = (uint8_t *) memory_allocate(
-				                           sizeof( uint8_t ) * value_data_size );
-
-				if( inode->name == NULL )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_MEMORY,
-					 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-					 "%s: unable to create name.",
-					 function );
-
-					goto on_error;
-				}
-				inode->name_size = value_data_size;
-
-				if( memory_copy(
-				     inode->name,
-				     &( data[ value_data_offset ] ),
-				     value_data_size ) == NULL )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_MEMORY,
-					 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-					 "%s: unable to copy name.",
-					 function );
-
-					goto on_error;
-				}
-			}
 			value_data_offset += value_data_size;
+
+			trailing_data_size = value_data_offset % 4;
+
+			if( trailing_data_size > 0 )
+			{
+				trailing_data_size = 4 - trailing_data_size;
+
+				if( value_data_offset > ( data_size - trailing_data_size ) )
+				{
+					trailing_data_size = data_size - value_data_offset;
+				}
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "%s: extended field: %" PRIu16 " trailing data:\n",
+					 function,
+					 extended_field_index );
+					libcnotify_print_data(
+					 &( data[ value_data_offset ] ),
+					 trailing_data_size,
+					 0 );
+				}
+#endif
+				value_data_offset += trailing_data_size;
+			}
 		}
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1062,43 +1130,6 @@ int libfsapfs_inode_get_file_mode(
 	return( 1 );
 }
 
-/* Retrieves the data stream identifier
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_inode_get_data_stream_identifier(
-     libfsapfs_inode_t *inode,
-     uint64_t *data_stream_identifier,
-     libcerror_error_t **error )
-{
-	static char *function = "libfsapfs_inode_get_data_stream_identifier";
-
-	if( inode == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid inode.",
-		 function );
-
-		return( -1 );
-	}
-	if( data_stream_identifier == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream identifier.",
-		 function );
-
-		return( -1 );
-	}
-	*data_stream_identifier = inode->data_stream_identifier;
-
-	return( 1 );
-}
-
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error
@@ -1260,6 +1291,80 @@ int libfsapfs_inode_get_utf16_name(
 
 		return( -1 );
 	}
+	return( 1 );
+}
+
+/* Retrieves the data stream identifier
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_data_stream_identifier(
+     libfsapfs_inode_t *inode,
+     uint64_t *data_stream_identifier,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_data_stream_identifier";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_stream_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid data stream identifier.",
+		 function );
+
+		return( -1 );
+	}
+	*data_stream_identifier = inode->data_stream_identifier;
+
+	return( 1 );
+}
+
+/* Retrieves the data stream size
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_data_stream_size(
+     libfsapfs_inode_t *inode,
+     uint64_t *data_stream_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_data_stream_size";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_stream_size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid data stream size.",
+		 function );
+
+		return( -1 );
+	}
+	*data_stream_size = inode->data_stream_size;
+
 	return( 1 );
 }
 

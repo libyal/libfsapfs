@@ -43,10 +43,6 @@ struct libfsapfs_inode
 	 */
 	uint64_t parent_identifier;
 
-	/* Data stream identifier
-	 */
-	uint64_t data_stream_identifier;
-
 	/* Modification time
 	 */
 	uint64_t modification_time;
@@ -82,6 +78,14 @@ struct libfsapfs_inode
 	/* Name
 	 */
 	uint8_t *name;
+
+	/* Data stream identifier
+	 */
+	uint64_t data_stream_identifier;
+
+	/* Data stream size
+	 */
+	uint64_t data_stream_size;
 };
 
 int libfsapfs_inode_initialize(
@@ -149,11 +153,6 @@ int libfsapfs_inode_get_file_mode(
      uint16_t *file_mode,
      libcerror_error_t **error );
 
-int libfsapfs_inode_get_data_stream_identifier(
-     libfsapfs_inode_t *inode,
-     uint64_t *data_stream_identifier,
-     libcerror_error_t **error );
-
 int libfsapfs_inode_get_utf8_name_size(
      libfsapfs_inode_t *inode,
      size_t *utf8_string_size,
@@ -174,6 +173,16 @@ int libfsapfs_inode_get_utf16_name(
      libfsapfs_inode_t *inode,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_data_stream_identifier(
+     libfsapfs_inode_t *inode,
+     uint64_t *data_stream_identifier,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_data_stream_size(
+     libfsapfs_inode_t *inode,
+     uint64_t *data_stream_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

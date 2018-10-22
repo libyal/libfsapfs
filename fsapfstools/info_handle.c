@@ -971,10 +971,12 @@ int info_handle_file_entry_value_fprint(
 	char file_mode_string[ 11 ]                        = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
 
 	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	system_character_t *extended_attribute_name        = NULL;
 	system_character_t *file_entry_name                = NULL;
 	system_character_t *symbolic_link_target           = NULL;
 	static char *function                              = "info_handle_file_entry_value_fprint";
 	size64_t size                                      = 0;
+	size_t extended_attribute_name_size                = 0;
 	size_t file_entry_name_size                        = 0;
 	size_t symbolic_link_target_size                   = 0;
 	uint64_t identifier                                = 0;
@@ -1508,7 +1510,88 @@ int info_handle_file_entry_value_fprint(
 
 					goto on_error;
 				}
-/* TODO print attribute name */
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+				result = libfsapfs_extended_attribute_get_utf16_name_size(
+				          extended_attribute,
+				          &extended_attribute_name_size,
+				          error );
+#else
+				result = libfsapfs_extended_attribute_get_utf8_name_size(
+				          extended_attribute,
+				          &extended_attribute_name_size,
+				          error );
+#endif
+				if( result == -1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+					 "%s: unable to retrieve extended attribute name string size.",
+					 function );
+
+					goto on_error;
+				}
+				fprintf(
+				 info_handle->notify_stream,
+				 "\t\tAttribute: %d\t: ",
+				 extended_attribute_index + 1 );
+
+				if( ( result == 1 )
+				 && ( extended_attribute_name_size > 0 ) )
+				{
+					extended_attribute_name = system_string_allocate(
+					                           extended_attribute_name_size );
+
+					if( extended_attribute_name == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+						 "%s: unable to create extended attribute name string.",
+						 function );
+
+						goto on_error;
+					}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+					result = libfsapfs_extended_attribute_get_utf16_name(
+					          extended_attribute,
+					          (uint16_t *) extended_attribute_name,
+					          extended_attribute_name_size,
+					          error );
+#else
+					result = libfsapfs_extended_attribute_get_utf8_name(
+					          extended_attribute,
+					          (uint8_t *) extended_attribute_name,
+					          extended_attribute_name_size,
+					          error );
+#endif
+					if( result != 1 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+						 "%s: unable to retrieve extended attribute name string.",
+						 function );
+
+						goto on_error;
+					}
+					fprintf(
+					 info_handle->notify_stream,
+					 "%" PRIs_SYSTEM "",
+					 extended_attribute_name );
+
+					memory_free(
+					 extended_attribute_name );
+
+					extended_attribute_name = NULL;
+				}
+				fprintf(
+				 info_handle->notify_stream,
+				 "\n" );
+
 				if( libfsapfs_extended_attribute_free(
 				     &extended_attribute,
 				     error ) != 1 )
@@ -1543,6 +1626,11 @@ int info_handle_file_entry_value_fprint(
 	return( 1 );
 
 on_error:
+	if( extended_attribute_name != NULL )
+	{
+		memory_free(
+		 extended_attribute_name );
+	}
 	if( extended_attribute != NULL )
 	{
 		libfsapfs_extended_attribute_free(
@@ -2703,7 +2791,7 @@ int info_handle_volume_fprint(
 	fprintf(
 	 info_handle->notify_stream,
 	 "\nVolume: %d information:\n",
-	 volume_index );
+	 volume_index + 1 );
 
 	if( libfsapfs_volume_get_identifier(
 	     volume,

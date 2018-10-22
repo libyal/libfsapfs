@@ -180,6 +180,53 @@ void libfsapfs_debug_print_directory_entry_flags(
 	}
 }
 
+/* Prints the extended field flags
+ */
+void libfsapfs_debug_print_extended_field_flags(
+      uint8_t extended_field_flags )
+{
+	if( ( extended_field_flags & 0x01 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_DATA_DEPENDENT)\n" );
+	}
+	if( ( extended_field_flags & 0x02 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_DO_NOT_COPY)\n" );
+	}
+	if( ( extended_field_flags & 0x04 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_RESERVED_4)\n" );
+	}
+	if( ( extended_field_flags & 0x08 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_CHILDREN_INHERIT)\n" );
+	}
+	if( ( extended_field_flags & 0x10 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_USER_FIELD)\n" );
+	}
+	if( ( extended_field_flags & 0x20 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_SYSTEM_FIELD)\n" );
+	}
+	if( ( extended_field_flags & 0x40 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_RESERVED_40)\n" );
+	}
+	if( ( extended_field_flags & 0x80 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XF_RESERVED_80)\n" );
+	}
+}
+
 /* Prints the inode flags
  */
 void libfsapfs_debug_print_inode_flags(

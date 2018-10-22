@@ -290,6 +290,36 @@ struct fsapfs_file_system_btree_value_inode
 	 */
 };
 
+typedef struct fsapfs_file_system_data_stream_attribute fsapfs_file_system_data_stream_attribute_t;
+
+struct fsapfs_file_system_data_stream_attribute
+{
+	/* The used size
+	 * Consists of 8 bytes
+	 */
+	uint8_t used_size[ 8 ];
+
+	/* The allocated size
+	 * Consists of 8 bytes
+	 */
+	uint8_t allocated_size[ 8 ];
+
+	/* The encryption identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t encryption_identifier[ 8 ];
+
+	/* The number of bytes written
+	 * Consists of 8 bytes
+	 */
+	uint8_t number_of_bytes_written[ 8 ];
+
+	/* The number of bytes read
+	 * Consists of 8 bytes
+	 */
+	uint8_t number_of_bytes_read[ 8 ];
+};
+
 #if defined( __cplusplus )
 }
 #endif

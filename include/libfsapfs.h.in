@@ -871,6 +871,48 @@ int libfsapfs_extended_attribute_free(
      libfsapfs_extended_attribute_t **extended_attribute,
      libfsapfs_error_t **error );
 
+/* Retrieves the size of the UTF-8 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_utf8_name_size(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     size_t *utf8_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-8 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_utf8_name(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-16 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_utf16_name_size(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     size_t *utf16_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-16 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_utf16_name(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libfsapfs_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

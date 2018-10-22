@@ -1557,8 +1557,8 @@ consists of:
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Object identifier (xattr_obj_id)
-| 8 | 48 | | Data stream descriptor +
-See section: <<data_stream_descriptor,data stream descriptor>>
+| 8 | 48 | | Data stream attribute +
+See section: <<data_stream_attribute,data stream attribute>>
 |===
 
 [yellow-background]*TODO: complete this section.*
@@ -1792,6 +1792,10 @@ See section: <<extended_field_descriptor,Extended field descriptor>>
 | ... | ... | | Extended field value data
 |===
 
+[NOTE]
+The extended field values are stored 4-byte aligned in the extended field
+value data.
+
 ==== [[extended_field_descriptor]]Extended field descriptor
 
 An extended field descriptor (x_field_t) is 4 bytes of size and consists of:
@@ -1837,7 +1841,7 @@ The extended field data contains a 64-bit integer value
 | 7 | INO_EXT_TYPE_FINDER_INFO | Finder information +
 The extended field data contains a 32-bit integer value
 | 8 | INO_EXT_TYPE_DSTREAM | Data stream +
-The extended field data contains a <<data_stream_descriptor,data stream descriptor>>
+The extended field data contains a <<data_stream_attribute,data stream attribute>>
 | 9 | INO_EXT_TYPE_RESERVED_9 | [yellow-background]*Unknown (Reserved)*
 | 10 | INO_EXT_TYPE_DIR_STATS_KEY | Direcotry statistics +
 [yellow-background]*Unknown if this contains the object identifier of the directory statisticts or a j_dir_stats_val_t structure*
@@ -1855,26 +1859,26 @@ The extended field data contains a 32-bit integer value
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x01 | XF_DATA_DEPENDENT | [yellow-background]*Unknown*
+| 0x01 | XF_DATA_DEPENDENT | Contents of the extended field is dependent on the data stream (file contents)
 | 0x02 | XF_DO_NOT_COPY | Do not duplicate the extended field when copied
 | 0x04 | XF_RESERVED_4 | [yellow-background]*Unknown (Reserved)*
-| 0x08 | XF_CHILDREN_INHERIT | [yellow-background]*Unknown*
-| 0x10 | XF_USER_FIELD | [yellow-background]*Unknown*
-| 0x20 | XF_SYSTEM_FIELD | [yellow-background]*Unknown*
-| 0x40 | XF_RESERVED_40 | [yellow-background]*Unknown*
-| 0x80 | XF_RESERVED_80 | [yellow-background]*Unknown*
+| 0x08 | XF_CHILDREN_INHERIT | Newly created sub directory entries (children) inherit the extended field
+| 0x10 | XF_USER_FIELD | Extended field was added by an user-space program
+| 0x20 | XF_SYSTEM_FIELD | Extended field was added by the system (kernel)
+| 0x40 | XF_RESERVED_40 | [yellow-background]*Unknown (Reserved)*
+| 0x80 | XF_RESERVED_80 | [yellow-background]*Unknown (Reserved)*
 |===
 
-=== [[data_stream_descriptor]]Data stream descriptor
+=== [[data_stream_attribute]]Data stream attribute
 
-The data stream descriptor (j_dstream_t) is 40 bytes of size and constist of:
+The data stream attribute (j_dstream_t) is 40 bytes of size and consist of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Used size (size)
 | 8 | 8 | | Allocated size (alloced_size)
-| 16 | 8 | | Default encryption identifier (default_crypto_id)
+| 16 | 8 | | (Default) encryption identifier (default_crypto_id)
 | 24 | 8 | | Total number of bytes written to data stream (total_bytes_written)
 | 32 | 8 | | Total number of bytes read from data stream (total_bytes_written)
 |===
