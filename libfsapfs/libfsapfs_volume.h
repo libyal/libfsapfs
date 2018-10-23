@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_INTERNAL_VOLUME_H )
-#define _LIBFSAPFS_INTERNAL_VOLUME_H
+#if !defined( _LIBFSAPFS_VOLUME_H )
+#define _LIBFSAPFS_VOLUME_H
 
 #include <common.h>
 #include <types.h>
@@ -116,13 +116,25 @@ struct libfsapfs_internal_volume
 	 */
 	uint8_t *user_password;
 
-        /* User password size
+        /* The user password size
 	 */
 	size_t user_password_size;
 
 	/* Value to indicate the user password is set
 	 */
 	uint8_t user_password_is_set;
+
+	/* The recovery password
+	 */
+	uint8_t *recovery_password;
+
+        /* The recovery password size
+	 */
+	size_t recovery_password_size;
+
+	/* Value to indicate the recovery password is set
+	 */
+	uint8_t recovery_password_is_set;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -247,6 +259,20 @@ int libfsapfs_volume_set_utf16_password(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf8_recovery_password(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf16_recovery_password(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_next_file_entry_identifier(
      libfsapfs_volume_t *volume,
      uint64_t *identifier,
@@ -289,5 +315,5 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_INTERNAL_VOLUME_H ) */
+#endif /* !defined( _LIBFSAPFS_VOLUME_H ) */
 

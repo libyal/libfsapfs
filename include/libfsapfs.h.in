@@ -482,6 +482,28 @@ int libfsapfs_volume_set_utf16_password(
      size_t utf16_string_length,
      libfsapfs_error_t **error );
 
+/* Sets an UTF-8 formatted recovery password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf8_recovery_password(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_error_t **error );
+
+/* Sets an UTF-16 formatted recovery password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_utf16_recovery_password(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_error_t **error );
+
 /* Retrieves the next file entry identifier
  * Returns 1 if successful or -1 on error
  */

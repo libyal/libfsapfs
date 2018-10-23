@@ -1988,16 +1988,6 @@ find /Volumes/SingleVolume
 | URL: | https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf
 |===
 
-`[HANSEN17]`
-
-[cols="1,5",options="header"]
-|===
-| Title: | Decoding the APFS file system
-| Author(s): | Hansen, Kurt & Toolan, Fergus
-| Date: | September 2017
-| URL: | https://www.researchgate.net/publication/319573636_Decoding_the_APFS_file_system
-|===
-
 `[GANDER17]`
 
 [cols="1,5",options="header"]
@@ -2019,7 +2009,38 @@ find /Volumes/SingleVolume
 https://bitbucket.org/garethl/xtssharp/src/0e6a81a823e9/docs/1619-2007-NIST-Submission.pdf
 |===
 
+`[HANSEN17]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | Decoding the APFS file system
+| Author(s): | Hansen, Kurt & Toolan, Fergus
+| Date: | September 2017
+| URL: | https://www.researchgate.net/publication/319573636_Decoding_the_APFS_file_system
+|===
+
+`[KODIS92]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | Fletcher's checksum - Error correction at a fraction of the cost
+| Author(s): | John Kodis
+| Date: | May 1992
+| URL: | http://collaboration.cmc.ec.gc.ca/science/rpn/biblio/ddj/Website/articles/DDJ/1992/9205/9205b/9205b.htm
+|===
+
+`[PLUM17]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | APFS filesystem format
+| Author(s): | Jonas Plum
+| Date: | April 2017
+| URL: | https://blog.cugu.eu/post/apfs/
+|===
+
 `[RFC2898]`
+
 [cols="1,5",options="header"]
 |===
 | Title: | PKCS #5: Password-Based Cryptography Specification
@@ -2030,6 +2051,7 @@ https://bitbucket.org/garethl/xtssharp/src/0e6a81a823e9/docs/1619-2007-NIST-Subm
 |===
 
 `[RFC3394]`
+
 [cols="1,5",options="header"]
 |===
 | Title: | Advanced Encryption Standard (AES) Key Wrap Algorithm

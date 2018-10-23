@@ -339,6 +339,28 @@ int info_handle_free(
 			}
 			( *info_handle )->bodyfile_stream = NULL;
 		}
+		if( ( *info_handle )->recovery_password != NULL )
+		{
+			if( memory_set(
+			     ( *info_handle )->recovery_password,
+			     0,
+			     ( *info_handle )->recovery_password_size ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+				 "%s: unable to clear recovery password.",
+				 function );
+
+				result = -1;
+			}
+			memory_free(
+			 ( *info_handle )->recovery_password );
+
+			( *info_handle )->recovery_password      = NULL;
+			( *info_handle )->recovery_password_size = 0;
+		}
 		if( ( *info_handle )->user_password != NULL )
 		{
 			if( memory_set(
@@ -471,6 +493,64 @@ int info_handle_set_bodyfile(
 	return( 1 );
 }
 
+/* Sets the file system index
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_file_system_index(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_set_file_system_index";
+	size_t string_length  = 0;
+	uint64_t value_64bit  = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = system_string_length(
+	                 string );
+
+	if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
+	     string,
+	     string_length + 1,
+	     &value_64bit,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy string to 64-bit decimal.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( value_64bit == 0 )
+	 || ( value_64bit > 100 ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file system index value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	info_handle->file_system_index = (int) value_64bit;
+
+	return( 1 );
+}
+
 /* Sets the password
  * Returns 1 if successful or -1 on error
  */
@@ -559,6 +639,98 @@ on_error:
 		info_handle->user_password = NULL;
 	}
 	info_handle->user_password_size = 0;
+
+	return( -1 );
+}
+
+/* Sets the recovery password
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_set_recovery_password(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_set_recovery_password";
+	size_t string_length  = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( info_handle->recovery_password != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid info handle - recovery password value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( string == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid string.",
+		 function );
+
+		return( -1 );
+	}
+	string_length = system_string_length(
+	                 string );
+
+	info_handle->recovery_password_size = string_length + 1;
+
+	info_handle->recovery_password = system_string_allocate(
+	                                  info_handle->recovery_password_size );
+
+	if( info_handle->recovery_password == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create recovery password.",
+		 function );
+
+		goto on_error;
+	}
+	if( system_string_copy(
+	     info_handle->recovery_password,
+	     string,
+	     info_handle->recovery_password_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy recovery password.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( info_handle->recovery_password != NULL )
+	{
+		memory_free(
+		 info_handle->recovery_password );
+
+		info_handle->recovery_password = NULL;
+	}
+	info_handle->recovery_password_size = 0;
 
 	return( -1 );
 }
@@ -724,6 +896,131 @@ int info_handle_close_input(
 		return( -1 );
 	}
 	return( 0 );
+}
+
+/* Retrieves a specific volume from the container
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_get_volume_by_index(
+     info_handle_t *info_handle,
+     int volume_index,
+     libfsapfs_volume_t **volume,
+     libcerror_error_t **error )
+{
+	static char *function = "info_handle_get_volume_by_index";
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( *volume != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_container_get_volume_by_index(
+	     info_handle->input_container,
+	     volume_index,
+	     volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume: %d.",
+		 function,
+		 volume_index );
+
+		goto on_error;
+	}
+	if( info_handle->user_password != NULL )
+	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		if( libfsapfs_volume_set_utf16_password(
+		     *volume,
+		     (uint16_t *) info_handle->user_password,
+		     info_handle->user_password_size - 1,
+		     error ) != 1 )
+#else
+		if( libfsapfs_volume_set_utf8_password(
+		     *volume,
+		     (uint8_t *) info_handle->user_password,
+		     info_handle->user_password_size - 1,
+		     error ) != 1 )
+#endif
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set password.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( info_handle->recovery_password != NULL )
+	{
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		if( libfsapfs_volume_set_utf16_recovery_password(
+		     *volume,
+		     (uint16_t *) info_handle->recovery_password,
+		     info_handle->recovery_password_size - 1,
+		     error ) != 1 )
+#else
+		if( libfsapfs_volume_set_utf8_recovery_password(
+		     *volume,
+		     (uint8_t *) info_handle->recovery_password,
+		     info_handle->recovery_password_size - 1,
+		     error ) != 1 )
+#endif
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set recovery password.",
+			 function );
+
+			goto on_error;
+		}
+	}
+/* TODO call unlock volume */
+	return( 1 );
+
+on_error:
+	if( *volume != NULL )
+	{
+		libfsapfs_volume_free(
+		 volume,
+		 NULL );
+	}
+	return( -1 );
 }
 
 /* Prints a POSIX value
@@ -2011,8 +2308,8 @@ int info_handle_file_system_hierarchy_fprint(
 	     volume_index < number_of_volumes;
 	     volume_index++ )
 	{
-		if( libfsapfs_container_get_volume_by_index(
-		     info_handle->input_container,
+		if( info_handle_get_volume_by_index(
+		     info_handle,
 		     volume_index,
 		     &volume,
 		     error ) != 1 )
@@ -2026,33 +2323,6 @@ int info_handle_file_system_hierarchy_fprint(
 			 volume_index );
 
 			goto on_error;
-		}
-		if( info_handle->user_password != NULL )
-		{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			if( libfsapfs_volume_set_utf16_password(
-			     volume,
-			     (uint16_t *) info_handle->user_password,
-			     info_handle->user_password_size - 1,
-			     error ) != 1 )
-#else
-			if( libfsapfs_volume_set_utf8_password(
-			     volume,
-			     (uint8_t *) info_handle->user_password,
-			     info_handle->user_password_size - 1,
-			     error ) != 1 )
-#endif
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set password.",
-				 function );
-
-				goto on_error;
-			}
-/* TODO call unlock volume */
 		}
 		if( libfsapfs_volume_get_identifier(
 		     volume,
@@ -2227,18 +2497,18 @@ on_error:
 	return( -1 );
 }
 
-/* Prints file entry information as part of the inode information
+/* Prints file entry information
  * Returns 1 if successful, 0 if not or -1 on error
  */
-int info_handle_inode_fprint_file_entry(
+int info_handle_file_entry_fprint(
      info_handle_t *info_handle,
-     libfsapfs_volume_t *volume,
      int volume_index,
-     uint64_t inode_number,
+     libfsapfs_volume_t *volume,
+     uint64_t file_system_identifier,
      libcerror_error_t **error )
 {
 	libfsapfs_file_entry_t *file_entry = NULL;
-	static char *function              = "info_handle_inode_fprint_file_entry";
+	static char *function              = "info_handle_file_entry_fprint";
 	int result                         = 0;
 
 	if( info_handle == NULL )
@@ -2254,7 +2524,7 @@ int info_handle_inode_fprint_file_entry(
 	}
 	result = libfsapfs_volume_get_file_entry_by_identifier(
 	          volume,
-	          inode_number,
+	          file_system_identifier,
 	          &file_entry,
 	          error );
 
@@ -2271,8 +2541,8 @@ int info_handle_inode_fprint_file_entry(
 
 		fprintf(
 		 info_handle->notify_stream,
-		 "Error reading inode: %" PRIu64 "\n\n",
-		 inode_number );
+		 "Error reading file entry: %" PRIu64 "\n\n",
+		 file_system_identifier );
 
 		return( 0 );
 	}
@@ -2283,7 +2553,7 @@ int info_handle_inode_fprint_file_entry(
 	fprintf(
 	 info_handle->notify_stream,
 	 "Inode: %" PRIu64 ":\n",
-	 inode_number );
+	 file_system_identifier );
 
 	if( info_handle_file_entry_value_fprint(
 	     info_handle,
@@ -2329,16 +2599,18 @@ on_error:
 	return( -1 );
 }
 
-/* Prints the inode information
+/* Prints the file entry information for a specific identifier
  * Returns 1 if successful, 0 if not or -1 on error
  */
-int info_handle_inode_fprint(
+int info_handle_file_entry_fprint_by_identifier(
      info_handle_t *info_handle,
-     uint64_t inode_number,
+     uint64_t file_system_identifier,
      libcerror_error_t **error )
 {
 	libfsapfs_volume_t *volume = NULL;
-	static char *function      = "info_handle_inode_fprint";
+	static char *function      = "info_handle_file_entry_fprint_by_identifier";
+	int number_of_volumes      = 0;
+	int volume_index           = 0;
 
 	if( info_handle == NULL )
 	{
@@ -2351,10 +2623,44 @@ int info_handle_inode_fprint(
 
 		return( -1 );
 	}
-/* TODO add multi volume support */
-	if( libfsapfs_container_get_volume_by_index(
+	if( libfsapfs_container_get_number_of_volumes(
 	     info_handle->input_container,
-	     0,
+	     &number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		goto on_error;
+	}
+	volume_index = info_handle->file_system_index;
+
+	if( ( volume_index == 0 )
+	 && ( number_of_volumes == 1 ) )
+	{
+		volume_index = 1;
+	}
+	if( ( volume_index <= 0 )
+	 || ( volume_index > number_of_volumes ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file system index value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	volume_index -= 1;
+
+	if( info_handle_get_volume_by_index(
+	     info_handle,
+	     volume_index,
 	     &volume,
 	     error ) != 1 )
 	{
@@ -2364,55 +2670,28 @@ int info_handle_inode_fprint(
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve volume: %d.",
 		 function,
-		 0 );
+		 volume_index );
 
 		goto on_error;
-	}
-	if( info_handle->user_password != NULL )
-	{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		if( libfsapfs_volume_set_utf16_password(
-		     volume,
-		     (uint16_t *) info_handle->user_password,
-		     info_handle->user_password_size - 1,
-		     error ) != 1 )
-#else
-		if( libfsapfs_volume_set_utf8_password(
-		     volume,
-		     (uint8_t *) info_handle->user_password,
-		     info_handle->user_password_size - 1,
-		     error ) != 1 )
-#endif
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set password.",
-			 function );
-
-			goto on_error;
-		}
-/* TODO call unlock volume */
 	}
 	fprintf(
 	 info_handle->notify_stream,
 	 "Apple File System (APFS) information:\n\n" );
 
-	if( info_handle_inode_fprint_file_entry(
+	if( info_handle_file_entry_fprint(
 	     info_handle,
+	     volume_index,
 	     volume,
-	     0,
-	     inode_number,
+	     file_system_identifier,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print inode: %" PRIu64 ".",
+		 "%s: unable to print file entry: %" PRIu64 ".",
 		 function,
-		 inode_number );
+		 file_system_identifier );
 
 		return( -1 );
 	}
@@ -2441,154 +2720,21 @@ on_error:
 	return( -1 );
 }
 
-/* Prints the inodes information
+/* Prints the file entry information for a specific path
  * Returns 1 if successful or -1 on error
  */
-int info_handle_inodes_fprint(
-     info_handle_t *info_handle,
-     libcerror_error_t **error )
-{
-	libfsapfs_volume_t *volume          = NULL;
-	static char *function               = "info_handle_inodes_fprint";
-	uint64_t inode_number               = 0;
-	uint64_t next_file_entry_identifier = 0;
-	int result                          = 0;
-
-	if( info_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid info handle.",
-		 function );
-
-		return( -1 );
-	}
-/* TODO add multi volume support */
-	if( libfsapfs_container_get_volume_by_index(
-	     info_handle->input_container,
-	     0,
-	     &volume,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume: %d.",
-		 function,
-		 0 );
-
-		goto on_error;
-	}
-	if( info_handle->user_password != NULL )
-	{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		if( libfsapfs_volume_set_utf16_password(
-		     volume,
-		     (uint16_t *) info_handle->user_password,
-		     info_handle->user_password_size - 1,
-		     error ) != 1 )
-#else
-		if( libfsapfs_volume_set_utf8_password(
-		     volume,
-		     (uint8_t *) info_handle->user_password,
-		     info_handle->user_password_size - 1,
-		     error ) != 1 )
-#endif
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set password.",
-			 function );
-
-			goto on_error;
-		}
-/* TODO call unlock volume */
-	}
-	if( libfsapfs_volume_get_next_file_entry_identifier(
-	     volume,
-	     &next_file_entry_identifier,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve next file entry identifier.",
-		 function );
-
-		return( -1 );
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "Apple File System (APFS) information:\n\n" );
-
-	for( inode_number = 0;
-	     inode_number < next_file_entry_identifier;
-	     inode_number++ )
-	{
-		result = info_handle_inode_fprint_file_entry(
-		          info_handle,
-		          volume,
-		          0,
-		          inode_number,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print inode: %" PRIu64 ".",
-			 function,
-			 inode_number );
-
-			return( -1 );
-		}
-	}
-	if( libfsapfs_volume_free(
-	     &volume,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free volume.",
-		 function );
-
-		goto on_error;
-	}
-	return( 1 );
-
-on_error:
-	if( volume != NULL )
-	{
-		libfsapfs_volume_free(
-		 &volume,
-		 NULL );
-	}
-	return( -1 );
-}
-
-/* Prints the file entry information
- * Returns 1 if successful or -1 on error
- */
-int info_handle_file_entry_fprint(
+int info_handle_file_entry_fprint_by_path(
      info_handle_t *info_handle,
      const system_character_t *path,
      libcerror_error_t **error )
 {
 	libfsapfs_file_entry_t *file_entry = NULL;
 	libfsapfs_volume_t *volume         = NULL;
-	static char *function              = "info_handle_file_entry_fprint";
+	static char *function              = "info_handle_file_entry_fprint_by_path";
 	size_t path_length                 = 0;
+	int number_of_volumes              = 0;
 	int result                         = 0;
+	int volume_index                   = 0;
 
 	if( info_handle == NULL )
 	{
@@ -2601,10 +2747,44 @@ int info_handle_file_entry_fprint(
 
 		return( -1 );
 	}
-/* TODO add multi volume support */
-	if( libfsapfs_container_get_volume_by_index(
+	if( libfsapfs_container_get_number_of_volumes(
 	     info_handle->input_container,
-	     0,
+	     &number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		goto on_error;
+	}
+	volume_index = info_handle->file_system_index;
+
+	if( ( volume_index == 0 )
+	 && ( number_of_volumes == 1 ) )
+	{
+		volume_index = 1;
+	}
+	if( ( volume_index <= 0 )
+	 || ( volume_index > number_of_volumes ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file system index value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	volume_index -= 1;
+
+	if( info_handle_get_volume_by_index(
+	     info_handle,
+	     volume_index,
 	     &volume,
 	     error ) != 1 )
 	{
@@ -2617,33 +2797,6 @@ int info_handle_file_entry_fprint(
 		 0 );
 
 		goto on_error;
-	}
-	if( info_handle->user_password != NULL )
-	{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		if( libfsapfs_volume_set_utf16_password(
-		     volume,
-		     (uint16_t *) info_handle->user_password,
-		     info_handle->user_password_size - 1,
-		     error ) != 1 )
-#else
-		if( libfsapfs_volume_set_utf8_password(
-		     volume,
-		     (uint8_t *) info_handle->user_password,
-		     info_handle->user_password_size - 1,
-		     error ) != 1 )
-#endif
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set password.",
-			 function );
-
-			goto on_error;
-		}
-/* TODO call unlock volume */
 	}
 	path_length = system_string_length(
 	               path );
@@ -2761,13 +2914,157 @@ on_error:
 	return( -1 );
 }
 
+/* Prints the file entries information
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_file_entries_fprint(
+     info_handle_t *info_handle,
+     libcerror_error_t **error )
+{
+	libfsapfs_volume_t *volume          = NULL;
+	static char *function               = "info_handle_file_entries_fprint";
+	uint64_t file_system_identifier     = 0;
+	uint64_t next_file_entry_identifier = 0;
+	int number_of_volumes               = 0;
+	int result                          = 0;
+	int volume_index                    = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_container_get_number_of_volumes(
+	     info_handle->input_container,
+	     &number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		goto on_error;
+	}
+	volume_index = info_handle->file_system_index;
+
+	if( ( volume_index == 0 )
+	 && ( number_of_volumes == 1 ) )
+	{
+		volume_index = 1;
+	}
+	if( ( volume_index <= 0 )
+	 || ( volume_index > number_of_volumes ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file system index value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+	volume_index -= 1;
+
+	if( info_handle_get_volume_by_index(
+	     info_handle,
+	     volume_index,
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve volume: %d.",
+		 function,
+		 0 );
+
+		goto on_error;
+	}
+	if( libfsapfs_volume_get_next_file_entry_identifier(
+	     volume,
+	     &next_file_entry_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve next file entry identifier.",
+		 function );
+
+		return( -1 );
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "Apple File System (APFS) information:\n\n" );
+
+	for( file_system_identifier = 0;
+	     file_system_identifier < next_file_entry_identifier;
+	     file_system_identifier++ )
+	{
+		result = info_handle_file_entry_fprint(
+		          info_handle,
+		          volume_index,
+		          volume,
+		          file_system_identifier,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print file entry: %" PRIu64 ".",
+			 function,
+			 file_system_identifier );
+
+			return( -1 );
+		}
+	}
+	if( libfsapfs_volume_free(
+	     &volume,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free volume.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( volume != NULL )
+	{
+		libfsapfs_volume_free(
+		 &volume,
+		 NULL );
+	}
+	return( -1 );
+}
+
 /* Prints the volume information
  * Returns 1 if successful or -1 on error
  */
 int info_handle_volume_fprint(
      info_handle_t *info_handle,
-     libfsapfs_volume_t *volume,
      int volume_index,
+     libfsapfs_volume_t *volume,
      libcerror_error_t **error )
 {
 	uint8_t uuid_data[ 16 ];
@@ -3008,8 +3305,8 @@ int info_handle_container_fprint(
 	     volume_index < number_of_volumes;
 	     volume_index++ )
 	{
-		if( libfsapfs_container_get_volume_by_index(
-		     info_handle->input_container,
+		if( info_handle_get_volume_by_index(
+		     info_handle,
 		     volume_index,
 		     &volume,
 		     error ) != 1 )
@@ -3024,37 +3321,10 @@ int info_handle_container_fprint(
 
 			goto on_error;
 		}
-		if( info_handle->user_password != NULL )
-		{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			if( libfsapfs_volume_set_utf16_password(
-			     volume,
-			     (uint16_t *) info_handle->user_password,
-			     info_handle->user_password_size - 1,
-			     error ) != 1 )
-#else
-			if( libfsapfs_volume_set_utf8_password(
-			     volume,
-			     (uint8_t *) info_handle->user_password,
-			     info_handle->user_password_size - 1,
-			     error ) != 1 )
-#endif
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-				 "%s: unable to set password.",
-				 function );
-
-				goto on_error;
-			}
-/* TODO call unlock volume */
-		}
 		if( info_handle_volume_fprint(
 		     info_handle,
-		     volume,
 		     volume_index,
+		     volume,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

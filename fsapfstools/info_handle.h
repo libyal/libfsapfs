@@ -41,6 +41,18 @@ typedef struct info_handle info_handle_t;
 
 struct info_handle
 {
+	/* The file system index
+	 */
+	int file_system_index;
+
+	/* The recovery password
+	 */
+	system_character_t *recovery_password;
+
+	/* The recovery password size
+	 */
+	size_t recovery_password_size;
+
 	/* The user password
 	 */
 	system_character_t *user_password;
@@ -97,7 +109,17 @@ int info_handle_set_bodyfile(
      const system_character_t *filename,
      libcerror_error_t **error );
 
+int info_handle_set_file_system_index(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error );
+
 int info_handle_set_password(
+     info_handle_t *info_handle,
+     const system_character_t *string,
+     libcerror_error_t **error );
+
+int info_handle_set_recovery_password(
      info_handle_t *info_handle,
      const system_character_t *string,
      libcerror_error_t **error );
@@ -114,6 +136,12 @@ int info_handle_open_input(
 
 int info_handle_close_input(
      info_handle_t *info_handle,
+     libcerror_error_t **error );
+
+int info_handle_get_volume_by_index(
+     info_handle_t *info_handle,
+     int volume_index,
+     libfsapfs_volume_t **volume,
      libcerror_error_t **error );
 
 int info_handle_posix_time_value_fprint(
@@ -145,31 +173,31 @@ int info_handle_file_system_hierarchy_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
-int info_handle_inode_fprint_file_entry(
-     info_handle_t *info_handle,
-     libfsapfs_volume_t *volume,
-     int volume_index,
-     uint64_t inode_number,
-     libcerror_error_t **error );
-
-int info_handle_inode_fprint(
-     info_handle_t *info_handle,
-     uint64_t inode_number,
-     libcerror_error_t **error );
-
-int info_handle_inodes_fprint(
-     info_handle_t *info_handle,
-     libcerror_error_t **error );
-
 int info_handle_file_entry_fprint(
+     info_handle_t *info_handle,
+     int volume_index,
+     libfsapfs_volume_t *volume,
+     uint64_t file_system_identifier,
+     libcerror_error_t **error );
+
+int info_handle_file_entry_fprint_by_identifier(
+     info_handle_t *info_handle,
+     uint64_t file_system_identifier,
+     libcerror_error_t **error );
+
+int info_handle_file_entry_fprint_by_path(
      info_handle_t *info_handle,
      const system_character_t *path,
      libcerror_error_t **error );
 
+int info_handle_file_entries_fprint(
+     info_handle_t *info_handle,
+     libcerror_error_t **error );
+
 int info_handle_volume_fprint(
      info_handle_t *info_handle,
-     libfsapfs_volume_t *volume,
      int volume_index,
+     libfsapfs_volume_t *volume,
      libcerror_error_t **error );
 
 int info_handle_container_fprint(

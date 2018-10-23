@@ -28,6 +28,7 @@ Tools:
 * fsapfsinfo tool
 ** add volume selection
 ** do not print name of root file entry
+** ask for password or recovery password
 * add fsapfsmount tool
 
 Tests:

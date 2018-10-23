@@ -46,9 +46,10 @@
 enum FSAPFSINFO_MODES
 {
 	FSAPFSINFO_MODE_CONTAINER,
-	FSAPFSINFO_MODE_FILE_ENTRY,
-	FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY,
-	FSAPFSINFO_MODE_INODE
+	FSAPFSINFO_MODE_FILE_ENTRIES,
+	FSAPFSINFO_MODE_FILE_ENTRY_BY_IDENTIFIER,
+	FSAPFSINFO_MODE_FILE_ENTRY_BY_PATH,
+	FSAPFSINFO_MODE_FILE_SYSTEM_HIERARCHY
 };
 
 info_handle_t *fsapfsinfo_info_handle = NULL;
@@ -66,19 +67,22 @@ void usage_fprint(
 	fprintf( stream, "Use fsapfsinfo to determine information about an Apple\n"
 	                 " File System (APFS).\n\n" );
 
-	fprintf( stream, "Usage: fsapfsinfo [ -B bodyfile ] [ -E inode_number ]\n"
-	                 "                  [ -F file_entry ] [ -o offset ]\n"
-	                 "                  [ -p password ] [ -BhHvV ] source\n\n" );
+	fprintf( stream, "Usage: fsapfsinfo [ -B bodyfile ] [ -E identifier ]\n"
+	                 "                  [ -f file_system_index ] [ -F path ]\n"
+	                 "                  [ -o offset ] [ -p password ]\n"
+	                 "                  [ -r password ] [ -BhHvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
 	fprintf( stream, "\t-B:     output file system information as a bodyfile.\n" );
-	fprintf( stream, "\t-E:     show information about a specific inode or \"all\".\n" );
+	fprintf( stream, "\t-E:     show information about a specific file system entry or \"all\".\n" );
+	fprintf( stream, "\t-f:     show information about a specific file system or \"all\".\n" );
 	fprintf( stream, "\t-F:     show information about a specific file entry path.\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
 	fprintf( stream, "\t-H:     shows the file system hierarchy\n" );
 	fprintf( stream, "\t-o:     specify the volume offset\n" );
 	fprintf( stream, "\t-p:     specify the password\n" );
+	fprintf( stream, "\t-r:     specify the recovery password\n" );
 	fprintf( stream, "\t-v:     verbose output to stderr\n" );
 	fprintf( stream, "\t-V:     print version\n" );
 }
@@ -135,19 +139,21 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
-	libfsapfs_error_t *error                 = NULL;
-	system_character_t *option_bodyfile      = NULL;
-	system_character_t *option_file_entry    = NULL;
-	system_character_t *option_inode_number  = NULL;
-	system_character_t *option_password      = NULL;
-	system_character_t *option_volume_offset = NULL;
-	system_character_t *source               = NULL;
-	char *program                            = "fsapfsinfo";
-	system_integer_t option                  = 0;
-	size_t string_length                     = 0;
-	uint64_t inode_number                    = 0;
-	int option_mode                          = FSAPFSINFO_MODE_CONTAINER;
-	int verbose                              = 0;
+	libfsapfs_error_t *error                         = NULL;
+	system_character_t *option_bodyfile              = NULL;
+	system_character_t *option_file_entry_identifier = NULL;
+	system_character_t *option_file_entry_path       = NULL;
+	system_character_t *option_file_system_index     = NULL;
+	system_character_t *option_password              = NULL;
+	system_character_t *option_recovery_password     = NULL;
+	system_character_t *option_volume_offset         = NULL;
+	system_character_t *source                       = NULL;
+	char *program                                    = "fsapfsinfo";
+	system_integer_t option                          = 0;
+	size_t string_length                             = 0;
+	uint64_t file_entry_identifier                   = 0;
+	int option_mode                                  = FSAPFSINFO_MODE_CONTAINER;
+	int verbose                                      = 0;
 
 	libcnotify_stream_set(
 	 stderr,
@@ -182,7 +188,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "B:E:F:hHo:p:vV" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "B:E:f:F:hHo:p:r:vV" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -204,14 +210,19 @@ int main( int argc, char * const argv[] )
 				break;
 
 			case (system_integer_t) 'E':
-				option_mode         = FSAPFSINFO_MODE_INODE;
-				option_inode_number = optarg;
+				option_mode                  = FSAPFSINFO_MODE_FILE_ENTRY_BY_IDENTIFIER;
+				option_file_entry_identifier = optarg;
+
+				break;
+
+			case (system_integer_t) 'f':
+				option_file_system_index = optarg;
 
 				break;
 
 			case (system_integer_t) 'F':
-				option_mode       = FSAPFSINFO_MODE_FILE_ENTRY;
-				option_file_entry = optarg;
+				option_mode            = FSAPFSINFO_MODE_FILE_ENTRY_BY_PATH;
+				option_file_entry_path = optarg;
 
 				break;
 
@@ -233,6 +244,11 @@ int main( int argc, char * const argv[] )
 
 			case (system_integer_t) 'p':
 				option_password = optarg;
+
+				break;
+
+			case (system_integer_t) 'r':
+				option_recovery_password = optarg;
 
 				break;
 
@@ -293,6 +309,23 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
+	if( option_file_system_index != NULL )
+	{
+		if( info_handle_set_file_system_index(
+		     fsapfsinfo_info_handle,
+		     option_file_system_index,
+		     &error ) != 1 )
+		{
+			libcnotify_print_error_backtrace(
+			 error );
+			libcerror_error_free(
+			 &error );
+
+			fprintf(
+			 stderr,
+			 "Unsupported file system index defaulting to: all.\n" );
+		}
+	}
 	if( option_password != NULL )
 	{
 		if( info_handle_set_password(
@@ -303,6 +336,20 @@ int main( int argc, char * const argv[] )
 			fprintf(
 			 stderr,
 			 "Unable to set password.\n" );
+
+			goto on_error;
+		}
+	}
+	if( option_recovery_password != NULL )
+	{
+		if( info_handle_set_recovery_password(
+		     fsapfsinfo_info_handle,
+		     option_recovery_password,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set recovery password.\n" );
 
 			goto on_error;
 		}
@@ -337,12 +384,82 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+	if( option_mode == FSAPFSINFO_MODE_FILE_ENTRY_BY_IDENTIFIER )
+	{
+		if( option_file_entry_identifier == NULL )
+		{
+			fprintf(
+			 stderr,
+			 "Mising file entry identifier string.\n" );
+
+			goto on_error;
+		}
+		string_length = system_string_length(
+				 option_file_entry_identifier );
+
+		if( ( string_length == 3 )
+		 && ( system_string_compare(
+		       option_file_entry_identifier,
+		       _SYSTEM_STRING( "all" ),
+		       3 ) == 0 ) )
+		{
+			option_mode = FSAPFSINFO_MODE_FILE_ENTRIES;
+		}
+		else if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
+		          option_file_entry_identifier,
+		          string_length + 1,
+		          &file_entry_identifier,
+		          &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to copy file entry identifier string to 64-bit decimal.\n" );
+
+			goto on_error;
+		}
+		else if( file_entry_identifier > (uint64_t) 0x0fffffffffffffffUL )
+		{
+			fprintf(
+			 stderr,
+			 "Invalid file entry identifier value out of bounds." );
+
+			goto on_error;
+		}
+	}
 	switch( option_mode )
 	{
-		case FSAPFSINFO_MODE_FILE_ENTRY:
-			if( info_handle_file_entry_fprint(
+		case FSAPFSINFO_MODE_FILE_ENTRIES:
+			if( info_handle_file_entries_fprint(
 			     fsapfsinfo_info_handle,
-			     option_file_entry,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to print file entries.\n" );
+
+				goto on_error;
+			}
+			break;
+
+		case FSAPFSINFO_MODE_FILE_ENTRY_BY_IDENTIFIER:
+			if( info_handle_file_entry_fprint_by_identifier(
+			     fsapfsinfo_info_handle,
+			     file_entry_identifier,
+			     &error ) != 1 )
+			{
+				fprintf(
+				 stderr,
+				 "Unable to print file entry: %" PRIu64 ".\n",
+				 file_entry_identifier );
+
+				goto on_error;
+			}
+			break;
+
+		case FSAPFSINFO_MODE_FILE_ENTRY_BY_PATH:
+			if( info_handle_file_entry_fprint_by_path(
+			     fsapfsinfo_info_handle,
+			     option_file_entry_path,
 			     &error ) != 1 )
 			{
 				fprintf(
@@ -361,72 +478,6 @@ int main( int argc, char * const argv[] )
 				fprintf(
 				 stderr,
 				 "Unable to print file system hierarchy.\n" );
-
-				goto on_error;
-			}
-			break;
-
-		case FSAPFSINFO_MODE_INODE:
-			if( option_inode_number == NULL )
-			{
-				fprintf(
-				 stderr,
-				 "Mising inode number string.\n" );
-
-				goto on_error;
-			}
-			string_length = system_string_length(
-					 option_inode_number );
-
-			if( ( string_length == 3 )
-			 && ( system_string_compare(
-			       option_inode_number,
-			       _SYSTEM_STRING( "all" ),
-			       3 ) == 0 ) )
-			{
-				if( info_handle_inodes_fprint(
-				     fsapfsinfo_info_handle,
-				     &error ) != 1 )
-				{
-					fprintf(
-					 stderr,
-					 "Unable to print inodes.\n" );
-
-					goto on_error;
-				}
-			}
-			else if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
-			          option_inode_number,
-			          string_length + 1,
-			          &inode_number,
-			          &error ) == 1 )
-			{
-				if( inode_number > (uint64_t) 0x0fffffffffffffffUL )
-				{
-					fprintf(
-					 stderr,
-					 "Invalid inode number value out of bounds." );
-
-					goto on_error;
-				}
-				if( info_handle_inode_fprint(
-				     fsapfsinfo_info_handle,
-				     (uint32_t) inode_number,
-				     &error ) != 1 )
-				{
-					fprintf(
-					 stderr,
-					 "Unable to print inode: %" PRIu64 ".\n",
-					 inode_number );
-
-					goto on_error;
-				}
-			}
-			else
-			{
-				fprintf(
-				 stderr,
-				 "Unable to copy inode number string to 64-bit decimal.\n" );
 
 				goto on_error;
 			}

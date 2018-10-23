@@ -910,6 +910,28 @@ int libfsapfs_volume_close(
 		internal_volume->user_password      = NULL;
 		internal_volume->user_password_size = 0;
 	}
+	if( internal_volume->recovery_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->recovery_password,
+		     0,
+		     internal_volume->recovery_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear recovery password.",
+			 function );
+
+			result = -1;
+		}
+		memory_free(
+		 internal_volume->recovery_password );
+
+		internal_volume->recovery_password      = NULL;
+		internal_volume->recovery_password_size = 0;
+	}
 	if( internal_volume->superblock != NULL )
 	{
 		if( libfsapfs_volume_superblock_free(
@@ -1553,6 +1575,7 @@ int libfsapfs_internal_volume_unlock(
 
 		return( -1 );
 	}
+/* TODO add support for recovery password */
 	result = libfsapfs_volume_key_bag_get_volume_key(
 	          internal_volume->key_bag,
 	          internal_volume->user_password,
@@ -2455,6 +2478,314 @@ on_error:
 		internal_volume->user_password = NULL;
 	}
 	internal_volume->user_password_size = 0;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_volume->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Sets an UTF-8 formatted recovery password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
+ */
+int libfsapfs_volume_set_utf8_recovery_password(
+     libfsapfs_volume_t *volume,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_set_utf8_recovery_password";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->recovery_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->recovery_password,
+		     0,
+		     internal_volume->recovery_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear recovery password.",
+			 function );
+
+			goto on_error;
+		}
+		memory_free(
+		 internal_volume->recovery_password );
+
+		internal_volume->recovery_password      = NULL;
+		internal_volume->recovery_password_size = 0;
+	}
+	internal_volume->recovery_password_size = 1 + narrow_string_length(
+	                                               (char *) utf8_string );
+
+	internal_volume->recovery_password = (uint8_t *) memory_allocate(
+	                                                  sizeof( uint8_t ) * internal_volume->recovery_password_size );
+
+	if( internal_volume->recovery_password == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to create recovery password.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_copy(
+	     internal_volume->recovery_password,
+	     utf8_string,
+	     utf8_string_length ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy recovery password.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->recovery_password[ internal_volume->recovery_password_size - 1 ] = 0;
+
+	internal_volume->recovery_password_is_set = 1;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: recovery password: %s\n",
+		 function,
+		 internal_volume->recovery_password );
+	}
+#endif
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+	if( internal_volume->recovery_password != NULL )
+	{
+		memory_set(
+		 internal_volume->recovery_password,
+		 0,
+		 internal_volume->recovery_password_size );
+		memory_free(
+		 internal_volume->recovery_password );
+
+		internal_volume->recovery_password = NULL;
+	}
+	internal_volume->recovery_password_size = 0;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_volume->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Sets an UTF-16 formatted recovery password
+ * This function needs to be used before one of the open functions
+ * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
+ */
+int libfsapfs_volume_set_utf16_recovery_password(
+     libfsapfs_volume_t *volume,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_set_utf16_recovery_password";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->recovery_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->recovery_password,
+		     0,
+		     internal_volume->recovery_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear recovery password.",
+			 function );
+
+			goto on_error;
+		}
+		memory_free(
+		 internal_volume->recovery_password );
+
+		internal_volume->recovery_password      = NULL;
+		internal_volume->recovery_password_size = 0;
+	}
+	if( libuna_utf8_string_size_from_utf16(
+	     utf16_string,
+	     utf16_string_length,
+	     &( internal_volume->recovery_password_size ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set password size.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->recovery_password_size += 1;
+
+	internal_volume->recovery_password = (uint8_t *) memory_allocate(
+	                                                  sizeof( uint8_t ) * internal_volume->recovery_password_size );
+
+	if( internal_volume->recovery_password == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to create recovery password.",
+		 function );
+
+		goto on_error;
+	}
+	if( libuna_utf8_string_copy_from_utf16(
+	     internal_volume->recovery_password,
+	     internal_volume->recovery_password_size,
+	     utf16_string,
+	     utf16_string_length,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to copy recovery password.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->recovery_password[ internal_volume->recovery_password_size - 1 ] = 0;
+
+	internal_volume->recovery_password_is_set = 1;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: recovery password: %s\n",
+		 function,
+		 internal_volume->recovery_password );
+	}
+#endif
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+	if( internal_volume->recovery_password != NULL )
+	{
+		memory_set(
+		 internal_volume->recovery_password,
+		 0,
+		 internal_volume->recovery_password_size );
+		memory_free(
+		 internal_volume->recovery_password );
+
+		internal_volume->recovery_password = NULL;
+	}
+	internal_volume->recovery_password_size = 0;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_write(
