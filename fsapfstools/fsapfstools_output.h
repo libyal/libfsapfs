@@ -36,14 +36,14 @@ int fsapfstools_output_initialize(
      int stdio_mode,
      libcerror_error_t **error );
 
-void fsapfsoutput_copyright_fprint(
+void fsapfstools_output_copyright_fprint(
       FILE *stream );
 
-void fsapfsoutput_version_fprint(
+void fsapfstools_output_version_fprint(
       FILE *stream,
       const char *program );
 
-void fsapfsoutput_version_detailed_fprint(
+void fsapfstools_output_version_detailed_fprint(
       FILE *stream,
       const char *program );
 

@@ -2282,14 +2282,16 @@ int info_handle_file_system_hierarchy_fprint(
 
 		return( -1 );
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "Apple File System (APFS) information:\n\n" );
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "Apple File System (APFS) information:\n\n" );
 
-	fprintf(
-	 info_handle->notify_stream,
-	 "File system hierarchy:\n" );
-
+		fprintf(
+		 info_handle->notify_stream,
+		 "File system hierarchy:\n" );
+	}
 	if( libfsapfs_container_get_number_of_volumes(
 	     info_handle->input_container,
 	     &number_of_volumes,
@@ -2469,10 +2471,12 @@ int info_handle_file_system_hierarchy_fprint(
 			goto on_error;
 		}
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
-
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "\n" );
+	}
 	return( 1 );
 
 on_error:

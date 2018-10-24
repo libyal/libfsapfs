@@ -425,6 +425,169 @@ int libfsapfs_file_entry_get_parent_identifier(
 	return( result );
 }
 
+/* Retrieves the parent file entry
+ * Returns 1 if successful, 0 if no such file entry or -1 on error
+ */
+int libfsapfs_file_entry_get_parent_file_entry(
+     libfsapfs_file_entry_t *file_entry,
+     libfsapfs_file_entry_t **parent_file_entry,
+     libcerror_error_t **error )
+{
+	libfsapfs_inode_t *inode                             = NULL;
+	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
+	static char *function                                = "libfsapfs_file_entry_get_parent_file_entry";
+	int result                                           = 0;
+	uint64_t file_system_identifier                      = 0;
+
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
+
+	if( parent_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid parent file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( *parent_file_entry != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid parent file entry value already set.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libfsapfs_inode_get_identifier(
+	     internal_file_entry->inode,
+	     &file_system_identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier.",
+		 function );
+
+		goto on_error;
+	}
+	if( file_system_identifier > 2 )
+	{
+		if( libfsapfs_inode_get_parent_identifier(
+		     internal_file_entry->inode,
+		     &file_system_identifier,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve parent identifier.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_file_system_btree_get_inode_by_identifier(
+		     internal_file_entry->file_system_btree,
+		     internal_file_entry->file_io_handle,
+		     file_system_identifier,
+		     &inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve inode: %" PRIu64 " from file system B-tree.",
+			 function,
+			 file_system_identifier );
+
+			 goto on_error;
+		}
+		if( libfsapfs_file_entry_initialize(
+		     parent_file_entry,
+		     internal_file_entry->io_handle,
+		     internal_file_entry->file_io_handle,
+		     internal_file_entry->file_system_btree,
+		     inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create file entry.",
+			 function );
+
+			goto on_error;
+		}
+		inode  = NULL;
+		result = 1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_file_entry->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+
+on_error:
+	if( inode != NULL )
+	{
+		libfsapfs_inode_free(
+		 &inode,
+		 NULL );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
 /* Retrieves the creation date and time
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * This value is retrieved from the inode

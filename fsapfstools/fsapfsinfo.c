@@ -181,7 +181,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-	fsapfsoutput_version_fprint(
+	fsapfstools_output_version_fprint(
 	 stdout,
 	 program );
 
@@ -258,7 +258,7 @@ int main( int argc, char * const argv[] )
 				break;
 
 			case (system_integer_t) 'V':
-				fsapfsoutput_copyright_fprint(
+				fsapfstools_output_copyright_fprint(
 				 stdout );
 
 				return( EXIT_SUCCESS );

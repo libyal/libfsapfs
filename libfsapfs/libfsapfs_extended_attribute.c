@@ -601,8 +601,38 @@ int libfsapfs_extended_attribute_get_identifier(
 
 		return( -1 );
 	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	*identifier = internal_extended_attribute->identifier;
 
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	return( 1 );
 }
 
@@ -617,6 +647,7 @@ int libfsapfs_extended_attribute_get_utf8_name_size(
 {
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
 	static char *function                                                = "libfsapfs_extended_attribute_get_utf8_name_size";
+	int result                                                           = 1;
 
 	if( extended_attribute == NULL )
 	{
@@ -631,6 +662,21 @@ int libfsapfs_extended_attribute_get_utf8_name_size(
 	}
 	internal_extended_attribute = (libfsapfs_internal_extended_attribute_t *) extended_attribute;
 
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	if( libuna_utf8_string_size_from_utf8_stream(
 	     internal_extended_attribute->name,
 	     (size_t) internal_extended_attribute->name_size,
@@ -644,9 +690,24 @@ int libfsapfs_extended_attribute_get_utf8_name_size(
 		 "%s: unable to retrieve UTF-8 string size.",
 		 function );
 
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	return( result );
 }
 
 /* Retrieves the UTF-8 encoded name
@@ -661,6 +722,7 @@ int libfsapfs_extended_attribute_get_utf8_name(
 {
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
 	static char *function                                                = "libfsapfs_extended_attribute_get_utf8_name";
+	int result                                                           = 1;
 
 	if( extended_attribute == NULL )
 	{
@@ -675,6 +737,21 @@ int libfsapfs_extended_attribute_get_utf8_name(
 	}
 	internal_extended_attribute = (libfsapfs_internal_extended_attribute_t *) extended_attribute;
 
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	if( libuna_utf8_string_copy_from_utf8_stream(
 	     utf8_string,
 	     utf8_string_size,
@@ -689,9 +766,24 @@ int libfsapfs_extended_attribute_get_utf8_name(
 		 "%s: unable to retrieve UTF-8 string.",
 		 function );
 
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	return( result );
 }
 
 /* Compares the name with an UTF-8 encoded string
@@ -755,6 +847,7 @@ int libfsapfs_extended_attribute_get_utf16_name_size(
 {
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
 	static char *function                                                = "libfsapfs_extended_attribute_get_utf16_name_size";
+	int result                                                           = 1;
 
 	if( extended_attribute == NULL )
 	{
@@ -769,6 +862,21 @@ int libfsapfs_extended_attribute_get_utf16_name_size(
 	}
 	internal_extended_attribute = (libfsapfs_internal_extended_attribute_t *) extended_attribute;
 
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	if( libuna_utf16_string_size_from_utf8_stream(
 	     internal_extended_attribute->name,
 	     (size_t) internal_extended_attribute->name_size,
@@ -782,9 +890,24 @@ int libfsapfs_extended_attribute_get_utf16_name_size(
 		 "%s: unable to retrieve UTF-16 string size.",
 		 function );
 
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	return( result );
 }
 
 /* Retrieves the UTF-16 encoded name
@@ -799,6 +922,7 @@ int libfsapfs_extended_attribute_get_utf16_name(
 {
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
 	static char *function                                                = "libfsapfs_extended_attribute_get_utf16_name";
+	int result                                                           = 1;
 
 	if( extended_attribute == NULL )
 	{
@@ -813,6 +937,21 @@ int libfsapfs_extended_attribute_get_utf16_name(
 	}
 	internal_extended_attribute = (libfsapfs_internal_extended_attribute_t *) extended_attribute;
 
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 	if( libuna_utf16_string_copy_from_utf8_stream(
 	     utf16_string,
 	     utf16_string_size,
@@ -827,9 +966,24 @@ int libfsapfs_extended_attribute_get_utf16_name(
 		 "%s: unable to retrieve UTF-16 string.",
 		 function );
 
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_extended_attribute->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
 		return( -1 );
 	}
-	return( 1 );
+#endif
+	return( result );
 }
 
 /* Compares the name with an UTF-16 encoded string

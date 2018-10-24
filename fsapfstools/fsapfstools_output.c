@@ -94,7 +94,7 @@ int fsapfstools_output_initialize(
 
 /* Prints the copyright information
  */
-void fsapfsoutput_copyright_fprint(
+void fsapfstools_output_copyright_fprint(
       FILE *stream )
 {
 	if( stream == NULL )
@@ -126,7 +126,7 @@ void fsapfsoutput_copyright_fprint(
 
 /* Prints the version information
  */
-void fsapfsoutput_version_fprint(
+void fsapfstools_output_version_fprint(
       FILE *stream,
       const char *program )
 {
@@ -147,7 +147,7 @@ void fsapfsoutput_version_fprint(
 
 /* Prints the detailed version information
  */
-void fsapfsoutput_version_detailed_fprint(
+void fsapfstools_output_version_detailed_fprint(
       FILE *stream,
       const char *program )
 {

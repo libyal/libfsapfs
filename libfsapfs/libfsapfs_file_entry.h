@@ -112,6 +112,12 @@ int libfsapfs_file_entry_get_parent_identifier(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_parent_file_entry(
+     libfsapfs_file_entry_t *file_entry,
+     libfsapfs_file_entry_t **parent_file_entry,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_creation_time(
      libfsapfs_file_entry_t *file_entry,
      int64_t *posix_time,

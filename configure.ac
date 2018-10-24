@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsapfs],
- [20181022],
+ [20181024],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -127,6 +127,9 @@ AS_IF(
     ])
   ])
 
+dnl Check if libfuse or required headers and functions are available
+AX_LIBFUSE_CHECK_ENABLE
+
 dnl Check if fsapfstools required headers and functions are available
 AX_FSAPFSTOOLS_CHECK_LOCAL
 
@@ -166,6 +169,13 @@ AS_IF(
  [AC_SUBST(
   [libfsapfs_spec_requires],
   [Requires:])
+ ])
+
+AS_IF(
+ [test "x$ac_cv_libfuse" != xno],
+ [AC_SUBST(
+  [libfsapfs_spec_tools_build_requires],
+  [BuildRequires:])
  ])
 
 dnl Set the date for the dpkg files
@@ -246,6 +256,7 @@ Building:
    SHA256 support:                              $ac_cv_libhmac_sha256
    libcaes support:                             $ac_cv_libcaes
    AES support:                                 $ac_cv_libcaes_aes
+   FUSE support:                                $ac_cv_libfuse
 
 Features:
    Multi-threading support:                     $ac_cv_libcthreads_multi_threading

@@ -1,8 +1,4 @@
 TODO
-* make file data stream size work
-* file entry/inode info
-** add thread lock to extended attribute
-** print extended attribute values
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * Add container data handle? Add decryption support and use it to read container key bag?
 * rename volume data handle to container data handle?
@@ -10,7 +6,7 @@ TODO
 
 library:
 * improve file content read support
-** encrypted file content read support
+** encrypted file content read support - detect block identifier mismatch
 ** compressed file content read support?
 * change container read bootstap as advised in documentation
 ** validate checksum
@@ -26,10 +22,13 @@ Python bindings:
 
 Tools:
 * fsapfsinfo tool
-** add volume selection
+** add volume selection via GUID in path
 ** do not print name of root file entry
-** ask for password or recovery password
-* add fsapfsmount tool
+** prompt user for password or recovery password when needed
+** print extended attribute values
+* fsapfsmount tool
+** add owner and group identifier support?
+** add extended attributes support
 
 Tests:
 * test with copy of mounted file system

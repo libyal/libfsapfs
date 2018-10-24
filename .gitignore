@@ -123,6 +123,7 @@ stamp-h[1-9]
 /pyfsapfs-python[23]/*.[ch]
 /fsapfstools/*.exe
 /fsapfstools/fsapfsinfo
+/fsapfstools/fsapfsmount
 /tests/*.exe
 /tests/fsapfs_test_btree_entry
 /tests/fsapfs_test_btree_footer

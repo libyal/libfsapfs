@@ -568,7 +568,7 @@ int libfsapfs_file_entry_free(
 
 /* Retrieves the identifier (or inode number)
  * This value is retrieved from the inode
- * Returns 1 if successfulor -1 on error
+ * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_identifier(
@@ -578,12 +578,21 @@ int libfsapfs_file_entry_get_identifier(
 
 /* Retrieves the parent identifier (or inode number)
  * This value is retrieved from the inode
- * Returns 1 if successfulor -1 on error
+ * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_parent_identifier(
      libfsapfs_file_entry_t *file_entry,
      uint64_t *parent_identifier,
+     libfsapfs_error_t **error );
+
+/* Retrieves the parent file entry
+ * Returns 1 if successful, 0 if no such file entry or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_parent_file_entry(
+     libfsapfs_file_entry_t *file_entry,
+     libfsapfs_file_entry_t **parent_file_entry,
      libfsapfs_error_t **error );
 
 /* Retrieves the creation date and time

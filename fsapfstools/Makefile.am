@@ -12,12 +12,14 @@ AM_CPPFLAGS = \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
+	@LIBFUSE_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
 AM_LDFLAGS = @STATIC_LDFLAGS@
 
 bin_PROGRAMS = \
-	fsapfsinfo
+	fsapfsinfo \
+	fsapfsmount
 
 fsapfsinfo_SOURCES = \
 	fsapfsinfo.c \
@@ -40,6 +42,36 @@ fsapfsinfo_SOURCES = \
 fsapfsinfo_LDADD = \
 	@LIBFGUID_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@ \
+	@LIBINTL@
+
+fsapfsmount_SOURCES = \
+	fsapfsmount.c \
+	fsapfstools_getopt.c fsapfstools_getopt.h \
+	fsapfstools_i18n.h \
+	fsapfstools_libbfio.h \
+	fsapfstools_libcerror.h \
+	fsapfstools_libclocale.h \
+	fsapfstools_libcnotify.h \
+	fsapfstools_libcpath.h \
+	fsapfstools_libfsapfs.h \
+	fsapfstools_libuna.h \
+	fsapfstools_output.c fsapfstools_output.h \
+	fsapfstools_signal.c fsapfstools_signal.h \
+	fsapfstools_unused.h \
+	mount_handle.c mount_handle.h
+
+fsapfsmount_LDADD = \
+	@LIBFUSE_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBCFILE_LIBADD@ \
