@@ -4423,6 +4423,10 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 			}
 			sub_node = NULL;
 		}
+		if( file_system_identifier > identifier )
+		{
+			break;
+		}
 		previous_entry = entry;
 	}
 	return( result );

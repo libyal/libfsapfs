@@ -1604,20 +1604,6 @@ int info_handle_file_entry_value_fprint(
 			goto on_error;
 		}
 	}
-	if( libfsapfs_file_entry_get_number_of_extended_attributes(
-	     file_entry,
-	     &number_of_extended_attributes,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of extended attributes.",
-		 function );
-
-		goto on_error;
-	}
 	if( libfsapfs_file_entry_get_size(
 	     file_entry,
 	     &size,
@@ -1780,6 +1766,20 @@ int info_handle_file_entry_value_fprint(
 			 info_handle->notify_stream,
 			 "\tSymbolic link target\t: %" PRIs_SYSTEM "\n",
 			 symbolic_link_target );
+		}
+		if( libfsapfs_file_entry_get_number_of_extended_attributes(
+		     file_entry,
+		     &number_of_extended_attributes,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of extended attributes.",
+			 function );
+
+			goto on_error;
 		}
 		if( number_of_extended_attributes > 0 )
 		{

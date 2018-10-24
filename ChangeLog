@@ -15,6 +15,7 @@ library:
 * refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 * Create libfsapfs_container_superblock_get_identifier
 * Create libfsapfs_volume_superblock_get_identifier
+* Add support for extended attribute with data stream descriptor
 
 Python bindings:
 * add extents object
@@ -28,6 +29,8 @@ Tools:
 ** print extended attribute values
 * fsapfsmount tool
 ** add owner and group identifier support?
+** add support for all volumes
+** add volume selection support
 ** add extended attributes support
 
 Tests:

@@ -388,7 +388,7 @@ int libfsapfs_extended_attribute_read_value_data(
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
 	static char *function                                                = "libfsapfs_extended_attribute_read_value_data";
 	size_t data_offset                                                   = 0;
-	uint16_t extended_attribute_data_flags                               = 0;
+	uint16_t extended_attribute_flags                                    = 0;
 	uint16_t extended_attribute_data_size                                = 0;
 
 	if( extended_attribute == NULL )
@@ -452,7 +452,7 @@ int libfsapfs_extended_attribute_read_value_data(
 #endif
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsapfs_file_system_btree_value_extended_attribute_t *) data )->flags,
-	 extended_attribute_data_flags );
+	 extended_attribute_flags );
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsapfs_file_system_btree_value_extended_attribute_t *) data )->data_size,
@@ -464,13 +464,12 @@ int libfsapfs_extended_attribute_read_value_data(
 		libcnotify_printf(
 		 "%s: flags\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
-		 extended_attribute_data_flags );
-/* TODO implement
+		 extended_attribute_flags );
 		libfsapfs_debug_print_extended_attribute_flags(
-		 extended_attribute_data_flags );
+		 extended_attribute_flags );
 		libcnotify_printf(
 		 "\n" );
-*/
+
 		libcnotify_printf(
 		 "%s: data size\t\t\t: %" PRIu16 "\n",
 		 function,
@@ -483,18 +482,6 @@ int libfsapfs_extended_attribute_read_value_data(
 
 	data_offset = sizeof( fsapfs_file_system_btree_value_extended_attribute_t );
 
-	if( ( extended_attribute_data_flags & 0x0001 ) != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: invalid extended attribute flags: 0x%04" PRIx16 ".",
-		 function,
-		 extended_attribute_data_flags );
-
-		goto on_error;
-	}
 	if( (size_t) extended_attribute_data_size > ( data_size - data_offset ) )
 	{
 		libcerror_error_set(
@@ -518,7 +505,11 @@ int libfsapfs_extended_attribute_read_value_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
-	if( ( extended_attribute_data_flags & 0x0002 ) != 0 )
+	if( ( extended_attribute_flags & 0x0001 ) != 0 )
+	{
+/* TODO handle */
+	}
+	else if( ( extended_attribute_flags & 0x0002 ) != 0 )
 	{
 		internal_extended_attribute->data = (uint8_t *) memory_allocate(
 		                                                 sizeof( uint8_t ) * data_size );

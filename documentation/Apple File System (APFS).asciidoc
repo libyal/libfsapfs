@@ -1532,7 +1532,12 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 [cols="1,1,5",options="header"]
 |===
 | Name | Description
+| com.apple.decmpfs |
+| com.apple.FinderInfo |
 | com.apple.fs.symlink | Symbolic link
+| com.apple.ResourceFork | Resource fork
+| com.apple.rootless |
+| com.apple.system.Security |
 |===
 
 ==== [[extended_attribute_flags]]Extended attribute flags
@@ -1540,12 +1545,12 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000001 | XATTR_DATA_STREAM | Extended attribute data is stored in a data stream +
+| 0x0001 | XATTR_DATA_STREAM | Extended attribute data is stored in a data stream +
 The extended attribute data contains an 8-byte file system object identifier of the corresponding data stream +
 See section: <<extended_attribute_data_stream,Extended attribute data_stream>>
-| 0x00000002 | XATTR_DATA_EMBEDDED | Extended attribute data is stored directly in the record
-| 0x00000004 | XATTR_FILE_SYSTEM_OWNED | Extended attribute record is owned by the file system
-| 0x00000008 | XATTR_RESERVED_8 | [yellow-background]*Unknown (Reserved)*
+| 0x0002 | XATTR_DATA_EMBEDDED | Extended attribute data is stored directly in the record
+| 0x0004 | XATTR_FILE_SYSTEM_OWNED | Extended attribute record is owned by the file system
+| 0x0008 | XATTR_RESERVED_8 | [yellow-background]*Unknown (Reserved)*
 |===
 
 ==== [[extended_attribute_data_stream]]Extended attribute data stream

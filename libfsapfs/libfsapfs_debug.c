@@ -180,6 +180,33 @@ void libfsapfs_debug_print_directory_entry_flags(
 	}
 }
 
+/* Prints the extended attribute flags
+ */
+void libfsapfs_debug_print_extended_attribute_flags(
+      uint16_t extended_attribute_flags )
+{
+	if( ( extended_attribute_flags & 0x0001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XATTR_DATA_STREAM)\n" );
+	}
+	if( ( extended_attribute_flags & 0x0002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XATTR_DATA_EMBEDDED)\n" );
+	}
+	if( ( extended_attribute_flags & 0x0004 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XATTR_FILE_SYSTEM_OWNED)\n" );
+	}
+	if( ( extended_attribute_flags & 0x0008 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(XATTR_RESERVED_8)\n" );
+	}
+}
+
 /* Prints the extended field flags
  */
 void libfsapfs_debug_print_extended_field_flags(

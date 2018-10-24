@@ -46,6 +46,9 @@ void libfsapfs_debug_print_checkpoint_flags(
 void libfsapfs_debug_print_directory_entry_flags(
       uint16_t directory_entry_flags );
 
+void libfsapfs_debug_print_extended_attributes_flags(
+      uint16_t extended_attributes_flags );
+
 void libfsapfs_debug_print_extended_field_flags(
       uint8_t extended_field_flags );
 

@@ -3080,7 +3080,8 @@ int libfsapfs_internal_file_entry_get_data_stream(
 	libfsapfs_data_stream_handle_t *data_stream_handle = NULL;
 	libfsapfs_file_extent_t *file_extent               = NULL;
 	static char *function                              = "libfsapfs_internal_file_entry_get_data_stream";
-	uint64_t data_stream_size                          = 0;
+	size64_t data_stream_size                          = 0;
+	uint64_t used_data_stream_size                     = 0;
 	int extent_index                                   = 0;
 	int number_of_extents                              = 0;
 	int segment_index                                  = 0;
@@ -3237,8 +3238,8 @@ int libfsapfs_internal_file_entry_get_data_stream(
 			goto on_error;
 		}
 	}
-	if( libfsapfs_inode_get_data_stream_size(
-	     internal_file_entry->inode,
+	if( libfdata_stream_get_size(
+	     internal_file_entry->data_stream,
 	     &data_stream_size,
 	     error ) != 1 )
 	{
@@ -3251,19 +3252,37 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 		goto on_error;
 	}
-	if( libfdata_stream_set_mapped_size(
-	     internal_file_entry->data_stream,
-	     (size64_t) data_stream_size,
+	if( libfsapfs_inode_get_data_stream_size(
+	     internal_file_entry->inode,
+	     &used_data_stream_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set mapped size.",
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve data stream size.",
 		 function );
 
 		goto on_error;
+	}
+/* TODO what if data_stream_size < used_data_stream_size is the data stream compressed ? */
+	if( (size64_t) used_data_stream_size < data_stream_size )
+	{
+		if( libfdata_stream_set_mapped_size(
+		     internal_file_entry->data_stream,
+		     (size64_t) used_data_stream_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set mapped size.",
+			 function );
+
+			goto on_error;
+		}
 	}
 	return( 1 );
 
