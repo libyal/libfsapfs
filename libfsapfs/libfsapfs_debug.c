@@ -115,6 +115,54 @@ void libfsapfs_debug_print_checkpoint_flags(
 	}
 }
 
+/* Prints the container compatible feature flags
+ */
+void libfsapfs_debug_print_container_compatible_feature_flags(
+      uint64_t compatible_feature_flags )
+{
+	if( ( compatible_feature_flags & 0x0000000000000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(NX_FEATURE_DEFRAG)\n" );
+	}
+	if( ( compatible_feature_flags & 0x0000000000000002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(NX_FEATURE_LCFD)\n" );
+	}
+}
+
+/* Prints the container incompatible feature flags
+ */
+void libfsapfs_debug_print_container_incompatible_feature_flags(
+      uint64_t incompatible_feature_flags )
+{
+	if( ( incompatible_feature_flags & 0x0000000000000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(NX_INCOMPAT_VERSION1)\n" );
+	}
+	if( ( incompatible_feature_flags & 0x0000000000000002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(NX_INCOMPAT_VERSION2)\n" );
+	}
+
+	if( ( incompatible_feature_flags & 0x0000000000000100 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(NX_INCOMPAT_FUSION)\n" );
+	}
+}
+
+/* Prints the container read-only compatible feature flags
+ */
+void libfsapfs_debug_print_container_read_only_compatible_feature_flags(
+      uint64_t read_only_compatible_feature_flags )
+{
+	/* Currently there are no container read-only compatible feature flags defined */
+}
+
 /* Prints the directory entry flags
  */
 void libfsapfs_debug_print_directory_entry_flags(
@@ -344,6 +392,100 @@ void libfsapfs_debug_print_inode_flags(
 		libcnotify_printf(
 		 "\t(INODE_ALLOCATION_SPILLEDOVER)\n" );
 	}
+}
+
+/* Prints the volume compatible feature flags
+ */
+void libfsapfs_debug_print_volume_compatible_feature_flags(
+      uint64_t compatible_feature_flags )
+{
+	if( ( compatible_feature_flags & 0x0000000000000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FEATURE_DEFRAG_PRERELEASE)\n" );
+	}
+	if( ( compatible_feature_flags & 0x0000000000000002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FEATURE_HARDLINK_MAP_RECORDS)\n" );
+	}
+	if( ( compatible_feature_flags & 0x0000000000000004 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FEATURE_DEFRAG)\n" );
+	}
+}
+
+/* Prints the volume flags
+ */
+void libfsapfs_debug_print_volume_flags(
+      uint64_t volume_flags )
+{
+	if( ( volume_flags & 0x0000000000000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FS_UNENCRYPTED)\n" );
+	}
+	if( ( volume_flags & 0x0000000000000002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FS_EFFACEABLE)\n" );
+	}
+	if( ( volume_flags & 0x0000000000000004 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FS_RESERVED_4)\n" );
+	}
+	if( ( volume_flags & 0x0000000000000008 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FS_ONEKEY)\n" );
+	}
+	if( ( volume_flags & 0x0000000000000010 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FS_SPILLEDOVER)\n" );
+	}
+	if( ( volume_flags & 0x0000000000000020 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FS_RUN_SPILLOVER_CLEANER)\n" );
+	}
+}
+
+/* Prints the volume incompatible feature flags
+ */
+void libfsapfs_debug_print_volume_incompatible_feature_flags(
+      uint64_t incompatible_feature_flags )
+{
+	if( ( incompatible_feature_flags & 0x0000000000000001 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_INCOMPAT_CASE_INSENSITIVE)\n" );
+	}
+	if( ( incompatible_feature_flags & 0x0000000000000002 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_INCOMPAT_DATALESS_SNAPS)\n" );
+	}
+	if( ( incompatible_feature_flags & 0x0000000000000004 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_INCOMPAT_ENC_ROLLED)\n" );
+	}
+	if( ( incompatible_feature_flags & 0x0000000000000008 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_INCOMPAT_NORMALIZATION_INSENSITIVE)\n" );
+	}
+}
+
+/* Prints the volume read-only compatible feature flags
+ */
+void libfsapfs_debug_print_volume_read_only_compatible_feature_flags(
+      uint64_t read_only_compatible_feature_flags )
+{
+	/* Currently there are no volume read-only compatible feature flags defined */
 }
 
 /* Prints the file system data type

@@ -1189,9 +1189,9 @@ Contains a block number relative to the start of the container of the <<object_m
 | 236 | 8 | | [yellow-background]*Unknown (apfs_total_blocks_freed)*
 | 244 | 16 | | Volume identifier (apfs_vol_uuid) +
 Contains a UUID stored in big-endian
-| 260 | 8 | | [yellow-background]*Unknown (apfs_last_mod_time)* +
+| 260 | 8 | | Modification date and time (apfs_last_mod_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
-| 268 | 8 | | [yellow-background]*Unknown (apfs_fs_flags)* +
+| 268 | 8 | | Volume flags (apfs_fs_flags) +
 <<volume_superblock_flags,Volume superblock flags>>
 | 276 | 40 | | Creation change information (apfs_formatted_by) +
 See section: <<change_information,Change information>>
@@ -1249,12 +1249,12 @@ Contains 0 if not set
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000001 | APFS_FS_UNENCRYPTED | [yellow-background]*Unknown (unencrypted?)*
-| 0x00000002 | APFS_FS_EFFACEABLE | [yellow-background]*Unknown (effaceable?)*
-| 0x00000004 | APFS_FS_RESERVED_4 | [yellow-background]*Unknown (reserved)*
-| 0x00000008 | APFS_FS_ONEKEY | [yellow-background]*Unknown (one key?)*
-| 0x00000010 | APFS_FS_SPILLEDOVER | [yellow-background]*Unknown (spilled over?)*
-| 0x00000020 | APFS_FS_RUN_SPILLOVER_CLEANER | [yellow-background]*Unknown (spill over cleaner?)*
+| 0x0000000000000001 | APFS_FS_UNENCRYPTED | Volume is unencrypted
+| 0x0000000000000002 | APFS_FS_EFFACEABLE | [yellow-background]*Unknown (Volume supports effaceable storage?)*
+| 0x0000000000000004 | APFS_FS_RESERVED_4 | [yellow-background]*Unknown (reserved)*
+| 0x0000000000000008 | APFS_FS_ONEKEY | Volume uses software encryption with a single key (volume master key)
+| 0x0000000000000010 | APFS_FS_SPILLEDOVER | Volume has run out of allocated space on the solid-state drive
+| 0x0000000000000020 | APFS_FS_RUN_SPILLOVER_CLEANER | Volume has spilled over and the spillover cleaner must be run
 |===
 
 ==== [[volume_superblock_feature]]Volume superblock features
@@ -1262,9 +1262,9 @@ Contains 0 if not set
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000001 | APFS_FEATURE_DEFRAG_PRERELEASE | [yellow-background]*Unknown*
-| 0x00000002 | APFS_FEATURE_HARDLINK_MAP_RECORDS | [yellow-background]*Unknown*
-| 0x00000003 | APFS_FEATURE_DEFRAG | [yellow-background]*Unknown*
+| 0x0000000000000001 | APFS_FEATURE_DEFRAG_PRERELEASE | [yellow-background]*Unknown*
+| 0x0000000000000002 | APFS_FEATURE_HARDLINK_MAP_RECORDS | [yellow-background]*Unknown*
+| 0x0000000000000004 | APFS_FEATURE_DEFRAG | [yellow-background]*Unknown*
 |===
 
 ==== [[volume_read_only_feature_flags]]Volume read-only feature flags
@@ -1276,10 +1276,10 @@ Current no read-only feature flags are defined
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000001 | APFS_INCOMPAT_CASE_INSENSITIVE | [yellow-background]*Unknown (case-insensitive?)*
-| 0x00000002 | APFS_INCOMPAT_DATALESS_SNAPS | [yellow-background]*Unknown*
-| 0x00000004 | APFS_INCOMPAT_ENC_ROLLED | [yellow-background]*Unknown*
-| 0x00000008 | APFS_INCOMPAT_NORMALIZATION_INSENSITIVE | Is case insensitive
+| 0x0000000000000001 | APFS_INCOMPAT_CASE_INSENSITIVE | Filenames are case insensitive
+| 0x0000000000000002 | APFS_INCOMPAT_DATALESS_SNAPS | Volume contains one or more snapshots without data
+| 0x0000000000000004 | APFS_INCOMPAT_ENC_ROLLED | Encryption keys of the volume have been changed
+| 0x0000000000000008 | APFS_INCOMPAT_NORMALIZATION_INSENSITIVE | Filenames are normalization insensitive
 |===
 
 == [[file_system]]File system
@@ -1741,6 +1741,7 @@ A whiteout is a directory entry that covers up all entries of a particular name 
 
 The name hash of a directory entry is calculated as following:
 
+* If the file system is case-insensitive represent the name in lower-case
 * Represent the name as an Unicode string in Normalization Form Canonical Decomposition (NFD)
 * Format the Unicode string as a little-endian UTF-32 stream without a byte-order-mark or end-of-string character
 * Calculate a CRC-32c checksum of the UTF-32 stream with an initial checkum of 0xffffffff (-1)

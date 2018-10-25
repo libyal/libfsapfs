@@ -233,17 +233,18 @@ int libfsapfs_container_superblock_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function              = "libfsapfs_container_superblock_read_data";
-	size_t data_offset                 = 0;
-	uint64_t volume_object_identifier  = 0;
-	uint32_t maximum_number_of_volumes = 0;
-	uint32_t object_subtype            = 0;
-	uint32_t object_type               = 0;
-	int object_identifier_index        = 0;
+	static char *function               = "libfsapfs_container_superblock_read_data";
+	size_t data_offset                  = 0;
+	uint64_t incompatible_feature_flags = 0;
+	uint64_t volume_object_identifier   = 0;
+	uint32_t maximum_number_of_volumes  = 0;
+	uint32_t object_subtype             = 0;
+	uint32_t object_type                = 0;
+	int object_identifier_index         = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit               = 0;
-	uint32_t value_32bit               = 0;
+	uint64_t value_64bit                = 0;
+	uint32_t value_32bit                = 0;
 #endif
 
 	if( container_superblock == NULL )
@@ -349,6 +350,10 @@ int libfsapfs_container_superblock_read_data(
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_container_superblock_t *) data )->number_of_blocks,
 	 container_superblock->number_of_blocks );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_container_superblock_t *) data )->incompatible_features_flags,
+	 incompatible_feature_flags );
 
 	if( memory_copy(
 	     container_superblock->container_identifier,
@@ -475,6 +480,10 @@ int libfsapfs_container_superblock_read_data(
 		 "%s: compatible features flags\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
+		libfsapfs_debug_print_container_compatible_feature_flags(
+		 value_64bit );
+		libcnotify_printf(
+		 "\n" );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_container_superblock_t *) data )->read_only_compatible_features_flags,
@@ -483,14 +492,19 @@ int libfsapfs_container_superblock_read_data(
 		 "%s: read-only compatible features flags\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->incompatible_features_flags,
+		libfsapfs_debug_print_container_read_only_compatible_feature_flags(
 		 value_64bit );
+		libcnotify_printf(
+		 "\n" );
+
 		libcnotify_printf(
 		 "%s: incompatible features flags\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 incompatible_feature_flags );
+		libfsapfs_debug_print_container_incompatible_feature_flags(
+		 incompatible_feature_flags );
+		libcnotify_printf(
+		 "\n" );
 
 		if( libfsapfs_debug_print_guid_value(
 		     function,
@@ -760,6 +774,17 @@ int libfsapfs_container_superblock_read_data(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
+	if( ( incompatible_feature_flags & 0x0000000000000001 ) != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported format version 1.",
+		 function );
+
+		return( -1 );
+	}
 	if( container_superblock->block_size != 4096 )
 	{
 		libcerror_error_set(

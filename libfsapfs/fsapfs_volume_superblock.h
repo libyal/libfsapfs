@@ -215,15 +215,15 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t volume_identifier[ 16 ];
 
-	/* Unknown
+	/* The volume (last) modification date and time
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown30[ 8 ];
+	uint8_t modification_time[ 8 ];
 
-	/* Unknown
+	/* The volume flags
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown31[ 8 ];
+	uint8_t volume_flags[ 8 ];
 
 	/* Unknown
 	 * Consists of 32 bytes

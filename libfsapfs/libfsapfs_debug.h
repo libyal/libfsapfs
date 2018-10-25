@@ -43,17 +43,38 @@ void libfsapfs_debug_print_btree_node_flags(
 void libfsapfs_debug_print_checkpoint_flags(
       uint32_t checkpoint_flags );
 
+void libfsapfs_debug_print_container_compatible_feature_flags(
+      uint64_t compatible_feature_flags );
+
+void libfsapfs_debug_print_container_incompatible_feature_flags(
+      uint64_t incompatible_feature_flags );
+
+void libfsapfs_debug_print_container_read_only_compatible_feature_flags(
+      uint64_t read_only_compatible_feature_flags );
+
 void libfsapfs_debug_print_directory_entry_flags(
       uint16_t directory_entry_flags );
 
-void libfsapfs_debug_print_extended_attributes_flags(
-      uint16_t extended_attributes_flags );
+void libfsapfs_debug_print_extended_attribute_flags(
+      uint16_t extended_attribute_flags );
 
 void libfsapfs_debug_print_extended_field_flags(
       uint8_t extended_field_flags );
 
 void libfsapfs_debug_print_inode_flags(
       uint64_t inode_flags );
+
+void libfsapfs_debug_print_volume_compatible_feature_flags(
+      uint64_t compatible_feature_flags );
+
+void libfsapfs_debug_print_volume_flags(
+      uint64_t volume_flags );
+
+void libfsapfs_debug_print_volume_incompatible_feature_flags(
+      uint64_t incompatible_feature_flags );
+
+void libfsapfs_debug_print_volume_read_only_compatible_feature_flags(
+      uint64_t read_only_compatible_feature_flags );
 
 const char *libfsapfs_debug_print_file_system_data_type(
              uint8_t file_system_data_type );

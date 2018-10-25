@@ -436,6 +436,10 @@ int libfsapfs_volume_superblock_read_data(
 		 "%s: compatible features flags\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
+		libfsapfs_debug_print_volume_compatible_feature_flags(
+		 value_64bit );
+		libcnotify_printf(
+		 "\n" );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->read_only_compatible_features_flags,
@@ -444,6 +448,10 @@ int libfsapfs_volume_superblock_read_data(
 		 "%s: read-only compatible features flags\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
+		libfsapfs_debug_print_volume_read_only_compatible_feature_flags(
+		 value_64bit );
+		libcnotify_printf(
+		 "\n" );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->incompatible_features_flags,
@@ -452,6 +460,10 @@ int libfsapfs_volume_superblock_read_data(
 		 "%s: incompatible features flags\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
+		libfsapfs_debug_print_volume_incompatible_feature_flags(
+		 value_64bit );
+		libcnotify_printf(
+		 "\n" );
 
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
@@ -675,8 +687,8 @@ int libfsapfs_volume_superblock_read_data(
 		}
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "unknown30\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown30,
+		     "modification time\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->modification_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
@@ -693,12 +705,16 @@ int libfsapfs_volume_superblock_read_data(
 			return( -1 );
 		}
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown31,
+		 ( (fsapfs_volume_superblock_t *) data )->volume_flags,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown31\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: volume flags\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
+		libfsapfs_debug_print_volume_flags(
+		 value_64bit );
+		libcnotify_printf(
+		 "\n" );
 
 		libcnotify_printf(
 		 "%s: unknown32:\n",
