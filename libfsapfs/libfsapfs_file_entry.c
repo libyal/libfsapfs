@@ -3266,23 +3266,19 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 		goto on_error;
 	}
-/* TODO what if data_stream_size < used_data_stream_size is the data stream compressed ? */
-	if( (size64_t) used_data_stream_size < data_stream_size )
+	if( libfdata_stream_set_mapped_size(
+	     internal_file_entry->data_stream,
+	     (size64_t) used_data_stream_size,
+	     error ) != 1 )
 	{
-		if( libfdata_stream_set_mapped_size(
-		     internal_file_entry->data_stream,
-		     (size64_t) used_data_stream_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set mapped size.",
-			 function );
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to set mapped size.",
+		 function );
 
-			goto on_error;
-		}
+		goto on_error;
 	}
 	return( 1 );
 
@@ -3712,6 +3708,7 @@ int libfsapfs_file_entry_get_size(
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_size";
+	int result                                           = 1;
 
 	if( file_entry == NULL )
 	{
@@ -3741,6 +3738,24 @@ int libfsapfs_file_entry_get_size(
 		return( -1 );
 	}
 #endif
+#ifdef TODO
+/* TODO this will speed up creation of a bodyfile */
+
+	if( libfsapfs_inode_get_data_stream_size(
+	     internal_file_entry->inode,
+	     size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve data stream size.",
+		 function );
+
+		result = -1;
+	}
+#else
 	if( internal_file_entry->data_stream == NULL )
 	{
 		if( libfsapfs_internal_file_entry_get_data_stream(
@@ -3771,6 +3786,7 @@ int libfsapfs_file_entry_get_size(
 
 		goto on_error;
 	}
+#endif /* TODO */
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_file_entry->read_write_lock,
@@ -3786,7 +3802,7 @@ int libfsapfs_file_entry_get_size(
 		return( -1 );
 	}
 #endif
-	return( 1 );
+	return( result );
 
 on_error:
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )

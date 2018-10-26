@@ -1535,6 +1535,7 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 | com.apple.decmpfs |
 | com.apple.FinderInfo |
 | com.apple.fs.symlink | Symbolic link
+| com.apple.quarantine |
 | com.apple.ResourceFork | Resource fork
 | com.apple.rootless |
 | com.apple.system.Security |

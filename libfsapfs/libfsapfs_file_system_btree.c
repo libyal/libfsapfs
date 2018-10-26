@@ -1775,14 +1775,19 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 #endif
 		file_system_identifier &= 0x0fffffffffffffffUL;
 
-		if( file_system_identifier >= parent_identifier )
+		compare_result = LIBUNA_COMPARE_LESS;
+
+		if( file_system_identifier > parent_identifier )
 		{
-			if( ( file_system_identifier != parent_identifier )
-			 || ( file_system_data_type != LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) )
+			compare_result = LIBUNA_COMPARE_GREATER;
+		}
+		else if( file_system_identifier == parent_identifier )
+		{
+			if( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
 			{
 				compare_result = LIBUNA_COMPARE_GREATER;
 			}
-			else
+			else if( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
 			{
 				if( libfsapfs_directory_record_initialize(
 				     &safe_directory_record,
@@ -1845,110 +1850,104 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 					goto on_error;
 				}
 			}
-			if( compare_result != LIBUNA_COMPARE_LESS )
-			{
-				if( ( previous_entry == NULL )
-				 || ( compare_result == LIBUNA_COMPARE_EQUAL ) )
-				{
-					previous_entry = entry;
-				}
-				if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
-				     file_system_btree,
-				     file_io_handle,
-				     previous_entry,
-				     &sub_node_block_number,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to determine sub node block number.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsapfs_file_system_btree_get_sub_node(
-				     file_system_btree,
-				     file_io_handle,
-				     sub_node_block_number,
-				     &sub_node,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-					 function,
-					 sub_node_block_number );
-
-					goto on_error;
-				}
-				is_leaf_node = libfsapfs_btree_node_is_leaf_node(
-				                sub_node,
-				                error );
-
-				if( is_leaf_node == -1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to determine if B-tree sub node is a leaf node.",
-					 function );
-
-					goto on_error;
-				}
-				if( is_leaf_node != 0 )
-				{
-					result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name(
-						  file_system_btree,
-						  sub_node,
-						  parent_identifier,
-						  utf8_string,
-						  utf8_string_length,
-						  name_hash,
-						  directory_record,
-						  error );
-				}
-				else
-				{
-					result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_name(
-						  file_system_btree,
-						  file_io_handle,
-						  sub_node,
-						  parent_identifier,
-						  utf8_string,
-						  utf8_string_length,
-						  name_hash,
-						  directory_record,
-						  error );
-				}
-				if( result == -1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve directory entry by name.",
-					 function );
-
-					goto on_error;
-				}
-				sub_node = NULL;
-			}
-			if( result != 0 )
-			{
-				break;
-			}
 		}
-		if( file_system_identifier > parent_identifier )
+		if( compare_result != LIBUNA_COMPARE_LESS )
 		{
+			if( ( previous_entry == NULL )
+			 || ( compare_result == LIBUNA_COMPARE_EQUAL ) )
+			{
+				previous_entry = entry;
+			}
 			break;
 		}
 		previous_entry = entry;
 	}
+	if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+	     file_system_btree,
+	     file_io_handle,
+	     previous_entry,
+	     &sub_node_block_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine sub node block number.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_system_btree_get_sub_node(
+	     file_system_btree,
+	     file_io_handle,
+	     sub_node_block_number,
+	     &sub_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+		 function,
+		 sub_node_block_number );
+
+		goto on_error;
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                sub_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree sub node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	if( is_leaf_node != 0 )
+	{
+		result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name(
+			  file_system_btree,
+			  sub_node,
+			  parent_identifier,
+			  utf8_string,
+			  utf8_string_length,
+			  name_hash,
+			  directory_record,
+			  error );
+	}
+	else
+	{
+		result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_name(
+			  file_system_btree,
+			  file_io_handle,
+			  sub_node,
+			  parent_identifier,
+			  utf8_string,
+			  utf8_string_length,
+			  name_hash,
+			  directory_record,
+			  error );
+	}
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve directory entry by name.",
+		 function );
+
+		goto on_error;
+	}
+	sub_node = NULL;
+
 	return( result );
 
 on_error:
@@ -2400,14 +2399,19 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 #endif
 		file_system_identifier &= 0x0fffffffffffffffUL;
 
-		if( file_system_identifier >= parent_identifier )
+		compare_result = LIBUNA_COMPARE_LESS;
+
+		if( file_system_identifier > parent_identifier )
 		{
-			if( ( file_system_identifier != parent_identifier )
-			 || ( file_system_data_type != LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) )
+			compare_result = LIBUNA_COMPARE_GREATER;
+		}
+		else if( file_system_identifier == parent_identifier )
+		{
+			if( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
 			{
 				compare_result = LIBUNA_COMPARE_GREATER;
 			}
-			else
+			else if( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
 			{
 				if( libfsapfs_directory_record_initialize(
 				     &safe_directory_record,
@@ -2470,110 +2474,104 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 					goto on_error;
 				}
 			}
-			if( compare_result != LIBUNA_COMPARE_LESS )
-			{
-				if( ( previous_entry == NULL )
-				 || ( compare_result == LIBUNA_COMPARE_EQUAL ) )
-				{
-					previous_entry = entry;
-				}
-				if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
-				     file_system_btree,
-				     file_io_handle,
-				     previous_entry,
-				     &sub_node_block_number,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to determine sub node block number.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsapfs_file_system_btree_get_sub_node(
-				     file_system_btree,
-				     file_io_handle,
-				     sub_node_block_number,
-				     &sub_node,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-					 function,
-					 sub_node_block_number );
-
-					goto on_error;
-				}
-				is_leaf_node = libfsapfs_btree_node_is_leaf_node(
-				                sub_node,
-				                error );
-
-				if( is_leaf_node == -1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to determine if B-tree sub node is a leaf node.",
-					 function );
-
-					goto on_error;
-				}
-				if( is_leaf_node != 0 )
-				{
-					result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name(
-						  file_system_btree,
-						  sub_node,
-						  parent_identifier,
-						  utf16_string,
-						  utf16_string_length,
-						  name_hash,
-						  directory_record,
-						  error );
-				}
-				else
-				{
-					result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_name(
-						  file_system_btree,
-						  file_io_handle,
-						  sub_node,
-						  parent_identifier,
-						  utf16_string,
-						  utf16_string_length,
-						  name_hash,
-						  directory_record,
-						  error );
-				}
-				if( result == -1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve directory entry by name.",
-					 function );
-
-					goto on_error;
-				}
-				sub_node = NULL;
-			}
-			if( result != 0 )
-			{
-				break;
-			}
 		}
-		if( file_system_identifier > parent_identifier )
+		if( compare_result != LIBUNA_COMPARE_LESS )
 		{
+			if( ( previous_entry == NULL )
+			 || ( compare_result == LIBUNA_COMPARE_EQUAL ) )
+			{
+				previous_entry = entry;
+			}
 			break;
 		}
 		previous_entry = entry;
 	}
+	if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+	     file_system_btree,
+	     file_io_handle,
+	     previous_entry,
+	     &sub_node_block_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine sub node block number.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_system_btree_get_sub_node(
+	     file_system_btree,
+	     file_io_handle,
+	     sub_node_block_number,
+	     &sub_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+		 function,
+		 sub_node_block_number );
+
+		goto on_error;
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                sub_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree sub node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	if( is_leaf_node != 0 )
+	{
+		result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name(
+			  file_system_btree,
+			  sub_node,
+			  parent_identifier,
+			  utf16_string,
+			  utf16_string_length,
+			  name_hash,
+			  directory_record,
+			  error );
+	}
+	else
+	{
+		result = libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_name(
+			  file_system_btree,
+			  file_io_handle,
+			  sub_node,
+			  parent_identifier,
+			  utf16_string,
+			  utf16_string_length,
+			  name_hash,
+			  directory_record,
+			  error );
+	}
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve directory entry by name.",
+		 function );
+
+		goto on_error;
+	}
+	sub_node = NULL;
+
 	return( result );
 
 on_error:
@@ -2609,9 +2607,9 @@ int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 	uint64_t lookup_identifier                     = 0;
 	int btree_entry_index                          = 0;
 	int entry_index                                = 0;
+	int found_directory_entry                      = 0;
 	int is_leaf_node                               = 0;
 	int number_of_entries                          = 0;
-	int result                                     = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint8_t file_system_data_type                  = 0;
@@ -2820,9 +2818,9 @@ int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 		}
 		directory_record = NULL;
 
-		result = 1;
+		found_directory_entry = 1;
 	}
-	return( result );
+	return( found_directory_entry );
 
 on_error:
 	if( directory_record != NULL )
@@ -2858,6 +2856,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 	uint64_t sub_node_block_number          = 0;
 	uint8_t file_system_data_type           = 0;
 	int entry_index                         = 0;
+	int found_directory_entry               = 0;
 	int is_leaf_node                        = 0;
 	int number_of_entries                   = 0;
 	int result                              = 0;
@@ -2997,14 +2996,15 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 #endif
 		file_system_identifier &= 0x0fffffffffffffffUL;
 
-		if( file_system_identifier >= parent_identifier )
+		if( ( file_system_identifier > parent_identifier )
+		 || ( ( file_system_identifier == parent_identifier )
+		  &&  ( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
 		{
-			if( ( previous_entry == NULL )
-			 || ( ( file_system_identifier == parent_identifier )
-			  &&  ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
-			{
-				previous_entry = entry;
-			}
+			break;
+		}
+		if( ( file_system_identifier == parent_identifier )
+		 && ( previous_entry != NULL ) )
+		{
 			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
 			     file_system_btree,
 			     file_io_handle,
@@ -3084,15 +3084,98 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 
 				goto on_error;
 			}
+			else if( result != 0 )
+			{
+				found_directory_entry = 1;
+			}
 			sub_node = NULL;
-		}
-		if( file_system_identifier > parent_identifier )
-		{
-			break;
 		}
 		previous_entry = entry;
 	}
-	return( result );
+	if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+	     file_system_btree,
+	     file_io_handle,
+	     previous_entry,
+	     &sub_node_block_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine sub node block number.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_system_btree_get_sub_node(
+	     file_system_btree,
+	     file_io_handle,
+	     sub_node_block_number,
+	     &sub_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+		 function,
+		 sub_node_block_number );
+
+		goto on_error;
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                sub_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree sub node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	if( is_leaf_node != 0 )
+	{
+		result = libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
+		          file_system_btree,
+		          sub_node,
+		          parent_identifier,
+		          directory_entries,
+		          error );
+	}
+	else
+	{
+		result = libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
+		          file_system_btree,
+		          file_io_handle,
+		          sub_node,
+		          parent_identifier,
+		          directory_entries,
+		          error );
+	}
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve directory entries: %" PRIu64 " from file system B-tree sub node.",
+		 function,
+		 parent_identifier );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		found_directory_entry = 1;
+	}
+	return( found_directory_entry );
 
 on_error:
 	libcdata_array_empty(
@@ -3269,13 +3352,13 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves extended attributes for a specific parent identifier from the file system B-tree leaf node
+/* Retrieves extended attributes for a specific identifier from the file system B-tree leaf node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
 int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_btree_node_t *node,
-     uint64_t parent_identifier,
+     uint64_t identifier,
      libcdata_array_t *extended_attributes,
      libcerror_error_t **error )
 {
@@ -3286,9 +3369,9 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 	uint64_t lookup_identifier                         = 0;
 	int btree_entry_index                              = 0;
 	int entry_index                                    = 0;
+	int found_extended_attribute                       = 0;
 	int is_leaf_node                                   = 0;
 	int number_of_entries                              = 0;
-	int result                                         = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint8_t file_system_data_type                      = 0;
@@ -3348,7 +3431,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		libcnotify_printf(
 		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
 		 function,
-		 parent_identifier );
+		 identifier );
 	}
 #endif
 	if( libfsapfs_btree_node_get_number_of_entries(
@@ -3365,7 +3448,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 
 		goto on_error;
 	}
-	lookup_identifier = ( (uint64_t) LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_EXTENDED_ATTRIBUTE << 60 ) | parent_identifier;
+	lookup_identifier = ( (uint64_t) LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_EXTENDED_ATTRIBUTE << 60 ) | identifier;
 
 	for( btree_entry_index = 0;
 	     btree_entry_index < number_of_entries;
@@ -3429,7 +3512,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 			  file_system_data_type ) );
 		}
 #endif
-		if( ( file_system_identifier & 0x0fffffffffffffffUL ) > parent_identifier )
+		if( ( file_system_identifier & 0x0fffffffffffffffUL ) > identifier )
 		{
 			break;
 		}
@@ -3497,9 +3580,9 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		}
 		extended_attribute = NULL;
 
-		result = 1;
+		found_extended_attribute = 1;
 	}
-	return( result );
+	return( found_extended_attribute );
 
 on_error:
 	if( extended_attribute != NULL )
@@ -3516,14 +3599,14 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves extended attributes for a specific parent identifier from the file system B-tree branch node
+/* Retrieves extended attributes for a specific identifier from the file system B-tree branch node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
 int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
-     uint64_t parent_identifier,
+     uint64_t identifier,
      libcdata_array_t *extended_attributes,
      libcerror_error_t **error )
 {
@@ -3535,6 +3618,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 	uint64_t sub_node_block_number          = 0;
 	uint8_t file_system_data_type           = 0;
 	int entry_index                         = 0;
+	int found_extended_attribute            = 0;
 	int is_leaf_node                        = 0;
 	int number_of_entries                   = 0;
 	int result                              = 0;
@@ -3593,7 +3677,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 		libcnotify_printf(
 		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
 		 function,
-		 parent_identifier );
+		 identifier );
 	}
 #endif
 	if( libfsapfs_btree_node_get_number_of_entries(
@@ -3674,18 +3758,19 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 #endif
 		file_system_identifier &= 0x0fffffffffffffffUL;
 
-		if( file_system_identifier >= parent_identifier )
+		if( ( file_system_identifier > identifier )
+		 || ( ( file_system_identifier == identifier )
+		  &&  ( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_EXTENDED_ATTRIBUTE ) ) )
 		{
-			if( ( previous_entry == NULL )
-			 || ( ( file_system_identifier == parent_identifier )
-			  &&  ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
-			{
-				previous_entry = entry;
-			}
+			break;
+		}
+		if( ( file_system_identifier == identifier )
+		 && ( previous_entry != NULL ) )
+		{
 			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
 			     file_system_btree,
 			     file_io_handle,
-			     previous_entry,
+			     entry,
 			     &sub_node_block_number,
 			     error ) != 1 )
 			{
@@ -3735,7 +3820,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 				result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 				          file_system_btree,
 				          sub_node,
-				          parent_identifier,
+				          identifier,
 				          extended_attributes,
 				          error );
 			}
@@ -3745,7 +3830,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 				          file_system_btree,
 				          file_io_handle,
 				          sub_node,
-				          parent_identifier,
+				          identifier,
 				          extended_attributes,
 				          error );
 			}
@@ -3757,19 +3842,102 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree sub node.",
 				 function,
-				 parent_identifier );
+				 identifier );
 
 				goto on_error;
 			}
+			else if( result != 0 )
+			{
+				found_extended_attribute = 1;
+			}
 			sub_node = NULL;
-		}
-		if( file_system_identifier > parent_identifier )
-		{
-			break;
 		}
 		previous_entry = entry;
 	}
-	return( result );
+	if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+	     file_system_btree,
+	     file_io_handle,
+	     previous_entry,
+	     &sub_node_block_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine sub node block number.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_system_btree_get_sub_node(
+	     file_system_btree,
+	     file_io_handle,
+	     sub_node_block_number,
+	     &sub_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+		 function,
+		 sub_node_block_number );
+
+		goto on_error;
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                sub_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree sub node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	if( is_leaf_node != 0 )
+	{
+		result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+		          file_system_btree,
+		          sub_node,
+		          identifier,
+		          extended_attributes,
+		          error );
+	}
+	else
+	{
+		result = libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+		          file_system_btree,
+		          file_io_handle,
+		          sub_node,
+		          identifier,
+		          extended_attributes,
+		          error );
+	}
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree sub node.",
+		 function,
+		 identifier );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		found_extended_attribute = 1;
+	}
+	return( found_extended_attribute );
 
 on_error:
 	libcdata_array_empty(
@@ -3780,13 +3948,13 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves extended attributes for a specific parent identifier from the file system B-tree
+/* Retrieves extended attributes for a specific identifier from the file system B-tree
  * Returns 1 if successful, 0 if not found or -1 on error
  */
 int libfsapfs_file_system_btree_get_extended_attributes(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
-     uint64_t parent_identifier,
+     uint64_t identifier,
      libcdata_array_t *extended_attributes,
      libcerror_error_t **error )
 {
@@ -3836,7 +4004,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 		libcnotify_printf(
 		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
 		 function,
-		 parent_identifier );
+		 identifier );
 	}
 #endif
 	if( libfsapfs_file_system_btree_get_root_node(
@@ -3886,7 +4054,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 		result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		          file_system_btree,
 		          root_node,
-		          parent_identifier,
+		          identifier,
 		          extended_attributes,
 		          error );
 	}
@@ -3896,7 +4064,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 		          file_system_btree,
 		          file_io_handle,
 		          root_node,
-		          parent_identifier,
+		          identifier,
 		          extended_attributes,
 		          error );
 	}
@@ -3908,7 +4076,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree root node.",
 		 function,
-		 parent_identifier );
+		 identifier );
 
 		goto on_error;
 	}
@@ -3963,9 +4131,9 @@ int libfsapfs_file_system_btree_get_file_extents_from_leaf_node(
 	uint64_t lookup_identifier           = 0;
 	int btree_entry_index                = 0;
 	int entry_index                      = 0;
+	int found_file_extent                = 0;
 	int is_leaf_node                     = 0;
 	int number_of_entries                = 0;
-	int result                           = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint8_t file_system_data_type        = 0;
@@ -4163,9 +4331,9 @@ int libfsapfs_file_system_btree_get_file_extents_from_leaf_node(
 		}
 		file_extent = NULL;
 
-		result = 1;
+		found_file_extent = 1;
 	}
-	return( result );
+	return( found_file_extent );
 
 on_error:
 	if( file_extent != NULL )
@@ -4182,7 +4350,7 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves file extents for a specific parent identifier from the file system B-tree branch node
+/* Retrieves file extents for a specific identifier from the file system B-tree branch node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
 int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
@@ -4197,10 +4365,12 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 	libfsapfs_btree_entry_t *previous_entry = NULL;
 	libfsapfs_btree_node_t *sub_node        = NULL;
 	static char *function                   = "libfsapfs_file_system_btree_get_file_extents_from_branch_node";
+	uint64_t file_extent_logical_address    = 0;
 	uint64_t file_system_identifier         = 0;
 	uint64_t sub_node_block_number          = 0;
 	uint8_t file_system_data_type           = 0;
 	int entry_index                         = 0;
+	int found_file_extent                   = 0;
 	int is_leaf_node                        = 0;
 	int number_of_entries                   = 0;
 	int result                              = 0;
@@ -4340,14 +4510,27 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 #endif
 		file_system_identifier &= 0x0fffffffffffffffUL;
 
-		if( file_system_identifier >= identifier )
+		if( ( file_system_identifier > identifier )
+		 || ( ( file_system_identifier == identifier )
+		  &&  ( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_FILE_EXTENT ) ) )
 		{
-			if( ( previous_entry == NULL )
-			 || ( ( file_system_identifier == identifier )
-			  &&  ( file_system_data_type <= LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_FILE_EXTENT ) ) )
-			{
-				previous_entry = entry;
-			}
+			break;
+		}
+		if( ( file_system_identifier == identifier )
+		 && ( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_FILE_EXTENT ) )
+		{
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsapfs_file_system_btree_key_file_extent_t *) entry->key_data )->logical_address,
+			 file_extent_logical_address );
+		}
+		else
+		{
+			file_extent_logical_address = 0;
+		}
+		if( ( file_system_identifier == identifier )
+		 && ( file_extent_logical_address > 0 )
+		 && ( previous_entry != NULL ) )
+		{
 			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
 			     file_system_btree,
 			     file_io_handle,
@@ -4427,15 +4610,100 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 
 				goto on_error;
 			}
+			else if( result != 0 )
+			{
+				found_file_extent = 1;
+			}
 			sub_node = NULL;
-		}
-		if( file_system_identifier > identifier )
-		{
-			break;
 		}
 		previous_entry = entry;
 	}
-	return( result );
+	/* Fall-through for the last B-Tree entry
+	 */
+	if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
+	     file_system_btree,
+	     file_io_handle,
+	     previous_entry,
+	     &sub_node_block_number,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine sub node block number.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_system_btree_get_sub_node(
+	     file_system_btree,
+	     file_io_handle,
+	     sub_node_block_number,
+	     &sub_node,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+		 function,
+		 sub_node_block_number );
+
+		goto on_error;
+	}
+	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
+	                sub_node,
+	                error );
+
+	if( is_leaf_node == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if B-tree sub node is a leaf node.",
+		 function );
+
+		goto on_error;
+	}
+	if( is_leaf_node != 0 )
+	{
+		result = libfsapfs_file_system_btree_get_file_extents_from_leaf_node(
+		          file_system_btree,
+		          sub_node,
+		          identifier,
+		          file_extents,
+		          error );
+	}
+	else
+	{
+		result = libfsapfs_file_system_btree_get_file_extents_from_branch_node(
+		          file_system_btree,
+		          file_io_handle,
+		          sub_node,
+		          identifier,
+		          file_extents,
+		          error );
+	}
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file extents: %" PRIu64 " from file system B-tree sub node.",
+		 function,
+		 identifier );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		found_file_extent = 1;
+	}
+	return( found_file_extent );
 
 on_error:
 	libcdata_array_empty(

@@ -192,7 +192,7 @@ int libfsapfs_file_system_btree_get_directory_entries(
 int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_btree_node_t *node,
-     uint64_t parent_identifier,
+     uint64_t identifier,
      libcdata_array_t *extended_attributes,
      libcerror_error_t **error );
 
@@ -200,7 +200,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
-     uint64_t parent_identifier,
+     uint64_t identifier,
      libcdata_array_t *extended_attributes,
      libcerror_error_t **error );
 

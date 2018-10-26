@@ -1,11 +1,12 @@
 TODO
+* Add support for sparse files
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
+* add support for case folding
 * Add container data handle? Add decryption support and use it to read container key bag?
 * rename volume data handle to container data handle?
 * add snapshot support
 
 library:
-* add support for case folding
 * improve file content read support
 ** encrypted file content read support - detect block identifier mismatch
 ** compressed file content read support?
