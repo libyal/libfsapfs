@@ -35,12 +35,16 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
      uint32_t *name_hash,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint8_t use_case_folding,
      libcerror_error_t **error )
 {
-	uint8_t *utf32_stream        = NULL;
-	static char *function        = "libfsapfs_name_hash_calculate_from_utf8_string";
-	size_t utf32_stream_size     = 0;
-	uint32_t calculated_checksum = 0;
+	uint8_t *utf32_stream                        = NULL;
+	static char *function                        = "libfsapfs_name_hash_calculate_from_utf8_string";
+	size_t utf32_stream_index                    = 0;
+	size_t utf32_stream_size                     = 0;
+	size_t utf8_string_index                     = 0;
+	libuna_unicode_character_t unicode_character = 0;
+	uint32_t calculated_checksum                 = 0;
 
 	if( name_hash == NULL )
 	{
@@ -68,6 +72,8 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 
 		goto on_error;
 	}
+	utf32_stream_size -= 4;
+
 	utf32_stream = (uint8_t *) memory_allocate(
 	                            sizeof( uint8_t ) * utf32_stream_size );
 
@@ -82,22 +88,51 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 
 		goto on_error;
 	}
-	if( libuna_utf32_stream_copy_from_utf8(
-	     utf32_stream,
-	     utf32_stream_size,
-	     LIBUNA_ENDIAN_LITTLE,
-	     utf8_string,
-	     utf8_string_length,
-	     error ) != 1 )
+	while( utf8_string_index < utf8_string_length )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-32 stream.",
-		 function );
+		if( libuna_unicode_character_copy_from_utf8(
+		     &unicode_character,
+		     utf8_string,
+		     utf8_string_length,
+		     &utf8_string_index,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_CONVERSION,
+			 LIBCERROR_CONVERSION_ERROR_INPUT_FAILED,
+			 "%s: unable to copy Unicode character from UTF-8 string.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+/* TODO add NFD support */
+		if( use_case_folding != 0 )
+		{
+/* TODO add case folding */
+			unicode_character  = towlower( unicode_character );
+		}
+		if( libuna_unicode_character_copy_to_utf32_stream(
+		     unicode_character,
+		     utf32_stream,
+		     utf32_stream_size,
+		     &utf32_stream_index,
+		     LIBUNA_ENDIAN_LITTLE,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_CONVERSION,
+			 LIBCERROR_CONVERSION_ERROR_OUTPUT_FAILED,
+			 "%s: unable to copy Unicode character to UTF-32 stream.",
+			 function );
+
+			goto on_error;
+		}
+		if( unicode_character == 0 )
+		{
+			break;
+		}
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -106,15 +141,15 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 		 "%s: UTF-32 stream data:\n",
 		 function );
 		libcnotify_print_data(
-		 &( utf32_stream[ 4 ] ),
-		 utf32_stream_size - 4,
+		 utf32_stream,
+		 utf32_stream_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
 	if( libfsapfs_checksum_calculate_weak_crc32(
 	     &calculated_checksum,
-	     &( utf32_stream[ 4 ] ),
-	     utf32_stream_size - 4,
+	     utf32_stream,
+	     utf32_stream_size,
 	     0xffffffffUL,
 	     error ) != 1 )
 	{
@@ -168,12 +203,16 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
      uint32_t *name_hash,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint8_t use_case_folding,
      libcerror_error_t **error )
 {
-	uint8_t *utf32_stream        = NULL;
-	static char *function        = "libfsapfs_name_hash_calculate_from_utf16_string";
-	size_t utf32_stream_size     = 0;
-	uint32_t calculated_checksum = 0;
+	uint8_t *utf32_stream                        = NULL;
+	static char *function                        = "libfsapfs_name_hash_calculate_from_utf16_string";
+	size_t utf16_string_index                    = 0;
+	size_t utf32_stream_index                    = 0;
+	size_t utf32_stream_size                     = 0;
+	libuna_unicode_character_t unicode_character = 0;
+	uint32_t calculated_checksum                 = 0;
 
 	if( name_hash == NULL )
 	{
@@ -201,6 +240,8 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 
 		goto on_error;
 	}
+	utf32_stream_size -= 4;
+
 	utf32_stream = (uint8_t *) memory_allocate(
 	                            sizeof( uint8_t ) * utf32_stream_size );
 
@@ -215,22 +256,51 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 
 		goto on_error;
 	}
-	if( libuna_utf32_stream_copy_from_utf16(
-	     utf32_stream,
-	     utf32_stream_size,
-	     LIBUNA_ENDIAN_LITTLE,
-	     utf16_string,
-	     utf16_string_length,
-	     error ) != 1 )
+	while( utf16_string_index < utf16_string_length )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-32 stream.",
-		 function );
+		if( libuna_unicode_character_copy_from_utf16(
+		     &unicode_character,
+		     utf16_string,
+		     utf16_string_length,
+		     &utf16_string_index,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_CONVERSION,
+			 LIBCERROR_CONVERSION_ERROR_INPUT_FAILED,
+			 "%s: unable to copy Unicode character from UTF-16 string.",
+			 function );
 
-		goto on_error;
+			goto on_error;
+		}
+/* TODO add NFD support */
+		if( use_case_folding != 0 )
+		{
+/* TODO add case folding */
+			unicode_character  = towlower( unicode_character );
+		}
+		if( libuna_unicode_character_copy_to_utf32_stream(
+		     unicode_character,
+		     utf32_stream,
+		     utf32_stream_size,
+		     &utf32_stream_index,
+		     LIBUNA_ENDIAN_LITTLE,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_CONVERSION,
+			 LIBCERROR_CONVERSION_ERROR_OUTPUT_FAILED,
+			 "%s: unable to copy Unicode character to UTF-32 stream.",
+			 function );
+
+			goto on_error;
+		}
+		if( unicode_character == 0 )
+		{
+			break;
+		}
 	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -239,15 +309,15 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 		 "%s: UTF-32 stream data:\n",
 		 function );
 		libcnotify_print_data(
-		 &( utf32_stream[ 4 ] ),
-		 utf32_stream_size - 4,
+		 utf32_stream,
+		 utf32_stream_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
 	if( libfsapfs_checksum_calculate_weak_crc32(
 	     &calculated_checksum,
-	     &( utf32_stream[ 4 ] ),
-	     utf32_stream_size - 4,
+	     utf32_stream,
+	     utf32_stream_size,
 	     0xffffffffUL,
 	     error ) != 1 )
 	{

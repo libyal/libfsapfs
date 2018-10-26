@@ -4871,6 +4871,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 	     &name_hash,
 	     utf8_string,
 	     utf8_string_length,
+	     file_system_btree->use_case_folding,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -5225,6 +5226,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 			     &name_hash,
 			     utf8_string_segment,
 			     utf8_string_segment_length,
+			     file_system_btree->use_case_folding,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -5523,6 +5525,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 	     &name_hash,
 	     utf16_string,
 	     utf16_string_length,
+	     file_system_btree->use_case_folding,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -5877,6 +5880,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 			     &name_hash,
 			     utf16_string_segment,
 			     utf16_string_segment_length,
+			     file_system_btree->use_case_folding,
 			     error ) != 1 )
 			{
 				libcerror_error_set(

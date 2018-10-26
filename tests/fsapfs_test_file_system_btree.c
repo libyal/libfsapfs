@@ -320,6 +320,7 @@ int fsapfs_test_file_system_btree_initialize(
 	          NULL,
 	          NULL,
 	          0,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -360,6 +361,7 @@ int fsapfs_test_file_system_btree_initialize(
 	          NULL,
 	          NULL,
 	          0,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -381,6 +383,7 @@ int fsapfs_test_file_system_btree_initialize(
 	          NULL,
 	          NULL,
 	          NULL,
+	          0,
 	          0,
 	          &error );
 
@@ -413,6 +416,7 @@ int fsapfs_test_file_system_btree_initialize(
 		          NULL,
 		          NULL,
 		          NULL,
+		          0,
 		          0,
 		          &error );
 
@@ -459,6 +463,7 @@ int fsapfs_test_file_system_btree_initialize(
 		          NULL,
 		          NULL,
 		          NULL,
+		          0,
 		          0,
 		          &error );
 

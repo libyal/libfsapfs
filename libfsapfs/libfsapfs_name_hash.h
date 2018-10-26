@@ -35,12 +35,14 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
      uint32_t *name_hash,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint8_t use_case_folding,
      libcerror_error_t **error );
 
 int libfsapfs_name_hash_calculate_from_utf16_string(
      uint32_t *name_hash,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint8_t use_case_folding,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

@@ -20,7 +20,6 @@ library:
 
 Python bindings:
 * add extents object
-* add support for posix time in nano seconds
 
 Tools:
 * fsapfsinfo tool
@@ -40,6 +39,7 @@ Tests:
 * add tests for container_key_bag
 * add tests for volume_key_bag
 * add tests for key_encrypted_key
+* add tests for Unicode filenames
 
 20180907
 * see `git log' for more recent change log
