@@ -2501,108 +2501,6 @@ on_error:
 	return( -1 );
 }
 
-/* Prints file entry information
- * Returns 1 if successful, 0 if not or -1 on error
- */
-int info_handle_file_entry_fprint(
-     info_handle_t *info_handle,
-     int volume_index,
-     libfsapfs_volume_t *volume,
-     uint64_t file_system_identifier,
-     libcerror_error_t **error )
-{
-	libfsapfs_file_entry_t *file_entry = NULL;
-	static char *function              = "info_handle_file_entry_fprint";
-	int result                         = 0;
-
-	if( info_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid info handle.",
-		 function );
-
-		return( -1 );
-	}
-	result = libfsapfs_volume_get_file_entry_by_identifier(
-	          volume,
-	          file_system_identifier,
-	          &file_entry,
-	          error );
-
-	if( result == -1 )
-	{
-		if( ( error != NULL )
-		 && ( *error != NULL ) )
-		{
-			libcnotify_print_error_backtrace(
-			 *error );
-		}
-		libcerror_error_free(
-		 error );
-
-		fprintf(
-		 info_handle->notify_stream,
-		 "Error reading file entry: %" PRIu64 "\n\n",
-		 file_system_identifier );
-
-		return( 0 );
-	}
-	else if( result == 0 )
-	{
-		return( 0 );
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "Inode: %" PRIu64 ":\n",
-	 file_system_identifier );
-
-	if( info_handle_file_entry_value_fprint(
-	     info_handle,
-	     file_entry,
-	     NULL,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print file entry.",
-		 function );
-
-		return( -1 );
-	}
-	if( libfsapfs_file_entry_free(
-	     &file_entry,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free file entry.",
-		 function );
-
-		goto on_error;
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
-
-	return( 1 );
-
-on_error:
-	if( file_entry != NULL )
-	{
-		libfsapfs_file_entry_free(
-		 &file_entry,
-		 NULL );
-	}
-	return( -1 );
-}
-
 /* Prints the file entry information for a specific identifier
  * Returns 1 if successful, 0 if not or -1 on error
  */
@@ -2611,10 +2509,12 @@ int info_handle_file_entry_fprint_by_identifier(
      uint64_t file_system_identifier,
      libcerror_error_t **error )
 {
-	libfsapfs_volume_t *volume = NULL;
-	static char *function      = "info_handle_file_entry_fprint_by_identifier";
-	int number_of_volumes      = 0;
-	int volume_index           = 0;
+	libfsapfs_file_entry_t *file_entry = NULL;
+	libfsapfs_volume_t *volume         = NULL;
+	static char *function              = "info_handle_file_entry_fprint_by_identifier";
+	int number_of_volumes              = 0;
+	int result                         = 0;
+	int volume_index                   = 0;
 
 	if( info_handle == NULL )
 	{
@@ -2678,26 +2578,72 @@ int info_handle_file_entry_fprint_by_identifier(
 
 		goto on_error;
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "Apple File System (APFS) information:\n\n" );
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "Apple File System (APFS) information:\n\n" );
+	}
+	result = libfsapfs_volume_get_file_entry_by_identifier(
+	          volume,
+	          file_system_identifier,
+	          &file_entry,
+	          error );
 
-	if( info_handle_file_entry_fprint(
-	     info_handle,
-	     volume_index,
-	     volume,
-	     file_system_identifier,
-	     error ) != 1 )
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-		 "%s: unable to print file entry: %" PRIu64 ".",
+		 "%s: unable to retrieve file entry: %" PRIu64 ".",
 		 function,
 		 file_system_identifier );
 
-		return( -1 );
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		if( info_handle->bodyfile_stream == NULL )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "File entry:\n" );
+		}
+		if( info_handle_file_entry_value_fprint(
+		     info_handle,
+		     file_entry,
+		     NULL,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print file entry.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_file_entry_free(
+		     &file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file entry.",
+			 function );
+
+			goto on_error;
+		}
+		if( info_handle->bodyfile_stream == NULL )
+		{
+			fprintf(
+			 info_handle->notify_stream,
+			 "\n" );
+		}
 	}
 	if( libfsapfs_volume_free(
 	     &volume,
@@ -2712,9 +2658,15 @@ int info_handle_file_entry_fprint_by_identifier(
 
 		goto on_error;
 	}
-	return( 1 );
+	return( result );
 
 on_error:
+	if( file_entry != NULL )
+	{
+		libfsapfs_file_entry_free(
+		 &file_entry,
+		 NULL );
+	}
 	if( volume != NULL )
 	{
 		libfsapfs_volume_free(
@@ -2842,19 +2794,21 @@ int info_handle_file_entry_fprint_by_path(
 
 		goto on_error;
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "Apple File System (APFS) information:\n\n" );
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "Apple File System (APFS) information:\n\n" );
 
-	fprintf(
-	 info_handle->notify_stream,
-	 "File entry:\n" );
+		fprintf(
+		 info_handle->notify_stream,
+		 "File entry:\n" );
 
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tPath\t\t\t: %" PRIs_SYSTEM "\n",
-	 path );
-
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tPath\t\t\t: %" PRIs_SYSTEM "\n",
+		 path );
+	}
 	if( info_handle_file_entry_value_fprint(
 	     info_handle,
 	     file_entry,
@@ -2896,10 +2850,12 @@ int info_handle_file_entry_fprint_by_path(
 
 		goto on_error;
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
-
+	if( info_handle->bodyfile_stream == NULL )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "\n" );
+	}
 	return( 1 );
 
 on_error:
@@ -2925,6 +2881,7 @@ int info_handle_file_entries_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error )
 {
+	libfsapfs_file_entry_t *file_entry  = NULL;
 	libfsapfs_volume_t *volume          = NULL;
 	static char *function               = "info_handle_file_entries_fprint";
 	uint64_t file_system_identifier     = 0;
@@ -3017,11 +2974,10 @@ int info_handle_file_entries_fprint(
 	     file_system_identifier < next_file_entry_identifier;
 	     file_system_identifier++ )
 	{
-		result = info_handle_file_entry_fprint(
-		          info_handle,
-		          volume_index,
+		result = libfsapfs_volume_get_file_entry_by_identifier(
 		          volume,
 		          file_system_identifier,
+		          &file_entry,
 		          error );
 
 		if( result == -1 )
@@ -3030,11 +2986,42 @@ int info_handle_file_entries_fprint(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print file entry: %" PRIu64 ".",
+			 "%s: unable to retrieve file entry: %" PRIu64 ".",
 			 function,
 			 file_system_identifier );
 
-			return( -1 );
+			goto on_error;
+		}
+		else if( result != 0 )
+		{
+			if( info_handle_file_entry_value_fprint(
+			     info_handle,
+			     file_entry,
+			     NULL,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+				 "%s: unable to print file entry.",
+				 function );
+
+				return( -1 );
+			}
+			if( libfsapfs_file_entry_free(
+			     &file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free file entry.",
+				 function );
+
+				goto on_error;
+			}
 		}
 	}
 	if( libfsapfs_volume_free(
@@ -3053,6 +3040,12 @@ int info_handle_file_entries_fprint(
 	return( 1 );
 
 on_error:
+	if( file_entry != NULL )
+	{
+		libfsapfs_file_entry_free(
+		 &file_entry,
+		 NULL );
+	}
 	if( volume != NULL )
 	{
 		libfsapfs_volume_free(

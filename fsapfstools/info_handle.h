@@ -170,13 +170,6 @@ int info_handle_file_system_hierarchy_fprint(
      info_handle_t *info_handle,
      libcerror_error_t **error );
 
-int info_handle_file_entry_fprint(
-     info_handle_t *info_handle,
-     int volume_index,
-     libfsapfs_volume_t *volume,
-     uint64_t file_system_identifier,
-     libcerror_error_t **error );
-
 int info_handle_file_entry_fprint_by_identifier(
      info_handle_t *info_handle,
      uint64_t file_system_identifier,
