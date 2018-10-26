@@ -68,6 +68,10 @@ struct libfsapfs_file_system_btree
 	/* The block number of B-tree root node
 	 */
 	uint64_t root_node_block_number;
+
+	/* Flag to indicate case folding should be used
+	 */
+	uint8_t use_case_folding;
 };
 
 int libfsapfs_file_system_btree_initialize(
@@ -76,6 +80,7 @@ int libfsapfs_file_system_btree_initialize(
      libfdata_vector_t *data_block_vector,
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t root_node_block_number,
+     uint8_t use_case_folding,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_free(

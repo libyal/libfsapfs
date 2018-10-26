@@ -78,6 +78,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_libfguid.h \
 	libfsapfs_libhmac.h \
 	libfsapfs_libuna.h \
+	libfsapfs_name.c libfsapfs_name.h \
 	libfsapfs_name_hash.c libfsapfs_name_hash.h \
 	libfsapfs_notify.c libfsapfs_notify.h \
 	libfsapfs_object.c libfsapfs_object.h \

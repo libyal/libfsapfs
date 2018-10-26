@@ -97,6 +97,7 @@ int libfsapfs_directory_record_compare_name_with_utf8_string(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
      uint32_t name_hash,
+     uint8_t use_case_folding,
      libcerror_error_t **error );
 
 int libfsapfs_directory_record_get_utf16_name_size(
@@ -115,6 +116,7 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      uint32_t name_hash,
+     uint8_t use_case_folding,
      libcerror_error_t **error );
 
 int libfsapfs_directory_record_get_added_time(

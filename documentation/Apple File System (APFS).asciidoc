@@ -57,7 +57,7 @@ An APFS volume consists of:
 | Characteristics | Description
 | Byte order | little-endian
 | Date and time values | number of nanoseconds since January 1, 1970 00:00:00 UTC (POSIX epoch), disregarding leap seconds
-| Character strings | Unicode strings are stored in UTF-8
+| Character strings | Unicode (version 9.0) strings are stored in UTF-8
 |===
 
 [NOTE]

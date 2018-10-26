@@ -36,6 +36,10 @@ typedef struct libfsapfs_volume_superblock libfsapfs_volume_superblock_t;
 
 struct libfsapfs_volume_superblock
 {
+	/* The incompatibility features flags
+	 */
+	uint64_t incompatibility_features_flags;
+
 	/* The object map block number
 	 */
 	uint64_t object_map_block_number;

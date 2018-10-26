@@ -117,15 +117,15 @@ void libfsapfs_debug_print_checkpoint_flags(
 
 /* Prints the container compatible feature flags
  */
-void libfsapfs_debug_print_container_compatible_feature_flags(
-      uint64_t compatible_feature_flags )
+void libfsapfs_debug_print_container_compatible_features_flags(
+      uint64_t compatible_features_flags )
 {
-	if( ( compatible_feature_flags & 0x0000000000000001 ) != 0 )
+	if( ( compatible_features_flags & 0x0000000000000001 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(NX_FEATURE_DEFRAG)\n" );
 	}
-	if( ( compatible_feature_flags & 0x0000000000000002 ) != 0 )
+	if( ( compatible_features_flags & 0x0000000000000002 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(NX_FEATURE_LCFD)\n" );
@@ -134,21 +134,21 @@ void libfsapfs_debug_print_container_compatible_feature_flags(
 
 /* Prints the container incompatible feature flags
  */
-void libfsapfs_debug_print_container_incompatible_feature_flags(
-      uint64_t incompatible_feature_flags )
+void libfsapfs_debug_print_container_incompatible_features_flags(
+      uint64_t incompatible_features_flags )
 {
-	if( ( incompatible_feature_flags & 0x0000000000000001 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000001 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(NX_INCOMPAT_VERSION1)\n" );
 	}
-	if( ( incompatible_feature_flags & 0x0000000000000002 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000002 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(NX_INCOMPAT_VERSION2)\n" );
 	}
 
-	if( ( incompatible_feature_flags & 0x0000000000000100 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000100 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(NX_INCOMPAT_FUSION)\n" );
@@ -157,8 +157,8 @@ void libfsapfs_debug_print_container_incompatible_feature_flags(
 
 /* Prints the container read-only compatible feature flags
  */
-void libfsapfs_debug_print_container_read_only_compatible_feature_flags(
-      uint64_t read_only_compatible_feature_flags )
+void libfsapfs_debug_print_container_read_only_compatible_features_flags(
+      uint64_t read_only_compatible_features_flags )
 {
 	/* Currently there are no container read-only compatible feature flags defined */
 }
@@ -396,20 +396,20 @@ void libfsapfs_debug_print_inode_flags(
 
 /* Prints the volume compatible feature flags
  */
-void libfsapfs_debug_print_volume_compatible_feature_flags(
-      uint64_t compatible_feature_flags )
+void libfsapfs_debug_print_volume_compatible_features_flags(
+      uint64_t compatible_features_flags )
 {
-	if( ( compatible_feature_flags & 0x0000000000000001 ) != 0 )
+	if( ( compatible_features_flags & 0x0000000000000001 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(APFS_FEATURE_DEFRAG_PRERELEASE)\n" );
 	}
-	if( ( compatible_feature_flags & 0x0000000000000002 ) != 0 )
+	if( ( compatible_features_flags & 0x0000000000000002 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(APFS_FEATURE_HARDLINK_MAP_RECORDS)\n" );
 	}
-	if( ( compatible_feature_flags & 0x0000000000000004 ) != 0 )
+	if( ( compatible_features_flags & 0x0000000000000004 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(APFS_FEATURE_DEFRAG)\n" );
@@ -455,25 +455,25 @@ void libfsapfs_debug_print_volume_flags(
 
 /* Prints the volume incompatible feature flags
  */
-void libfsapfs_debug_print_volume_incompatible_feature_flags(
-      uint64_t incompatible_feature_flags )
+void libfsapfs_debug_print_volume_incompatible_features_flags(
+      uint64_t incompatible_features_flags )
 {
-	if( ( incompatible_feature_flags & 0x0000000000000001 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000001 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(APFS_INCOMPAT_CASE_INSENSITIVE)\n" );
 	}
-	if( ( incompatible_feature_flags & 0x0000000000000002 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000002 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(APFS_INCOMPAT_DATALESS_SNAPS)\n" );
 	}
-	if( ( incompatible_feature_flags & 0x0000000000000004 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000004 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(APFS_INCOMPAT_ENC_ROLLED)\n" );
 	}
-	if( ( incompatible_feature_flags & 0x0000000000000008 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000008 ) != 0 )
 	{
 		libcnotify_printf(
 		 "\t(APFS_INCOMPAT_NORMALIZATION_INSENSITIVE)\n" );
@@ -482,8 +482,8 @@ void libfsapfs_debug_print_volume_incompatible_feature_flags(
 
 /* Prints the volume read-only compatible feature flags
  */
-void libfsapfs_debug_print_volume_read_only_compatible_feature_flags(
-      uint64_t read_only_compatible_feature_flags )
+void libfsapfs_debug_print_volume_read_only_compatible_features_flags(
+      uint64_t read_only_compatible_features_flags )
 {
 	/* Currently there are no volume read-only compatible feature flags defined */
 }

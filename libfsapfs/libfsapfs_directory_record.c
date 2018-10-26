@@ -29,6 +29,7 @@
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libfdatetime.h"
 #include "libfsapfs_libuna.h"
+#include "libfsapfs_name.h"
 
 #include "fsapfs_file_system.h"
 
@@ -787,6 +788,7 @@ int libfsapfs_directory_record_compare_name_with_utf8_string(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
      uint32_t name_hash,
+     uint8_t use_case_folding,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_directory_record_compare_name_with_utf8_string";
@@ -817,11 +819,12 @@ int libfsapfs_directory_record_compare_name_with_utf8_string(
 	}
 	if( directory_record->name != NULL )
 	{
-		result = libuna_utf8_string_compare_with_utf8_stream(
-		          utf8_string,
-		          utf8_string_length,
+		result = libfsapfs_name_compare_with_utf8_string(
 		          directory_record->name,
 		          directory_record->name_size,
+		          utf8_string,
+		          utf8_string_length,
+		          use_case_folding,
 		          error );
 
 		if( result == -1 )
@@ -929,6 +932,7 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      uint32_t name_hash,
+     uint8_t use_case_folding,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_directory_record_compare_name_with_utf16_string";
@@ -959,11 +963,12 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
 	}
 	if( directory_record->name != NULL )
 	{
-		result = libuna_utf16_string_compare_with_utf8_stream(
-		          utf16_string,
-		          utf16_string_length,
+		result = libfsapfs_name_compare_with_utf16_string(
 		          directory_record->name,
 		          directory_record->name_size,
+		          utf16_string,
+		          utf16_string_length,
+		          use_case_folding,
 		          error );
 
 		if( result == -1 )

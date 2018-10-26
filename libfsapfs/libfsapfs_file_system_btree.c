@@ -59,6 +59,7 @@ int libfsapfs_file_system_btree_initialize(
      libfdata_vector_t *data_block_vector,
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t root_node_block_number,
+     uint8_t use_case_folding,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_file_system_btree_initialize";
@@ -150,6 +151,7 @@ int libfsapfs_file_system_btree_initialize(
 	( *file_system_btree )->data_block_vector      = data_block_vector;
 	( *file_system_btree )->object_map_btree       = object_map_btree;
 	( *file_system_btree )->root_node_block_number = root_node_block_number;
+	( *file_system_btree )->use_case_folding       = use_case_folding;
 
 	return( 1 );
 
@@ -1537,6 +1539,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name
 			                  utf8_string,
 			                  utf8_string_length,
 			                  name_hash,
+			                  file_system_btree->use_case_folding,
 			                  error );
 
 			if( compare_result == -1 )
@@ -1814,6 +1817,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 				                  utf8_string,
 				                  utf8_string_length,
 				                  name_hash,
+				                  file_system_btree->use_case_folding,
 				                  error );
 
 				if( compare_result == -1 )
@@ -2160,6 +2164,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_nam
 			                  utf16_string,
 			                  utf16_string_length,
 			                  name_hash,
+			                  file_system_btree->use_case_folding,
 			                  error );
 
 			if( compare_result == -1 )
@@ -2437,6 +2442,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 				                  utf16_string,
 				                  utf16_string_length,
 				                  name_hash,
+				                  file_system_btree->use_case_folding,
 				                  error );
 
 				if( compare_result == -1 )

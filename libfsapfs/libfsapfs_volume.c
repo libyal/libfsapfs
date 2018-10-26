@@ -2875,6 +2875,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	libfdata_vector_t *data_block_vector                     = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_get_file_system_btree";
+	uint8_t use_case_folding                                 = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -2950,12 +2951,17 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	{
 		data_block_vector = internal_volume->data_block_vector;
 	}
+	if( ( internal_volume->superblock->incompatibility_features_flags & 0x00000000000000001 ) != 0 )
+	{
+		use_case_folding = 1;
+	}
 	if( libfsapfs_file_system_btree_initialize(
 	     &( internal_volume->file_system_btree ),
 	     internal_volume->io_handle,
 	     data_block_vector,
 	     internal_volume->object_map_btree,
 	     object_map_descriptor->physical_address,
+	     use_case_folding,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
