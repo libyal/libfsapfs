@@ -1634,7 +1634,8 @@ int info_handle_file_entry_value_fprint(
 			 "%" PRIs_SYSTEM "",
 			 path );
 		}
-		if( file_entry_name != NULL )
+		if( ( file_entry_name != NULL )
+		 && ( identifier != 2 ) )
 		{
 			fprintf(
 			 info_handle->bodyfile_stream,
@@ -1954,7 +1955,6 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,
      const system_character_t *path,
-     int level,
      libcerror_error_t **error )
 {
 	libfsapfs_file_entry_t *sub_file_entry = NULL;
@@ -1964,6 +1964,7 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 	size_t file_entry_name_size            = 0;
 	size_t path_length                     = 0;
 	size_t sub_path_size                   = 0;
+	uint64_t identifier                    = 0;
 	int number_of_sub_file_entries         = 0;
 	int result                             = 0;
 	int sub_file_entry_index               = 0;
@@ -1990,6 +1991,20 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 
 		return( -1 );
 	}
+	if( libfsapfs_file_entry_get_identifier(
+	     file_entry,
+	     &identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfsapfs_file_entry_get_number_of_sub_file_entries(
 	     file_entry,
 	     &number_of_sub_file_entries,
@@ -2007,71 +2022,68 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 	path_length = system_string_length(
 	               path );
 
-	if( level > 0 )
-	{
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libfsapfs_file_entry_get_utf16_name_size(
+	result = libfsapfs_file_entry_get_utf16_name_size(
+	          file_entry,
+	          &file_entry_name_size,
+	          error );
+#else
+	result = libfsapfs_file_entry_get_utf8_name_size(
+	          file_entry,
+	          &file_entry_name_size,
+	          error );
+#endif
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file entry name string size.",
+		 function );
+
+		goto on_error;
+	}
+	if( ( result == 1 )
+	 && ( file_entry_name_size > 0 ) )
+	{
+		file_entry_name = system_string_allocate(
+		                   file_entry_name_size );
+
+		if( file_entry_name == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create file entry name string.",
+			 function );
+
+			goto on_error;
+		}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+		result = libfsapfs_file_entry_get_utf16_name(
 		          file_entry,
-		          &file_entry_name_size,
+		          (uint16_t *) file_entry_name,
+		          file_entry_name_size,
 		          error );
 #else
-		result = libfsapfs_file_entry_get_utf8_name_size(
+		result = libfsapfs_file_entry_get_utf8_name(
 		          file_entry,
-		          &file_entry_name_size,
+		          (uint8_t *) file_entry_name,
+		          file_entry_name_size,
 		          error );
 #endif
-		if( result == -1 )
+		if( result != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file entry name string size.",
+			 "%s: unable to retrieve file entry name string.",
 			 function );
 
 			goto on_error;
-		}
-		if( ( result == 1 )
-		 && ( file_entry_name_size > 0 ) )
-		{
-			file_entry_name = system_string_allocate(
-			                   file_entry_name_size );
-
-			if( file_entry_name == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-				 "%s: unable to create file entry name string.",
-				 function );
-
-				goto on_error;
-			}
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			result = libfsapfs_file_entry_get_utf16_name(
-			          file_entry,
-			          (uint16_t *) file_entry_name,
-			          file_entry_name_size,
-			          error );
-#else
-			result = libfsapfs_file_entry_get_utf8_name(
-			          file_entry,
-			          (uint8_t *) file_entry_name,
-			          file_entry_name_size,
-			          error );
-#endif
-			if( result != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve file entry name string.",
-				 function );
-
-				goto on_error;
-			}
 		}
 	}
 	if( info_handle->bodyfile_stream != NULL )
@@ -2101,7 +2113,8 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 		 "%" PRIs_SYSTEM "",
 		 path );
 
-		if( file_entry_name != NULL )
+		if( ( file_entry_name != NULL )
+		 && ( identifier != 2 ) )
 		{
 			fprintf(
 			 info_handle->notify_stream,
@@ -2144,7 +2157,8 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 
 			goto on_error;
 		}
-		if( file_entry_name != NULL )
+		if( ( file_entry_name != NULL )
+		 && ( identifier != 2 ) )
 		{
 			if( system_string_copy(
 			     &( sub_path[ path_length ] ),
@@ -2188,7 +2202,6 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 			     info_handle,
 			     sub_file_entry,
 			     sub_path,
-			     level + 1,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -2306,10 +2319,27 @@ int info_handle_file_system_hierarchy_fprint(
 
 		goto on_error;
 	}
+	if( ( info_handle->file_system_index < 0 )
+	 || ( info_handle->file_system_index > number_of_volumes ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file system index value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
 	for( volume_index = 0;
 	     volume_index < number_of_volumes;
 	     volume_index++ )
 	{
+		if( ( info_handle->file_system_index != 0 )
+		 && ( info_handle->file_system_index != ( volume_index + 1 ) ) )
+		{
+			continue;
+		}
 		if( info_handle_get_volume_by_index(
 		     info_handle,
 		     volume_index,
@@ -2432,7 +2462,6 @@ int info_handle_file_system_hierarchy_fprint(
 		     info_handle,
 		     file_entry,
 		     uuid_string,
-		     0,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

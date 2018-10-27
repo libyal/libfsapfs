@@ -1,4 +1,6 @@
 TODO
+* Handle hard link
+* Handle file size of 0, mapped file size does not support 0 ?
 * Add support for sparse files
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * add support for case folding
@@ -25,7 +27,6 @@ Python bindings:
 Tools:
 * fsapfsinfo tool
 ** add volume selection via GUID in path
-** do not print name of root file entry
 ** prompt user for password or recovery password when needed
 ** print extended attribute values
 ** handle \r in filename

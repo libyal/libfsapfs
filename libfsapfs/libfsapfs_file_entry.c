@@ -3266,6 +3266,7 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 		goto on_error;
 	}
+/* TODO handle file size of 0 */
 	if( libfdata_stream_set_mapped_size(
 	     internal_file_entry->data_stream,
 	     (size64_t) used_data_stream_size,
@@ -3738,9 +3739,6 @@ int libfsapfs_file_entry_get_size(
 		return( -1 );
 	}
 #endif
-#ifdef TODO
-/* TODO this will speed up creation of a bodyfile */
-
 	if( libfsapfs_inode_get_data_stream_size(
 	     internal_file_entry->inode,
 	     size,
@@ -3755,38 +3753,6 @@ int libfsapfs_file_entry_get_size(
 
 		result = -1;
 	}
-#else
-	if( internal_file_entry->data_stream == NULL )
-	{
-		if( libfsapfs_internal_file_entry_get_data_stream(
-		     internal_file_entry,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine data stream.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	if( libfdata_stream_get_size(
-	     internal_file_entry->data_stream,
-	     size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve size from data stream.",
-		 function );
-
-		goto on_error;
-	}
-#endif /* TODO */
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_file_entry->read_write_lock,
