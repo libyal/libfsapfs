@@ -141,6 +141,122 @@ int libfsapfs_directory_record_free(
 	return( 1 );
 }
 
+/* Clones a directory record
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_directory_record_clone(
+     libfsapfs_directory_record_t **destination_directory_record,
+     libfsapfs_directory_record_t *source_directory_record,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_directory_record_clone";
+
+	if( destination_directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( *destination_directory_record != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid destination directory record value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( source_directory_record == NULL )
+	{
+		*destination_directory_record = source_directory_record;
+
+		return( 1 );
+	}
+	*destination_directory_record = memory_allocate_structure(
+	                                 libfsapfs_directory_record_t );
+
+	if( *destination_directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create destination directory record.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_copy(
+	     *destination_directory_record,
+	     source_directory_record,
+	     sizeof( libfsapfs_directory_record_t ) ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to copy source directory record to destination.",
+		 function );
+
+		( *destination_directory_record )->name = NULL;
+
+		goto on_error;
+	}
+	( *destination_directory_record )->name = (uint8_t *) memory_allocate(
+	                                                       sizeof( uint8_t ) * source_directory_record->name_size );
+
+	if( ( *destination_directory_record )->name == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create destination record name.",
+		 function );
+
+		( *destination_directory_record )->name = NULL;
+
+		goto on_error;
+	}
+	if( memory_copy(
+	     ( *destination_directory_record )->name,
+	     source_directory_record->name,
+	     source_directory_record->name_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy source directory record name to destination.",
+		 function );
+
+		goto on_error;
+	}
+	return( 1 );
+
+on_error:
+	if( *destination_directory_record != NULL )
+	{
+		if( ( *destination_directory_record )->name != NULL )
+		{
+			memory_free(
+			 ( *destination_directory_record )->name );
+		}
+		memory_free(
+		 *destination_directory_record );
+
+		*destination_directory_record = NULL;
+	}
+	return( -1 );
+}
+
 /* Reads the directory record key data
  * Returns 1 if successful or -1 on error
  */
@@ -257,7 +373,7 @@ int libfsapfs_directory_record_read_key_data(
 		 ( (fsapfs_file_system_btree_key_directory_record_t *) data )->file_system_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: parent identifier\t\t: 0x%08" PRIx64 "\n",
+		 "%s: parent identifier\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -267,7 +383,7 @@ int libfsapfs_directory_record_read_key_data(
 			 ( (fsapfs_file_system_btree_key_directory_record_t *) data )->name_size,
 			 value_16bit );
 			libcnotify_printf(
-			 "%s: name size\t\t\t\t: 0x%04" PRIx16 " (size: %" PRIu32 ")\n",
+			 "%s: name size\t\t\t\t\t: 0x%04" PRIx16 " (size: %" PRIu32 ")\n",
 			 function,
 			 value_16bit,
 			 name_size );
@@ -278,7 +394,7 @@ int libfsapfs_directory_record_read_key_data(
 			 ( (fsapfs_file_system_btree_key_directory_record_with_hash_t *) data )->name_size_and_hash,
 			 value_32bit );
 			libcnotify_printf(
-			 "%s: name size and hash\t\t: 0x%04" PRIx32 " (size: %" PRIu32 ", hash: 0x%06" PRIx32 ")\n",
+			 "%s: name size and hash\t\t\t: 0x%04" PRIx32 " (size: %" PRIu32 ", hash: 0x%06" PRIx32 ")\n",
 			 function,
 			 value_32bit,
 			 name_size,
@@ -439,13 +555,13 @@ int libfsapfs_directory_record_read_value_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: identifier\t\t\t: %" PRIu64 "\n",
+		 "%s: identifier\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 directory_record->identifier );
 
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "added time\t\t\t",
+		     "added time\t\t\t\t",
 		     ( (fsapfs_file_system_btree_value_directory_record_t *) data )->added_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
@@ -466,7 +582,7 @@ int libfsapfs_directory_record_read_value_data(
 		 ( (fsapfs_file_system_btree_value_directory_record_t *) data )->directory_entry_flags,
 		 value_16bit );
 		libcnotify_printf(
-		 "%s: directory entry flags\t: 0x%04" PRIx16 "\n",
+		 "%s: directory entry flags\t\t: 0x%04" PRIx16 "\n",
 		 function,
 		 value_16bit );
 		libfsapfs_debug_print_directory_entry_flags(
@@ -546,11 +662,11 @@ int libfsapfs_directory_record_read_value_data(
 				 function,
 				 extended_field_index,
 				 extended_field_type,
-				 libfsapfs_debug_print_inode_extended_field_type(
+				 libfsapfs_debug_print_directory_record_extended_field_type(
 				  extended_field_type ) );
 
 				libcnotify_printf(
-				 "%s: extended field: %" PRIu16 " flags\t: 0x%04" PRIx16 "\n",
+				 "%s: extended field: %" PRIu16 " flags\t\t: 0x%04" PRIx16 "\n",
 				 function,
 				 extended_field_index,
 				 extended_field_flags );

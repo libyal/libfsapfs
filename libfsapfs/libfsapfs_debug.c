@@ -537,6 +537,19 @@ const char *libfsapfs_debug_print_file_system_data_type(
 	return( "Unknown" );
 }
 
+/* Prints the directory record extended field type
+ */
+const char *libfsapfs_debug_print_directory_record_extended_field_type(
+             uint8_t extended_field_type )
+{
+	switch( extended_field_type )
+	{
+		case 1:
+			return( "(DREC_EXT_TYPE_SIBLING_ID)" );
+	}
+	return( "Unknown" );
+}
+
 /* Prints the inode extended field type
  */
 const char *libfsapfs_debug_print_inode_extended_field_type(

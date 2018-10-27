@@ -619,7 +619,7 @@ int libfsapfs_file_system_btree_get_root_node(
 		     0,
 		     (intptr_t *) node,
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_btree_node_free,
-		     0,
+		     LIBFCACHE_CACHE_VALUE_FLAG_MANAGED,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -909,7 +909,7 @@ int libfsapfs_file_system_btree_get_sub_node(
 		     0,
 		     (intptr_t *) node,
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_btree_node_free,
-		     0,
+		     LIBFCACHE_CACHE_VALUE_FLAG_MANAGED,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -5037,17 +5037,17 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry           = NULL;
-	libfsapfs_btree_node_t *btree_node             = NULL;
-	libfsapfs_btree_node_t *root_node              = NULL;
-	libfsapfs_directory_record_t *directory_record = NULL;
-	static char *function                          = "libfsapfs_file_system_btree_get_inode_by_utf8_name";
-	uint64_t lookup_identifier                     = 0;
-	uint32_t name_hash                             = 0;
-	int is_leaf_node                               = 0;
-	int result                                     = 0;
+	libfsapfs_btree_entry_t *btree_entry = NULL;
+	libfsapfs_btree_node_t *btree_node   = NULL;
+	libfsapfs_btree_node_t *root_node    = NULL;
+	static char *function                = "libfsapfs_file_system_btree_get_inode_by_utf8_name";
+	uint64_t lookup_identifier           = 0;
+	uint32_t name_hash                   = 0;
+	int is_leaf_node                     = 0;
+	int result                           = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -5100,6 +5100,28 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid inode value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( *directory_record != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid directory record value already set.",
 		 function );
 
 		return( -1 );
@@ -5160,7 +5182,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 			  utf8_string,
 			  utf8_string_length,
 			  name_hash,
-			  &directory_record,
+			  directory_record,
 			  error );
 	}
 	else
@@ -5173,7 +5195,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 			  utf8_string,
 			  utf8_string_length,
 			  name_hash,
-			  &directory_record,
+			  directory_record,
 			  error );
 	}
 	if( result == -1 )
@@ -5190,7 +5212,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 	else if( result != 0 )
 	{
 		if( libfsapfs_directory_record_get_identifier(
-		     directory_record,
+		     *directory_record,
 		     &lookup_identifier,
 		     error ) != 1 )
 		{
@@ -5199,19 +5221,6 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve directory entry identifier.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_directory_record_free(
-		     &directory_record,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free directory record.",
 			 function );
 
 			goto on_error;
@@ -5314,6 +5323,12 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 	return( result );
 
 on_error:
+	if( *directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 directory_record,
+		 NULL );
+	}
 	if( *inode != NULL )
 	{
 		libfsapfs_inode_free(
@@ -5333,21 +5348,21 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry           = NULL;
-	libfsapfs_btree_node_t *btree_node             = NULL;
-	libfsapfs_btree_node_t *root_node              = NULL;
-	libfsapfs_directory_record_t *directory_record = NULL;
-	const uint8_t *utf8_string_segment             = NULL;
-	static char *function                          = "libfsapfs_file_system_btree_get_inode_by_utf8_path";
-	libuna_unicode_character_t unicode_character   = 0;
-	size_t utf8_string_index                       = 0;
-	size_t utf8_string_segment_length              = 0;
-	uint64_t lookup_identifier                     = 0;
-	uint32_t name_hash                             = 0;
-	int is_leaf_node                               = 0;
-	int result                                     = 0;
+	libfsapfs_btree_entry_t *btree_entry         = NULL;
+	libfsapfs_btree_node_t *btree_node           = NULL;
+	libfsapfs_btree_node_t *root_node            = NULL;
+	const uint8_t *utf8_string_segment           = NULL;
+	static char *function                        = "libfsapfs_file_system_btree_get_inode_by_utf8_path";
+	libuna_unicode_character_t unicode_character = 0;
+	size_t utf8_string_index                     = 0;
+	size_t utf8_string_segment_length            = 0;
+	uint64_t lookup_identifier                   = 0;
+	uint32_t name_hash                           = 0;
+	int is_leaf_node                             = 0;
+	int result                                   = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -5400,6 +5415,28 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid inode value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( *directory_record != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid directory record value already set.",
 		 function );
 
 		return( -1 );
@@ -5515,7 +5552,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 					  utf8_string_segment,
 					  utf8_string_segment_length,
 				          name_hash,
-					  &directory_record,
+					  directory_record,
 					  error );
 			}
 			else
@@ -5528,7 +5565,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 					  utf8_string_segment,
 					  utf8_string_segment_length,
 				          name_hash,
-					  &directory_record,
+					  directory_record,
 					  error );
 			}
 		}
@@ -5548,7 +5585,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 			break;
 		}
 		if( libfsapfs_directory_record_get_identifier(
-		     directory_record,
+		     *directory_record,
 		     &lookup_identifier,
 		     error ) != 1 )
 		{
@@ -5557,19 +5594,6 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve directory entry identifier.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_directory_record_free(
-		     &directory_record,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free directory record.",
 			 function );
 
 			goto on_error;
@@ -5672,6 +5696,12 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 	return( result );
 
 on_error:
+	if( *directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 directory_record,
+		 NULL );
+	}
 	if( *inode != NULL )
 	{
 		libfsapfs_inode_free(
@@ -5691,17 +5721,17 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry           = NULL;
-	libfsapfs_btree_node_t *btree_node             = NULL;
-	libfsapfs_btree_node_t *root_node              = NULL;
-	libfsapfs_directory_record_t *directory_record = NULL;
-	static char *function                          = "libfsapfs_file_system_btree_get_inode_by_utf16_name";
-	uint64_t lookup_identifier                     = 0;
-	uint32_t name_hash                             = 0;
-	int is_leaf_node                               = 0;
-	int result                                     = 0;
+	libfsapfs_btree_entry_t *btree_entry = NULL;
+	libfsapfs_btree_node_t *btree_node   = NULL;
+	libfsapfs_btree_node_t *root_node    = NULL;
+	static char *function                = "libfsapfs_file_system_btree_get_inode_by_utf16_name";
+	uint64_t lookup_identifier           = 0;
+	uint32_t name_hash                   = 0;
+	int is_leaf_node                     = 0;
+	int result                           = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -5754,6 +5784,28 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid inode value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( *directory_record != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid directory record value already set.",
 		 function );
 
 		return( -1 );
@@ -5814,7 +5866,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 			  utf16_string,
 			  utf16_string_length,
 			  name_hash,
-			  &directory_record,
+			  directory_record,
 			  error );
 	}
 	else
@@ -5827,7 +5879,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 			  utf16_string,
 			  utf16_string_length,
 			  name_hash,
-			  &directory_record,
+			  directory_record,
 			  error );
 	}
 	if( result == -1 )
@@ -5844,7 +5896,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 	else if( result != 0 )
 	{
 		if( libfsapfs_directory_record_get_identifier(
-		     directory_record,
+		     *directory_record,
 		     &lookup_identifier,
 		     error ) != 1 )
 		{
@@ -5853,19 +5905,6 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve directory entry identifier.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_directory_record_free(
-		     &directory_record,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free directory record.",
 			 function );
 
 			goto on_error;
@@ -5968,6 +6007,12 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 	return( result );
 
 on_error:
+	if( *directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 directory_record,
+		 NULL );
+	}
 	if( *inode != NULL )
 	{
 		libfsapfs_inode_free(
@@ -5987,21 +6032,21 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry           = NULL;
-	libfsapfs_btree_node_t *btree_node             = NULL;
-	libfsapfs_btree_node_t *root_node              = NULL;
-	libfsapfs_directory_record_t *directory_record = NULL;
-	const uint16_t *utf16_string_segment           = NULL;
-	static char *function                          = "libfsapfs_file_system_btree_get_inode_by_utf16_path";
-	libuna_unicode_character_t unicode_character   = 0;
-	size_t utf16_string_index                      = 0;
-	size_t utf16_string_segment_length             = 0;
-	uint64_t lookup_identifier                     = 0;
-	uint32_t name_hash                             = 0;
-	int is_leaf_node                               = 0;
-	int result                                     = 0;
+	libfsapfs_btree_entry_t *btree_entry         = NULL;
+	libfsapfs_btree_node_t *btree_node           = NULL;
+	libfsapfs_btree_node_t *root_node            = NULL;
+	const uint16_t *utf16_string_segment         = NULL;
+	static char *function                        = "libfsapfs_file_system_btree_get_inode_by_utf16_path";
+	libuna_unicode_character_t unicode_character = 0;
+	size_t utf16_string_index                    = 0;
+	size_t utf16_string_segment_length           = 0;
+	uint64_t lookup_identifier                   = 0;
+	uint32_t name_hash                           = 0;
+	int is_leaf_node                             = 0;
+	int result                                   = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -6054,6 +6099,28 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid inode value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( directory_record == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( *directory_record != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid directory record value already set.",
 		 function );
 
 		return( -1 );
@@ -6169,7 +6236,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 					  utf16_string_segment,
 					  utf16_string_segment_length,
 				          name_hash,
-					  &directory_record,
+					  directory_record,
 					  error );
 			}
 			else
@@ -6182,7 +6249,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 					  utf16_string_segment,
 					  utf16_string_segment_length,
 				          name_hash,
-					  &directory_record,
+					  directory_record,
 					  error );
 			}
 		}
@@ -6202,7 +6269,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 			break;
 		}
 		if( libfsapfs_directory_record_get_identifier(
-		     directory_record,
+		     *directory_record,
 		     &lookup_identifier,
 		     error ) != 1 )
 		{
@@ -6211,19 +6278,6 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve directory entry identifier.",
-			 function );
-
-			goto on_error;
-		}
-		if( libfsapfs_directory_record_free(
-		     &directory_record,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free directory record.",
 			 function );
 
 			goto on_error;
@@ -6326,6 +6380,12 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 	return( result );
 
 on_error:
+	if( *directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 directory_record,
+		 NULL );
+	}
 	if( *inode != NULL )
 	{
 		libfsapfs_inode_free(

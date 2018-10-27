@@ -1,5 +1,4 @@
 TODO
-* Handle hard link
 * Handle file size of 0, mapped file size does not support 0 ?
 * Add support for sparse files
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
@@ -9,13 +8,13 @@ TODO
 * add snapshot support
 
 library:
+* expose directory entry added time
 * improve file content read support
 ** encrypted file content read support - detect block identifier mismatch
 ** compressed file content read support?
 * change container read bootstap as advised in documentation
 ** validate checksum
 ** read backup container superblocks
-* expose directory entry added time
 * refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 * Create libfsapfs_container_superblock_get_identifier
 * Create libfsapfs_volume_superblock_get_identifier

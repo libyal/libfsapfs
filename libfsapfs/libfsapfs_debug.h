@@ -79,6 +79,9 @@ void libfsapfs_debug_print_volume_read_only_compatible_features_flags(
 const char *libfsapfs_debug_print_file_system_data_type(
              uint8_t file_system_data_type );
 
+const char *libfsapfs_debug_print_directory_record_extended_field_type(
+             uint8_t extended_field_type );
+
 const char *libfsapfs_debug_print_inode_extended_field_type(
              uint8_t extended_field_type );
 

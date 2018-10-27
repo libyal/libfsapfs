@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_directory_record.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
@@ -59,6 +60,10 @@ struct libfsapfs_internal_file_entry
 	 */
 	libfsapfs_inode_t *inode;
 
+	/* The directory record
+	 */
+	libfsapfs_directory_record_t *directory_record;
+
 	/* The extended attributes
 	 */
 	libcdata_array_t *extended_attributes;
@@ -92,6 +97,7 @@ int libfsapfs_file_entry_initialize(
      libbfio_handle_t *file_io_handle,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
+     libfsapfs_directory_record_t *directory_record,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

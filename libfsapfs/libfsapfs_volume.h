@@ -28,7 +28,6 @@
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
-#include "libfsapfs_inode.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
@@ -87,10 +86,6 @@ struct libfsapfs_internal_volume
 	/* The file system B-tree
 	 */
 	libfsapfs_file_system_btree_t *file_system_btree;
-
-	/* The root directory inode
-	 */
-	libfsapfs_inode_t *root_directory_inode;
 
 	/* The IO handle
 	 */

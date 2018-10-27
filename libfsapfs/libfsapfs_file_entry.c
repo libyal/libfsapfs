@@ -49,6 +49,7 @@ int libfsapfs_file_entry_initialize(
      libbfio_handle_t *file_io_handle,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
+     libfsapfs_directory_record_t *directory_record,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
@@ -133,6 +134,7 @@ int libfsapfs_file_entry_initialize(
 	internal_file_entry->file_io_handle    = file_io_handle;
 	internal_file_entry->file_system_btree = file_system_btree;
 	internal_file_entry->inode             = inode;
+	internal_file_entry->directory_record  = directory_record;
 
 #if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
 	if( libcthreads_read_write_lock_initialize(
@@ -206,6 +208,38 @@ int libfsapfs_file_entry_free(
 #endif
 		/* The file_io_handle and file_system_btree references are freed elsewhere
 		 */
+		if( internal_file_entry->inode != NULL )
+		{
+			if( libfsapfs_inode_free(
+			     &( internal_file_entry->inode ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free inode.",
+				 function );
+
+				result = -1;
+			}
+		}
+		if( internal_file_entry->directory_record != NULL )
+		{
+			if( libfsapfs_directory_record_free(
+			     &( internal_file_entry->directory_record ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free directory record.",
+				 function );
+
+				result = -1;
+			}
+		}
 		if( internal_file_entry->extended_attributes != NULL )
 		{
 			if( libcdata_array_free(
@@ -542,6 +576,7 @@ int libfsapfs_file_entry_get_parent_file_entry(
 		     internal_file_entry->file_io_handle,
 		     internal_file_entry->file_system_btree,
 		     inode,
+		     NULL,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1145,19 +1180,39 @@ int libfsapfs_file_entry_get_utf8_name_size(
 		return( -1 );
 	}
 #endif
-	if( libfsapfs_inode_get_utf8_name_size(
-	     internal_file_entry->inode,
-	     utf8_string_size,
-	     error ) != 1 )
+	if( internal_file_entry->directory_record != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 string size.",
-		 function );
+		if( libfsapfs_directory_record_get_utf8_name_size(
+		     internal_file_entry->directory_record,
+		     utf8_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 string size from directory record.",
+			 function );
 
-		result = -1;
+			result = -1;
+		}
+	}
+	else
+	{
+		if( libfsapfs_inode_get_utf8_name_size(
+		     internal_file_entry->inode,
+		     utf8_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 string size from inode.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -1220,20 +1275,41 @@ int libfsapfs_file_entry_get_utf8_name(
 		return( -1 );
 	}
 #endif
-	if( libfsapfs_inode_get_utf8_name(
-	     internal_file_entry->inode,
-	     utf8_string,
-	     utf8_string_size,
-	     error ) != 1 )
+	if( internal_file_entry->directory_record != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 string.",
-		 function );
+		if( libfsapfs_directory_record_get_utf8_name(
+		     internal_file_entry->directory_record,
+		     utf8_string,
+		     utf8_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 string from directory entry.",
+			 function );
 
-		result = -1;
+			result = -1;
+		}
+	}
+	else
+	{
+		if( libfsapfs_inode_get_utf8_name(
+		     internal_file_entry->inode,
+		     utf8_string,
+		     utf8_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-8 string from inode.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -1295,19 +1371,39 @@ int libfsapfs_file_entry_get_utf16_name_size(
 		return( -1 );
 	}
 #endif
-	if( libfsapfs_inode_get_utf16_name_size(
-	     internal_file_entry->inode,
-	     utf16_string_size,
-	     error ) != 1 )
+	if( internal_file_entry->directory_record != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-16 string size.",
-		 function );
+		if( libfsapfs_directory_record_get_utf16_name_size(
+		     internal_file_entry->directory_record,
+		     utf16_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 string size from directory record.",
+			 function );
 
-		result = -1;
+			result = -1;
+		}
+	}
+	else
+	{
+		if( libfsapfs_inode_get_utf16_name_size(
+		     internal_file_entry->inode,
+		     utf16_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 string size from inode.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -1370,20 +1466,41 @@ int libfsapfs_file_entry_get_utf16_name(
 		return( -1 );
 	}
 #endif
-	if( libfsapfs_inode_get_utf16_name(
-	     internal_file_entry->inode,
-	     utf16_string,
-	     utf16_string_size,
-	     error ) != 1 )
+	if( internal_file_entry->directory_record != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-16 string.",
-		 function );
+		if( libfsapfs_directory_record_get_utf16_name(
+		     internal_file_entry->directory_record,
+		     utf16_string,
+		     utf16_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 string from directory record.",
+			 function );
 
-		result = -1;
+			result = -1;
+		}
+	}
+	else
+	{
+		if( libfsapfs_inode_get_utf16_name(
+		     internal_file_entry->inode,
+		     utf16_string,
+		     utf16_string_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve UTF-16 string from inode.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_read(
@@ -2504,6 +2621,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
      libcerror_error_t **error )
 {
 	libfsapfs_directory_record_t *directory_record       = NULL;
+	libfsapfs_directory_record_t *directory_record_copy  = NULL;
 	libfsapfs_inode_t *inode                             = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_sub_file_entry_by_index";
@@ -2623,12 +2741,27 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 
 		 goto on_error;
 	}
+	if( libfsapfs_directory_record_clone(
+	     &directory_record_copy,
+	     directory_record,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create directory record copy.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfsapfs_file_entry_initialize(
 	     sub_file_entry,
 	     internal_file_entry->io_handle,
 	     internal_file_entry->file_io_handle,
 	     internal_file_entry->file_system_btree,
 	     inode,
+	     directory_record_copy,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -2640,7 +2773,8 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 
 		goto on_error;
 	}
-	inode = NULL;
+	inode                 = NULL;
+	directory_record_copy = NULL;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -2660,6 +2794,12 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 	return( 1 );
 
 on_error:
+	if( directory_record_copy != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 &directory_record_copy,
+		 NULL );
+	}
 	if( inode != NULL )
 	{
 		libfsapfs_inode_free(
@@ -2684,6 +2824,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
      libfsapfs_file_entry_t **sub_file_entry,
      libcerror_error_t **error )
 {
+	libfsapfs_directory_record_t *directory_record       = NULL;
 	libfsapfs_inode_t *inode                             = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_sub_file_entry_by_utf8_name";
@@ -2761,6 +2902,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 	          utf8_string,
 	          utf8_string_length,
 	          &inode,
+	          &directory_record,
 	          error );
 
 	if( result == -1 )
@@ -2782,6 +2924,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 		     internal_file_entry->file_io_handle,
 		     internal_file_entry->file_system_btree,
 		     inode,
+		     directory_record,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -2812,6 +2955,12 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 	return( result );
 
 on_error:
+	if( directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 &directory_record,
+		 NULL );
+	}
 	if( inode != NULL )
 	{
 		libfsapfs_inode_free(
@@ -2836,6 +2985,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
      libfsapfs_file_entry_t **sub_file_entry,
      libcerror_error_t **error )
 {
+	libfsapfs_directory_record_t *directory_record       = NULL;
 	libfsapfs_inode_t *inode                             = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_sub_file_entry_by_utf16_name";
@@ -2913,6 +3063,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 	          utf16_string,
 	          utf16_string_length,
 	          &inode,
+	          &directory_record,
 	          error );
 
 	if( result == -1 )
@@ -2934,6 +3085,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 		     internal_file_entry->file_io_handle,
 		     internal_file_entry->file_system_btree,
 		     inode,
+		     directory_record,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -2964,6 +3116,12 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 	return( result );
 
 on_error:
+	if( directory_record != NULL )
+	{
+		libfsapfs_directory_record_free(
+		 &directory_record,
+		 NULL );
+	}
 	if( inode != NULL )
 	{
 		libfsapfs_inode_free(
@@ -3769,14 +3927,6 @@ int libfsapfs_file_entry_get_size(
 	}
 #endif
 	return( result );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_file_entry->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
 }
 
 /* Retrieves the number of extents

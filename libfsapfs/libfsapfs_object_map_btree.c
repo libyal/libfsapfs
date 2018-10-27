@@ -179,6 +179,19 @@ int libfsapfs_object_map_btree_free(
 		/* The data_block_vector is referenced and freed elsewhere
 		 */
 		if( libfcache_cache_free(
+		     &( ( *object_map_btree )->node_cache ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free node cache.",
+			 function );
+
+			result = -1;
+		}
+		if( libfcache_cache_free(
 		     &( ( *object_map_btree )->data_block_cache ),
 		     error ) != 1 )
 		{
@@ -429,7 +442,7 @@ int libfsapfs_object_map_btree_get_root_node(
 		     0,
 		     (intptr_t *) node,
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_btree_node_free,
-		     0,
+		     LIBFCACHE_CACHE_VALUE_FLAG_MANAGED,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -707,7 +720,7 @@ int libfsapfs_object_map_btree_get_sub_node(
 		     0,
 		     (intptr_t *) node,
 		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_btree_node_free,
-		     0,
+		     LIBFCACHE_CACHE_VALUE_FLAG_MANAGED,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

@@ -64,6 +64,11 @@ int libfsapfs_directory_record_free(
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
+int libfsapfs_directory_record_clone(
+     libfsapfs_directory_record_t **destination_directory_record,
+     libfsapfs_directory_record_t *source_directory_record,
+     libcerror_error_t **error );
+
 int libfsapfs_directory_record_read_key_data(
      libfsapfs_directory_record_t *directory_record,
      const uint8_t *data,

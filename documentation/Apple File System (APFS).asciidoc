@@ -1320,20 +1320,25 @@ See section: <<file_system_data_types,File system data types>>
 | Value | Identifier | Description
 | 0x0 | APFS_TYPE_ANY | [yellow-background]*Unknown (Any)*
 | 0x1 | APFS_TYPE_SNAP_METADATA | Snapshot metadata
-| 0x2 | APFS_TYPE_EXTENT | Extent
+| 0x2 | APFS_TYPE_EXTENT | Extent +
+See section: <<extent,Extent>>
 | 0x3 | APFS_TYPE_INODE | Inode +
 See section: <<inode,Inode>>
 | 0x4 | APFS_TYPE_XATTR | Extended attribute (xattr) +
 See section: <<extended_attribute,Extended attribute>>
-| 0x5 | APFS_TYPE_SIBLING_LINK | Sibling link
-| 0x6 | APFS_TYPE_DSTREAM_ID | Data stream identifier
+| 0x5 | APFS_TYPE_SIBLING_LINK | Sibling link +
+See section: <<sibling_link,Sibling link>>
+| 0x6 | APFS_TYPE_DSTREAM_ID | Data stream identifier +
+See section: <<data_stream_identifier,Data stream identifier>>
 | 0x7 | APFS_TYPE_CRYPTO_STATE | Encryption state
 | 0x8 | APFS_TYPE_FILE_EXTENT | File extent
 | 0x9 | APFS_TYPE_DIR_REC | Directory record +
 See section: <<directory_record,Directory record>>
-| 0xa | APFS_TYPE_DIR_STATS | Directory stats
+| 0xa | APFS_TYPE_DIR_STATS | Directory stats +
+See section: <<directory_stats,Directory stats>>
 | 0xb | APFS_TYPE_SNAP_NAME | Snapshot name
-| 0xc | APFS_TYPE_SIBLING_MAP | Sibling map
+| 0xc | APFS_TYPE_SIBLING_MAP | Sibling map +
+See section: <<sibling_map,Sibling map>>
 | | |
 | 0xf | APFS_TYPE_INVALID | Invalid
 |===
@@ -1352,7 +1357,7 @@ A file system B-tree branch node value is 8 bytes of size and consists of:
 The object identifiers can be resolved in the <<object_map,object map>> to a "physical" location
 |===
 
-=== Extent
+=== [[extent]]Extent
 
 ==== Extent key data
 
@@ -1567,9 +1572,38 @@ consists of:
 See section: <<data_stream_attribute,data stream attribute>>
 |===
 
-[yellow-background]*TODO: complete this section.*
+=== [[sibling_link]]Sibling link
 
-=== Data stream identifier
+==== Sibling link key data
+
+The sibling link key data (j_sibling_key_t) is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x4 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+| 8 | 8 | | Sibling map identifier (sibling_id) +
+Contains the file system object identifier of the sibling map record
+|===
+
+==== Sibling link value data
+
+The sibling link value data (j_sibling_val_t) is variable of size and consists
+of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Parent file system object identifier (parent_id)
+| 8 | 2 | | Name string size (name_len) +
+Includes the size of the end-of-string character
+| 10 | ... | | Name string (name) +
+Contains an UTF-8 encoded string with an end-of-string character
+|===
+
+=== [[data_stream_identifier]]Data stream identifier
 
 ==== Data stream identifier key data
 
@@ -1752,7 +1786,7 @@ The CRC-32 calculation uses the Castagnoli polynomial of 0x1edc6f41, also known
 as CRC-32C. The CRC-32 calculation does not use the XOR with 0xffffffff before
 and after the calculation, which is also referred to as weak CRC-32 calculation.
 
-=== Directory stats
+=== [[directory_stats]]Directory stats
 
 ==== Directory stats key data
 
@@ -1779,6 +1813,32 @@ consists of:
 | 8 | 8 | | Total size (total_size)
 | 16 | 8 | | Parent directory file system object identifier (chained_key)
 | 24 | 8 | | Generation count (gen_count)
+|===
+
+=== [[sibling_map]]Sibling map
+
+==== Sibling map key data
+
+The sibling map key data (j_sibling_map_key_t) is 8 bytes of size and consists
+of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | File system object identifier (FSOID)
+| 7.4 | 4 bits | 0x4 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+|===
+
+==== Sibling map value data
+
+The sibling map value data (j_sibling_map_val_t) is 8 bytes of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | File system object identifier (file_id)
 |===
 
 === [[extended_fields]]Extended fields
@@ -1824,9 +1884,8 @@ See section: <<extended_field_flags,Extended field flags>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 1 | DREC_EXT_TYPE_SIBLING_ID | Sibling identifier for a directory record +
-The extended field data contains a 64-bit integer value +
-This extended field is used by hard links
+| 1 | DREC_EXT_TYPE_SIBLING_ID | Hard link sibling identifier +
+The extended field data contains a 64-bit integer value
 |===
 
 ===== Inode extended field types

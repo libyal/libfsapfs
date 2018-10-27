@@ -247,6 +247,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_inode_by_utf8_path(
@@ -256,6 +257,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
      const uint8_t *utf8_string,
      size_t utf8_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_inode_by_utf16_name(
@@ -265,6 +267,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_inode_by_utf16_path(
@@ -274,6 +277,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      libfsapfs_inode_t **inode,
+     libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
