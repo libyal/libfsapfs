@@ -1,5 +1,5 @@
 /*
- * The data stream handle functions
+ * The data block data stream handle functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -24,7 +24,7 @@
 #include <types.h>
 
 #include "libfsapfs_data_block.h"
-#include "libfsapfs_data_stream_handle.h"
+#include "libfsapfs_data_block_data_stream_handle.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
@@ -37,14 +37,14 @@
  * Make sure the value data_stream_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_data_stream_handle_initialize(
-     libfsapfs_data_stream_handle_t **data_stream_handle,
+int libfsapfs_data_block_data_stream_handle_initialize(
+     libfsapfs_data_block_data_stream_handle_t **data_stream_handle,
      libfsapfs_io_handle_t *io_handle,
+     libfsapfs_volume_data_handle_t *volume_data_handle,
      libcerror_error_t **error )
 {
-	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
-	static char *function                              = "libfsapfs_data_stream_handle_initialize";	
-	int element_index                                  = 0;
+	static char *function = "libfsapfs_data_block_data_stream_handle_initialize";	
+	int element_index     = 0;
 
 	if( data_stream_handle == NULL )
 	{
@@ -79,8 +79,19 @@ int libfsapfs_data_stream_handle_initialize(
 
 		return( -1 );
 	}
+	if( volume_data_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume data handle.",
+		 function );
+
+		return( -1 );
+	}
 	*data_stream_handle = memory_allocate_structure(
-	                       libfsapfs_data_stream_handle_t );
+	                       libfsapfs_data_block_data_stream_handle_t );
 
 	if( *data_stream_handle == NULL )
 	{
@@ -96,7 +107,7 @@ int libfsapfs_data_stream_handle_initialize(
 	if( memory_set(
 	     *data_stream_handle,
 	     0,
-	     sizeof( libfsapfs_data_stream_handle_t ) ) == NULL )
+	     sizeof( libfsapfs_data_block_data_stream_handle_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -112,20 +123,6 @@ int libfsapfs_data_stream_handle_initialize(
 
 		return( -1 );
 	}
-	if( libfsapfs_volume_data_handle_initialize(
-	     &volume_data_handle,
-	     io_handle,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create volume data handle.",
-		 function );
-
-		goto on_error;
-	}
 	if( libfdata_vector_initialize(
 	     &( ( *data_stream_handle )->data_block_vector ),
 	     (size64_t) io_handle->block_size,
@@ -134,7 +131,7 @@ int libfsapfs_data_stream_handle_initialize(
 	     NULL,
 	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
 	     NULL,
-	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
+	     LIBFDATA_DATA_HANDLE_FLAG_NON_MANAGED,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -146,9 +143,6 @@ int libfsapfs_data_stream_handle_initialize(
 
 		goto on_error;
 	}
-	( *data_stream_handle )->volume_data_handle = volume_data_handle;
-	volume_data_handle                          = NULL;
-
 	if( libfdata_vector_append_segment(
 	     ( *data_stream_handle )->data_block_vector,
 	     &element_index,
@@ -200,12 +194,6 @@ on_error:
 			 &( ( *data_stream_handle )->data_block_vector ),
 			 NULL );
 		}
-		if( volume_data_handle != NULL )
-		{
-			libfsapfs_volume_data_handle_free(
-			 &volume_data_handle,
-			 NULL );
-		}
 		memory_free(
 		 *data_stream_handle );
 
@@ -217,11 +205,11 @@ on_error:
 /* Frees data stream handle
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_data_stream_handle_free(
-     libfsapfs_data_stream_handle_t **data_stream_handle,
+int libfsapfs_data_block_data_stream_handle_free(
+     libfsapfs_data_block_data_stream_handle_t **data_stream_handle,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_data_stream_handle_free";
+	static char *function = "libfsapfs_data_block_data_stream_handle_free";
 	int result            = 1;
 
 	if( data_stream_handle == NULL )
@@ -275,8 +263,8 @@ int libfsapfs_data_stream_handle_free(
  * Callback for the data stream
  * Returns the number of bytes read or -1 on error
  */
-ssize_t libfsapfs_data_stream_handle_read_segment_data(
-         libfsapfs_data_stream_handle_t *data_stream_handle,
+ssize_t libfsapfs_data_block_data_stream_handle_read_segment_data(
+         libfsapfs_data_block_data_stream_handle_t *data_stream_handle,
          libbfio_handle_t *file_io_handle,
          int segment_index LIBFSAPFS_ATTRIBUTE_UNUSED,
          int segment_file_index LIBFSAPFS_ATTRIBUTE_UNUSED,
@@ -287,7 +275,7 @@ ssize_t libfsapfs_data_stream_handle_read_segment_data(
          libcerror_error_t **error )
 {
 	libfsapfs_data_block_t *data_block = NULL;
-	static char *function              = "libfsapfs_data_stream_handle_read_segment_data";
+	static char *function              = "libfsapfs_data_block_data_stream_handle_read_segment_data";
 	size_t data_block_offset           = 0;
 	size_t segment_data_offset         = 0;
 	size_t read_size                   = 0;
@@ -401,25 +389,22 @@ ssize_t libfsapfs_data_stream_handle_read_segment_data(
 
 			return( -1 );
 		}
-		if( segment_data_size < data_stream_handle->io_handle->block_size )
-		{
-			read_size = segment_data_size;
-		}
-		else
-		{
-			read_size = (size_t) ( data_stream_handle->io_handle->block_size - data_block_offset );
-		}
-		if( ( read_size > data_block->data_size )
-		 || ( data_block_offset > ( data_block->data_size - read_size ) ) )
+		if( data_block_offset >= data_block->data_size )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid read size value out of bounds.",
+			 "%s: invalid data block offset value out of bounds.",
 			 function );
 
 			return( -1 );
+		}
+		read_size = data_block->data_size - data_block_offset;
+
+		if( read_size > segment_data_size )
+		{
+			read_size = segment_data_size;
 		}
 		if( memory_copy(
 		     &( segment_data[ segment_data_offset ] ),
@@ -442,6 +427,8 @@ ssize_t libfsapfs_data_stream_handle_read_segment_data(
 
 		block_number++;
 	}
+	data_stream_handle->current_segment_offset += segment_data_offset;
+
 	return( (ssize_t) segment_data_offset );
 }
 
@@ -449,15 +436,15 @@ ssize_t libfsapfs_data_stream_handle_read_segment_data(
  * Callback for the data stream
  * Returns the offset if seek is successful or -1 on error
  */
-off64_t libfsapfs_data_stream_handle_seek_segment_offset(
-         libfsapfs_data_stream_handle_t *data_stream_handle,
+off64_t libfsapfs_data_block_data_stream_handle_seek_segment_offset(
+         libfsapfs_data_block_data_stream_handle_t *data_stream_handle,
          intptr_t *file_io_handle LIBFSAPFS_ATTRIBUTE_UNUSED,
          int segment_index LIBFSAPFS_ATTRIBUTE_UNUSED,
          int segment_file_index LIBFSAPFS_ATTRIBUTE_UNUSED,
          off64_t segment_offset,
          libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_data_stream_handle_seek_segment_offset";
+	static char *function = "libfsapfs_data_block_data_stream_handle_seek_segment_offset";
 
 	LIBFSAPFS_UNREFERENCED_PARAMETER( file_io_handle )
 	LIBFSAPFS_UNREFERENCED_PARAMETER( segment_index )

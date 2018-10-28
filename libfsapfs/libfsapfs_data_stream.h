@@ -1,5 +1,5 @@
 /*
- * The data stream descriptor functions
+ * Data stream functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,48 +19,38 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_DATA_STREAM_DESCRIPTOR_H )
-#define _LIBFSAPFS_DATA_STREAM_DESCRIPTOR_H
+#if !defined( _LIBFSAPFS_DATA_STREAM_H )
+#define _LIBFSAPFS_DATA_STREAM_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsapfs_libcerror.h"
+#include "libfsapfs_io_handle.h"
+#include "libfsapfs_libcdata.h"
+#include "libfsapfs_libfdata.h"
+#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsapfs_data_stream_descriptor libfsapfs_data_stream_descriptor_t;
-
-struct libfsapfs_data_stream_descriptor
-{
-	/* The object identifier
-	 */
-	uint64_t object_identifier;
-
-	/* The physical address
-	 */
-	uint64_t physical_address;
-};
-
-int libfsapfs_data_stream_descriptor_initialize(
-     libfsapfs_data_stream_descriptor_t **data_stream_descriptor,
+int libfsapfs_data_stream_initialize_from_buffer(
+     libfdata_stream_t **data_stream,
+     const uint8_t *buffer,
+     size_t buffer_size,
      libcerror_error_t **error );
 
-int libfsapfs_data_stream_descriptor_free(
-     libfsapfs_data_stream_descriptor_t **data_stream_descriptor,
-     libcerror_error_t **error );
-
-int libfsapfs_data_stream_descriptor_read_data(
-     libfsapfs_data_stream_descriptor_t *data_stream_descriptor,
-     const uint8_t *data,
-     size_t data_size,
+int libfsapfs_data_stream_initialize_from_file_extents(
+     libfdata_stream_t **data_stream,
+     libfsapfs_io_handle_t *io_handle,
+     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libcdata_array_t *file_extents,
+     size64_t data_stream_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_DATA_STREAM_DESCRIPTOR_H ) */
+#endif /* !defined( _LIBFSAPFS_DATA_STREAM_H ) */
 

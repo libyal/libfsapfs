@@ -1320,6 +1320,7 @@ See section: <<file_system_data_types,File system data types>>
 | Value | Identifier | Description
 | 0x0 | APFS_TYPE_ANY | [yellow-background]*Unknown (Any)*
 | 0x1 | APFS_TYPE_SNAP_METADATA | Snapshot metadata
+See section: <<snapshot_metadata,Snapshot metadata>>
 | 0x2 | APFS_TYPE_EXTENT | Extent +
 See section: <<extent,Extent>>
 | 0x3 | APFS_TYPE_INODE | Inode +
@@ -1331,12 +1332,15 @@ See section: <<sibling_link,Sibling link>>
 | 0x6 | APFS_TYPE_DSTREAM_ID | Data stream identifier +
 See section: <<data_stream_identifier,Data stream identifier>>
 | 0x7 | APFS_TYPE_CRYPTO_STATE | Encryption state
+See section: <<encryption_state,Encryption state>>
 | 0x8 | APFS_TYPE_FILE_EXTENT | File extent
+See section: <<file_extent,File extent>>
 | 0x9 | APFS_TYPE_DIR_REC | Directory record +
 See section: <<directory_record,Directory record>>
 | 0xa | APFS_TYPE_DIR_STATS | Directory stats +
 See section: <<directory_stats,Directory stats>>
-| 0xb | APFS_TYPE_SNAP_NAME | Snapshot name
+| 0xb | APFS_TYPE_SNAP_NAME | Snapshot name +
+See section: <<snapshot_name,Snapshot name>>
 | 0xc | APFS_TYPE_SIBLING_MAP | Sibling map +
 See section: <<sibling_map,Sibling map>>
 | | |
@@ -1356,6 +1360,10 @@ A file system B-tree branch node value is 8 bytes of size and consists of:
 | 0 | 8 | | B-tree sub node object identifier +
 The object identifiers can be resolved in the <<object_map,object map>> to a "physical" location
 |===
+
+=== [[snapshot_metadata]]Snapshot metadata
+
+[yellow-background]*TODO: complete this section.*
 
 === [[extent]]Extent
 
@@ -1409,7 +1417,8 @@ The inode value data (APFS_TYPE_INVALID) is 8 bytes of size and consists of:
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Parent file system object identifier (parent_id)
-| 8 | 8 | | Data stream file system object identifier (private_id)
+| 8 | 8 | | Data stream file system object identifier (private_id) +
+Contains the file system object identifier of the file extents that make up the data stream
 | 16 | 8 | | Creation date and time (create_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
 | 24 | 8 | | Modification date and time (mod_time) +
@@ -1496,7 +1505,37 @@ A whiteout is a file entry that covers up all entries of a particular name from 
 
 ===== [[bsd_file_entry_flags]]BSD file entry flags
 
-See the 'chflags(2)' man page and the '<sys/stat.h>' header file.
+The BSD file entry flags are defined in the '<sys/stat.h>' header file.
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x0000ffff | UF_SETTABLE | bitmask of owner changeable flags
+| | |
+| 0x00000001 | UF_NODUMP | do not dump file entry
+| 0x00000002 | UF_IMMUTABLE | file entry is immutable and may not be changed
+| 0x00000004 | UF_APPEND | writes to file entry may only append
+| 0x00000008 | UF_OPAQUE | directory is opaque wrt. union
+| 0x00000010 | UF_NOUNLINK | file entry may not be removed or renamed +
+Not implement in MacOS
+| 0x00000020 | UF_COMPRESSED | file entry is compressed
+| 0x00000040 | UF_TRACKED | notify about file entry changes
+| 0x00000080 | UF_DATAVAULT | entitlement required for reading and writing
+| | |
+| 0x00008000 | UF_HIDDEN | file entry is hidden
+| | |
+| 0xffff0000 | SF_SETTABLE | bitmask of superuser changeable flags
+| | |
+| 0x001f0000 | SF_SUPPORTED | bitmask of superuser supported flags
+| | |
+| 0x00010000 | SF_ARCHIVED | file entry is archived
+| 0x00020000 | SF_IMMUTABLE | file entry is immutable and may not be changed
+| 0x00040000 | SF_APPEND | writes to file entry may only append
+| 0x00080000 | SF_RESTRICTED | entitlement required for writing
+| 0x00100000 | SF_NOUNLINK | file entry may not be removed, renamed or used as mount point
+| 0x00200000 | SF_SNAPSHOT | snapshot inode +
+Not implement in MacOS
+|===
 
 === [[extended_attribute]]Extended attribute
 
@@ -1537,7 +1576,8 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 [cols="1,1,5",options="header"]
 |===
 | Name | Description
-| com.apple.decmpfs |
+| com.apple.decmpfs | Compressed data extended attribute +
+See section: <<compressed_data_extended_attribute,Compressed data extended attribute>>
 | com.apple.FinderInfo |
 | com.apple.fs.symlink | Symbolic link
 | com.apple.quarantine |
@@ -1553,7 +1593,7 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 | Value | Identifier | Description
 | 0x0001 | XATTR_DATA_STREAM | Extended attribute data is stored in a data stream +
 The extended attribute data contains an 8-byte file system object identifier of the corresponding data stream +
-See section: <<extended_attribute_data_stream,Extended attribute data_stream>>
+See section: <<extended_attribute_data_stream,Extended attribute data stream>>
 | 0x0002 | XATTR_DATA_EMBEDDED | Extended attribute data is stored directly in the record
 | 0x0004 | XATTR_FILE_SYSTEM_OWNED | Extended attribute record is owned by the file system
 | 0x0008 | XATTR_RESERVED_8 | [yellow-background]*Unknown (Reserved)*
@@ -1567,9 +1607,49 @@ consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 8 | | Object identifier (xattr_obj_id)
+| 0 | 8 | | Data stream file system object identifier (xattr_obj_id) +
+Contains the file system object identifier of the file extents that make up the data stream
 | 8 | 48 | | Data stream attribute +
 See section: <<data_stream_attribute,data stream attribute>>
+|===
+
+==== [[compressed_data_extended_attribute]]Compressed data extended attribute
+
+The compressed extended attribute is named "com.apple.decmpfs" and consists of:
+
+* compressed data header
+* optional compressed data
+
+==== Compressed data header
+
+The compressed data header is 16 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | "fpmc" | Signature
+| 4 | 4 | | | Compression method +
+See section: <<compression_method,Compression method>>
+| 8 | 8 | | | Uncompressed data size
+|===
+
+[NOTE]
+The signature is likely stored in little-endian and represents "cmpf".
+
+==== [[compression_method]]Compression method
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 3 | | ZLIB (DEFLATE) compressed extended attribute data +
+The compressed data is stored in the extended attribute after the compressed data header
+| 4 | | ZLIB (DEFLATE) compressed resource fork +
+The compressed data is stored in the resource fork
+| | |
+| 7 | | LZFSE compressed extended attribute data +
+The compressed data is stored in the extended attribute after the compressed data header
+| 8 | | LZFSE compressed resource fork +
+The compressed data is stored in the resource fork
 |===
 
 === [[sibling_link]]Sibling link
@@ -1629,7 +1709,11 @@ of:
 | 0 | 4 | | Reference count (refcnt)
 |===
 
-=== File extent
+=== [[encryption_state]]Encryption state
+
+[yellow-background]*TODO: complete this section.*
+
+=== [[file_extent]]File extent
 
 ==== File extent key data
 
@@ -1815,6 +1899,10 @@ consists of:
 | 24 | 8 | | Generation count (gen_count)
 |===
 
+=== [[snapshot_name]]Snapshot name
+
+[yellow-background]*TODO: complete this section.*
+
 === [[sibling_map]]Sibling map
 
 ==== Sibling map key data
@@ -1888,7 +1976,7 @@ See section: <<extended_field_flags,Extended field flags>>
 The extended field data contains a 64-bit integer value
 |===
 
-===== Inode extended field types
+===== [[inode_extended_field_types]]Inode extended field types
 
 [cols="1,1,5",options="header"]
 |===
@@ -1948,6 +2036,51 @@ The data stream attribute (j_dstream_t) is 40 bytes of size and consist of:
 | 24 | 8 | | Total number of bytes written to data stream (total_bytes_written)
 | 32 | 8 | | Total number of bytes read from data stream (total_bytes_written)
 |===
+
+== [[file_content]]File content
+
+APFS supports multiple ways to store file content:
+
+* Data fork
+* Compressed data extended attribute
+* Compressed data extended attribute with resource fork
+* Resource fork
+* Extended attribute (named fork)
+
+=== Data fork
+
+The file content size is stored in an INO_EXT_TYPE_DSTREAM
+<<inode_extended_field_types,inode extended field type>>.
+
+The file content data can be located through the <<file_extent,file extents>>
+for the data stream file system object identifier in the
+<<file_system,file system tree>>.
+
+[yellow-background]*TODO: describe encryption identifier.*
+
+=== Compressed data extended attribute
+
+The file content size is stored in the compressed data header of
+a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
+
+The file content data is stored in a "com.apple.decmpfs" 
+<<extended_attribute,extended attribute>> after the compressed data header.
+
+=== Compressed data extended attribute with resource fork
+
+The file content size is stored in the compressed data header of
+a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
+
+The file content data is stored in a "com.apple.ResourceFork"
+<<extended_attribute,extended attribute>>.
+
+=== Resource fork
+
+[yellow-background]*TODO: complete this section.*
+
+=== Extended attribute (named fork)
+
+[yellow-background]*TODO: complete this section.*
 
 == [[efi_jumpstart]]EFI jumpstart
 

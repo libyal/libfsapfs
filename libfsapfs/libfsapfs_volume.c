@@ -2942,6 +2942,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	if( libfsapfs_file_system_btree_initialize(
 	     &( internal_volume->file_system_btree ),
 	     internal_volume->io_handle,
+	     internal_volume->volume_data_handle,
 	     data_block_vector,
 	     internal_volume->object_map_btree,
 	     object_map_descriptor->physical_address,
@@ -3093,6 +3094,7 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
+		     internal_volume->volume_data_handle,
 		     internal_volume->file_system_btree,
 		     inode,
 		     NULL,
@@ -3237,6 +3239,7 @@ int libfsapfs_volume_get_root_directory(
 	     file_entry,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
+	     internal_volume->volume_data_handle,
 	     internal_volume->file_system_btree,
 	     inode,
 	     NULL,
@@ -3392,6 +3395,7 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
+		     internal_volume->volume_data_handle,
 		     internal_volume->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3406,6 +3410,8 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 
 			goto on_error;
 		}
+		inode            = NULL;
+		directory_record = NULL;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3425,6 +3431,12 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 	return( result );
 
 on_error:
+	if( *file_entry != NULL )
+	{
+		libfsapfs_file_entry_free(
+		 file_entry,
+		 NULL );
+	}
 	if( directory_record != NULL )
 	{
 		libfsapfs_directory_record_free(
@@ -3554,6 +3566,7 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
+		     internal_volume->volume_data_handle,
 		     internal_volume->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3568,6 +3581,8 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 
 			goto on_error;
 		}
+		inode            = NULL;
+		directory_record = NULL;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3587,6 +3602,12 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 	return( result );
 
 on_error:
+	if( *file_entry != NULL )
+	{
+		libfsapfs_file_entry_free(
+		 file_entry,
+		 NULL );
+	}
 	if( directory_record != NULL )
 	{
 		libfsapfs_directory_record_free(

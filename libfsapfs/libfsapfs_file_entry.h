@@ -1,7 +1,7 @@
 /*
  * File entry functions
  *
- * Copyright (C) 2010-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -35,6 +35,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_types.h"
+#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -52,6 +53,10 @@ struct libfsapfs_internal_file_entry
 	 */
 	libbfio_handle_t *file_io_handle;
 
+	/* The volume data handle
+	 */
+	libfsapfs_volume_data_handle_t *volume_data_handle;
+
 	/* The file system B-tree
 	 */
 	libfsapfs_file_system_btree_t *file_system_btree;
@@ -68,13 +73,37 @@ struct libfsapfs_internal_file_entry
 	 */
 	libcdata_array_t *extended_attributes;
 
+	/* The compressed data extended attribute
+	 */
+	libfsapfs_extended_attribute_t *compressed_data_extended_attribute;
+
+	/* The resource fork extended attribute
+	 */
+	libfsapfs_extended_attribute_t *resource_fork_extended_attribute;
+
 	/* The symbolic link extended attribute
 	 */
 	libfsapfs_extended_attribute_t *symbolic_link_extended_attribute;
 
+	/* The symbolic link data
+	 */
+	uint8_t *symbolic_link_data;
+
+	/* The symbolic link data size
+	 */
+	size_t symbolic_link_data_size;
+
 	/* The directory entries
 	 */
 	libcdata_array_t *directory_entries;
+
+	/* The file size
+	 */
+	size64_t file_size;
+
+	/* The compression method
+	 */
+	uint32_t compression_method;
 
 	/* The file extents
 	 */
@@ -95,6 +124,7 @@ int libfsapfs_file_entry_initialize(
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     libfsapfs_volume_data_handle_t *volume_data_handle,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
      libfsapfs_directory_record_t *directory_record,
@@ -192,6 +222,10 @@ int libfsapfs_file_entry_get_utf16_name(
      libcerror_error_t **error );
 
 int libfsapfs_internal_file_entry_get_extended_attributes(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_file_entry_get_symbolic_link_data(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error );
 
@@ -301,6 +335,10 @@ LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_offset(
      libfsapfs_file_entry_t *file_entry,
      off64_t *offset,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_file_entry_get_file_size(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

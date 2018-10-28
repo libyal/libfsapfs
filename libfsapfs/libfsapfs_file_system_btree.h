@@ -27,7 +27,6 @@
 
 #include "libfsapfs_btree_node.h"
 #include "libfsapfs_directory_record.h"
-#include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
@@ -36,6 +35,7 @@
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
+#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -48,6 +48,10 @@ struct libfsapfs_file_system_btree
 	/* The IO handle
 	 */
 	libfsapfs_io_handle_t *io_handle;
+
+	/* The volume data handle
+	 */
+	libfsapfs_volume_data_handle_t *volume_data_handle;
 
 	/* The data block vector
 	 */
@@ -77,6 +81,7 @@ struct libfsapfs_file_system_btree
 int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
      libfsapfs_io_handle_t *io_handle,
+     libfsapfs_volume_data_handle_t *volume_data_handle,
      libfdata_vector_t *data_block_vector,
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t root_node_block_number,
@@ -191,6 +196,7 @@ int libfsapfs_file_system_btree_get_directory_entries(
 
 int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
      libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
      libcdata_array_t *extended_attributes,

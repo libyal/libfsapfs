@@ -319,6 +319,7 @@ int fsapfs_test_file_system_btree_initialize(
 	          NULL,
 	          NULL,
 	          NULL,
+	          NULL,
 	          0,
 	          0,
 	          &error );
@@ -360,6 +361,7 @@ int fsapfs_test_file_system_btree_initialize(
 	          NULL,
 	          NULL,
 	          NULL,
+	          NULL,
 	          0,
 	          0,
 	          &error );
@@ -380,6 +382,7 @@ int fsapfs_test_file_system_btree_initialize(
 
 	result = libfsapfs_file_system_btree_initialize(
 	          &file_system_btree,
+	          NULL,
 	          NULL,
 	          NULL,
 	          NULL,
@@ -413,6 +416,7 @@ int fsapfs_test_file_system_btree_initialize(
 
 		result = libfsapfs_file_system_btree_initialize(
 		          &file_system_btree,
+		          NULL,
 		          NULL,
 		          NULL,
 		          NULL,
@@ -460,6 +464,7 @@ int fsapfs_test_file_system_btree_initialize(
 
 		result = libfsapfs_file_system_btree_initialize(
 		          &file_system_btree,
+		          NULL,
 		          NULL,
 		          NULL,
 		          NULL,

@@ -1,7 +1,7 @@
 /*
  * File entry functions
  *
- * Copyright (C) 2010-2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -23,7 +23,7 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsapfs_data_stream_handle.h"
+#include "libfsapfs_data_stream.h"
 #include "libfsapfs_directory_record.h"
 #include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_entry.h"
@@ -34,10 +34,13 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_libuna.h"
 #include "libfsapfs_types.h"
+
+#include "fsapfs_file_system.h"
 
 /* Creates a file entry
  * Make sure the value file_entry is referencing, is set to NULL
@@ -47,6 +50,7 @@ int libfsapfs_file_entry_initialize(
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     libfsapfs_volume_data_handle_t *volume_data_handle,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
      libfsapfs_directory_record_t *directory_record,
@@ -77,28 +81,6 @@ int libfsapfs_file_entry_initialize(
 
 		return( -1 );
 	}
-	if( file_system_btree == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file system B-tree.",
-		 function );
-
-		return( -1 );
-	}
-	if( inode == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid inode.",
-		 function );
-
-		return( -1 );
-	}
 	internal_file_entry = memory_allocate_structure(
 	                       libfsapfs_internal_file_entry_t );
 
@@ -106,8 +88,8 @@ int libfsapfs_file_entry_initialize(
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
 		 "%s: unable to create file entry.",
 		 function );
 
@@ -130,11 +112,13 @@ int libfsapfs_file_entry_initialize(
 
 		return( -1 );
 	}
-	internal_file_entry->io_handle         = io_handle;
-	internal_file_entry->file_io_handle    = file_io_handle;
-	internal_file_entry->file_system_btree = file_system_btree;
-	internal_file_entry->inode             = inode;
-	internal_file_entry->directory_record  = directory_record;
+	internal_file_entry->io_handle          = io_handle;
+	internal_file_entry->file_io_handle     = file_io_handle;
+	internal_file_entry->volume_data_handle = volume_data_handle;
+	internal_file_entry->file_system_btree  = file_system_btree;
+	internal_file_entry->inode              = inode;
+	internal_file_entry->directory_record   = directory_record;
+	internal_file_entry->file_size          = (size64_t) -1;
 
 #if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
 	if( libcthreads_read_write_lock_initialize(
@@ -306,6 +290,11 @@ int libfsapfs_file_entry_free(
 
 				result = -1;
 			}
+		}
+		if( internal_file_entry->symbolic_link_data != NULL )
+		{
+			memory_free(
+			 internal_file_entry->symbolic_link_data );
 		}
 		memory_free(
 		 internal_file_entry );
@@ -574,6 +563,7 @@ int libfsapfs_file_entry_get_parent_file_entry(
 		     parent_file_entry,
 		     internal_file_entry->io_handle,
 		     internal_file_entry->file_io_handle,
+		     internal_file_entry->volume_data_handle,
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     NULL,
@@ -1527,9 +1517,12 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error )
 {
-	static char *function           = "libfsapfs_internal_file_entry_get_extended_attributes";
-	uint64_t file_system_identifier = 0;
-	int result                      = 0;
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	static char *function                              = "libfsapfs_internal_file_entry_get_extended_attributes";
+	uint64_t file_system_identifier                    = 0;
+	int extended_attribute_index                       = 0;
+	int number_of_extended_attributes                  = 0;
+	int result                                         = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -1599,70 +1592,6 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 
 		goto on_error;
 	}
-	return( 1 );
-
-on_error:
-	if( internal_file_entry->extended_attributes != NULL )
-	{
-		libcdata_array_free(
-		 &( internal_file_entry->extended_attributes ),
-		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
-		 NULL );
-	}
-	return( -1 );
-}
-
-/* Determines the symbolic link extended attribute
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
-     libfsapfs_internal_file_entry_t *internal_file_entry,
-     libcerror_error_t **error )
-{
-	libfsapfs_extended_attribute_t *extended_attribute = NULL;
-	static char *function                              = "libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute";
-	int extended_attribute_index                       = 0;
-	int number_of_extended_attributes                  = 0;
-	int result                                         = 0;
-
-	if( internal_file_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid file entry - symbolic link extended attribute value already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_file_entry->extended_attributes == NULL )
-	{
-		if( libfsapfs_internal_file_entry_get_extended_attributes(
-		     internal_file_entry,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine extended attributes.",
-			 function );
-
-			return( -1 );
-		}
-	}
 	if( libcdata_array_get_number_of_entries(
 	     internal_file_entry->extended_attributes,
 	     &number_of_extended_attributes,
@@ -1699,6 +1628,52 @@ int libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
 		}
 		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
 		          extended_attribute,
+		          (uint8_t *) "com.apple.decmpfs",
+		          17,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to compare UTF-8 string with name of extended attribute.",
+			 function );
+
+			return( -1 );
+		}
+		else if( result == LIBUNA_COMPARE_EQUAL )
+		{
+			internal_file_entry->compressed_data_extended_attribute = extended_attribute;
+
+			continue;
+		}
+		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
+		          extended_attribute,
+		          (uint8_t *) "com.apple.ResourceFork",
+		          22,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to compare UTF-8 string with name of extended attribute.",
+			 function );
+
+			return( -1 );
+		}
+		else if( result == LIBUNA_COMPARE_EQUAL )
+		{
+			internal_file_entry->resource_fork_extended_attribute = extended_attribute;
+
+			continue;
+		}
+		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
+		          extended_attribute,
 		          (uint8_t *) "com.apple.fs.symlink",
 		          20,
 		          error );
@@ -1709,20 +1684,152 @@ int libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GENERIC,
-			 "%s: unable to compare UTF-8 string with name of extended record.",
+			 "%s: unable to compare UTF-8 string with name of extended attribute.",
 			 function );
 
 			return( -1 );
 		}
-		else if( result != LIBUNA_COMPARE_EQUAL )
+		else if( result == LIBUNA_COMPARE_EQUAL )
 		{
+			internal_file_entry->symbolic_link_extended_attribute = extended_attribute;
+
 			continue;
 		}
-		internal_file_entry->symbolic_link_extended_attribute = extended_attribute;
-
-		break;
 	}
 	return( 1 );
+
+on_error:
+	if( internal_file_entry->extended_attributes != NULL )
+	{
+		libcdata_array_free(
+		 &( internal_file_entry->extended_attributes ),
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+		 NULL );
+	}
+	return( -1 );
+}
+
+/* Determines the symbolic link data
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_file_entry_get_symbolic_link_data(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_internal_file_entry_get_symbolic_link_data";
+	ssize_t read_count    = 0;
+
+	if( internal_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->symbolic_link_data != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry - symbolic link data value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->extended_attributes == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine extended attributes.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	{
+		if( libfsapfs_extended_attribute_get_size(
+		     internal_file_entry->symbolic_link_extended_attribute,
+		     &( internal_file_entry->symbolic_link_data_size ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve extended attribute data size.",
+			 function );
+
+			goto on_error;
+		}
+		if( internal_file_entry->symbolic_link_data_size > (size_t) SSIZE_MAX )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid extended attribute data size value exceeds maximum.",
+			 function );
+
+			goto on_error;
+		}
+		internal_file_entry->symbolic_link_data = (uint8_t *) memory_allocate(
+		                                                       sizeof( uint8_t ) * internal_file_entry->symbolic_link_data_size );
+
+		if( internal_file_entry->symbolic_link_data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create extended attribute data.",
+			 function );
+
+			goto on_error;
+		}
+		read_count = libfsapfs_extended_attribute_read_buffer_at_offset(
+		              internal_file_entry->symbolic_link_extended_attribute,
+		              internal_file_entry->symbolic_link_data,
+		              internal_file_entry->symbolic_link_data_size,
+		              0,
+		              error );
+	       
+		if( read_count != internal_file_entry->symbolic_link_data_size )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read extended attribute data.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	return( 1 );
+
+on_error:
+	if( internal_file_entry->symbolic_link_data != NULL )
+	{
+		memory_free(
+		 internal_file_entry->symbolic_link_data );
+
+		internal_file_entry->symbolic_link_data = NULL;
+	}
+	internal_file_entry->symbolic_link_data_size = 0;
+
+	return( -1 );
 }
 
 /* Retrieves the size of the UTF-8 encoded symbolic link target
@@ -1736,9 +1843,7 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_target_size(
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	uint8_t *symbolic_link_data                          = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_target_size";
-	size_t symbolic_link_data_size                       = 0;
 	int result                                           = 0;
 
 	if( file_entry == NULL )
@@ -1769,9 +1874,9 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_target_size(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
+	if( internal_file_entry->symbolic_link_data == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
+		if( libfsapfs_internal_file_entry_get_symbolic_link_data(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -1779,32 +1884,17 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_target_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine symbolic link extended attribute.",
+			 "%s: unable to determine symbolic link data.",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	if( internal_file_entry->symbolic_link_data != NULL )
 	{
-		if( libfsapfs_extended_attribute_get_data(
-		     internal_file_entry->symbolic_link_extended_attribute,
-		     &symbolic_link_data,
-		     &symbolic_link_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve symbolic link extended attribute data.",
-			 function );
-
-			goto on_error;
-		}
 		if( libuna_utf8_string_size_from_utf8_stream(
-		     symbolic_link_data,
-		     symbolic_link_data_size,
+		     internal_file_entry->symbolic_link_data,
+		     internal_file_entry->symbolic_link_data_size,
 		     utf8_string_size,
 		     error ) != 1 )
 		{
@@ -1857,9 +1947,7 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_target(
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	uint8_t *symbolic_link_data                          = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_utf8_symbolic_link_target";
-	size_t symbolic_link_data_size                       = 0;
 	int result                                           = 0;
 
 	if( file_entry == NULL )
@@ -1890,9 +1978,9 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_target(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
+	if( internal_file_entry->symbolic_link_data == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
+		if( libfsapfs_internal_file_entry_get_symbolic_link_data(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -1900,34 +1988,19 @@ int libfsapfs_file_entry_get_utf8_symbolic_link_target(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine symbolic link extended attribute.",
+			 "%s: unable to determine symbolic link data.",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	if( internal_file_entry->symbolic_link_data != NULL )
 	{
-		if( libfsapfs_extended_attribute_get_data(
-		     internal_file_entry->symbolic_link_extended_attribute,
-		     &symbolic_link_data,
-		     &symbolic_link_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve symbolic link extended attribute data.",
-			 function );
-
-			goto on_error;
-		}
 		if( libuna_utf8_string_copy_from_utf8_stream(
 		     utf8_string,
 		     utf8_string_size,
-		     symbolic_link_data,
-		     symbolic_link_data_size,
+		     internal_file_entry->symbolic_link_data,
+		     internal_file_entry->symbolic_link_data_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1978,9 +2051,7 @@ int libfsapfs_file_entry_get_utf16_symbolic_link_target_size(
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	uint8_t *symbolic_link_data                          = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_utf16_symbolic_link_target_size";
-	size_t symbolic_link_data_size                       = 0;
 	int result                                           = 0;
 
 	if( file_entry == NULL )
@@ -2011,9 +2082,9 @@ int libfsapfs_file_entry_get_utf16_symbolic_link_target_size(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
+	if( internal_file_entry->symbolic_link_data == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
+		if( libfsapfs_internal_file_entry_get_symbolic_link_data(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -2021,32 +2092,17 @@ int libfsapfs_file_entry_get_utf16_symbolic_link_target_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine symbolic link extended attribute.",
+			 "%s: unable to determine symbolic link data.",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	if( internal_file_entry->symbolic_link_data != NULL )
 	{
-		if( libfsapfs_extended_attribute_get_data(
-		     internal_file_entry->symbolic_link_extended_attribute,
-		     &symbolic_link_data,
-		     &symbolic_link_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve symbolic link extended attribute data.",
-			 function );
-
-			goto on_error;
-		}
 		if( libuna_utf16_string_size_from_utf8_stream(
-		     symbolic_link_data,
-		     symbolic_link_data_size,
+		     internal_file_entry->symbolic_link_data,
+		     internal_file_entry->symbolic_link_data_size,
 		     utf16_string_size,
 		     error ) != 1 )
 		{
@@ -2099,9 +2155,7 @@ int libfsapfs_file_entry_get_utf16_symbolic_link_target(
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
-	uint8_t *symbolic_link_data                          = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_utf16_symbolic_link_target";
-	size_t symbolic_link_data_size                       = 0;
 	int result                                           = 0;
 
 	if( file_entry == NULL )
@@ -2132,9 +2186,9 @@ int libfsapfs_file_entry_get_utf16_symbolic_link_target(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->symbolic_link_extended_attribute == NULL )
+	if( internal_file_entry->symbolic_link_data == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_symbolic_link_extended_attribute(
+		if( libfsapfs_internal_file_entry_get_symbolic_link_data(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -2142,34 +2196,19 @@ int libfsapfs_file_entry_get_utf16_symbolic_link_target(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine symbolic link extended attribute.",
+			 "%s: unable to determine symbolic link data.",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	if( internal_file_entry->symbolic_link_data != NULL )
 	{
-		if( libfsapfs_extended_attribute_get_data(
-		     internal_file_entry->symbolic_link_extended_attribute,
-		     &symbolic_link_data,
-		     &symbolic_link_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve symbolic link extended attribute data.",
-			 function );
-
-			goto on_error;
-		}
 		if( libuna_utf16_string_copy_from_utf8_stream(
 		     utf16_string,
 		     utf16_string_size,
-		     symbolic_link_data,
-		     symbolic_link_data_size,
+		     internal_file_entry->symbolic_link_data,
+		     internal_file_entry->symbolic_link_data_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -2759,6 +2798,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 	     sub_file_entry,
 	     internal_file_entry->io_handle,
 	     internal_file_entry->file_io_handle,
+	     internal_file_entry->volume_data_handle,
 	     internal_file_entry->file_system_btree,
 	     inode,
 	     directory_record_copy,
@@ -2922,6 +2962,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 		     sub_file_entry,
 		     internal_file_entry->io_handle,
 		     internal_file_entry->file_io_handle,
+		     internal_file_entry->volume_data_handle,
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3083,6 +3124,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 		     sub_file_entry,
 		     internal_file_entry->io_handle,
 		     internal_file_entry->file_io_handle,
+		     internal_file_entry->volume_data_handle,
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3235,14 +3277,8 @@ int libfsapfs_internal_file_entry_get_data_stream(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_data_stream_handle_t *data_stream_handle = NULL;
-	libfsapfs_file_extent_t *file_extent               = NULL;
-	static char *function                              = "libfsapfs_internal_file_entry_get_data_stream";
-	size64_t data_stream_size                          = 0;
-	uint64_t used_data_stream_size                     = 0;
-	int extent_index                                   = 0;
-	int number_of_extents                              = 0;
-	int segment_index                                  = 0;
+	static char *function     = "libfsapfs_internal_file_entry_get_data_stream";
+	uint64_t data_stream_size = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -3293,111 +3329,8 @@ int libfsapfs_internal_file_entry_get_data_stream(
 			goto on_error;
 		}
 	}
-	if( libfsapfs_data_stream_handle_initialize(
-	     &data_stream_handle,
-	     internal_file_entry->io_handle,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data stream handle.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfdata_stream_initialize(
-	     &( internal_file_entry->data_stream ),
-	     (intptr_t *) data_stream_handle,
-	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_data_stream_handle_free,
-	     NULL,
-	     NULL,
-	     (ssize_t (*)(intptr_t *, intptr_t *, int, int, uint8_t *, size_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_data_stream_handle_read_segment_data,
-	     NULL,
-	     (off64_t (*)(intptr_t *, intptr_t *, int, int, off64_t, libcerror_error_t **)) &libfsapfs_data_stream_handle_seek_segment_offset,
-	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data stream.",
-		 function );
-
-		goto on_error;
-	}
-	data_stream_handle = NULL;
-
-	if( libcdata_array_get_number_of_entries(
-	     internal_file_entry->file_extents,
-	     &number_of_extents,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from array.",
-		 function );
-
-		goto on_error;
-	}
-	for( extent_index = 0;
-	     extent_index < number_of_extents;
-	     extent_index++ )
-	{
-		if( libcdata_array_get_entry_by_index(
-		     internal_file_entry->file_extents,
-		     extent_index,
-		     (intptr_t **) &file_extent,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file extent: %d.",
-			 function,
-			 extent_index );
-
-			goto on_error;
-		}
-		if( file_extent == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing file extent: %d.",
-			 function,
-			 extent_index );
-
-			goto on_error;
-		}
-		if( libfdata_stream_append_segment(
-		     internal_file_entry->data_stream,
-		     &segment_index,
-		     0,
-		     file_extent->block_number * internal_file_entry->io_handle->block_size,
-		     file_extent->data_size,
-		     0,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-			 "%s: unable to append extent: %d as data stream segment.",
-			 function,
-			 extent_index );
-
-			goto on_error;
-		}
-	}
-	if( libfdata_stream_get_size(
-	     internal_file_entry->data_stream,
+	if( libfsapfs_inode_get_data_stream_size(
+	     internal_file_entry->inode,
 	     &data_stream_size,
 	     error ) != 1 )
 	{
@@ -3405,36 +3338,24 @@ int libfsapfs_internal_file_entry_get_data_stream(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve data stream size.",
+		 "%s: unable to retrieve data stream size from inode.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsapfs_inode_get_data_stream_size(
-	     internal_file_entry->inode,
-	     &used_data_stream_size,
+	if( libfsapfs_data_stream_initialize_from_file_extents(
+	     &( internal_file_entry->data_stream ),
+	     internal_file_entry->io_handle,
+	     internal_file_entry->volume_data_handle,
+	     internal_file_entry->file_extents,
+	     (size64_t) data_stream_size,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve data stream size.",
-		 function );
-
-		goto on_error;
-	}
-/* TODO handle file size of 0 */
-	if( libfdata_stream_set_mapped_size(
-	     internal_file_entry->data_stream,
-	     (size64_t) used_data_stream_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set mapped size.",
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create data stream from file extents.",
 		 function );
 
 		goto on_error;
@@ -3442,12 +3363,6 @@ int libfsapfs_internal_file_entry_get_data_stream(
 	return( 1 );
 
 on_error:
-	if( data_stream_handle != NULL )
-	{
-		libfsapfs_data_stream_handle_free(
-		 &data_stream_handle,
-		 NULL );
-	}
 	if( internal_file_entry->data_stream != NULL )
 	{
 		libfdata_stream_free(
@@ -3466,6 +3381,7 @@ ssize_t libfsapfs_file_entry_read_buffer(
          size_t buffer_size,
          libcerror_error_t **error )
 {
+	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_read_buffer";
 	ssize_t read_count                                   = 0;
@@ -3498,9 +3414,9 @@ ssize_t libfsapfs_file_entry_read_buffer(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->data_stream == NULL )
+	if( internal_file_entry->file_size == (size64_t) -1 )
 	{
-		if( libfsapfs_internal_file_entry_get_data_stream(
+		if( libfsapfs_internal_file_entry_get_file_size(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3508,14 +3424,81 @@ ssize_t libfsapfs_file_entry_read_buffer(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine data stream.",
+			 "%s: unable to determine file size.",
 			 function );
 
 			goto on_error;
 		}
 	}
+	if( internal_file_entry->compression_method == 0 )
+	{
+	       	if( internal_file_entry->data_stream == NULL )
+		{
+			if( libfsapfs_internal_file_entry_get_data_stream(
+			     internal_file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine data stream.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		data_stream = internal_file_entry->data_stream;
+	}
+	else if( ( internal_file_entry->compression_method == 3 )
+	      || ( internal_file_entry->compression_method == 7 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->compressed_data_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from compressed data extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else if( ( internal_file_entry->compression_method == 4 )
+	      || ( internal_file_entry->compression_method == 8 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->resource_fork_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from resource fork extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported compression method.",
+		 function );
+
+		goto on_error;
+	}
 	read_count = libfdata_stream_read_buffer(
-	              internal_file_entry->data_stream,
+	              data_stream,
 	              (intptr_t *) internal_file_entry->file_io_handle,
 	              (uint8_t *) buffer,
 	              buffer_size,
@@ -3531,7 +3514,7 @@ ssize_t libfsapfs_file_entry_read_buffer(
 		 "%s: unable to read buffer from data stream.",
 		 function );
 
-		read_count = -1;
+		goto on_error;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3569,6 +3552,7 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
          off64_t offset,
          libcerror_error_t **error )
 {
+	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_read_buffer_at_offset";
 	ssize_t read_count                                   = 0;
@@ -3601,9 +3585,9 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->data_stream == NULL )
+	if( internal_file_entry->file_size == (size64_t) -1 )
 	{
-		if( libfsapfs_internal_file_entry_get_data_stream(
+		if( libfsapfs_internal_file_entry_get_file_size(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3611,14 +3595,81 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine data stream.",
+			 "%s: unable to determine file size.",
 			 function );
 
 			goto on_error;
 		}
 	}
+	if( internal_file_entry->compression_method == 0 )
+	{
+	       	if( internal_file_entry->data_stream == NULL )
+		{
+			if( libfsapfs_internal_file_entry_get_data_stream(
+			     internal_file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine data stream.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		data_stream = internal_file_entry->data_stream;
+	}
+	else if( ( internal_file_entry->compression_method == 3 )
+	      || ( internal_file_entry->compression_method == 7 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->compressed_data_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from compressed data extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else if( ( internal_file_entry->compression_method == 4 )
+	      || ( internal_file_entry->compression_method == 8 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->resource_fork_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from resource fork extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported compression method.",
+		 function );
+
+		goto on_error;
+	}
 	read_count = libfdata_stream_read_buffer_at_offset(
-	              internal_file_entry->data_stream,
+	              data_stream,
 	              (intptr_t *) internal_file_entry->file_io_handle,
 	              (uint8_t *) buffer,
 	              buffer_size,
@@ -3635,7 +3686,7 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
 		 "%s: unable to read buffer at offset from data stream.",
 		 function );
 
-		read_count = -1;
+		goto on_error;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3672,6 +3723,7 @@ off64_t libfsapfs_file_entry_seek_offset(
          int whence,
          libcerror_error_t **error )
 {
+	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_seek_offset";
 
@@ -3703,9 +3755,9 @@ off64_t libfsapfs_file_entry_seek_offset(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->data_stream == NULL )
+	if( internal_file_entry->file_size == (size64_t) -1 )
 	{
-		if( libfsapfs_internal_file_entry_get_data_stream(
+		if( libfsapfs_internal_file_entry_get_file_size(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3713,14 +3765,81 @@ off64_t libfsapfs_file_entry_seek_offset(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine data stream.",
+			 "%s: unable to determine file size.",
 			 function );
 
 			goto on_error;
 		}
 	}
+	if( internal_file_entry->compression_method == 0 )
+	{
+	       	if( internal_file_entry->data_stream == NULL )
+		{
+			if( libfsapfs_internal_file_entry_get_data_stream(
+			     internal_file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine data stream.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		data_stream = internal_file_entry->data_stream;
+	}
+	else if( ( internal_file_entry->compression_method == 3 )
+	      || ( internal_file_entry->compression_method == 7 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->compressed_data_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from compressed data extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else if( ( internal_file_entry->compression_method == 4 )
+	      || ( internal_file_entry->compression_method == 8 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->resource_fork_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from resource fork extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported compression method.",
+		 function );
+
+		goto on_error;
+	}
 	offset = libfdata_stream_seek_offset(
-	          internal_file_entry->data_stream,
+	          data_stream,
 	          offset,
 	          whence,
 	          error );
@@ -3770,6 +3889,7 @@ int libfsapfs_file_entry_get_offset(
      off64_t *offset,
      libcerror_error_t **error )
 {
+	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_offset";
 
@@ -3801,9 +3921,9 @@ int libfsapfs_file_entry_get_offset(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->data_stream == NULL )
+	if( internal_file_entry->file_size == (size64_t) -1 )
 	{
-		if( libfsapfs_internal_file_entry_get_data_stream(
+		if( libfsapfs_internal_file_entry_get_file_size(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3811,14 +3931,81 @@ int libfsapfs_file_entry_get_offset(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine data stream.",
+			 "%s: unable to determine file size.",
 			 function );
 
 			goto on_error;
 		}
 	}
+	if( internal_file_entry->compression_method == 0 )
+	{
+	       	if( internal_file_entry->data_stream == NULL )
+		{
+			if( libfsapfs_internal_file_entry_get_data_stream(
+			     internal_file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine data stream.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		data_stream = internal_file_entry->data_stream;
+	}
+	else if( ( internal_file_entry->compression_method == 3 )
+	      || ( internal_file_entry->compression_method == 7 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->compressed_data_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from compressed data extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else if( ( internal_file_entry->compression_method == 4 )
+	      || ( internal_file_entry->compression_method == 8 ) )
+	{
+		if( libfsapfs_extended_attribute_get_data_stream(
+		     internal_file_entry->resource_fork_extended_attribute,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream from resource fork extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported compression method.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfdata_stream_get_offset(
-	     internal_file_entry->data_stream,
+	     data_stream,
 	     offset,
 	     error ) != 1 )
 	{
@@ -3857,6 +4044,144 @@ on_error:
 	return( -1 );
 }
 
+/* Determines the file size
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_internal_file_entry_get_file_size(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     libcerror_error_t **error )
+{
+	uint8_t extended_attribute_data[ 16 ];
+
+	static char *function = "libfsapfs_internal_file_entry_get_file_size";
+	ssize_t read_count    = 0;
+
+	if( internal_file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->file_size != (size64_t) -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry - file size value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_file_entry->extended_attributes == NULL )
+	{
+		if( libfsapfs_internal_file_entry_get_extended_attributes(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine extended attributes.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	if( internal_file_entry->compressed_data_extended_attribute != NULL )
+	{
+		read_count = libfsapfs_extended_attribute_read_buffer_at_offset(
+		              internal_file_entry->compressed_data_extended_attribute,
+		              extended_attribute_data,
+		              16,
+		              0,
+		              error );
+	       
+		if( read_count != (ssize_t) 16 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read extended attribute data.",
+			 function );
+
+			return( -1 );
+		}
+		if( memory_compare(
+		     ( (fsapfs_file_system_extended_attribute_compression_header_t *) extended_attribute_data )->signature,
+		     "fpmc",
+		     4 ) != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: invalid compressed data header signature.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsapfs_file_system_extended_attribute_compression_header_t *) extended_attribute_data )->compression_method,
+		 internal_file_entry->compression_method );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_file_system_extended_attribute_compression_header_t *) extended_attribute_data )->uncompressed_data_size,
+		 internal_file_entry->file_size );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: signature\t\t\t: %c%c%c%c\n",
+			 function,
+			 extended_attribute_data[ 0 ],
+			 extended_attribute_data[ 1 ],
+			 extended_attribute_data[ 2 ],
+			 extended_attribute_data[ 3 ] );
+
+			libcnotify_printf(
+			 "%s: compression method\t\t: %" PRIu32 "\n",
+			 function,
+			 internal_file_entry->compression_method );
+
+			libcnotify_printf(
+			 "%s: uncompressed data size\t: %" PRIu64 "\n",
+			 function,
+			 internal_file_entry->file_size );
+
+			libcnotify_printf(
+			 "\n" );
+		}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+	}
+	else
+	{
+		if( libfsapfs_inode_get_data_stream_size(
+		     internal_file_entry->inode,
+		     &( internal_file_entry->file_size ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream size from inode.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	return( 1 );
+}
+
 /* Retrieves the size of the data stream object
  * Returns 1 if successful or -1 on error
  */
@@ -3867,7 +4192,6 @@ int libfsapfs_file_entry_get_size(
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_size";
-	int result                                           = 1;
 
 	if( file_entry == NULL )
 	{
@@ -3882,6 +4206,17 @@ int libfsapfs_file_entry_get_size(
 	}
 	internal_file_entry = (libfsapfs_internal_file_entry_t *) file_entry;
 
+	if( size == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid size.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_file_entry->read_write_lock,
@@ -3897,20 +4232,24 @@ int libfsapfs_file_entry_get_size(
 		return( -1 );
 	}
 #endif
-	if( libfsapfs_inode_get_data_stream_size(
-	     internal_file_entry->inode,
-	     size,
-	     error ) != 1 )
+	if( internal_file_entry->file_size == (size64_t) -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve data stream size.",
-		 function );
+		if( libfsapfs_internal_file_entry_get_file_size(
+		     internal_file_entry,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine file size.",
+			 function );
 
-		result = -1;
+			goto on_error;
+		}
 	}
+	*size = internal_file_entry->file_size;
+
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_file_entry->read_write_lock,
@@ -3926,7 +4265,15 @@ int libfsapfs_file_entry_get_size(
 		return( -1 );
 	}
 #endif
-	return( result );
+	return( 1 );
+
+on_error:
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_write(
+	 internal_file_entry->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
 }
 
 /* Retrieves the number of extents

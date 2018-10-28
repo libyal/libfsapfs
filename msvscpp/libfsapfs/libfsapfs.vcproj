@@ -190,6 +190,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_buffer_data_stream_handle.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_checkpoint_map.c"
 				>
 			</File>
@@ -226,11 +230,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_data_stream_descriptor.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block_data_stream_handle.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_data_stream_handle.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_data_stream.c"
 				>
 			</File>
 			<File
@@ -404,6 +408,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_buffer_data_stream_handle.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_checkpoint_map.h"
 				>
 			</File>
@@ -440,11 +448,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_data_stream_descriptor.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block_data_stream_handle.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_data_stream_handle.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_data_stream.h"
 				>
 			</File>
 			<File

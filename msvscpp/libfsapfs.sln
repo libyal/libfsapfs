@@ -134,12 +134,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fsapfs_test_data_block", "f
 		{F480F61D-4950-4603-9F6F-F95ECC64A31C} = {F480F61D-4950-4603-9F6F-F95ECC64A31C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fsapfs_test_data_stream_descriptor", "fsapfs_test_data_stream_descriptor\fsapfs_test_data_stream_descriptor.vcproj", "{F3EF982E-017B-49CE-861F-85057D5A4290}"
-	ProjectSection(ProjectDependencies) = postProject
-		{66956CAB-8580-4D29-AFA4-49E9934D9E42} = {66956CAB-8580-4D29-AFA4-49E9934D9E42}
-		{F480F61D-4950-4603-9F6F-F95ECC64A31C} = {F480F61D-4950-4603-9F6F-F95ECC64A31C}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fsapfs_test_directory_record", "fsapfs_test_directory_record\fsapfs_test_directory_record.vcproj", "{808897C3-261A-4998-B768-1D94B39BD822}"
 	ProjectSection(ProjectDependencies) = postProject
 		{66956CAB-8580-4D29-AFA4-49E9934D9E42} = {66956CAB-8580-4D29-AFA4-49E9934D9E42}
@@ -522,10 +516,6 @@ Global
 		{546056DF-1F2C-4D7B-9368-0D0463FB9442}.Release|Win32.Build.0 = Release|Win32
 		{546056DF-1F2C-4D7B-9368-0D0463FB9442}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
 		{546056DF-1F2C-4D7B-9368-0D0463FB9442}.VSDebug|Win32.Build.0 = VSDebug|Win32
-		{F3EF982E-017B-49CE-861F-85057D5A4290}.Release|Win32.ActiveCfg = Release|Win32
-		{F3EF982E-017B-49CE-861F-85057D5A4290}.Release|Win32.Build.0 = Release|Win32
-		{F3EF982E-017B-49CE-861F-85057D5A4290}.VSDebug|Win32.ActiveCfg = VSDebug|Win32
-		{F3EF982E-017B-49CE-861F-85057D5A4290}.VSDebug|Win32.Build.0 = VSDebug|Win32
 		{808897C3-261A-4998-B768-1D94B39BD822}.Release|Win32.ActiveCfg = Release|Win32
 		{808897C3-261A-4998-B768-1D94B39BD822}.Release|Win32.Build.0 = Release|Win32
 		{808897C3-261A-4998-B768-1D94B39BD822}.VSDebug|Win32.ActiveCfg = VSDebug|Win32

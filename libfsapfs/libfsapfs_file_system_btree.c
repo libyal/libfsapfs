@@ -45,6 +45,7 @@
 #include "libfsapfs_name_hash.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
+#include "libfsapfs_volume_data_handle.h"
 
 #include "fsapfs_file_system.h"
 #include "fsapfs_object.h"
@@ -56,6 +57,7 @@
 int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
      libfsapfs_io_handle_t *io_handle,
+     libfsapfs_volume_data_handle_t *volume_data_handle,
      libfdata_vector_t *data_block_vector,
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t root_node_block_number,
@@ -148,6 +150,7 @@ int libfsapfs_file_system_btree_initialize(
 		goto on_error;
 	}
 	( *file_system_btree )->io_handle              = io_handle;
+	( *file_system_btree )->volume_data_handle     = volume_data_handle;
 	( *file_system_btree )->data_block_vector      = data_block_vector;
 	( *file_system_btree )->object_map_btree       = object_map_btree;
 	( *file_system_btree )->root_node_block_number = root_node_block_number;
@@ -3002,6 +3005,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 		{
 			break;
 		}
+/* TODO include file_system_data_type in check ? */
 		if( ( file_system_identifier == parent_identifier )
 		 && ( previous_entry != NULL ) )
 		{
@@ -3357,6 +3361,7 @@ on_error:
  */
 int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
      libfsapfs_file_system_btree_t *file_system_btree,
+     libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
      libcdata_array_t *extended_attributes,
@@ -3522,6 +3527,10 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		}
 		if( libfsapfs_extended_attribute_initialize(
 		     &extended_attribute,
+		     file_system_btree->io_handle,
+		     file_io_handle,
+		     file_system_btree->volume_data_handle,
+		     file_system_btree,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -3764,13 +3773,14 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 		{
 			break;
 		}
+/* TODO include file_system_data_type in check ? */
 		if( ( file_system_identifier == identifier )
 		 && ( previous_entry != NULL ) )
 		{
 			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
 			     file_system_btree,
 			     file_io_handle,
-			     entry,
+			     previous_entry,
 			     &sub_node_block_number,
 			     error ) != 1 )
 			{
@@ -3819,6 +3829,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 			{
 				result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 				          file_system_btree,
+				          file_io_handle,
 				          sub_node,
 				          identifier,
 				          extended_attributes,
@@ -3906,6 +3917,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 	{
 		result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		          file_system_btree,
+		          file_io_handle,
 		          sub_node,
 		          identifier,
 		          extended_attributes,
@@ -4053,6 +4065,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 	{
 		result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		          file_system_btree,
+		          file_io_handle,
 		          root_node,
 		          identifier,
 		          extended_attributes,
@@ -4527,6 +4540,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 		{
 			file_extent_logical_address = 0;
 		}
+/* TODO include file_system_data_type in check ? */
 		if( ( file_system_identifier == identifier )
 		 && ( file_extent_logical_address > 0 )
 		 && ( previous_entry != NULL ) )

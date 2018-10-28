@@ -26,9 +26,15 @@
 #include <types.h>
 
 #include "libfsapfs_extern.h"
+#include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_io_handle.h"
+#include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
+#include "libfsapfs_libfdata.h"
 #include "libfsapfs_types.h"
+#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -38,6 +44,22 @@ typedef struct libfsapfs_internal_extended_attribute libfsapfs_internal_extended
 
 struct libfsapfs_internal_extended_attribute
 {
+	/* The IO handle
+	 */
+	libfsapfs_io_handle_t *io_handle;
+
+	/* The file IO handle
+	 */
+	libbfio_handle_t *file_io_handle;
+
+	/* The volume data handle
+	 */
+	libfsapfs_volume_data_handle_t *volume_data_handle;
+
+	/* The file system B-tree
+	 */
+	libfsapfs_file_system_btree_t *file_system_btree;
+
 	/* The identifier
 	 */
 	uint64_t identifier;
@@ -50,13 +72,25 @@ struct libfsapfs_internal_extended_attribute
 	 */
 	uint8_t *name;
 
-	/* The data size
-	 */
-	uint16_t data_size;
-
 	/* The data
 	 */
 	uint8_t *data;
+
+	/* Data stream identifier
+	 */
+	uint64_t data_stream_identifier;
+
+	/* Data stream size
+	 */
+	uint64_t data_stream_size;
+
+	/* The file extents
+	 */
+	libcdata_array_t *file_extents;
+
+	/* The data stream
+	 */
+	libfdata_stream_t *data_stream;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -67,6 +101,10 @@ struct libfsapfs_internal_extended_attribute
 
 int libfsapfs_extended_attribute_initialize(
      libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
+     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_file_system_btree_t *file_system_btree,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
@@ -88,6 +126,11 @@ int libfsapfs_extended_attribute_read_value_data(
      libfsapfs_extended_attribute_t *extended_attribute,
      const uint8_t *data,
      size_t data_size,
+     libcerror_error_t **error );
+
+int libfsapfs_extended_attribute_get_data_stream(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     libfdata_stream_t **data_stream,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
@@ -134,10 +177,46 @@ int libfsapfs_extended_attribute_compare_name_with_utf16_string(
      size_t utf16_string_length,
      libcerror_error_t **error );
 
-int libfsapfs_extended_attribute_get_data(
+int libfsapfs_internal_extended_attribute_get_file_extents(
+     libfsapfs_internal_extended_attribute_t *internal_extended_attribute,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_extended_attribute_get_data_stream(
+     libfsapfs_internal_extended_attribute_t *internal_extended_attribute,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_extended_attribute_read_buffer(
+         libfsapfs_extended_attribute_t *extended_attribute,
+         void *buffer,
+         size_t buffer_size,
+         libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_extended_attribute_read_buffer_at_offset(
+         libfsapfs_extended_attribute_t *extended_attribute,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+off64_t libfsapfs_extended_attribute_seek_offset(
+         libfsapfs_extended_attribute_t *extended_attribute,
+         off64_t offset,
+         int whence,
+         libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_offset(
      libfsapfs_extended_attribute_t *extended_attribute,
-     uint8_t **data,
-     size_t *data_size,
+     off64_t *offset,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_size(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     size64_t *size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

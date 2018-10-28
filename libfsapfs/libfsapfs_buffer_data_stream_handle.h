@@ -1,5 +1,5 @@
 /*
- * The data stream handle functions
+ * The buffer data stream handle functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,60 +19,48 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_DATA_STREAM_HANDLE_H )
-#define _LIBFSAPFS_DATA_STREAM_HANDLE_H
+#if !defined( _LIBFSAPFS_BUFFER_DATA_STREAM_HANDLE_H )
+#define _LIBFSAPFS_BUFFER_DATA_STREAM_HANDLE_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsapfs_io_handle.h"
-#include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
-#include "libfsapfs_libfcache.h"
-#include "libfsapfs_libfdata.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsapfs_data_stream_handle libfsapfs_data_stream_handle_t;
+typedef struct libfsapfs_buffer_data_stream_handle libfsapfs_buffer_data_stream_handle_t;
 
-struct libfsapfs_data_stream_handle
+struct libfsapfs_buffer_data_stream_handle
 {
 	/* The current segment offset
 	 */
 	off64_t current_segment_offset;
 
-	/* The IO handle
+	/* The buffer
 	 */
-	libfsapfs_io_handle_t *io_handle;
+	const uint8_t *buffer;
 
-	/* The volume data handle
+	/* The buffer size
 	 */
-	libfsapfs_volume_data_handle_t *volume_data_handle;
-
-	/* The data block vector
-	 */
-	libfdata_vector_t *data_block_vector;
-
-	/* The data block cache
-	 */
-	libfcache_cache_t *data_block_cache;
+	size_t buffer_size;
 };
 
-int libfsapfs_data_stream_handle_initialize(
-     libfsapfs_data_stream_handle_t **data_stream_handle,
-     libfsapfs_io_handle_t *io_handle,
+int libfsapfs_buffer_data_stream_handle_initialize(
+     libfsapfs_buffer_data_stream_handle_t **data_stream_handle,
+     const uint8_t *buffer,
+     size_t buffer_size,
      libcerror_error_t **error );
 
-int libfsapfs_data_stream_handle_free(
-     libfsapfs_data_stream_handle_t **data_stream_handle,
+int libfsapfs_buffer_data_stream_handle_free(
+     libfsapfs_buffer_data_stream_handle_t **data_stream_handle,
      libcerror_error_t **error );
 
-ssize_t libfsapfs_data_stream_handle_read_segment_data(
-         libfsapfs_data_stream_handle_t *data_stream_handle,
-         libbfio_handle_t *file_io_handle,
+ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
+         libfsapfs_buffer_data_stream_handle_t *data_stream_handle,
+         intptr_t *file_io_handle,
          int segment_index,
          int segment_file_index,
          uint8_t *segment_data,
@@ -81,8 +69,8 @@ ssize_t libfsapfs_data_stream_handle_read_segment_data(
          uint8_t read_flags,
          libcerror_error_t **error );
 
-off64_t libfsapfs_data_stream_handle_seek_segment_offset(
-         libfsapfs_data_stream_handle_t *data_stream_handle,
+off64_t libfsapfs_buffer_data_stream_handle_seek_segment_offset(
+         libfsapfs_buffer_data_stream_handle_t *data_stream_handle,
          intptr_t *file_io_handle,
          int segment_index,
          int segment_file_index,
@@ -93,5 +81,5 @@ off64_t libfsapfs_data_stream_handle_seek_segment_offset(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_DATA_STREAM_HANDLE_H ) */
+#endif /* !defined( _LIBFSAPFS_BUFFER_DATA_STREAM_HANDLE_H ) */
 

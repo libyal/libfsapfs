@@ -2851,7 +2851,7 @@ int info_handle_file_entry_fprint_by_path(
 		 "%s: unable to print file entry.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	if( libfsapfs_file_entry_free(
 	     &file_entry,
@@ -2993,7 +2993,7 @@ int info_handle_file_entries_fprint(
 		 "%s: unable to retrieve next file entry identifier.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	fprintf(
 	 info_handle->notify_stream,
@@ -3023,6 +3023,12 @@ int info_handle_file_entries_fprint(
 		}
 		else if( result != 0 )
 		{
+			if( info_handle->bodyfile_stream == NULL )
+			{
+				fprintf(
+				 info_handle->notify_stream,
+				 "File entry:\n" );
+			}
 			if( info_handle_file_entry_value_fprint(
 			     info_handle,
 			     file_entry,
@@ -3036,7 +3042,7 @@ int info_handle_file_entries_fprint(
 				 "%s: unable to print file entry.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( libfsapfs_file_entry_free(
 			     &file_entry,
@@ -3050,6 +3056,12 @@ int info_handle_file_entries_fprint(
 				 function );
 
 				goto on_error;
+			}
+			if( info_handle->bodyfile_stream == NULL )
+			{
+				fprintf(
+				 info_handle->notify_stream,
+				 "\n" );
 			}
 		}
 	}

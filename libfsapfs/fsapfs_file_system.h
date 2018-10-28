@@ -134,36 +134,6 @@ struct fsapfs_file_system_btree_value_directory_record
 	 */
 };
 
-typedef struct fsapfs_file_system_data_stream_descriptor fsapfs_file_system_data_stream_descriptor_t;
-
-struct fsapfs_file_system_data_stream_descriptor
-{
-	/* The size
-	 * Consists of 8 bytes
-	 */
-	uint8_t size[ 8 ];
-
-	/* The allocated size
-	 * Consists of 8 bytes
-	 */
-	uint8_t allocated_size[ 8 ];
-
-	/* The default encryption identifier
-	 * Consists of 8 bytes
-	 */
-	uint8_t default_encryption_identifier[ 8 ];
-
-	/* The total number of bytes written
-	 * Consists of 8 bytes
-	 */
-	uint8_t total_bytes_written[ 8 ];
-
-	/* The total number of bytes read
-	 * Consists of 8 bytes
-	 */
-	uint8_t total_bytes_read[ 8 ];
-};
-
 typedef struct fsapfs_file_system_btree_value_extended_attribute fsapfs_file_system_btree_value_extended_attribute_t;
 
 struct fsapfs_file_system_btree_value_extended_attribute
@@ -180,6 +150,61 @@ struct fsapfs_file_system_btree_value_extended_attribute
 
 	/* The data
 	 */
+};
+
+typedef struct fsapfs_file_system_extended_attribute_data_stream fsapfs_file_system_extended_attribute_data_stream_t;
+
+struct fsapfs_file_system_extended_attribute_data_stream
+{
+	/* The data stream identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t data_stream_identifier[ 8 ];
+
+	/* The used size
+	 * Consists of 8 bytes
+	 */
+	uint8_t used_size[ 8 ];
+
+	/* The allocated size
+	 * Consists of 8 bytes
+	 */
+	uint8_t allocated_size[ 8 ];
+
+	/* The encryption identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t encryption_identifier[ 8 ];
+
+	/* The number of bytes written
+	 * Consists of 8 bytes
+	 */
+	uint8_t number_of_bytes_written[ 8 ];
+
+	/* The number of bytes read
+	 * Consists of 8 bytes
+	 */
+	uint8_t number_of_bytes_read[ 8 ];
+};
+
+typedef struct fsapfs_file_system_extended_attribute_compression_header fsapfs_file_system_extended_attribute_compression_header_t;
+
+struct fsapfs_file_system_extended_attribute_compression_header
+{
+	/* The signature
+	 * Consists of 4 bytes
+	 */
+	uint8_t signature[ 4 ];
+
+	/* The compression method
+	 * Consists of 4 bytes
+	 */
+	uint8_t compression_method[ 4 ];
+
+	/* The uncompressed data size
+	 * Consists of 8 bytes
+	 */
+	uint8_t uncompressed_data_size[ 8 ];
 };
 
 typedef struct fsapfs_file_system_btree_value_file_extent fsapfs_file_system_btree_value_file_extent_t;
