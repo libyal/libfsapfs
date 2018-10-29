@@ -24,6 +24,7 @@
 #include <types.h>
 
 #include "libfsapfs_data_stream.h"
+#include "libfsapfs_definitions.h"
 #include "libfsapfs_directory_record.h"
 #include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_entry.h"
@@ -3277,8 +3278,10 @@ int libfsapfs_internal_file_entry_get_data_stream(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error )
 {
-	static char *function     = "libfsapfs_internal_file_entry_get_data_stream";
-	uint64_t data_stream_size = 0;
+	libfdata_stream_t *compressed_data_stream = NULL;
+	static char *function                     = "libfsapfs_internal_file_entry_get_data_stream";
+	uint64_t data_stream_size                 = 0;
+	int compression_method                    = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -3313,9 +3316,9 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 		return( -1 );
 	}
-	if( internal_file_entry->file_extents == NULL )
+	if( internal_file_entry->file_size == (size64_t) -1 )
 	{
-		if( libfsapfs_internal_file_entry_get_file_extents(
+		if( libfsapfs_internal_file_entry_get_file_size(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3323,42 +3326,139 @@ int libfsapfs_internal_file_entry_get_data_stream(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file extents.",
+			 "%s: unable to determine file size.",
 			 function );
 
 			goto on_error;
 		}
 	}
-	if( libfsapfs_inode_get_data_stream_size(
-	     internal_file_entry->inode,
-	     &data_stream_size,
-	     error ) != 1 )
+/* TODO add support for compression method 3 and 4
+	if( ( internal_file_entry->compression_method == 3 )
+	 || ( internal_file_entry->compression_method == 4 ) )
+	{
+		compression_method = LIBFSAPFS_COMPRESSION_METHOD_DEFLATE;
+	}
+ */
+	if( ( internal_file_entry->compression_method == 7 )
+	 || ( internal_file_entry->compression_method == 8 ) )
+	{
+		compression_method = LIBFSAPFS_COMPRESSION_METHOD_LZVN;
+	}
+	else if( internal_file_entry->compression_method != 0 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve data stream size from inode.",
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported compression method.",
 		 function );
 
 		goto on_error;
 	}
-	if( libfsapfs_data_stream_initialize_from_file_extents(
-	     &( internal_file_entry->data_stream ),
-	     internal_file_entry->io_handle,
-	     internal_file_entry->volume_data_handle,
-	     internal_file_entry->file_extents,
-	     (size64_t) data_stream_size,
-	     error ) != 1 )
+	if( internal_file_entry->compression_method == 0 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data stream from file extents.",
-		 function );
+		if( internal_file_entry->file_extents == NULL )
+		{
+			if( libfsapfs_internal_file_entry_get_file_extents(
+			     internal_file_entry,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to determine file extents.",
+				 function );
 
-		goto on_error;
+				goto on_error;
+			}
+		}
+		if( libfsapfs_inode_get_data_stream_size(
+		     internal_file_entry->inode,
+		     &data_stream_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream size from inode.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_data_stream_initialize_from_file_extents(
+		     &( internal_file_entry->data_stream ),
+		     internal_file_entry->io_handle,
+		     internal_file_entry->volume_data_handle,
+		     internal_file_entry->file_extents,
+		     (size64_t) data_stream_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create data stream from file extents.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	else
+	{
+		if( ( internal_file_entry->compression_method == 3 )
+		 || ( internal_file_entry->compression_method == 7 ) )
+		{
+			if( libfsapfs_extended_attribute_get_data_stream(
+			     internal_file_entry->compressed_data_extended_attribute,
+			     &compressed_data_stream,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve data stream from compressed data extended attribute.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		else if( ( internal_file_entry->compression_method == 4 )
+		      || ( internal_file_entry->compression_method == 8 ) )
+		{
+			if( libfsapfs_extended_attribute_get_data_stream(
+			     internal_file_entry->resource_fork_extended_attribute,
+			     &compressed_data_stream,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve data stream from resource fork extended attribute.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		if( libfsapfs_data_stream_initialize_from_compressed_data_stream(
+		     &( internal_file_entry->data_stream ),
+		     compressed_data_stream,
+		     internal_file_entry->file_size,
+		     compression_method,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create data stream from compressed data stream.",
+			 function );
+
+			goto on_error;
+		}
 	}
 	return( 1 );
 
@@ -3381,7 +3481,6 @@ ssize_t libfsapfs_file_entry_read_buffer(
          size_t buffer_size,
          libcerror_error_t **error )
 {
-	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_read_buffer";
 	ssize_t read_count                                   = 0;
@@ -3414,9 +3513,9 @@ ssize_t libfsapfs_file_entry_read_buffer(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->file_size == (size64_t) -1 )
+	if( internal_file_entry->data_stream == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_file_size(
+		if( libfsapfs_internal_file_entry_get_data_stream(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3424,81 +3523,14 @@ ssize_t libfsapfs_file_entry_read_buffer(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file size.",
+			 "%s: unable to determine data stream.",
 			 function );
 
 			goto on_error;
 		}
-	}
-	if( internal_file_entry->compression_method == 0 )
-	{
-	       	if( internal_file_entry->data_stream == NULL )
-		{
-			if( libfsapfs_internal_file_entry_get_data_stream(
-			     internal_file_entry,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to determine data stream.",
-				 function );
-
-				goto on_error;
-			}
-		}
-		data_stream = internal_file_entry->data_stream;
-	}
-	else if( ( internal_file_entry->compression_method == 3 )
-	      || ( internal_file_entry->compression_method == 7 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->compressed_data_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from compressed data extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else if( ( internal_file_entry->compression_method == 4 )
-	      || ( internal_file_entry->compression_method == 8 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->resource_fork_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from resource fork extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported compression method.",
-		 function );
-
-		goto on_error;
 	}
 	read_count = libfdata_stream_read_buffer(
-	              data_stream,
+	              internal_file_entry->data_stream,
 	              (intptr_t *) internal_file_entry->file_io_handle,
 	              (uint8_t *) buffer,
 	              buffer_size,
@@ -3552,7 +3584,6 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
          off64_t offset,
          libcerror_error_t **error )
 {
-	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_read_buffer_at_offset";
 	ssize_t read_count                                   = 0;
@@ -3585,9 +3616,9 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->file_size == (size64_t) -1 )
+	if( internal_file_entry->data_stream == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_file_size(
+		if( libfsapfs_internal_file_entry_get_data_stream(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3595,81 +3626,14 @@ ssize_t libfsapfs_file_entry_read_buffer_at_offset(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file size.",
+			 "%s: unable to determine data stream.",
 			 function );
 
 			goto on_error;
 		}
-	}
-	if( internal_file_entry->compression_method == 0 )
-	{
-	       	if( internal_file_entry->data_stream == NULL )
-		{
-			if( libfsapfs_internal_file_entry_get_data_stream(
-			     internal_file_entry,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to determine data stream.",
-				 function );
-
-				goto on_error;
-			}
-		}
-		data_stream = internal_file_entry->data_stream;
-	}
-	else if( ( internal_file_entry->compression_method == 3 )
-	      || ( internal_file_entry->compression_method == 7 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->compressed_data_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from compressed data extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else if( ( internal_file_entry->compression_method == 4 )
-	      || ( internal_file_entry->compression_method == 8 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->resource_fork_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from resource fork extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported compression method.",
-		 function );
-
-		goto on_error;
 	}
 	read_count = libfdata_stream_read_buffer_at_offset(
-	              data_stream,
+	              internal_file_entry->data_stream,
 	              (intptr_t *) internal_file_entry->file_io_handle,
 	              (uint8_t *) buffer,
 	              buffer_size,
@@ -3723,7 +3687,6 @@ off64_t libfsapfs_file_entry_seek_offset(
          int whence,
          libcerror_error_t **error )
 {
-	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_seek_offset";
 
@@ -3755,9 +3718,9 @@ off64_t libfsapfs_file_entry_seek_offset(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->file_size == (size64_t) -1 )
+	if( internal_file_entry->data_stream == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_file_size(
+		if( libfsapfs_internal_file_entry_get_data_stream(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3765,81 +3728,14 @@ off64_t libfsapfs_file_entry_seek_offset(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file size.",
+			 "%s: unable to determine data stream.",
 			 function );
 
 			goto on_error;
 		}
-	}
-	if( internal_file_entry->compression_method == 0 )
-	{
-	       	if( internal_file_entry->data_stream == NULL )
-		{
-			if( libfsapfs_internal_file_entry_get_data_stream(
-			     internal_file_entry,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to determine data stream.",
-				 function );
-
-				goto on_error;
-			}
-		}
-		data_stream = internal_file_entry->data_stream;
-	}
-	else if( ( internal_file_entry->compression_method == 3 )
-	      || ( internal_file_entry->compression_method == 7 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->compressed_data_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from compressed data extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else if( ( internal_file_entry->compression_method == 4 )
-	      || ( internal_file_entry->compression_method == 8 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->resource_fork_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from resource fork extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported compression method.",
-		 function );
-
-		goto on_error;
 	}
 	offset = libfdata_stream_seek_offset(
-	          data_stream,
+	          internal_file_entry->data_stream,
 	          offset,
 	          whence,
 	          error );
@@ -3889,7 +3785,6 @@ int libfsapfs_file_entry_get_offset(
      off64_t *offset,
      libcerror_error_t **error )
 {
-	libfdata_stream_t *data_stream                       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_offset";
 
@@ -3921,9 +3816,9 @@ int libfsapfs_file_entry_get_offset(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->file_size == (size64_t) -1 )
+	if( internal_file_entry->data_stream == NULL )
 	{
-		if( libfsapfs_internal_file_entry_get_file_size(
+		if( libfsapfs_internal_file_entry_get_data_stream(
 		     internal_file_entry,
 		     error ) != 1 )
 		{
@@ -3931,81 +3826,14 @@ int libfsapfs_file_entry_get_offset(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file size.",
+			 "%s: unable to determine data stream.",
 			 function );
 
 			goto on_error;
 		}
-	}
-	if( internal_file_entry->compression_method == 0 )
-	{
-	       	if( internal_file_entry->data_stream == NULL )
-		{
-			if( libfsapfs_internal_file_entry_get_data_stream(
-			     internal_file_entry,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to determine data stream.",
-				 function );
-
-				goto on_error;
-			}
-		}
-		data_stream = internal_file_entry->data_stream;
-	}
-	else if( ( internal_file_entry->compression_method == 3 )
-	      || ( internal_file_entry->compression_method == 7 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->compressed_data_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from compressed data extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else if( ( internal_file_entry->compression_method == 4 )
-	      || ( internal_file_entry->compression_method == 8 ) )
-	{
-		if( libfsapfs_extended_attribute_get_data_stream(
-		     internal_file_entry->resource_fork_extended_attribute,
-		     &data_stream,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data stream from resource fork extended attribute.",
-			 function );
-
-			goto on_error;
-		}
-	}
-	else
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported compression method.",
-		 function );
-
-		goto on_error;
 	}
 	if( libfdata_stream_get_offset(
-	     data_stream,
+	     internal_file_entry->data_stream,
 	     offset,
 	     error ) != 1 )
 	{

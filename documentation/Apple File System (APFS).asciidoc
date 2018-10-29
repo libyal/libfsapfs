@@ -1646,9 +1646,9 @@ The compressed data is stored in the extended attribute after the compressed dat
 | 4 | | ZLIB (DEFLATE) compressed resource fork +
 The compressed data is stored in the resource fork
 | | |
-| 7 | | LZFSE compressed extended attribute data +
+| 7 | | LZVN compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
-| 8 | | LZFSE compressed resource fork +
+| 8 | | LZVN compressed resource fork +
 The compressed data is stored in the resource fork
 |===
 
@@ -2060,6 +2060,8 @@ for the data stream file system object identifier in the
 
 === Compressed data extended attribute
 
+<<compression_method,Compression method>> should be 3 or 7.
+
 The file content size is stored in the compressed data header of
 a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
 
@@ -2067,6 +2069,8 @@ The file content data is stored in a "com.apple.decmpfs"
 <<extended_attribute,extended attribute>> after the compressed data header.
 
 === Compressed data extended attribute with resource fork
+
+<<compression_method,Compression method>> should be 4 or 8.
 
 The file content size is stored in the compressed data header of
 a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.

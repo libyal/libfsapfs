@@ -190,7 +190,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_buffer_data_stream_handle.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_buffer_data_handle.c"
 				>
 			</File>
 			<File
@@ -203,6 +203,14 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_checksum.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_compressed_data_handle.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_compression.c"
 				>
 			</File>
 			<File
@@ -230,7 +238,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_data_block_data_stream_handle.c"
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block_data_handle.c"
 				>
 			</File>
 			<File
@@ -239,6 +247,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_debug.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_deflate.c"
 				>
 			</File>
 			<File
@@ -287,6 +299,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_key_encrypted_key.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_lzvn.c"
 				>
 			</File>
 			<File
@@ -408,7 +424,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_buffer_data_stream_handle.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_buffer_data_handle.h"
 				>
 			</File>
 			<File
@@ -421,6 +437,14 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_checksum.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_compressed_data_handle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_compression.h"
 				>
 			</File>
 			<File
@@ -448,7 +472,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_data_block_data_stream_handle.h"
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block_data_handle.h"
 				>
 			</File>
 			<File
@@ -461,6 +485,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_definitions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_deflate.h"
 				>
 			</File>
 			<File
@@ -565,6 +593,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_libuna.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_lzvn.h"
 				>
 			</File>
 			<File

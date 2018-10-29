@@ -1327,7 +1327,7 @@ int libfsapfs_internal_extended_attribute_get_data_stream(
 	}
 	if( internal_extended_attribute->data != NULL )
 	{
-		if( libfsapfs_data_stream_initialize_from_buffer(
+		if( libfsapfs_data_stream_initialize_from_data(
 		     &( internal_extended_attribute->data_stream ),
 		     internal_extended_attribute->data,
 		     internal_extended_attribute->data_stream_size,
@@ -1337,7 +1337,7 @@ int libfsapfs_internal_extended_attribute_get_data_stream(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create data stream from buffer.",
+			 "%s: unable to create data stream from data.",
 			 function );
 
 			goto on_error;

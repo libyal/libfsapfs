@@ -1,5 +1,5 @@
 /*
- * The libcaes header wrapper
+ * Compression handling functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,33 +19,29 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_LIBCAES_H )
-#define _LIBFSAPFS_LIBCAES_H
+#if !defined( _LIBFSAPFS_COMPRESS_H )
+#define _LIBFSAPFS_COMPRESS_H
 
 #include <common.h>
+#include <types.h>
 
-/* Define HAVE_LOCAL_LIBCAES for local use of libcaes
- */
-#if defined( HAVE_LOCAL_LIBCAES )
+#include "libfsapfs_libcerror.h"
 
-#include <libcaes_context.h>
-#include <libcaes_definitions.h>
-#include <libcaes_support.h>
-#include <libcaes_tweaked_context.h>
-#include <libcaes_types.h>
-
-#else
-
-/* If libtool DLL support is enabled set LIBCAES_DLL_IMPORT
- * before including libcaes.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
-#define LIBCAES_DLL_IMPORT
+#if defined( __cplusplus )
+extern "C" {
 #endif
 
-#include <libcaes.h>
+int libfsapfs_decompress_data(
+     const uint8_t *compressed_data,
+     size_t compressed_data_size,
+     int compression_method,
+     uint8_t *uncompressed_data,
+     size_t *uncompressed_data_size,
+     libcerror_error_t **error );
 
-#endif /* defined( HAVE_LOCAL_LIBCAES ) */
+#if defined( __cplusplus )
+}
+#endif
 
-#endif /* !defined( _LIBFSAPFS_LIBCAES_H ) */
+#endif /* !defined( _LIBFSAPFS_COMPRESS_H ) */
 

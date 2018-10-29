@@ -40,20 +40,23 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_btree_footer.c libfsapfs_btree_footer.h \
 	libfsapfs_btree_node.c libfsapfs_btree_node.h \
 	libfsapfs_btree_node_header.c libfsapfs_btree_node_header.h \
-	libfsapfs_buffer_data_stream_handle.c libfsapfs_buffer_data_stream_handle.h \
+	libfsapfs_buffer_data_handle.c libfsapfs_buffer_data_handle.h \
 	libfsapfs_checkpoint_map.c libfsapfs_checkpoint_map.h \
 	libfsapfs_checkpoint_map_entry.c libfsapfs_checkpoint_map_entry.h \
 	libfsapfs_checksum.c libfsapfs_checksum.h \
+	libfsapfs_compressed_data_handle.c libfsapfs_compressed_data_handle.h \
+	libfsapfs_compression.c libfsapfs_compression.h \
 	libfsapfs_container.c libfsapfs_container.h \
 	libfsapfs_container_key_bag.c libfsapfs_container_key_bag.h \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
 	libfsapfs_container_space_manager.c libfsapfs_container_space_manager.h \
 	libfsapfs_container_superblock.c libfsapfs_container_superblock.h \
 	libfsapfs_data_block.c libfsapfs_data_block.h \
-	libfsapfs_data_block_data_stream_handle.c libfsapfs_data_block_data_stream_handle.h \
+	libfsapfs_data_block_data_handle.c libfsapfs_data_block_data_handle.h \
 	libfsapfs_data_stream.c libfsapfs_data_stream.h \
 	libfsapfs_debug.c libfsapfs_debug.h \
 	libfsapfs_definitions.h \
+	libfsapfs_deflate.c libfsapfs_deflate.h \
 	libfsapfs_directory_record.c libfsapfs_directory_record.h \
 	libfsapfs_error.c libfsapfs_error.h \
 	libfsapfs_encryption_context.c libfsapfs_encryption_context.h \
@@ -80,6 +83,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_libfguid.h \
 	libfsapfs_libhmac.h \
 	libfsapfs_libuna.h \
+	libfsapfs_lzvn.c libfsapfs_lzvn.h \
 	libfsapfs_name.c libfsapfs_name.h \
 	libfsapfs_name_hash.c libfsapfs_name_hash.h \
 	libfsapfs_notify.c libfsapfs_notify.h \
@@ -115,6 +119,7 @@ libfsapfs_la_LIBADD = \
 	@LIBHMAC_LIBADD@ \
 	@LIBCAES_LIBADD@ \
 	@LIBCRYPTO_LIBADD@ \
+	@ZLIB_LIBADD@ \
 	@LIBDL_LIBADD@ \
 	@PTHREAD_LIBADD@
 

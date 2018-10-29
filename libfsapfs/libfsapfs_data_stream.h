@@ -34,10 +34,10 @@
 extern "C" {
 #endif
 
-int libfsapfs_data_stream_initialize_from_buffer(
+int libfsapfs_data_stream_initialize_from_data(
      libfdata_stream_t **data_stream,
-     const uint8_t *buffer,
-     size_t buffer_size,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error );
 
 int libfsapfs_data_stream_initialize_from_file_extents(
@@ -46,6 +46,13 @@ int libfsapfs_data_stream_initialize_from_file_extents(
      libfsapfs_volume_data_handle_t *volume_data_handle,
      libcdata_array_t *file_extents,
      size64_t data_stream_size,
+     libcerror_error_t **error );
+
+int libfsapfs_data_stream_initialize_from_compressed_data_stream(
+     libfdata_stream_t **data_stream,
+     libfdata_stream_t *compressed_data_stream,
+     size64_t uncompressed_data_size,
+     int compression_method,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

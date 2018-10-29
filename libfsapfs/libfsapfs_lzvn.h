@@ -1,5 +1,5 @@
 /*
- * The internal libhmac header
+ * LZVN (un)compression functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,35 +19,28 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_LIBHMAC_H )
-#define _LIBFSAPFS_LIBHMAC_H
+#if !defined( _LIBFSAPFS_LZVN_COMPRESSION_H )
+#define _LIBFSAPFS_LZVN_COMPRESSION_H
 
 #include <common.h>
+#include <types.h>
 
-/* Define HAVE_LOCAL_LIBHMAC for local use of libhmac
- */
-#if defined( HAVE_LOCAL_LIBHMAC )
+#include "libfsapfs_libcerror.h"
 
-#include <libhmac_definitions.h>
-#include <libhmac_md5.h>
-#include <libhmac_sha1.h>
-#include <libhmac_sha256.h>
-#include <libhmac_sha512.h>
-#include <libhmac_support.h>
-#include <libhmac_types.h>
-
-#else
-
-/* If libtool DLL support is enabled set LIBHMAC_DLL_IMPORT
- * before including libhmac.h
- */
-#if defined( _WIN32 ) && defined( DLL_IMPORT )
-#define LIBHMAC_DLL_IMPORT
+#if defined( __cplusplus )
+extern "C" {
 #endif
 
-#include <libhmac.h>
+int libfsapfs_lzvn_decompress(
+     const uint8_t *compressed_data,
+     size_t compressed_data_size,
+     uint8_t *uncompressed_data,
+     size_t *uncompressed_data_size,
+     libcerror_error_t **error );
 
+#if defined( __cplusplus )
+}
 #endif
 
-#endif
+#endif /* !defined( _LIBFSAPFS_LZVN_COMPRESSION_H ) */
 

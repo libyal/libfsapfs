@@ -2858,6 +2858,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 {
 	libfdata_vector_t *data_block_vector                     = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle       = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_get_file_system_btree";
 	uint8_t use_case_folding                                 = 0;
 
@@ -2927,6 +2928,14 @@ int libfsapfs_internal_volume_get_file_system_btree(
 
 		goto on_error;
 	}
+	if( internal_volume->encrypted_volume_data_handle != NULL )
+	{
+		volume_data_handle = internal_volume->encrypted_volume_data_handle;
+	}
+	else
+	{
+		volume_data_handle = internal_volume->volume_data_handle;
+	}
 	if( internal_volume->encrypted_data_block_vector != NULL )
 	{
 		data_block_vector = internal_volume->encrypted_data_block_vector;
@@ -2942,7 +2951,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	if( libfsapfs_file_system_btree_initialize(
 	     &( internal_volume->file_system_btree ),
 	     internal_volume->io_handle,
-	     internal_volume->volume_data_handle,
+	     volume_data_handle,
 	     data_block_vector,
 	     internal_volume->object_map_btree,
 	     object_map_descriptor->physical_address,
@@ -2998,10 +3007,11 @@ int libfsapfs_volume_get_file_entry_by_identifier(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_inode_t *inode                     = NULL;
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_get_file_entry_by_identifier";
-	int result                                   = 0;
+	libfsapfs_inode_t *inode                           = NULL;
+	libfsapfs_internal_volume_t *internal_volume       = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
+	static char *function                              = "libfsapfs_volume_get_file_entry_by_identifier";
+	int result                                         = 0;
 
 	if( volume == NULL )
 	{
@@ -3090,11 +3100,19 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 	}
 	else if( result != 0 )
 	{
+		if( internal_volume->encrypted_volume_data_handle != NULL )
+		{
+			volume_data_handle = internal_volume->encrypted_volume_data_handle;
+		}
+		else
+		{
+			volume_data_handle = internal_volume->volume_data_handle;
+		}
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
-		     internal_volume->volume_data_handle,
+		     volume_data_handle,
 		     internal_volume->file_system_btree,
 		     inode,
 		     NULL,
@@ -3144,10 +3162,11 @@ int libfsapfs_volume_get_root_directory(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_inode_t *inode                     = NULL;
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_get_root_directory";
-	int result                                   = 0;
+	libfsapfs_inode_t *inode                           = NULL;
+	libfsapfs_internal_volume_t *internal_volume       = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
+	static char *function                              = "libfsapfs_volume_get_root_directory";
+	int result                                         = 0;
 
 	if( volume == NULL )
 	{
@@ -3235,11 +3254,19 @@ int libfsapfs_volume_get_root_directory(
 	}
 /* TODO return 0 if no root directory inode */
 
+	if( internal_volume->encrypted_volume_data_handle != NULL )
+	{
+		volume_data_handle = internal_volume->encrypted_volume_data_handle;
+	}
+	else
+	{
+		volume_data_handle = internal_volume->volume_data_handle;
+	}
 	if( libfsapfs_file_entry_initialize(
 	     file_entry,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
-	     internal_volume->volume_data_handle,
+	     volume_data_handle,
 	     internal_volume->file_system_btree,
 	     inode,
 	     NULL,
@@ -3296,11 +3323,12 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record = NULL;
-	libfsapfs_inode_t *inode                       = NULL;
-	libfsapfs_internal_volume_t *internal_volume   = NULL;
-	static char *function                          = "libfsapfs_volume_get_file_entry_by_utf8_path";
-	int result                                     = 0;
+	libfsapfs_directory_record_t *directory_record     = NULL;
+	libfsapfs_inode_t *inode                           = NULL;
+	libfsapfs_internal_volume_t *internal_volume       = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
+	static char *function                              = "libfsapfs_volume_get_file_entry_by_utf8_path";
+	int result                                         = 0;
 
 	if( volume == NULL )
 	{
@@ -3391,11 +3419,19 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 	}
 	else if( result != 0 )
 	{
+		if( internal_volume->encrypted_volume_data_handle != NULL )
+		{
+			volume_data_handle = internal_volume->encrypted_volume_data_handle;
+		}
+		else
+		{
+			volume_data_handle = internal_volume->volume_data_handle;
+		}
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
-		     internal_volume->volume_data_handle,
+		     volume_data_handle,
 		     internal_volume->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3467,11 +3503,12 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record = NULL;
-	libfsapfs_inode_t *inode                       = NULL;
-	libfsapfs_internal_volume_t *internal_volume   = NULL;
-	static char *function                          = "libfsapfs_volume_get_file_entry_by_utf16_path";
-	int result                                     = 0;
+	libfsapfs_directory_record_t *directory_record     = NULL;
+	libfsapfs_inode_t *inode                           = NULL;
+	libfsapfs_internal_volume_t *internal_volume       = NULL;
+	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
+	static char *function                              = "libfsapfs_volume_get_file_entry_by_utf16_path";
+	int result                                         = 0;
 
 	if( volume == NULL )
 	{
@@ -3562,11 +3599,19 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 	}
 	else if( result != 0 )
 	{
+		if( internal_volume->encrypted_volume_data_handle != NULL )
+		{
+			volume_data_handle = internal_volume->encrypted_volume_data_handle;
+		}
+		else
+		{
+			volume_data_handle = internal_volume->volume_data_handle;
+		}
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
-		     internal_volume->volume_data_handle,
+		     volume_data_handle,
 		     internal_volume->file_system_btree,
 		     inode,
 		     directory_record,

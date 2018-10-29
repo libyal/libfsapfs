@@ -1,5 +1,5 @@
 /*
- * The buffer data stream handle functions
+ * The buffer data handle functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -23,136 +23,136 @@
 #include <memory.h>
 #include <types.h>
 
-#include "libfsapfs_buffer_data_stream_handle.h"
+#include "libfsapfs_buffer_data_handle.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_unused.h"
 
-/* Creates buffer data stream handle
- * Make sure the value data_stream_handle is referencing, is set to NULL
+/* Creates buffer data handle
+ * Make sure the value data_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_buffer_data_stream_handle_initialize(
-     libfsapfs_buffer_data_stream_handle_t **data_stream_handle,
-     const uint8_t *buffer,
-     size_t buffer_size,
+int libfsapfs_buffer_data_handle_initialize(
+     libfsapfs_buffer_data_handle_t **data_handle,
+     const uint8_t *data,
+     size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_buffer_data_stream_handle_initialize";	
+	static char *function = "libfsapfs_buffer_data_handle_initialize";
 
-	if( data_stream_handle == NULL )
+	if( data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream handle.",
+		 "%s: invalid data handle.",
 		 function );
 
 		return( -1 );
 	}
-	if( *data_stream_handle != NULL )
+	if( *data_handle != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid data stream handle value already set.",
+		 "%s: invalid data handle value already set.",
 		 function );
 
 		return( -1 );
 	}
-	if( buffer == NULL )
+	if( data == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid buffer.",
+		 "%s: invalid data.",
 		 function );
 
 		return( -1 );
 	}
-	if( buffer_size > (size_t) SSIZE_MAX )
+	if( data_size > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid buffer size value exceeds maximum.",
+		 "%s: invalid data size value exceeds maximum.",
 		 function );
 
 		return( -1 );
 	}
-	*data_stream_handle = memory_allocate_structure(
-	                       libfsapfs_buffer_data_stream_handle_t );
+	*data_handle = memory_allocate_structure(
+	                libfsapfs_buffer_data_handle_t );
 
-	if( *data_stream_handle == NULL )
+	if( *data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create data stream handle.",
+		 "%s: unable to create data handle.",
 		 function );
 
 		goto on_error;
 	}
 	if( memory_set(
-	     *data_stream_handle,
+	     *data_handle,
 	     0,
-	     sizeof( libfsapfs_buffer_data_stream_handle_t ) ) == NULL )
+	     sizeof( libfsapfs_buffer_data_handle_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear data stream handle.",
+		 "%s: unable to clear data handle.",
 		 function );
 
 		goto on_error;
 	}
-	( *data_stream_handle )->buffer      = buffer;
-	( *data_stream_handle )->buffer_size = buffer_size;
+	( *data_handle )->data      = data;
+	( *data_handle )->data_size = data_size;
 
 	return( 1 );
 
 on_error:
-	if( *data_stream_handle != NULL )
+	if( *data_handle != NULL )
 	{
 		memory_free(
-		 *data_stream_handle );
+		 *data_handle );
 
-		*data_stream_handle = NULL;
+		*data_handle = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees data stream handle
+/* Frees data handle
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_buffer_data_stream_handle_free(
-     libfsapfs_buffer_data_stream_handle_t **data_stream_handle,
+int libfsapfs_buffer_data_handle_free(
+     libfsapfs_buffer_data_handle_t **data_handle,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_buffer_data_stream_handle_free";
+	static char *function = "libfsapfs_buffer_data_handle_free";
 
-	if( data_stream_handle == NULL )
+	if( data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream handle.",
+		 "%s: invalid data handle.",
 		 function );
 
 		return( -1 );
 	}
-	if( *data_stream_handle != NULL )
+	if( *data_handle != NULL )
 	{
 		memory_free(
-		 *data_stream_handle );
+		 *data_handle );
 
-		*data_stream_handle = NULL;
+		*data_handle = NULL;
 	}
 	return( 1 );
 }
@@ -161,8 +161,8 @@ int libfsapfs_buffer_data_stream_handle_free(
  * Callback for the data stream
  * Returns the number of bytes read or -1 on error
  */
-ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
-         libfsapfs_buffer_data_stream_handle_t *data_stream_handle,
+ssize_t libfsapfs_buffer_data_handle_read_segment_data(
+         libfsapfs_buffer_data_handle_t *data_handle,
          intptr_t *file_io_handle LIBFSAPFS_ATTRIBUTE_UNUSED,
          int segment_index,
          int segment_file_index LIBFSAPFS_ATTRIBUTE_UNUSED,
@@ -172,7 +172,7 @@ ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
          uint8_t read_flags LIBFSAPFS_ATTRIBUTE_UNUSED,
          libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_buffer_data_stream_handle_read_segment_data";
+	static char *function = "libfsapfs_buffer_data_handle_read_segment_data";
 	size_t read_size      = 0;
 
 	LIBFSAPFS_UNREFERENCED_PARAMETER( file_io_handle )
@@ -180,13 +180,13 @@ ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
 	LIBFSAPFS_UNREFERENCED_PARAMETER( segment_flags )
 	LIBFSAPFS_UNREFERENCED_PARAMETER( read_flags )
 
-	if( data_stream_handle == NULL )
+	if( data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream handle.",
+		 "%s: invalid data handle.",
 		 function );
 
 		return( -1 );
@@ -224,9 +224,9 @@ ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
 
 		return( -1 );
 	}
-	if( data_stream_handle->current_segment_offset < (off64_t) data_stream_handle->buffer_size )
+	if( data_handle->current_segment_offset < (off64_t) data_handle->data_size )
 	{
-		read_size = data_stream_handle->buffer_size - (size_t) data_stream_handle->current_segment_offset;
+		read_size = data_handle->data_size - (size_t) data_handle->current_segment_offset;
 
 		if( read_size > segment_data_size )
 		{
@@ -234,7 +234,7 @@ ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
 		}
 		if( memory_copy(
 		     segment_data,
-		     &( data_stream_handle->buffer[ data_stream_handle->current_segment_offset ] ),
+		     &( data_handle->data[ data_handle->current_segment_offset ] ),
 		     read_size ) == NULL )
 		{
 			libcerror_error_set(
@@ -246,7 +246,7 @@ ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
 
 			return( -1 );
 		}
-		data_stream_handle->current_segment_offset += read_size;
+		data_handle->current_segment_offset += read_size;
 	}
 	return( (ssize_t) read_size );
 }
@@ -255,26 +255,26 @@ ssize_t libfsapfs_buffer_data_stream_handle_read_segment_data(
  * Callback for the data stream
  * Returns the offset if seek is successful or -1 on error
  */
-off64_t libfsapfs_buffer_data_stream_handle_seek_segment_offset(
-         libfsapfs_buffer_data_stream_handle_t *data_stream_handle,
+off64_t libfsapfs_buffer_data_handle_seek_segment_offset(
+         libfsapfs_buffer_data_handle_t *data_handle,
          intptr_t *file_io_handle LIBFSAPFS_ATTRIBUTE_UNUSED,
          int segment_index,
          int segment_file_index LIBFSAPFS_ATTRIBUTE_UNUSED,
          off64_t segment_offset,
          libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_buffer_data_stream_handle_seek_segment_offset";
+	static char *function = "libfsapfs_buffer_data_handle_seek_segment_offset";
 
 	LIBFSAPFS_UNREFERENCED_PARAMETER( file_io_handle )
 	LIBFSAPFS_UNREFERENCED_PARAMETER( segment_file_index )
 
-	if( data_stream_handle == NULL )
+	if( data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream handle.",
+		 "%s: invalid data handle.",
 		 function );
 
 		return( -1 );
@@ -301,7 +301,7 @@ off64_t libfsapfs_buffer_data_stream_handle_seek_segment_offset(
 
 		return( -1 );
 	}
-	data_stream_handle->current_segment_offset = segment_offset;
+	data_handle->current_segment_offset = segment_offset;
 
 	return( segment_offset );
 }
