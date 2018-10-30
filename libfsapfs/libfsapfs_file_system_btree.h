@@ -27,6 +27,7 @@
 
 #include "libfsapfs_btree_node.h"
 #include "libfsapfs_directory_record.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
@@ -35,7 +36,6 @@
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -49,9 +49,9 @@ struct libfsapfs_file_system_btree
 	 */
 	libfsapfs_io_handle_t *io_handle;
 
-	/* The volume data handle
+	/* The encryption context
 	 */
-	libfsapfs_volume_data_handle_t *volume_data_handle;
+	libfsapfs_encryption_context_t *encryption_context;
 
 	/* The data block vector
 	 */
@@ -81,7 +81,7 @@ struct libfsapfs_file_system_btree
 int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
      libfsapfs_io_handle_t *io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
      libfdata_vector_t *data_block_vector,
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t root_node_block_number,

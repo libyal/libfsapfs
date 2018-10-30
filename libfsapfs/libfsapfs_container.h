@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "libfsapfs_checkpoint_map.h"
+#include "libfsapfs_container_data_handle.h"
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_container_superblock.h"
 #include "libfsapfs_extern.h"
@@ -36,7 +37,6 @@
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_types.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -54,9 +54,9 @@ struct libfsapfs_internal_container
 	 */
 	libfsapfs_checkpoint_map_t *checkpoint_map;
 
-	/* The volume data handle
+	/* The container data handle
 	 */
-	libfsapfs_volume_data_handle_t *volume_data_handle;
+	libfsapfs_container_data_handle_t *container_data_handle;
 
 	/* The data block vector
 	 */

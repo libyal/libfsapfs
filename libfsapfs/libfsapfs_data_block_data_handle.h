@@ -25,12 +25,14 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_encryption_context.h"
+#include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -48,6 +50,10 @@ struct libfsapfs_data_block_data_handle
 	 */
 	libfsapfs_io_handle_t *io_handle;
 
+	/* The file system data handle
+	 */
+	libfsapfs_file_system_data_handle_t *file_system_data_handle;
+
 	/* The data block vector
 	 */
 	libfdata_vector_t *data_block_vector;
@@ -60,7 +66,8 @@ struct libfsapfs_data_block_data_handle
 int libfsapfs_data_block_data_handle_initialize(
      libfsapfs_data_block_data_handle_t **data_handle,
      libfsapfs_io_handle_t *io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
+     libcdata_array_t *file_extents,
      libcerror_error_t **error );
 
 int libfsapfs_data_block_data_handle_free(

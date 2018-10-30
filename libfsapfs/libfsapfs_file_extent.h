@@ -42,6 +42,10 @@ struct libfsapfs_file_extent
 	/* Data size
 	 */
 	uint64_t data_size;
+
+	/* Encryption identifier
+	 */
+	uint64_t encryption_identifier;
 };
 
 int libfsapfs_file_extent_initialize(

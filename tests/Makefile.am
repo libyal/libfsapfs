@@ -49,6 +49,7 @@ check_PROGRAMS = \
 	fsapfs_test_checkpoint_map \
 	fsapfs_test_checkpoint_map_entry \
 	fsapfs_test_container \
+	fsapfs_test_container_data_handle \
 	fsapfs_test_container_key_bag \
 	fsapfs_test_container_reaper \
 	fsapfs_test_container_space_manager \
@@ -71,7 +72,6 @@ check_PROGRAMS = \
 	fsapfs_test_object_map_descriptor \
 	fsapfs_test_support \
 	fsapfs_test_volume \
-	fsapfs_test_volume_data_handle \
 	fsapfs_test_volume_key_bag \
 	fsapfs_test_volume_superblock
 
@@ -185,6 +185,18 @@ fsapfs_test_container_LDADD = \
 	@LIBCTHREADS_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@PTHREAD_LIBADD@
+
+fsapfs_test_container_data_handle_SOURCES = \
+	fsapfs_test_container_data_handle.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_container_data_handle_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
 
 fsapfs_test_container_key_bag_SOURCES = \
 	fsapfs_test_container_key_bag.c \
@@ -556,18 +568,6 @@ fsapfs_test_volume_LDADD = \
 	@LIBCTHREADS_LIBADD@ \
 	@LIBCERROR_LIBADD@ \
 	@PTHREAD_LIBADD@
-
-fsapfs_test_volume_data_handle_SOURCES = \
-	fsapfs_test_libcerror.h \
-	fsapfs_test_libfsapfs.h \
-	fsapfs_test_macros.h \
-	fsapfs_test_memory.c fsapfs_test_memory.h \
-	fsapfs_test_unused.h \
-	fsapfs_test_volume_data_handle.c
-
-fsapfs_test_volume_data_handle_LDADD = \
-	../libfsapfs/libfsapfs.la \
-	@LIBCERROR_LIBADD@
 
 fsapfs_test_volume_key_bag_SOURCES = \
 	fsapfs_test_functions.c fsapfs_test_functions.h \

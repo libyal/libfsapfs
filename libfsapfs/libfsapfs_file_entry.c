@@ -26,6 +26,7 @@
 #include "libfsapfs_data_stream.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_directory_record.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_entry.h"
 #include "libfsapfs_file_extent.h"
@@ -51,7 +52,7 @@ int libfsapfs_file_entry_initialize(
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
      libfsapfs_directory_record_t *directory_record,
@@ -115,7 +116,7 @@ int libfsapfs_file_entry_initialize(
 	}
 	internal_file_entry->io_handle          = io_handle;
 	internal_file_entry->file_io_handle     = file_io_handle;
-	internal_file_entry->volume_data_handle = volume_data_handle;
+	internal_file_entry->encryption_context = encryption_context;
 	internal_file_entry->file_system_btree  = file_system_btree;
 	internal_file_entry->inode              = inode;
 	internal_file_entry->directory_record   = directory_record;
@@ -564,7 +565,7 @@ int libfsapfs_file_entry_get_parent_file_entry(
 		     parent_file_entry,
 		     internal_file_entry->io_handle,
 		     internal_file_entry->file_io_handle,
-		     internal_file_entry->volume_data_handle,
+		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     NULL,
@@ -2799,7 +2800,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 	     sub_file_entry,
 	     internal_file_entry->io_handle,
 	     internal_file_entry->file_io_handle,
-	     internal_file_entry->volume_data_handle,
+	     internal_file_entry->encryption_context,
 	     internal_file_entry->file_system_btree,
 	     inode,
 	     directory_record_copy,
@@ -2963,7 +2964,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 		     sub_file_entry,
 		     internal_file_entry->io_handle,
 		     internal_file_entry->file_io_handle,
-		     internal_file_entry->volume_data_handle,
+		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3125,7 +3126,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 		     sub_file_entry,
 		     internal_file_entry->io_handle,
 		     internal_file_entry->file_io_handle,
-		     internal_file_entry->volume_data_handle,
+		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3280,6 +3281,7 @@ int libfsapfs_internal_file_entry_get_data_stream(
 {
 	libfdata_stream_t *compressed_data_stream = NULL;
 	static char *function                     = "libfsapfs_internal_file_entry_get_data_stream";
+	off64_t compressed_data_stream_offset     = 0;
 	uint64_t data_stream_size                 = 0;
 	int compression_method                    = 0;
 
@@ -3390,7 +3392,7 @@ int libfsapfs_internal_file_entry_get_data_stream(
 		if( libfsapfs_data_stream_initialize_from_file_extents(
 		     &( internal_file_entry->data_stream ),
 		     internal_file_entry->io_handle,
-		     internal_file_entry->volume_data_handle,
+		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_extents,
 		     (size64_t) data_stream_size,
 		     error ) != 1 )
@@ -3424,6 +3426,7 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 				goto on_error;
 			}
+			compressed_data_stream_offset = 16;
 		}
 		else if( ( internal_file_entry->compression_method == 4 )
 		      || ( internal_file_entry->compression_method == 8 ) )
@@ -3442,10 +3445,12 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 				goto on_error;
 			}
+			compressed_data_stream_offset = 0;
 		}
 		if( libfsapfs_data_stream_initialize_from_compressed_data_stream(
 		     &( internal_file_entry->data_stream ),
 		     compressed_data_stream,
+		     compressed_data_stream_offset,
 		     internal_file_entry->file_size,
 		     compression_method,
 		     error ) != 1 )

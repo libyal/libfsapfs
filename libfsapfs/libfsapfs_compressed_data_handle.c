@@ -27,6 +27,7 @@
 #include "libfsapfs_compression.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcnotify.h"
 #include "libfsapfs_unused.h"
 
 #define LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE	65536
@@ -38,6 +39,7 @@
 int libfsapfs_compressed_data_handle_initialize(
      libfsapfs_compressed_data_handle_t **data_handle,
      libfdata_stream_t *compressed_data_stream,
+     off64_t compressed_data_stream_offset,
      size64_t uncompressed_data_size,
      int compression_method,
      libcerror_error_t **error )
@@ -152,7 +154,8 @@ int libfsapfs_compressed_data_handle_initialize(
 		goto on_error;
 	}
 	( *data_handle )->compressed_data_stream        = compressed_data_stream;
-	( *data_handle )->compressed_data_stream_offset = -1;
+	( *data_handle )->compressed_data_stream_offset = compressed_data_stream_offset;
+	( *data_handle )->current_data_stream_offset    = -1;
 	( *data_handle )->uncompressed_data_size        = uncompressed_data_size;
 	( *data_handle )->compression_method            = compression_method;
 
@@ -290,13 +293,16 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
 
 		return( -1 );
 	}
+/* TODO fix offset */
 	data_stream_offset = data_handle->current_segment_offset / LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE;
 	data_offset        = (size_t) ( data_handle->current_segment_offset % LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE );
 
 	while( segment_data_size > 0 )
 	{
-		if( data_handle->compressed_data_stream_offset != data_stream_offset )
+		if( data_handle->current_data_stream_offset != data_stream_offset )
 		{
+			data_stream_offset += data_handle->compressed_data_stream_offset;
+
 			read_count = libfdata_stream_read_buffer_at_offset(
 			              data_handle->compressed_data_stream,
 			              (intptr_t *) file_io_handle,
@@ -319,7 +325,7 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
 
 				return( -1 );
 			}
-			data_handle->compressed_data_stream_offset = data_stream_offset;
+			data_handle->current_data_stream_offset = data_stream_offset;
 
 			data_handle->segment_data_size = LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE;
 
@@ -340,6 +346,18 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
 
 				return( -1 );
 			}
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "%s: uncompressed data:\n",
+				 function );
+				libcnotify_print_data(
+				 data_handle->segment_data,
+				 data_handle->segment_data_size,
+				 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+			}
+#endif
 		}
 		if( data_offset >= data_handle->segment_data_size )
 		{
@@ -372,7 +390,8 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
 
 			return( -1 );
 		}
-		data_handle->current_segment_offset += read_size;
+		segment_data_size   -= read_size;
+		segment_data_offset += read_size;
 	}
 	data_handle->current_segment_offset += segment_data_offset;
 

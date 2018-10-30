@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_volume_data_handle"
+	Name="fsapfs_test_container_data_handle"
 	ProjectGUID="{BE397303-FDBC-4D45-A9F2-BC1F3C29B05F}"
-	RootNamespace="fsapfs_test_volume_data_handle"
+	RootNamespace="fsapfs_test_container_data_handle"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -180,7 +180,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_volume_data_handle.c"
+				RelativePath="..\..\tests\fsapfs_test_container_data_handle.c"
 				>
 			</File>
 		</Filter>

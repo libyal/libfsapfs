@@ -1,5 +1,5 @@
 /*
- * The volume data handle functions
+ * The file system data handle functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -26,43 +26,47 @@
 #include "libfsapfs_data_block.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_encryption_context.h"
+#include "libfsapfs_file_extent.h"
 #include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_profiler.h"
 #include "libfsapfs_unused.h"
-#include "libfsapfs_volume_data_handle.h"
+#include "libfsapfs_file_system_data_handle.h"
 
-/* Creates volume data handle
- * Make sure the value volume_data_handle is referencing, is set to NULL
+/* Creates file system data handle
+ * Make sure the value file_system_data_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_volume_data_handle_initialize(
-     libfsapfs_volume_data_handle_t **volume_data_handle,
+int libfsapfs_file_system_data_handle_initialize(
+     libfsapfs_file_system_data_handle_t **file_system_data_handle,
      libfsapfs_io_handle_t *io_handle,
+     libfsapfs_encryption_context_t *encryption_context,
+     libcdata_array_t *file_extents,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_volume_data_handle_initialize";
+	static char *function = "libfsapfs_file_system_data_handle_initialize";
 
-	if( volume_data_handle == NULL )
+	if( file_system_data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume data handle.",
+		 "%s: invalid file system data handle.",
 		 function );
 
 		return( -1 );
 	}
-	if( *volume_data_handle != NULL )
+	if( *file_system_data_handle != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume data handle value already set.",
+		 "%s: invalid file system data handle value already set.",
 		 function );
 
 		return( -1 );
@@ -78,240 +82,129 @@ int libfsapfs_volume_data_handle_initialize(
 
 		return( -1 );
 	}
-	*volume_data_handle = memory_allocate_structure(
-	                       libfsapfs_volume_data_handle_t );
+	*file_system_data_handle = memory_allocate_structure(
+	                            libfsapfs_file_system_data_handle_t );
 
-	if( *volume_data_handle == NULL )
+	if( *file_system_data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create volume data handle.",
+		 "%s: unable to create file system data handle.",
 		 function );
 
 		goto on_error;
 	}
 	if( memory_set(
-	     *volume_data_handle,
+	     *file_system_data_handle,
 	     0,
-	     sizeof( libfsapfs_volume_data_handle_t ) ) == NULL )
+	     sizeof( libfsapfs_file_system_data_handle_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear volume data handle.",
+		 "%s: unable to clear file system data handle.",
 		 function );
 
 		goto on_error;
 	}
-	( *volume_data_handle )->io_handle = io_handle;
+	( *file_system_data_handle )->io_handle          = io_handle;
+	( *file_system_data_handle )->encryption_context = encryption_context;
+	( *file_system_data_handle )->file_extents       = file_extents;
 
 	return( 1 );
 
 on_error:
-	if( *volume_data_handle != NULL )
+	if( *file_system_data_handle != NULL )
 	{
 		memory_free(
-		 *volume_data_handle );
+		 *file_system_data_handle );
 
-		*volume_data_handle = NULL;
+		*file_system_data_handle = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees volume data handle
+/* Frees file system data handle
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_volume_data_handle_free(
-     libfsapfs_volume_data_handle_t **volume_data_handle,
+int libfsapfs_file_system_data_handle_free(
+     libfsapfs_file_system_data_handle_t **file_system_data_handle,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_volume_data_handle_free";
-	int result            = 1;
+	static char *function = "libfsapfs_file_system_data_handle_free";
 
-	if( volume_data_handle == NULL )
+	if( file_system_data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume data handle.",
+		 "%s: invalid file system data handle.",
 		 function );
 
 		return( -1 );
 	}
-	if( *volume_data_handle != NULL )
+	if( *file_system_data_handle != NULL )
 	{
-		if( ( *volume_data_handle )->encryption_context != NULL )
-		{
-			if( libfsapfs_encryption_context_free(
-			     &( ( *volume_data_handle )->encryption_context ),
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free encryption context.",
-				 function );
-
-				result = -1;
-			}
-		}
 		memory_free(
-		 *volume_data_handle );
+		 *file_system_data_handle );
 
-		*volume_data_handle = NULL;
-	}
-	return( result );
-}
-
-/* Sets the volume master key
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_volume_data_handle_set_volume_master_key(
-     libfsapfs_volume_data_handle_t *volume_data_handle,
-     const uint8_t *volume_master_key,
-     size_t volume_master_key_size,
-     libcerror_error_t **error )
-{
-	static char *function = "libfsapfs_volume_data_handle_set_volume_master_key";
-
-	if( volume_data_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume data handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( volume_data_handle->encryption_context != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume data handle - encryption context already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( volume_master_key == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume master key.",
-		 function );
-
-		return( -1 );
-	}
-	if( volume_master_key_size != 32 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: unsupported volume master key size.",
-		 function );
-
-		return( -1 );
-	}
-	if( libfsapfs_encryption_context_initialize(
-	     &( volume_data_handle->encryption_context ),
-	     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize encryption context.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_encryption_context_set_keys(
-	     volume_data_handle->encryption_context,
-	     volume_master_key,
-	     16,
-	     &( volume_master_key[ 16 ] ),
-	     16,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set keys in encryption context.",
-		 function );
-
-		goto on_error;
+		*file_system_data_handle = NULL;
 	}
 	return( 1 );
-
-on_error:
-	if( volume_data_handle->encryption_context != NULL )
-	{
-		libfsapfs_encryption_context_free(
-		 &( volume_data_handle->encryption_context ),
-		 NULL );
-	}
-	return( -1 );
 }
 
 /* Reads a data block
  * Callback function for a data block vector
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_volume_data_handle_read_data_block(
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+int libfsapfs_file_system_data_handle_read_data_block(
+     libfsapfs_file_system_data_handle_t *file_system_data_handle,
      libbfio_handle_t *file_io_handle,
      libfdata_vector_t *vector,
      libfcache_cache_t *cache,
      int element_index,
-     int element_data_file_index LIBFSAPFS_ATTRIBUTE_UNUSED,
+     int element_data_file_index,
      off64_t element_data_offset,
      size64_t element_data_size,
      uint32_t element_data_flags LIBFSAPFS_ATTRIBUTE_UNUSED,
      uint8_t read_flags LIBFSAPFS_ATTRIBUTE_UNUSED,
      libcerror_error_t **error )
 {
-	libfsapfs_data_block_t *data_block = NULL;
-	static char *function              = "libfsapfs_volume_data_handle_read_data_block";
+	libfsapfs_data_block_t *data_block   = NULL;
+	libfsapfs_file_extent_t *file_extent = NULL;
+	static char *function                = "libfsapfs_file_system_data_handle_read_data_block";
+	uint64_t encryption_identifier       = 0;
+	int64_t file_extent_offset           = 0;
 
 #if defined( HAVE_PROFILER )
-	int64_t profiler_start_timestamp   = 0;
+	int64_t profiler_start_timestamp     = 0;
 #endif
 
-	LIBFSAPFS_UNREFERENCED_PARAMETER( element_data_file_index );
 	LIBFSAPFS_UNREFERENCED_PARAMETER( element_data_flags );
 	LIBFSAPFS_UNREFERENCED_PARAMETER( read_flags );
 
-	if( volume_data_handle == NULL )
+	if( file_system_data_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume data handle.",
+		 "%s: invalid file system data handle.",
 		 function );
 
 		return( -1 );
 	}
-	if( volume_data_handle->io_handle == NULL )
+	if( file_system_data_handle->io_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume data handle - missing IO handle.",
+		 "%s: invalid file system data handle - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -342,10 +235,10 @@ int libfsapfs_volume_data_handle_read_data_block(
 		goto on_error;
 	}
 #if defined( HAVE_PROFILER )
-	if( volume_data_handle->io_handle->profiler != NULL )
+	if( file_system_data_handle->io_handle->profiler != NULL )
 	{
 		if( libfsapfs_profiler_start_timing(
-		     volume_data_handle->io_handle->profiler,
+		     file_system_data_handle->io_handle->profiler,
 		     &profiler_start_timestamp,
 		     error ) != 1 )
 		{
@@ -361,12 +254,48 @@ int libfsapfs_volume_data_handle_read_data_block(
 	}
 #endif /* defined( HAVE_PROFILER ) */
 
+	encryption_identifier = element_data_offset / element_data_size;
+
+	if( file_system_data_handle->file_extents != NULL )
+	{
+		if( libcdata_array_get_entry_by_index(
+		     file_system_data_handle->file_extents,
+		     element_data_file_index,
+		     (intptr_t **) &file_extent,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file extent: %d.",
+			 function,
+			 element_data_file_index );
+
+			goto on_error;
+		}
+		if( file_extent == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing file extent: %d.",
+			 function,
+			 element_data_file_index );
+
+			goto on_error;
+		}
+		file_extent_offset    = (int64_t) encryption_identifier - (int64_t) file_extent->block_number;
+		encryption_identifier = file_extent->encryption_identifier + file_extent_offset;
+	}
 	if( libfsapfs_data_block_read(
 	     data_block,
-	     volume_data_handle->io_handle,
-	     volume_data_handle->encryption_context,
+	     file_system_data_handle->io_handle,
+	     file_system_data_handle->encryption_context,
 	     file_io_handle,
 	     element_data_offset,
+	     encryption_identifier,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -379,10 +308,10 @@ int libfsapfs_volume_data_handle_read_data_block(
 		goto on_error;
 	}
 #if defined( HAVE_PROFILER )
-	if( volume_data_handle->io_handle->profiler != NULL )
+	if( file_system_data_handle->io_handle->profiler != NULL )
 	{
 		if( libfsapfs_profiler_stop_timing(
-		     volume_data_handle->io_handle->profiler,
+		     file_system_data_handle->io_handle->profiler,
 		     profiler_start_timestamp,
 		     function,
 		     element_data_offset,

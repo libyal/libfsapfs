@@ -25,10 +25,10 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libfdata.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -43,7 +43,7 @@ int libfsapfs_data_stream_initialize_from_data(
 int libfsapfs_data_stream_initialize_from_file_extents(
      libfdata_stream_t **data_stream,
      libfsapfs_io_handle_t *io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
      libcdata_array_t *file_extents,
      size64_t data_stream_size,
      libcerror_error_t **error );
@@ -51,6 +51,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
 int libfsapfs_data_stream_initialize_from_compressed_data_stream(
      libfdata_stream_t **data_stream,
      libfdata_stream_t *compressed_data_stream,
+     off64_t compressed_data_stream_offset,
      size64_t uncompressed_data_size,
      int compression_method,
      libcerror_error_t **error );

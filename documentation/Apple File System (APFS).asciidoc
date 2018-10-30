@@ -1576,14 +1576,35 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 [cols="1,1,5",options="header"]
 |===
 | Name | Description
+| com.apple.assetsd.dbRebuildInProgress |
+| com.apple.assetsd.dbRebuildUuid |
+| com.apple.assetsd.thumbnailCameraPreviewImageAssetID |
+| com.apple.assetsd.UUID |
 | com.apple.decmpfs | Compressed data extended attribute +
 See section: <<compressed_data_extended_attribute,Compressed data extended attribute>>
 | com.apple.FinderInfo |
 | com.apple.fs.symlink | Symbolic link
+| com.apple.genstore.info |
+| com.apple.genstore.origdisplayname |
+| com.apple.genstore.orig_perms_v1 |
+| com.apple.genstore.origposixname |
+| com.apple.GeoServices.SHA1 |
+| com.apple.installd.installType |
+| com.apple.installd.uniqueInstallID |
+| com.apple.lastuseddate#PS |
+| com.apple.metadata:_kMDItemUserTags |
+| com.apple.metadata:com_apple_backup_excludeItem |
+| com.apple.metadata:kMDItemDownloadedDate |
+| com.apple.metadata:kMDItemWhereFroms |
+| com.apple.metadata:kMDLabel_fwlfb7nbt2o7degof3q2o2btjy |
 | com.apple.quarantine |
 | com.apple.ResourceFork | Resource fork
 | com.apple.rootless |
 | com.apple.system.Security |
+| com.apple.TextEncoding |
+| LastUpgradeCheck |
+| lock |
+| org.chromium.crashpad.database.initialized |
 |===
 
 ==== [[extended_attribute_flags]]Extended attribute flags

@@ -30,6 +30,7 @@
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_directory_record.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_extent.h"
 #include "libfsapfs_file_system_btree.h"
@@ -45,7 +46,6 @@
 #include "libfsapfs_name_hash.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #include "fsapfs_file_system.h"
 #include "fsapfs_object.h"
@@ -57,7 +57,7 @@
 int libfsapfs_file_system_btree_initialize(
      libfsapfs_file_system_btree_t **file_system_btree,
      libfsapfs_io_handle_t *io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
      libfdata_vector_t *data_block_vector,
      libfsapfs_object_map_btree_t *object_map_btree,
      uint64_t root_node_block_number,
@@ -150,7 +150,7 @@ int libfsapfs_file_system_btree_initialize(
 		goto on_error;
 	}
 	( *file_system_btree )->io_handle              = io_handle;
-	( *file_system_btree )->volume_data_handle     = volume_data_handle;
+	( *file_system_btree )->encryption_context     = encryption_context;
 	( *file_system_btree )->data_block_vector      = data_block_vector;
 	( *file_system_btree )->object_map_btree       = object_map_btree;
 	( *file_system_btree )->root_node_block_number = root_node_block_number;
@@ -3529,7 +3529,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		     &extended_attribute,
 		     file_system_btree->io_handle,
 		     file_io_handle,
-		     file_system_btree->volume_data_handle,
+		     file_system_btree->encryption_context,
 		     file_system_btree,
 		     error ) != 1 )
 		{

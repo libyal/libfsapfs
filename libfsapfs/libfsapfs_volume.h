@@ -25,16 +25,18 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_container_data_handle.h"
 #include "libfsapfs_container_key_bag.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
-#include "libfsapfs_volume_data_handle.h"
 #include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
 #include "libfsapfs_types.h"
@@ -55,17 +57,13 @@ struct libfsapfs_internal_volume
 	 */
 	libfsapfs_container_key_bag_t *container_key_bag;
 
-	/* The volume data handle
+	/* The container data handle
 	 */
-	libfsapfs_volume_data_handle_t *volume_data_handle;
+	libfsapfs_container_data_handle_t *container_data_handle;
 
-	/* The encrypted volume data handle
+	/* The container data block vector
 	 */
-	libfsapfs_volume_data_handle_t *encrypted_volume_data_handle;
-
-	/* The data block vector
-	 */
-	libfdata_vector_t *data_block_vector;
+	libfdata_vector_t *container_data_block_vector;
 
 	/* The volume object map B-tree
 	 */
@@ -75,13 +73,17 @@ struct libfsapfs_internal_volume
 	 */
 	libfsapfs_volume_key_bag_t *key_bag;
 
-	/* The volume master key
+	/* The encryption context
 	 */
-	uint8_t volume_master_key[ 32 ];
+	libfsapfs_encryption_context_t *encryption_context;
 
-	/* The encrypted data block vector
+	/* The file system data handle
 	 */
-	libfdata_vector_t *encrypted_data_block_vector;
+	libfsapfs_file_system_data_handle_t *file_system_data_handle;
+
+	/* The file system data block vector
+	 */
+	libfdata_vector_t *file_system_data_block_vector;
 
 	/* The file system B-tree
 	 */

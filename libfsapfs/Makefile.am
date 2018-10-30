@@ -47,6 +47,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_compressed_data_handle.c libfsapfs_compressed_data_handle.h \
 	libfsapfs_compression.c libfsapfs_compression.h \
 	libfsapfs_container.c libfsapfs_container.h \
+	libfsapfs_container_data_handle.c libfsapfs_container_data_handle.h \
 	libfsapfs_container_key_bag.c libfsapfs_container_key_bag.h \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
 	libfsapfs_container_space_manager.c libfsapfs_container_space_manager.h \
@@ -65,6 +66,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_file_entry.c libfsapfs_file_entry.h \
 	libfsapfs_file_extent.c libfsapfs_file_extent.h \
 	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
+	libfsapfs_file_system_data_handle.c libfsapfs_file_system_data_handle.h \
 	libfsapfs_inode.c libfsapfs_inode.h \
 	libfsapfs_io_handle.c libfsapfs_io_handle.h \
 	libfsapfs_key_bag_entry.c libfsapfs_key_bag_entry.h \
@@ -97,7 +99,6 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_types.h \
 	libfsapfs_unused.h \
 	libfsapfs_volume.c libfsapfs_volume.h \
-	libfsapfs_volume_data_handle.c libfsapfs_volume_data_handle.h \
 	libfsapfs_volume_key_bag.c libfsapfs_volume_key_bag.h \
 	libfsapfs_volume_superblock.c libfsapfs_volume_superblock.h
 

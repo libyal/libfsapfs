@@ -2,22 +2,21 @@ TODO
 * Add support for compressed files
 ** data stream with buffer correct for compressed data header
 ** data stream with buffer decompress data
-** data stream with extents add support for "encryption identifier"
 * Complete support for recovery password -r
 * Handle file size of 0, mapped file size does not support 0 ?
 * Add support for sparse files
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * add support for case folding
 * Add container data handle? Add decryption support and use it to read container key bag?
-* rename volume data handle to container data handle?
 * add snapshot support
 
 library:
+* Add support for compressed files
+** test with deflate compressed files
 * separate internal external attribute descriptor and API external descriptor
 * read inode and extended attributes at once
 * expose directory entry added time
 * improve file content read support
-** encrypted file content read support - detect block identifier mismatch
 * change container read bootstap as advised in documentation
 ** validate checksum
 ** read backup container superblocks
@@ -26,6 +25,7 @@ library:
 * Create libfsapfs_volume_superblock_get_identifier
 * Add support for extended attribute with data stream descriptor
 * Add resource fork support
+* Pass IO handle instead of container data handle?
 
 Python bindings:
 * add extents object?
@@ -38,6 +38,7 @@ Tools:
 ** print extended attribute values
 ** handle \r in filename
 ** print hardlinks for -E option?
+** "-E all" instead of using next_object_identifier walk leaf nodes
 * fsapfsmount tool
 ** make symbolic links an absolute path which accounts for mount point
 ** add owner and group identifier support?

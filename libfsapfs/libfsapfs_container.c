@@ -27,6 +27,7 @@
 
 #include "libfsapfs_checkpoint_map.h"
 #include "libfsapfs_container.h"
+#include "libfsapfs_container_data_handle.h"
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_container_reaper.h"
 #include "libfsapfs_container_space_manager.h"
@@ -998,11 +999,11 @@ int libfsapfs_internal_container_open_read(
      off64_t file_offset,
      libcerror_error_t **error )
 {
+	libfsapfs_container_data_handle_t *container_data_handle     = NULL;
 	libfsapfs_container_superblock_t *container_superblock       = NULL;
 	libfsapfs_container_superblock_t *container_superblock_swap  = NULL;
 	libfsapfs_object_t *object                                   = NULL;
 	libfsapfs_object_map_t *object_map                           = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle           = NULL;
 	static char *function                                        = "libfsapfs_internal_container_open_read";
 	uint64_t checkpoint_map_block_number                         = 0;
 	uint64_t checkpoint_map_transaction_identifier               = 0;
@@ -1494,8 +1495,8 @@ int libfsapfs_internal_container_open_read(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( libfsapfs_volume_data_handle_initialize(
-	     &volume_data_handle,
+	if( libfsapfs_container_data_handle_initialize(
+	     &container_data_handle,
 	     internal_container->io_handle,
 	     error ) != 1 )
 	{
@@ -1503,7 +1504,7 @@ int libfsapfs_internal_container_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create volume data handle.",
+		 "%s: unable to create container data handle.",
 		 function );
 
 		goto on_error;
@@ -1511,10 +1512,10 @@ int libfsapfs_internal_container_open_read(
 	if( libfdata_vector_initialize(
 	     &( internal_container->data_block_vector ),
 	     (size64_t) internal_container->io_handle->block_size,
-	     (intptr_t *) volume_data_handle,
-	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
+	     (intptr_t *) container_data_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_container_data_handle_free,
 	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_container_data_handle_read_data_block,
 	     NULL,
 	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
 	     error ) != 1 )
@@ -1528,8 +1529,8 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	internal_container->volume_data_handle = volume_data_handle;
-	volume_data_handle                     = NULL;
+	internal_container->container_data_handle = container_data_handle;
+	container_data_handle                     = NULL;
 
 	if( libfdata_vector_append_segment(
 	     internal_container->data_block_vector,
@@ -1707,10 +1708,10 @@ on_error:
 		 &object_map,
 		 NULL );
 	}
-	if( volume_data_handle != NULL )
+	if( container_data_handle != NULL )
 	{
-		libfsapfs_volume_data_handle_free(
-		 &volume_data_handle,
+		libfsapfs_container_data_handle_free(
+		 &container_data_handle,
 		 NULL );
 	}
 #if defined( HAVE_DEBUG_OUTPUT )

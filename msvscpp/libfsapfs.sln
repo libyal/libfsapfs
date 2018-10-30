@@ -284,7 +284,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fsapfs_test_volume", "fsapf
 		{F480F61D-4950-4603-9F6F-F95ECC64A31C} = {F480F61D-4950-4603-9F6F-F95ECC64A31C}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fsapfs_test_volume_data_handle", "fsapfs_test_volume_data_handle\fsapfs_test_volume_data_handle.vcproj", "{BE397303-FDBC-4D45-A9F2-BC1F3C29B05F}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "fsapfs_test_container_data_handle", "fsapfs_test_container_data_handle\fsapfs_test_container_data_handle.vcproj", "{BE397303-FDBC-4D45-A9F2-BC1F3C29B05F}"
 	ProjectSection(ProjectDependencies) = postProject
 		{66956CAB-8580-4D29-AFA4-49E9934D9E42} = {66956CAB-8580-4D29-AFA4-49E9934D9E42}
 		{F480F61D-4950-4603-9F6F-F95ECC64A31C} = {F480F61D-4950-4603-9F6F-F95ECC64A31C}

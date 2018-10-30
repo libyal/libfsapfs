@@ -26,6 +26,7 @@
 #include <types.h>
 
 #include "libfsapfs_directory_record.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
@@ -35,7 +36,6 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_types.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -53,9 +53,9 @@ struct libfsapfs_internal_file_entry
 	 */
 	libbfio_handle_t *file_io_handle;
 
-	/* The volume data handle
+	/* The encryption context
 	 */
-	libfsapfs_volume_data_handle_t *volume_data_handle;
+	libfsapfs_encryption_context_t *encryption_context;
 
 	/* The file system B-tree
 	 */
@@ -124,7 +124,7 @@ int libfsapfs_file_entry_initialize(
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
      libfsapfs_directory_record_t *directory_record,

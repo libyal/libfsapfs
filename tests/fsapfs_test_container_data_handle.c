@@ -1,5 +1,5 @@
 /*
- * Library volume_data_handle type test program
+ * Library container_data_handle type test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -33,25 +33,25 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_volume_data_handle.h"
+#include "../libfsapfs/libfsapfs_container_data_handle.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_volume_data_handle_initialize function
+/* Tests the libfsapfs_container_data_handle_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_volume_data_handle_initialize(
+int fsapfs_test_container_data_handle_initialize(
      void )
 {
-	libcerror_error_t *error                           = NULL;
-	libfsapfs_io_handle_t *io_handle                   = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
-	int result                                         = 0;
+	libcerror_error_t *error                                 = NULL;
+	libfsapfs_io_handle_t *io_handle                         = NULL;
+	libfsapfs_container_data_handle_t *container_data_handle = NULL;
+	int result                                               = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                    = 1;
-	int number_of_memset_fail_tests                    = 1;
-	int test_number                                    = 0;
+	int number_of_malloc_fail_tests                          = 1;
+	int number_of_memset_fail_tests                          = 1;
+	int test_number                                          = 0;
 #endif
 
 	/* Initialize test
@@ -75,8 +75,8 @@ int fsapfs_test_volume_data_handle_initialize(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_volume_data_handle_initialize(
-	          &volume_data_handle,
+	result = libfsapfs_container_data_handle_initialize(
+	          &container_data_handle,
 	          io_handle,
 	          &error );
 
@@ -86,15 +86,15 @@ int fsapfs_test_volume_data_handle_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "volume_data_handle",
-	 volume_data_handle );
+	 "container_data_handle",
+	 container_data_handle );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsapfs_volume_data_handle_free(
-	          &volume_data_handle,
+	result = libfsapfs_container_data_handle_free(
+	          &container_data_handle,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -103,8 +103,8 @@ int fsapfs_test_volume_data_handle_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "volume_data_handle",
-	 volume_data_handle );
+	 "container_data_handle",
+	 container_data_handle );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -112,7 +112,7 @@ int fsapfs_test_volume_data_handle_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_volume_data_handle_initialize(
+	result = libfsapfs_container_data_handle_initialize(
 	          NULL,
 	          io_handle,
 	          &error );
@@ -129,14 +129,14 @@ int fsapfs_test_volume_data_handle_initialize(
 	libcerror_error_free(
 	 &error );
 
-	volume_data_handle = (libfsapfs_volume_data_handle_t *) 0x12345678UL;
+	container_data_handle = (libfsapfs_container_data_handle_t *) 0x12345678UL;
 
-	result = libfsapfs_volume_data_handle_initialize(
-	          &volume_data_handle,
+	result = libfsapfs_container_data_handle_initialize(
+	          &container_data_handle,
 	          io_handle,
 	          &error );
 
-	volume_data_handle = NULL;
+	container_data_handle = NULL;
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -150,8 +150,8 @@ int fsapfs_test_volume_data_handle_initialize(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_volume_data_handle_initialize(
-	          &volume_data_handle,
+	result = libfsapfs_container_data_handle_initialize(
+	          &container_data_handle,
 	          NULL,
 	          &error );
 
@@ -173,12 +173,12 @@ int fsapfs_test_volume_data_handle_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_volume_data_handle_initialize with malloc failing
+		/* Test libfsapfs_container_data_handle_initialize with malloc failing
 		 */
 		fsapfs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsapfs_volume_data_handle_initialize(
-		          &volume_data_handle,
+		result = libfsapfs_container_data_handle_initialize(
+		          &container_data_handle,
 		          io_handle,
 		          &error );
 
@@ -186,10 +186,10 @@ int fsapfs_test_volume_data_handle_initialize(
 		{
 			fsapfs_test_malloc_attempts_before_fail = -1;
 
-			if( volume_data_handle != NULL )
+			if( container_data_handle != NULL )
 			{
-				libfsapfs_volume_data_handle_free(
-				 &volume_data_handle,
+				libfsapfs_container_data_handle_free(
+				 &container_data_handle,
 				 NULL );
 			}
 		}
@@ -201,8 +201,8 @@ int fsapfs_test_volume_data_handle_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "volume_data_handle",
-			 volume_data_handle );
+			 "container_data_handle",
+			 container_data_handle );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -216,12 +216,12 @@ int fsapfs_test_volume_data_handle_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_volume_data_handle_initialize with memset failing
+		/* Test libfsapfs_container_data_handle_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_volume_data_handle_initialize(
-		          &volume_data_handle,
+		result = libfsapfs_container_data_handle_initialize(
+		          &container_data_handle,
 		          io_handle,
 		          &error );
 
@@ -229,10 +229,10 @@ int fsapfs_test_volume_data_handle_initialize(
 		{
 			fsapfs_test_memset_attempts_before_fail = -1;
 
-			if( volume_data_handle != NULL )
+			if( container_data_handle != NULL )
 			{
-				libfsapfs_volume_data_handle_free(
-				 &volume_data_handle,
+				libfsapfs_container_data_handle_free(
+				 &container_data_handle,
 				 NULL );
 			}
 		}
@@ -244,8 +244,8 @@ int fsapfs_test_volume_data_handle_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "volume_data_handle",
-			 volume_data_handle );
+			 "container_data_handle",
+			 container_data_handle );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -284,10 +284,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( volume_data_handle != NULL )
+	if( container_data_handle != NULL )
 	{
-		libfsapfs_volume_data_handle_free(
-		 &volume_data_handle,
+		libfsapfs_container_data_handle_free(
+		 &container_data_handle,
 		 NULL );
 	}
 	if( io_handle != NULL )
@@ -299,10 +299,10 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_volume_data_handle_free function
+/* Tests the libfsapfs_container_data_handle_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_volume_data_handle_free(
+int fsapfs_test_container_data_handle_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -310,7 +310,7 @@ int fsapfs_test_volume_data_handle_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_volume_data_handle_free(
+	result = libfsapfs_container_data_handle_free(
 	          NULL,
 	          &error );
 
@@ -357,16 +357,16 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_volume_data_handle_initialize",
-	 fsapfs_test_volume_data_handle_initialize );
+	 "libfsapfs_container_data_handle_initialize",
+	 fsapfs_test_container_data_handle_initialize );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_volume_data_handle_free",
-	 fsapfs_test_volume_data_handle_free );
+	 "libfsapfs_container_data_handle_free",
+	 fsapfs_test_container_data_handle_free );
 
-	/* TODO: add tests for libfsapfs_volume_data_handle_set_volume_master_key */
+	/* TODO: add tests for libfsapfs_container_data_handle_set_volume_master_key */
 
-	/* TODO: add tests for libfsapfs_volume_data_handle_read_sector */
+	/* TODO: add tests for libfsapfs_container_data_handle_read_sector */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

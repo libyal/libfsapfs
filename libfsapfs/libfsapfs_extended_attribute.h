@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_io_handle.h"
@@ -34,7 +35,6 @@
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_types.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -52,9 +52,9 @@ struct libfsapfs_internal_extended_attribute
 	 */
 	libbfio_handle_t *file_io_handle;
 
-	/* The volume data handle
+	/* The encryption context
 	 */
-	libfsapfs_volume_data_handle_t *volume_data_handle;
+	libfsapfs_encryption_context_t *encryption_context;
 
 	/* The file system B-tree
 	 */
@@ -103,7 +103,7 @@ int libfsapfs_extended_attribute_initialize(
      libfsapfs_extended_attribute_t **extended_attribute,
      libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
      libcerror_error_t **error );
 

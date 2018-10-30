@@ -26,12 +26,13 @@
 #include "libfsapfs_data_block.h"
 #include "libfsapfs_data_block_data_handle.h"
 #include "libfsapfs_definitions.h"
+#include "libfsapfs_file_extent.h"
+#include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_unused.h"
-#include "libfsapfs_volume_data_handle.h"
 
 /* Creates data handle
  * Make sure the value data_handle is referencing, is set to NULL
@@ -40,11 +41,15 @@
 int libfsapfs_data_block_data_handle_initialize(
      libfsapfs_data_block_data_handle_t **data_handle,
      libfsapfs_io_handle_t *io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
+     libcdata_array_t *file_extents,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_data_block_data_handle_initialize";	
-	int element_index     = 0;
+	libfsapfs_file_extent_t *file_extent = NULL;
+	static char *function                = "libfsapfs_data_block_data_handle_initialize";	
+	int extent_index                     = 0;
+	int number_of_extents                = 0;
+	int segment_index                    = 0;
 
 	if( data_handle == NULL )
 	{
@@ -68,8 +73,19 @@ int libfsapfs_data_block_data_handle_initialize(
 
 		return( -1 );
 	}
+	if( io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid IO handle.",
+		 function );
+
+		return( -1 );
+	}
 	*data_handle = memory_allocate_structure(
-	                       libfsapfs_data_block_data_handle_t );
+	                libfsapfs_data_block_data_handle_t );
 
 	if( *data_handle == NULL )
 	{
@@ -101,13 +117,29 @@ int libfsapfs_data_block_data_handle_initialize(
 
 		return( -1 );
 	}
+	if( libfsapfs_file_system_data_handle_initialize(
+	     &( ( *data_handle )->file_system_data_handle ),
+	     io_handle,
+	     encryption_context,
+	     file_extents,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file system data handle.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfdata_vector_initialize(
 	     &( ( *data_handle )->data_block_vector ),
 	     (size64_t) io_handle->block_size,
-	     (intptr_t *) volume_data_handle,
-	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
+	     (intptr_t *) ( *data_handle )->file_system_data_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_system_data_handle_free,
 	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_file_system_data_handle_read_data_block,
 	     NULL,
 	     LIBFDATA_DATA_HANDLE_FLAG_NON_MANAGED,
 	     error ) != 1 )
@@ -121,23 +153,71 @@ int libfsapfs_data_block_data_handle_initialize(
 
 		goto on_error;
 	}
-	if( libfdata_vector_append_segment(
-	     ( *data_handle )->data_block_vector,
-	     &element_index,
-	     0,
-	     0,
-	     io_handle->container_size,
-	     0,
+	if( libcdata_array_get_number_of_entries(
+	     file_extents,
+	     &number_of_extents,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append segment to data block vector.",
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from array.",
 		 function );
 
 		goto on_error;
+	}
+	for( extent_index = 0;
+	     extent_index < number_of_extents;
+	     extent_index++ )
+	{
+		if( libcdata_array_get_entry_by_index(
+		     file_extents,
+		     extent_index,
+		     (intptr_t **) &file_extent,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file extent: %d.",
+			 function,
+			 extent_index );
+
+			goto on_error;
+		}
+		if( file_extent == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing file extent: %d.",
+			 function,
+			 extent_index );
+
+			goto on_error;
+		}
+		if( libfdata_vector_append_segment(
+		     ( *data_handle )->data_block_vector,
+		     &segment_index,
+		     extent_index,
+		     file_extent->block_number * io_handle->block_size,
+		     file_extent->data_size,
+		     0,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+			 "%s: unable to append extent: %d as data block vector segment.",
+			 function,
+			 extent_index );
+
+			goto on_error;
+		}
 	}
 	if( libfcache_cache_initialize(
 	     &( ( *data_handle )->data_block_cache ),
@@ -172,6 +252,12 @@ on_error:
 			 &( ( *data_handle )->data_block_vector ),
 			 NULL );
 		}
+		if( ( *data_handle )->file_system_data_handle != NULL )
+		{
+			libfsapfs_file_system_data_handle_free(
+			 &( ( *data_handle )->file_system_data_handle ),
+			 NULL );
+		}
 		memory_free(
 		 *data_handle );
 
@@ -203,6 +289,19 @@ int libfsapfs_data_block_data_handle_free(
 	}
 	if( *data_handle != NULL )
 	{
+		if( libfcache_cache_free(
+		     &( ( *data_handle )->data_block_cache ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free data block cache.",
+			 function );
+
+			result = -1;
+		}
 		if( libfdata_vector_free(
 		     &( ( *data_handle )->data_block_vector ),
 		     error ) != 1 )
@@ -216,15 +315,15 @@ int libfsapfs_data_block_data_handle_free(
 
 			result = -1;
 		}
-		if( libfcache_cache_free(
-		     &( ( *data_handle )->data_block_cache ),
+		if( libfsapfs_file_system_data_handle_free(
+		     &( ( *data_handle )->file_system_data_handle ),
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free data block cache.",
+			 "%s: unable to free file system data handle.",
 			 function );
 
 			result = -1;

@@ -1,5 +1,5 @@
 /*
- * The volume data handle functions
+ * The file system data handle functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_VOLUME_DATA_HANDLE_H )
-#define _LIBFSAPFS_VOLUME_DATA_HANDLE_H
+#if !defined( _LIBFSAPFS_FILE_SYSTEM_DATA_HANDLE_H )
+#define _LIBFSAPFS_FILE_SYSTEM_DATA_HANDLE_H
 
 #include <common.h>
 #include <types.h>
@@ -28,6 +28,7 @@
 #include "libfsapfs_encryption_context.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfcache.h"
 #include "libfsapfs_libfdata.h"
@@ -36,9 +37,9 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_volume_data_handle libfsapfs_volume_data_handle_t;
+typedef struct libfsapfs_file_system_data_handle libfsapfs_file_system_data_handle_t;
 
-struct libfsapfs_volume_data_handle
+struct libfsapfs_file_system_data_handle
 {
 	/* The IO handle
 	 */
@@ -47,25 +48,25 @@ struct libfsapfs_volume_data_handle
 	/* The encryption context
 	 */
 	libfsapfs_encryption_context_t *encryption_context;
+
+	/* The file extents
+	 */
+	libcdata_array_t *file_extents;
 };
 
-int libfsapfs_volume_data_handle_initialize(
-     libfsapfs_volume_data_handle_t **volume_data_handle,
+int libfsapfs_file_system_data_handle_initialize(
+     libfsapfs_file_system_data_handle_t **file_system_data_handle,
      libfsapfs_io_handle_t *io_handle,
+     libfsapfs_encryption_context_t *encryption_context,
+     libcdata_array_t *file_extents,
      libcerror_error_t **error );
 
-int libfsapfs_volume_data_handle_free(
-     libfsapfs_volume_data_handle_t **volume_data_handle,
+int libfsapfs_file_system_data_handle_free(
+     libfsapfs_file_system_data_handle_t **file_system_data_handle,
      libcerror_error_t **error );
 
-int libfsapfs_volume_data_handle_set_volume_master_key(
-     libfsapfs_volume_data_handle_t *volume_data_handle,
-     const uint8_t *volume_master_key,
-     size_t volume_master_key_size,
-     libcerror_error_t **error );
-
-int libfsapfs_volume_data_handle_read_data_block(
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+int libfsapfs_file_system_data_handle_read_data_block(
+     libfsapfs_file_system_data_handle_t *file_system_data_handle,
      libbfio_handle_t *file_io_handle,
      libfdata_vector_t *vector,
      libfcache_cache_t *cache,
@@ -81,5 +82,5 @@ int libfsapfs_volume_data_handle_read_data_block(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_VOLUME_DATA_HANDLE_H ) */
+#endif /* !defined( _LIBFSAPFS_FILE_SYSTEM_DATA_HANDLE_H ) */
 

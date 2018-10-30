@@ -40,6 +40,10 @@ struct libfsapfs_compressed_data_handle
 	 */
 	off64_t current_segment_offset;
 
+	/* The current data stream offset
+	 */
+	off64_t current_data_stream_offset;
+
 	/* The compressed data steam
 	 */
 	libfdata_stream_t *compressed_data_stream;
@@ -72,6 +76,7 @@ struct libfsapfs_compressed_data_handle
 int libfsapfs_compressed_data_handle_initialize(
      libfsapfs_compressed_data_handle_t **data_handle,
      libfdata_stream_t *compressed_data_stream,
+     off64_t compressed_data_stream_offset,
      size64_t uncompressed_data_size,
      int compression_method,
      libcerror_error_t **error );

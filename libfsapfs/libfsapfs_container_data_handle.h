@@ -1,5 +1,5 @@
 /*
- * Data block functions
+ * The container data handle functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,55 +19,56 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_DATA_BLOCK_H )
-#define _LIBFSAPFS_DATA_BLOCK_H
+#if !defined( _LIBFSAPFS_CONTAINER_DATA_HANDLE_H )
+#define _LIBFSAPFS_CONTAINER_DATA_HANDLE_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libfcache.h"
+#include "libfsapfs_libfdata.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsapfs_data_block libfsapfs_data_block_t;
+typedef struct libfsapfs_container_data_handle libfsapfs_container_data_handle_t;
 
-struct libfsapfs_data_block
+struct libfsapfs_container_data_handle
 {
-	/* The data
+	/* The IO handle
 	 */
-	uint8_t *data;
-
-	/* The data size
-	 */
-	size_t data_size;
+	libfsapfs_io_handle_t *io_handle;
 };
 
-int libfsapfs_data_block_initialize(
-     libfsapfs_data_block_t **data_block,
-     size_t data_size,
-     libcerror_error_t **error );
-
-int libfsapfs_data_block_free(
-     libfsapfs_data_block_t **data_block,
-     libcerror_error_t **error );
-
-int libfsapfs_data_block_read(
-     libfsapfs_data_block_t *data_block,
+int libfsapfs_container_data_handle_initialize(
+     libfsapfs_container_data_handle_t **container_data_handle,
      libfsapfs_io_handle_t *io_handle,
-     libfsapfs_encryption_context_t *encryption_context,
+     libcerror_error_t **error );
+
+int libfsapfs_container_data_handle_free(
+     libfsapfs_container_data_handle_t **container_data_handle,
+     libcerror_error_t **error );
+
+int libfsapfs_container_data_handle_read_data_block(
+     libfsapfs_container_data_handle_t *container_data_handle,
      libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
-     uint64_t encryption_identifier,
+     libfdata_vector_t *vector,
+     libfcache_cache_t *cache,
+     int element_index,
+     int element_data_file_index,
+     off64_t element_data_offset,
+     size64_t element_data_size,
+     uint32_t element_data_flags,
+     uint8_t read_flags,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_DATA_BLOCK_H ) */
+#endif /* !defined( _LIBFSAPFS_CONTAINER_DATA_HANDLE_H ) */
 

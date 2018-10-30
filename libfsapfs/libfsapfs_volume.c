@@ -25,11 +25,14 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include "libfsapfs_container_data_handle.h"
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_file_entry.h"
 #include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
@@ -42,7 +45,6 @@
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
 #include "libfsapfs_volume.h"
-#include "libfsapfs_volume_data_handle.h"
 #include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
 
@@ -644,7 +646,7 @@ int libfsapfs_volume_open_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - file IO handle already set.",
+		 "%s: invalid volume - file IO handle value already set.",
 		 function );
 
 		return( -1 );
@@ -949,14 +951,14 @@ int libfsapfs_volume_close(
 		}
 	}
 	if( libfdata_vector_free(
-	     &( internal_volume->data_block_vector ),
+	     &( internal_volume->container_data_block_vector ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free data block vector.",
+		 "%s: unable to free container data block vector.",
 		 function );
 
 		result = -1;
@@ -993,15 +995,31 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
+	if( internal_volume->encryption_context != NULL )
+	{
+		if( libfsapfs_encryption_context_free(
+		     &( internal_volume->encryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free encryption context.",
+			 function );
+
+			result = -1;
+		}
+	}
 	if( libfdata_vector_free(
-	     &( internal_volume->encrypted_data_block_vector ),
+	     &( internal_volume->file_system_data_block_vector ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free encrypted data block vector.",
+		 "%s: unable to free file system data block vector.",
 		 function );
 
 		result = -1;
@@ -1049,13 +1067,14 @@ int libfsapfs_internal_volume_open_read(
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	libfsapfs_object_map_t *object_map                 = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
-	static char *function                              = "libfsapfs_internal_volume_open_read";
-	uint64_t key_bag_block_number                      = 0;
-	uint64_t key_bag_number_of_blocks                  = 0;
-	int element_index                                  = 0;
-	int result                                         = 0;
+	libfsapfs_container_data_handle_t *container_data_handle     = NULL;
+	libfsapfs_file_system_data_handle_t *file_system_data_handle = NULL;
+	libfsapfs_object_map_t *object_map                           = NULL;
+	static char *function                                        = "libfsapfs_internal_volume_open_read";
+	uint64_t key_bag_block_number                                = 0;
+	uint64_t key_bag_number_of_blocks                            = 0;
+	int element_index                                            = 0;
+	int result                                                   = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -1090,13 +1109,13 @@ int libfsapfs_internal_volume_open_read(
 
 		return( -1 );
 	}
-	if( internal_volume->data_block_vector != NULL )
+	if( internal_volume->container_data_block_vector != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - data block vector already set.",
+		 "%s: invalid volume - container data block vector value already set.",
 		 function );
 
 		return( -1 );
@@ -1123,13 +1142,24 @@ int libfsapfs_internal_volume_open_read(
 
 		return( -1 );
 	}
-	if( internal_volume->encrypted_data_block_vector != NULL )
+	if( internal_volume->encryption_context != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - encrypted data block vector already set.",
+		 "%s: invalid volume - encryption context value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->file_system_data_block_vector != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - file system data block vector value already set.",
 		 function );
 
 		return( -1 );
@@ -1171,8 +1201,8 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
-	if( libfsapfs_volume_data_handle_initialize(
-	     &volume_data_handle,
+	if( libfsapfs_container_data_handle_initialize(
+	     &container_data_handle,
 	     internal_volume->io_handle,
 	     error ) != 1 )
 	{
@@ -1180,18 +1210,18 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create volume data handle.",
+		 "%s: unable to create container data handle.",
 		 function );
 
 		goto on_error;
 	}
 	if( libfdata_vector_initialize(
-	     &( internal_volume->data_block_vector ),
+	     &( internal_volume->container_data_block_vector ),
 	     (size64_t) internal_volume->io_handle->block_size,
-	     (intptr_t *) volume_data_handle,
-	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
+	     (intptr_t *) container_data_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_container_data_handle_free,
 	     NULL,
-	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_container_data_handle_read_data_block,
 	     NULL,
 	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
 	     error ) != 1 )
@@ -1200,16 +1230,16 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create data block vector.",
+		 "%s: unable to create container data block vector.",
 		 function );
 
 		goto on_error;
 	}
-	internal_volume->volume_data_handle = volume_data_handle;
-	volume_data_handle                  = NULL;
+	internal_volume->container_data_handle = container_data_handle;
+	container_data_handle                  = NULL;
 
 	if( libfdata_vector_append_segment(
-	     internal_volume->data_block_vector,
+	     internal_volume->container_data_block_vector,
 	     &element_index,
 	     0,
 	     0,
@@ -1221,7 +1251,7 @@ int libfsapfs_internal_volume_open_read(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-		 "%s: unable to append segment to data block vector.",
+		 "%s: unable to append segment to container data block vector.",
 		 function );
 
 		goto on_error;
@@ -1298,7 +1328,7 @@ int libfsapfs_internal_volume_open_read(
 	if( libfsapfs_object_map_btree_initialize(
 	     &( internal_volume->object_map_btree ),
 	     internal_volume->io_handle,
-	     internal_volume->data_block_vector,
+	     internal_volume->container_data_block_vector,
 	     object_map->object_map_btree_block_number,
 	     error ) != 1 )
 	{
@@ -1395,63 +1425,21 @@ int libfsapfs_internal_volume_open_read(
 
 				goto on_error;
 			}
+			if( libfsapfs_encryption_context_initialize(
+			     &( internal_volume->encryption_context ),
+			     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to initialize encryption context.",
+				 function );
+
+				goto on_error;
+			}
 			internal_volume->is_locked = 1;
-
-			if( libfsapfs_volume_data_handle_initialize(
-			     &volume_data_handle,
-			     internal_volume->io_handle,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create encrypted volume data handle.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfdata_vector_initialize(
-			     &( internal_volume->encrypted_data_block_vector ),
-			     (size64_t) internal_volume->io_handle->block_size,
-			     (intptr_t *) volume_data_handle,
-			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_volume_data_handle_free,
-			     NULL,
-			     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_volume_data_handle_read_data_block,
-			     NULL,
-			     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create encrypted data block vector.",
-				 function );
-
-				goto on_error;
-			}
-			internal_volume->encrypted_volume_data_handle = volume_data_handle;
-			volume_data_handle                            = NULL;
-
-			if( libfdata_vector_append_segment(
-			     internal_volume->encrypted_data_block_vector,
-			     &element_index,
-			     0,
-			     0,
-			     internal_volume->io_handle->container_size,
-			     0,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-				 "%s: unable to append segment to encrypted data block vector.",
-				 function );
-
-				goto on_error;
-			}
 		}
 	}
 	if( internal_volume->superblock->file_system_root_object_identifier == 0 )
@@ -1465,13 +1453,82 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
+	if( libfsapfs_file_system_data_handle_initialize(
+	     &file_system_data_handle,
+	     internal_volume->io_handle,
+	     internal_volume->encryption_context,
+	     NULL,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file system data handle.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfdata_vector_initialize(
+	     &( internal_volume->file_system_data_block_vector ),
+	     (size64_t) internal_volume->io_handle->block_size,
+	     (intptr_t *) file_system_data_handle,
+	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_system_data_handle_free,
+	     NULL,
+	     (int (*)(intptr_t *, intptr_t *, libfdata_vector_t *, libfdata_cache_t *, int, int, off64_t, size64_t, uint32_t, uint8_t, libcerror_error_t **)) &libfsapfs_file_system_data_handle_read_data_block,
+	     NULL,
+	     LIBFDATA_DATA_HANDLE_FLAG_MANAGED,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file system data block vector.",
+		 function );
+
+		goto on_error;
+	}
+	internal_volume->file_system_data_handle = file_system_data_handle;
+	file_system_data_handle                  = NULL;
+
+	if( libfdata_vector_append_segment(
+	     internal_volume->file_system_data_block_vector,
+	     &element_index,
+	     0,
+	     0,
+	     internal_volume->io_handle->container_size,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
+		 "%s: unable to append segment to file system data block vector.",
+		 function );
+
+		goto on_error;
+	}
 	return( 1 );
 
 on_error:
-	if( internal_volume->encrypted_data_block_vector != NULL )
+	if( internal_volume->file_system_data_block_vector != NULL )
 	{
 		libfdata_vector_free(
-		 &( internal_volume->encrypted_data_block_vector ),
+		 &( internal_volume->file_system_data_block_vector ),
+		 NULL );
+	}
+	if( file_system_data_handle != NULL )
+	{
+		libfsapfs_file_system_data_handle_free(
+		 &file_system_data_handle,
+		 NULL );
+	}
+	if( internal_volume->encryption_context != NULL )
+	{
+		libfsapfs_encryption_context_free(
+		 &( internal_volume->encryption_context ),
 		 NULL );
 	}
 	if( internal_volume->key_bag != NULL )
@@ -1492,16 +1549,16 @@ on_error:
 		 &object_map,
 		 NULL );
 	}
-	if( internal_volume->data_block_vector != NULL )
+	if( internal_volume->container_data_block_vector != NULL )
 	{
 		libfdata_vector_free(
-		 &( internal_volume->data_block_vector ),
+		 &( internal_volume->container_data_block_vector ),
 		 NULL );
 	}
-	if( volume_data_handle != NULL )
+	if( container_data_handle != NULL )
 	{
-		libfsapfs_volume_data_handle_free(
-		 &volume_data_handle,
+		libfsapfs_container_data_handle_free(
+		 &container_data_handle,
 		 NULL );
 	}
 	if( internal_volume->superblock != NULL )
@@ -1604,17 +1661,19 @@ int libfsapfs_internal_volume_unlock(
 		 0,
 		 32 );
 
-		if( libfsapfs_volume_data_handle_set_volume_master_key(
-		     internal_volume->encrypted_volume_data_handle,
+		if( libfsapfs_encryption_context_set_keys(
+		     internal_volume->encryption_context,
 		     volume_master_key,
-		     32,
+		     16,
+		     &( volume_master_key[ 16 ] ),
+		     16,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set volume master key in encrypted volume data handle.",
+			 "%s: unable to set keys in encryption context.",
 			 function );
 
 			goto on_error;
@@ -2856,9 +2915,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
      libfsapfs_internal_volume_t *internal_volume,
      libcerror_error_t **error )
 {
-	libfdata_vector_t *data_block_vector                     = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle       = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_get_file_system_btree";
 	uint8_t use_case_folding                                 = 0;
 
@@ -2928,22 +2985,6 @@ int libfsapfs_internal_volume_get_file_system_btree(
 
 		goto on_error;
 	}
-	if( internal_volume->encrypted_volume_data_handle != NULL )
-	{
-		volume_data_handle = internal_volume->encrypted_volume_data_handle;
-	}
-	else
-	{
-		volume_data_handle = internal_volume->volume_data_handle;
-	}
-	if( internal_volume->encrypted_data_block_vector != NULL )
-	{
-		data_block_vector = internal_volume->encrypted_data_block_vector;
-	}
-	else
-	{
-		data_block_vector = internal_volume->data_block_vector;
-	}
 	if( ( internal_volume->superblock->incompatibility_features_flags & 0x00000000000000001 ) != 0 )
 	{
 		use_case_folding = 1;
@@ -2951,8 +2992,8 @@ int libfsapfs_internal_volume_get_file_system_btree(
 	if( libfsapfs_file_system_btree_initialize(
 	     &( internal_volume->file_system_btree ),
 	     internal_volume->io_handle,
-	     volume_data_handle,
-	     data_block_vector,
+	     internal_volume->encryption_context,
+	     internal_volume->file_system_data_block_vector,
 	     internal_volume->object_map_btree,
 	     object_map_descriptor->physical_address,
 	     use_case_folding,
@@ -3007,11 +3048,10 @@ int libfsapfs_volume_get_file_entry_by_identifier(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_inode_t *inode                           = NULL;
-	libfsapfs_internal_volume_t *internal_volume       = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
-	static char *function                              = "libfsapfs_volume_get_file_entry_by_identifier";
-	int result                                         = 0;
+	libfsapfs_inode_t *inode                     = NULL;
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_file_entry_by_identifier";
+	int result                                   = 0;
 
 	if( volume == NULL )
 	{
@@ -3100,19 +3140,11 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 	}
 	else if( result != 0 )
 	{
-		if( internal_volume->encrypted_volume_data_handle != NULL )
-		{
-			volume_data_handle = internal_volume->encrypted_volume_data_handle;
-		}
-		else
-		{
-			volume_data_handle = internal_volume->volume_data_handle;
-		}
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
-		     volume_data_handle,
+		     internal_volume->encryption_context,
 		     internal_volume->file_system_btree,
 		     inode,
 		     NULL,
@@ -3162,11 +3194,10 @@ int libfsapfs_volume_get_root_directory(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_inode_t *inode                           = NULL;
-	libfsapfs_internal_volume_t *internal_volume       = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
-	static char *function                              = "libfsapfs_volume_get_root_directory";
-	int result                                         = 0;
+	libfsapfs_inode_t *inode                     = NULL;
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_root_directory";
+	int result                                   = 0;
 
 	if( volume == NULL )
 	{
@@ -3254,19 +3285,11 @@ int libfsapfs_volume_get_root_directory(
 	}
 /* TODO return 0 if no root directory inode */
 
-	if( internal_volume->encrypted_volume_data_handle != NULL )
-	{
-		volume_data_handle = internal_volume->encrypted_volume_data_handle;
-	}
-	else
-	{
-		volume_data_handle = internal_volume->volume_data_handle;
-	}
 	if( libfsapfs_file_entry_initialize(
 	     file_entry,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
-	     volume_data_handle,
+	     internal_volume->encryption_context,
 	     internal_volume->file_system_btree,
 	     inode,
 	     NULL,
@@ -3323,12 +3346,11 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record     = NULL;
-	libfsapfs_inode_t *inode                           = NULL;
-	libfsapfs_internal_volume_t *internal_volume       = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
-	static char *function                              = "libfsapfs_volume_get_file_entry_by_utf8_path";
-	int result                                         = 0;
+	libfsapfs_directory_record_t *directory_record = NULL;
+	libfsapfs_inode_t *inode                       = NULL;
+	libfsapfs_internal_volume_t *internal_volume   = NULL;
+	static char *function                          = "libfsapfs_volume_get_file_entry_by_utf8_path";
+	int result                                     = 0;
 
 	if( volume == NULL )
 	{
@@ -3419,19 +3441,11 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 	}
 	else if( result != 0 )
 	{
-		if( internal_volume->encrypted_volume_data_handle != NULL )
-		{
-			volume_data_handle = internal_volume->encrypted_volume_data_handle;
-		}
-		else
-		{
-			volume_data_handle = internal_volume->volume_data_handle;
-		}
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
-		     volume_data_handle,
+		     internal_volume->encryption_context,
 		     internal_volume->file_system_btree,
 		     inode,
 		     directory_record,
@@ -3503,12 +3517,11 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record     = NULL;
-	libfsapfs_inode_t *inode                           = NULL;
-	libfsapfs_internal_volume_t *internal_volume       = NULL;
-	libfsapfs_volume_data_handle_t *volume_data_handle = NULL;
-	static char *function                              = "libfsapfs_volume_get_file_entry_by_utf16_path";
-	int result                                         = 0;
+	libfsapfs_directory_record_t *directory_record = NULL;
+	libfsapfs_inode_t *inode                       = NULL;
+	libfsapfs_internal_volume_t *internal_volume   = NULL;
+	static char *function                          = "libfsapfs_volume_get_file_entry_by_utf16_path";
+	int result                                     = 0;
 
 	if( volume == NULL )
 	{
@@ -3599,19 +3612,11 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 	}
 	else if( result != 0 )
 	{
-		if( internal_volume->encrypted_volume_data_handle != NULL )
-		{
-			volume_data_handle = internal_volume->encrypted_volume_data_handle;
-		}
-		else
-		{
-			volume_data_handle = internal_volume->volume_data_handle;
-		}
 		if( libfsapfs_file_entry_initialize(
 		     file_entry,
 		     internal_volume->io_handle,
 		     internal_volume->file_io_handle,
-		     volume_data_handle,
+		     internal_volume->encryption_context,
 		     internal_volume->file_system_btree,
 		     inode,
 		     directory_record,

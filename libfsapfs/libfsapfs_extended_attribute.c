@@ -25,6 +25,7 @@
 
 #include "libfsapfs_data_stream.h"
 #include "libfsapfs_debug.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_extent.h"
 #include "libfsapfs_file_system_btree.h"
@@ -35,7 +36,6 @@
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_libfdatetime.h"
 #include "libfsapfs_libuna.h"
-#include "libfsapfs_volume_data_handle.h"
 
 #include "fsapfs_file_system.h"
 
@@ -47,7 +47,7 @@ int libfsapfs_extended_attribute_initialize(
      libfsapfs_extended_attribute_t **extended_attribute,
      libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
-     libfsapfs_volume_data_handle_t *volume_data_handle,
+     libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
      libcerror_error_t **error )
 {
@@ -109,7 +109,7 @@ int libfsapfs_extended_attribute_initialize(
 	}
 	internal_extended_attribute->io_handle          = io_handle;
 	internal_extended_attribute->file_io_handle     = file_io_handle;
-	internal_extended_attribute->volume_data_handle = volume_data_handle;
+	internal_extended_attribute->encryption_context = encryption_context;
 	internal_extended_attribute->file_system_btree  = file_system_btree;
 
 #if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
@@ -1364,7 +1364,7 @@ int libfsapfs_internal_extended_attribute_get_data_stream(
 		if( libfsapfs_data_stream_initialize_from_file_extents(
 		     &( internal_extended_attribute->data_stream ),
 		     internal_extended_attribute->io_handle,
-		     internal_extended_attribute->volume_data_handle,
+		     internal_extended_attribute->encryption_context,
 		     internal_extended_attribute->file_extents,
 		     internal_extended_attribute->data_stream_size,
 		     error ) != 1 )

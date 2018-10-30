@@ -295,6 +295,10 @@ int libfsapfs_file_extent_read_value_data(
 	 ( (fsapfs_file_system_btree_value_file_extent_t *) data )->physical_block_number,
 	 file_extent->block_number );
 
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_file_system_btree_value_file_extent_t *) data )->encryption_identifier,
+	 file_extent->encryption_identifier );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -313,13 +317,10 @@ int libfsapfs_file_extent_read_value_data(
 		 function,
 		 file_extent->block_number );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_file_system_btree_value_file_extent_t *) data )->encryption_identifier,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: encryption identifier\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 file_extent->encryption_identifier );
 
 		libcnotify_printf(
 		 "\n" );

@@ -199,6 +199,7 @@ int libfsapfs_data_block_read(
      libfsapfs_encryption_context_t *encryption_context,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     uint64_t encryption_identifier,
      libcerror_error_t **error )
 {
 	uint8_t *read_buffer  = NULL;
@@ -338,6 +339,9 @@ int libfsapfs_data_block_read(
 			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 		}
 #endif
+		encryption_identifier *= data_block->data_size;
+		encryption_identifier /= io_handle->bytes_per_sector;
+
 		if( libfsapfs_encryption_context_crypt(
 		     encryption_context,
 		     LIBFSAPFS_ENCRYPTION_CRYPT_MODE_DECRYPT,
@@ -345,7 +349,7 @@ int libfsapfs_data_block_read(
 		     data_block->data_size,
 		     data_block->data,
 		     data_block->data_size,
-		     (uint64_t) ( file_offset / io_handle->bytes_per_sector ),
+		     encryption_identifier,
 		     io_handle->bytes_per_sector,
 		     error ) != 1 )
 		{
