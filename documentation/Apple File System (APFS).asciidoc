@@ -1641,7 +1641,7 @@ The compressed extended attribute is named "com.apple.decmpfs" and consists of:
 * compressed data header
 * optional compressed data
 
-==== Compressed data header
+==== [[compressed_data_header]]Compressed data header
 
 The compressed data header is 16 bytes of size and consists of:
 
@@ -2077,7 +2077,8 @@ The file content data can be located through the <<file_extent,file extents>>
 for the data stream file system object identifier in the
 <<file_system,file system tree>>.
 
-[yellow-background]*TODO: describe encryption identifier.*
+If the volume is encrypted the file content is encrypted with the encryption
+identifier in defined by the <<file_extent,File extent>>.
 
 === Compressed data extended attribute
 
@@ -2087,7 +2088,8 @@ The file content size is stored in the compressed data header of
 a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
 
 The file content data is stored in a "com.apple.decmpfs" 
-<<extended_attribute,extended attribute>> after the compressed data header.
+<<extended_attribute,extended attribute>> after the
+<<compressed_data_header,compressed data header>>.
 
 === Compressed data extended attribute with resource fork
 
@@ -2098,6 +2100,14 @@ a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
 
 The file content data is stored in a "com.apple.ResourceFork"
 <<extended_attribute,extended attribute>>.
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Compressed data offset
+| 4 | 4 x ... | | Array of compressed data block sizes
+| ... | ... | | Compressed data blocks
+|===
 
 === Resource fork
 

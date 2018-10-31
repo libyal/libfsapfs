@@ -51,7 +51,6 @@ int libfsapfs_data_stream_initialize_from_file_extents(
 int libfsapfs_data_stream_initialize_from_compressed_data_stream(
      libfdata_stream_t **data_stream,
      libfdata_stream_t *compressed_data_stream,
-     off64_t compressed_data_stream_offset,
      size64_t uncompressed_data_size,
      int compression_method,
      libcerror_error_t **error );

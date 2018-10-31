@@ -224,30 +224,32 @@ ssize_t libfsapfs_buffer_data_handle_read_segment_data(
 
 		return( -1 );
 	}
-	if( data_handle->current_segment_offset < (off64_t) data_handle->data_size )
+	if( data_handle->current_segment_offset >= (off64_t) data_handle->data_size )
 	{
-		read_size = data_handle->data_size - (size_t) data_handle->current_segment_offset;
-
-		if( read_size > segment_data_size )
-		{
-			read_size = segment_data_size;
-		}
-		if( memory_copy(
-		     segment_data,
-		     &( data_handle->data[ data_handle->current_segment_offset ] ),
-		     read_size ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy data.",
-			 function );
-
-			return( -1 );
-		}
-		data_handle->current_segment_offset += read_size;
+		return( 0 );
 	}
+	read_size = data_handle->data_size - (size_t) data_handle->current_segment_offset;
+
+	if( read_size > segment_data_size )
+	{
+		read_size = segment_data_size;
+	}
+	if( memory_copy(
+	     segment_data,
+	     &( data_handle->data[ data_handle->current_segment_offset ] ),
+	     read_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy data.",
+		 function );
+
+		return( -1 );
+	}
+	data_handle->current_segment_offset += read_size;
+
 	return( (ssize_t) read_size );
 }
 

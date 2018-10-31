@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <memory.h>
 #include <types.h>
 
@@ -39,7 +40,6 @@
 int libfsapfs_compressed_data_handle_initialize(
      libfsapfs_compressed_data_handle_t **data_handle,
      libfdata_stream_t *compressed_data_stream,
-     off64_t compressed_data_stream_offset,
      size64_t uncompressed_data_size,
      int compression_method,
      libcerror_error_t **error )
@@ -153,11 +153,10 @@ int libfsapfs_compressed_data_handle_initialize(
 
 		goto on_error;
 	}
-	( *data_handle )->compressed_data_stream        = compressed_data_stream;
-	( *data_handle )->compressed_data_stream_offset = compressed_data_stream_offset;
-	( *data_handle )->current_data_stream_offset    = -1;
-	( *data_handle )->uncompressed_data_size        = uncompressed_data_size;
-	( *data_handle )->compression_method            = compression_method;
+	( *data_handle )->compressed_data_stream         = compressed_data_stream;
+	( *data_handle )->current_compressed_block_index = (uint32_t) -1;
+	( *data_handle )->uncompressed_data_size         = uncompressed_data_size;
+	( *data_handle )->compression_method             = compression_method;
 
 	return( 1 );
 
@@ -237,12 +236,15 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
          uint8_t read_flags LIBFSAPFS_ATTRIBUTE_UNUSED,
          libcerror_error_t **error )
 {
-	static char *function      = "libfsapfs_compressed_data_handle_read_segment_data";
-	off64_t data_stream_offset = 0;
-	size_t data_offset         = 0;
-	size_t read_size           = 0;
-	size_t segment_data_offset = 0;
-	ssize_t read_count         = 0;
+	static char *function           = "libfsapfs_compressed_data_handle_read_segment_data";
+	off64_t data_stream_offset      = 0;
+	size_t data_offset              = 0;
+	size_t read_size                = 0;
+	size_t segment_data_offset      = 0;
+	ssize_t read_count              = 0;
+	uint32_t compressed_block_index = 0;
+	uint32_t compressed_block_size  = 0;
+	uint32_t compressed_data_offset = 0;
 
 	LIBFSAPFS_UNREFERENCED_PARAMETER( file_io_handle )
 	LIBFSAPFS_UNREFERENCED_PARAMETER( segment_file_index )
@@ -293,40 +295,224 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
 
 		return( -1 );
 	}
-/* TODO fix offset */
-	data_stream_offset = data_handle->current_segment_offset / LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE;
-	data_offset        = (size_t) ( data_handle->current_segment_offset % LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE );
-
-	while( segment_data_size > 0 )
+	if( data_handle->compressed_block_offsets == NULL )
 	{
-		if( data_handle->current_data_stream_offset != data_stream_offset )
+		read_count = libfdata_stream_read_buffer_at_offset(
+		              data_handle->compressed_data_stream,
+		              (intptr_t *) file_io_handle,
+		              data_handle->compressed_segment_data,
+		              4,
+		              0,
+		              0,
+		              error );
+
+		if( read_count != 4 )
 		{
-			data_stream_offset += data_handle->compressed_data_stream_offset;
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read buffer at offset: 0 (0x00000000) from data stream.",
+			 function );
+
+			return( -1 );
+		}
+		if( memory_compare(
+		     data_handle->compressed_segment_data,
+		     "fpmc",
+		     4 ) == 0 )
+		{
+			if( segment_data_size > (size_t) LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid segment data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			data_handle->number_of_compressed_blocks = 1;
+
+			data_handle->compressed_block_offsets = (off64_t *) memory_allocate(
+			                                                     sizeof( off64_t ) * ( data_handle->number_of_compressed_blocks + 1 ) );
+
+			if( data_handle->compressed_block_offsets == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+				 "%s: unable to create compressed block offsets.",
+				 function );
+
+				return( -1 );
+			}
+			data_handle->compressed_block_offsets[ 0 ] = 16;
+			data_handle->compressed_block_offsets[ 1 ] = (off64_t) segment_data_size;
+		}
+		else
+		{
+			byte_stream_copy_to_uint32_little_endian(
+			 data_handle->compressed_segment_data,
+			 compressed_data_offset );
+
+			if( ( compressed_data_offset <= 4 )
+			 || ( compressed_data_offset >= LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid compressed data offset value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			data_handle->number_of_compressed_blocks = ( compressed_data_offset / 4 ) - 1;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "%s: number of compressed blocks\t: %" PRIu32 "\n",
+				 function,
+				 data_handle->number_of_compressed_blocks );
+			}
+#endif
+			read_size = (size_t) compressed_data_offset - 4;
 
 			read_count = libfdata_stream_read_buffer_at_offset(
 			              data_handle->compressed_data_stream,
 			              (intptr_t *) file_io_handle,
-			              (uint8_t *) data_handle->compressed_segment_data,
-			              LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE,
-			              data_stream_offset,
+			              data_handle->compressed_segment_data,
+			              read_size,
+			              4,
 			              0,
 			              error );
 
-			if( read_count < 0 )
+			if( read_count != read_size )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_IO,
 				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read buffer at offset: %" PRIi64 " (0x08" PRIx64 ") from data stream.",
+				 "%s: unable to read buffer at offset: 4 (0x00000004) from data stream.",
+				 function );
+
+				return( -1 );
+			}
+			data_handle->compressed_block_offsets = (off64_t *) memory_allocate(
+			                                                     sizeof( off64_t ) * ( data_handle->number_of_compressed_blocks + 1 ) );
+
+			if( data_handle->compressed_block_offsets == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+				 "%s: unable to create compressed block offsets.",
+				 function );
+
+				return( -1 );
+			}
+			segment_data_offset = 0;
+			data_stream_offset  = (off64_t) compressed_data_offset;
+
+			data_handle->compressed_block_offsets[ 0 ] = data_stream_offset;
+
+			for( compressed_block_index = 1;
+			     compressed_block_index <= data_handle->number_of_compressed_blocks;
+			     compressed_block_index++ )
+			{
+				byte_stream_copy_to_uint32_little_endian(
+				 &( data_handle->compressed_segment_data[ segment_data_offset ] ),
+				 compressed_block_size );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "%s: compressed block: %" PRIu32 " size\t: %" PRIu32 "\n",
+					 function,
+					 compressed_block_index,
+					 compressed_block_size );
+				}
+#endif
+				if( compressed_block_size > (uint32_t) LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+					 "%s: invalid compressed block: %" PRIu32 " size value out of bounds.",
+					 function,
+					 compressed_block_size );
+
+					return( -1 );
+				}
+				data_stream_offset += compressed_block_size;
+
+				data_handle->compressed_block_offsets[ compressed_block_index ] = data_stream_offset;
+			}
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( libcnotify_verbose != 0 )
+			{
+				libcnotify_printf(
+				 "\n" );
+			}
+#endif
+		}
+	}
+	if( data_handle->current_segment_offset >= data_handle->uncompressed_data_size )
+	{
+		return( 0 );
+	}
+	compressed_block_index = data_handle->current_segment_offset / LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE;
+	segment_data_offset    = 0;
+	data_offset            = (size_t) ( data_handle->current_segment_offset % LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE );
+
+	while( segment_data_size > 0 )
+	{
+		if( compressed_block_index >= data_handle->number_of_compressed_blocks )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid compressed block index value out of bounds.",
+			 function );
+
+			return( -1 );
+		}
+		if( data_handle->current_compressed_block_index != compressed_block_index )
+		{
+			data_stream_offset = data_handle->compressed_block_offsets[ compressed_block_index ];
+			read_size          = (size_t) ( data_handle->compressed_block_offsets[ compressed_block_index + 1 ] - data_stream_offset );
+
+			read_count = libfdata_stream_read_buffer_at_offset(
+			              data_handle->compressed_data_stream,
+			              (intptr_t *) file_io_handle,
+			              (uint8_t *) data_handle->compressed_segment_data,
+			              read_size,
+			              data_stream_offset,
+			              0,
+			              error );
+
+			if( read_count != read_size )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read buffer at offset: %" PRIi64 " (0x08%" PRIx64 ") from data stream.",
 				 function,
 				 data_stream_offset,
 				 data_stream_offset );
 
 				return( -1 );
 			}
-			data_handle->current_data_stream_offset = data_stream_offset;
-
 			data_handle->segment_data_size = LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE;
 
 			if( libfsapfs_decompress_data(
@@ -358,6 +544,19 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
 				 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 			}
 #endif
+			if( ( ( compressed_block_index + 1 ) != data_handle->number_of_compressed_blocks )
+			 && ( data_handle->segment_data_size != LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid uncompressed segment data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			data_handle->current_compressed_block_index = compressed_block_index;
 		}
 		if( data_offset >= data_handle->segment_data_size )
 		{

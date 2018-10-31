@@ -251,7 +251,6 @@ on_error:
 int libfsapfs_data_stream_initialize_from_compressed_data_stream(
      libfdata_stream_t **data_stream,
      libfdata_stream_t *compressed_data_stream,
-     off64_t compressed_data_stream_offset,
      size64_t uncompressed_data_size,
      int compression_method,
      libcerror_error_t **error )
@@ -274,7 +273,6 @@ int libfsapfs_data_stream_initialize_from_compressed_data_stream(
 	if( libfsapfs_compressed_data_handle_initialize(
 	     &data_handle,
 	     compressed_data_stream,
-	     compressed_data_stream_offset,
 	     uncompressed_data_size,
 	     compression_method,
 	     error ) != 1 )

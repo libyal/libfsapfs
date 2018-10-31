@@ -3281,7 +3281,6 @@ int libfsapfs_internal_file_entry_get_data_stream(
 {
 	libfdata_stream_t *compressed_data_stream = NULL;
 	static char *function                     = "libfsapfs_internal_file_entry_get_data_stream";
-	off64_t compressed_data_stream_offset     = 0;
 	uint64_t data_stream_size                 = 0;
 	int compression_method                    = 0;
 
@@ -3426,7 +3425,6 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 				goto on_error;
 			}
-			compressed_data_stream_offset = 16;
 		}
 		else if( ( internal_file_entry->compression_method == 4 )
 		      || ( internal_file_entry->compression_method == 8 ) )
@@ -3445,12 +3443,10 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 				goto on_error;
 			}
-			compressed_data_stream_offset = 0;
 		}
 		if( libfsapfs_data_stream_initialize_from_compressed_data_stream(
 		     &( internal_file_entry->data_stream ),
 		     compressed_data_stream,
-		     compressed_data_stream_offset,
 		     internal_file_entry->file_size,
 		     compression_method,
 		     error ) != 1 )
@@ -3948,7 +3944,7 @@ int libfsapfs_internal_file_entry_get_file_size(
 			return( -1 );
 		}
 		if( memory_compare(
-		     ( (fsapfs_file_system_extended_attribute_compression_header_t *) extended_attribute_data )->signature,
+		     extended_attribute_data,
 		     "fpmc",
 		     4 ) != 0 )
 		{

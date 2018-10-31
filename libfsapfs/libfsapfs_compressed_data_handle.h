@@ -40,17 +40,9 @@ struct libfsapfs_compressed_data_handle
 	 */
 	off64_t current_segment_offset;
 
-	/* The current data stream offset
-	 */
-	off64_t current_data_stream_offset;
-
 	/* The compressed data steam
 	 */
 	libfdata_stream_t *compressed_data_stream;
-
-	/* The compressed data stream offset
-	 */
-	off64_t compressed_data_stream_offset;
 
 	/* The uncompressed data size
 	 */
@@ -59,6 +51,10 @@ struct libfsapfs_compressed_data_handle
 	/* The compression method
 	 */
 	int compression_method;
+
+	/* The current compressed block index
+	 */
+	uint32_t current_compressed_block_index;
 
 	/* The compressed segment data
 	 */
@@ -71,12 +67,19 @@ struct libfsapfs_compressed_data_handle
 	/* The (uncompressed) segment data size
 	 */
 	size_t segment_data_size;
+
+	/* The number of compressed blocks
+	 */
+	uint32_t number_of_compressed_blocks;
+
+	/* The compressed block offsets
+	 */
+	off64_t *compressed_block_offsets;
 };
 
 int libfsapfs_compressed_data_handle_initialize(
      libfsapfs_compressed_data_handle_t **data_handle,
      libfdata_stream_t *compressed_data_stream,
-     off64_t compressed_data_stream_offset,
      size64_t uncompressed_data_size,
      int compression_method,
      libcerror_error_t **error );
