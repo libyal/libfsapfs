@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libfdata.h"
 
@@ -74,7 +75,7 @@ struct libfsapfs_compressed_data_handle
 
 	/* The compressed block offsets
 	 */
-	off64_t *compressed_block_offsets;
+	uint32_t *compressed_block_offsets;
 };
 
 int libfsapfs_compressed_data_handle_initialize(
@@ -86,6 +87,11 @@ int libfsapfs_compressed_data_handle_initialize(
 
 int libfsapfs_compressed_data_handle_free(
      libfsapfs_compressed_data_handle_t **data_handle,
+     libcerror_error_t **error );
+
+int libfsapfs_compressed_data_handle_get_compressed_block_offsets(
+     libfsapfs_compressed_data_handle_t *data_handle,
+     libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
 ssize_t libfsapfs_compressed_data_handle_read_segment_data(

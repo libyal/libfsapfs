@@ -2,10 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_container"
-	ProjectGUID="{C02ED8FC-1AC6-46CB-A0A2-F41B8ECFCA67}"
-	RootNamespace="fsapfs_test_container"
-	Keyword="Win32Proj"
+	Name="zlib"
+	ProjectGUID="{6AF53B72-2046-4B3A-96B3-F72C87E80980}"
+	RootNamespace="zlib"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -20,9 +19,8 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
-			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,8 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libhmac;..\..\libcaes;..\..\..\zlib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;ZLIB_DLL;LIBFSAPFS_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\..\zlib"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;ZLIB_DLL"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				CompileAs="1"
@@ -58,14 +56,12 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkIncremental="1"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="2"
 				DataExecutionPrevention="2"
 				TargetMachine="1"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -93,7 +89,7 @@
 			Name="VSDebug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -114,8 +110,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libhmac;..\..\libcaes;..\..\..\zlib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;ZLIB_DLL;LIBFSAPFS_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\..\zlib"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_WARNINGS;ZLIB_DLL"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
@@ -134,15 +130,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				LinkIncremental="1"
+				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
 				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="1"
 				TargetMachine="1"
+				ImportLibrary="$(OutDir)\$(ProjectName).lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -176,23 +170,63 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_container.c"
+				RelativePath="..\..\..\zlib\adler32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_functions.c"
+				RelativePath="..\..\..\zlib\compress.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_getopt.c"
+				RelativePath="..\..\..\zlib\crc32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_memory.c"
+				RelativePath="..\..\..\zlib\deflate.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_rwlock.c"
+				RelativePath="..\..\..\zlib\gzclose.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\gzlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\gzread.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\gzwrite.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\infback.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\inffast.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\inflate.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\inftrees.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\trees.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\uncompr.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\zlib\zutil.c"
 				>
 			</File>
 		</Filter>
@@ -202,51 +236,47 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_functions.h"
+				RelativePath="..\..\..\zlib\crc32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_getopt.h"
+				RelativePath="..\..\..\zlib\deflate.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libbfio.h"
+				RelativePath="..\..\..\zlib\gzguts.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libcerror.h"
+				RelativePath="..\..\..\zlib\inffast.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libclocale.h"
+				RelativePath="..\..\..\zlib\inffixed.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libcnotify.h"
+				RelativePath="..\..\..\zlib\inflate.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libfsapfs.h"
+				RelativePath="..\..\..\zlib\inftrees.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libuna.h"
+				RelativePath="..\..\..\zlib\trees.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_macros.h"
+				RelativePath="..\..\..\zlib\zconf.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_memory.h"
+				RelativePath="..\..\..\zlib\zlib.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_rwlock.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_unused.h"
+				RelativePath="..\..\..\zlib\zutil.h"
 				>
 			</File>
 		</Filter>
@@ -255,6 +285,10 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
+			<File
+				RelativePath="..\..\..\zlib\win32\zlib1.rc"
+				>
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

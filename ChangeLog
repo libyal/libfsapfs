@@ -1,7 +1,4 @@
 TODO
-* Add support for compressed files
-** data stream with buffer correct for compressed data header
-** data stream with buffer decompress data
 * Complete support for recovery password -r
 * Handle file size of 0, mapped file size does not support 0 ?
 * Add support for sparse files
@@ -11,8 +8,7 @@ TODO
 * add snapshot support
 
 library:
-* Add support for compressed files
-** test with deflate compressed files
+* Add support for deflate compressed files
 * separate internal external attribute descriptor and API external descriptor
 * read inode and extended attributes at once
 * expose directory entry added time
@@ -26,6 +22,8 @@ library:
 * Add support for extended attribute with data stream descriptor
 * Add resource fork support
 * Pass IO handle instead of container data handle?
+* Add function to provide volume size
+* Add function to provide volume date and time values
 
 Python bindings:
 * add extents object?
@@ -47,7 +45,6 @@ Tools:
 ** add extended attributes support
 
 Tests:
-* test with copy of mounted file system
 * add tests for container_key_bag
 * add tests for volume_key_bag
 * add tests for key_encrypted_key

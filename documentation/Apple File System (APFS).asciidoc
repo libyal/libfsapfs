@@ -1673,6 +1673,10 @@ The compressed data is stored in the extended attribute after the compressed dat
 The compressed data is stored in the resource fork
 |===
 
+[NOTE]
+If the LZVN compressed data starts with 0x06 (end of stream oppcode) the data
+is stored uncompressed after the end of stream oppcode.
+
 === [[sibling_link]]Sibling link
 
 ==== Sibling link key data
@@ -2105,9 +2109,13 @@ The file content data is stored in a "com.apple.ResourceFork"
 |===
 | Offset | Size | Value | Description
 | 0 | 4 | | Compressed data offset
-| 4 | 4 x ... | | Array of compressed data block sizes
+| 4 | 4 x ... | | Array of compressed data block offsets
 | ... | ... | | Compressed data blocks
 |===
+
+[NOTE]
+The compressed data block contains a maximum of 65536 bytes of data. The
+compressed data block therefore should not exceed 65537 bytes of size.
 
 === Resource fork
 

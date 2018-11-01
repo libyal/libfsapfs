@@ -18,6 +18,7 @@ AM_CPPFLAGS = \
 	@LIBCRYPTO_CPPFLAGS@ \
 	@LIBHMAC_CPPFLAGS@ \
 	@LIBCAES_CPPFLAGS@ \
+	@ZLIB_CPPFLAGS@ \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
@@ -48,6 +49,7 @@ check_PROGRAMS = \
 	fsapfs_test_btree_node_header \
 	fsapfs_test_checkpoint_map \
 	fsapfs_test_checkpoint_map_entry \
+	fsapfs_test_checksum \
 	fsapfs_test_container \
 	fsapfs_test_container_data_handle \
 	fsapfs_test_container_key_bag \
@@ -154,6 +156,18 @@ fsapfs_test_checkpoint_map_entry_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_checkpoint_map_entry_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_checksum_SOURCES = \
+	fsapfs_test_checksum.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_checksum_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

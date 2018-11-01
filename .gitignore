@@ -131,6 +131,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_btree_node_header
 /tests/fsapfs_test_checkpoint_map
 /tests/fsapfs_test_checkpoint_map_entry
+/tests/fsapfs_test_checksum
 /tests/fsapfs_test_container
 /tests/fsapfs_test_container_data_handle
 /tests/fsapfs_test_container_key_bag

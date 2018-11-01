@@ -1807,7 +1807,7 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 		              0,
 		              error );
 	       
-		if( read_count != internal_file_entry->symbolic_link_data_size )
+		if( read_count != (ssize_t) internal_file_entry->symbolic_link_data_size )
 		{
 			libcerror_error_set(
 			 error,

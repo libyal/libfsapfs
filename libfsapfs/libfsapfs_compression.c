@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <memory.h>
 #include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
@@ -218,23 +219,80 @@ int libfsapfs_decompress_data(
 	}
 	else if( compression_method == LIBFSAPFS_COMPRESSION_METHOD_LZVN )
 	{
-		result = libfsapfs_lzvn_decompress(
-		          compressed_data,
-		          compressed_data_size,
-		          uncompressed_data,
-		          uncompressed_data_size,
-		          error );
-
-		if( result != 1 )
+		if( ( compressed_data_size >= 1 )
+		 && ( compressed_data[ 0 ] == 0x06 ) )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to decompress LZVN compressed data.",
-			 function );
+			if( compressed_data_size > (size_t) SSIZE_MAX )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 "%s: invalid compressed data size value exceeds maximum.",
+				 function );
 
-			return( -1 );
+				return( -1 );
+			}
+			if( *uncompressed_data_size > (size_t) SSIZE_MAX )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 "%s: invalid uncompressed data size value exceeds maximum.",
+				 function );
+
+				return( -1 );
+			}
+			if( ( compressed_data_size - 1 ) > *uncompressed_data_size )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: compressed data size value exceeds uncompressed data size.",
+				 function );
+
+				return( -1 );
+			}
+			*uncompressed_data_size = compressed_data_size - 1;
+
+			if( memory_copy(
+			     uncompressed_data,
+			     &( compressed_data[ 1 ] ),
+			     *uncompressed_data_size ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to compressed to uncompressed data.",
+				 function );
+
+				return( -1 );
+			}
+			result = 1;
+		}
+		else
+		{
+			result = libfsapfs_lzvn_decompress(
+			          compressed_data,
+			          compressed_data_size,
+			          uncompressed_data,
+			          uncompressed_data_size,
+			          error );
+
+			if( result != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to decompress LZVN compressed data.",
+				 function );
+
+				return( -1 );
+			}
 		}
 	}
 	else

@@ -76,9 +76,10 @@ int libfsapfs_checksum_calculate_weak_crc32(
      uint32_t initial_value,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_checkcum_calculate_weak_crc32";
-	size_t buffer_offset  = 0;
-	uint32_t table_index  = 0;
+	static char *function  = "libfsapfs_checkcum_calculate_weak_crc32";
+	size_t buffer_offset   = 0;
+	uint32_t safe_checksum = 0;
+	uint32_t table_index   = 0;
 
 	if( checksum == NULL )
 	{
@@ -118,16 +119,18 @@ int libfsapfs_checksum_calculate_weak_crc32(
 		libfsapfs_checksum_initialize_crc32_table(
 		 0x82f63b78UL );
 	}
-	*checksum = initial_value;
+	safe_checksum = initial_value;
 
         for( buffer_offset = 0;
 	     buffer_offset < size;
 	     buffer_offset++ )
 	{
-		table_index = ( *checksum ^ buffer[ buffer_offset ] ) & 0x000000ffUL;
+		table_index = ( safe_checksum ^ buffer[ buffer_offset ] ) & 0x000000ffUL;
 
-		*checksum = libfsapfs_checksum_crc32_table[ table_index ] ^ ( *checksum >> 8 );
+		safe_checksum = libfsapfs_checksum_crc32_table[ table_index ] ^ ( safe_checksum >> 8 );
         }
+	*checksum = safe_checksum;
+
 	return( 1 );
 }
 

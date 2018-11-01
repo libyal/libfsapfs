@@ -30,6 +30,7 @@
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libfdatetime.h"
 #include "libfsapfs_libfguid.h"
+#include "libfsapfs_unused.h"
 
 #if defined( HAVE_DEBUG_OUTPUT )
 
@@ -158,8 +159,10 @@ void libfsapfs_debug_print_container_incompatible_features_flags(
 /* Prints the container read-only compatible feature flags
  */
 void libfsapfs_debug_print_container_read_only_compatible_features_flags(
-      uint64_t read_only_compatible_features_flags )
+      uint64_t read_only_compatible_features_flags LIBFSAPFS_ATTRIBUTE_UNUSED )
 {
+	LIBFSAPFS_UNREFERENCED_PARAMETER( read_only_compatible_features_flags )
+
 	/* Currently there are no container read-only compatible feature flags defined */
 }
 
@@ -483,8 +486,10 @@ void libfsapfs_debug_print_volume_incompatible_features_flags(
 /* Prints the volume read-only compatible feature flags
  */
 void libfsapfs_debug_print_volume_read_only_compatible_features_flags(
-      uint64_t read_only_compatible_features_flags )
+      uint64_t read_only_compatible_features_flags LIBFSAPFS_ATTRIBUTE_UNUSED )
 {
+	LIBFSAPFS_UNREFERENCED_PARAMETER( read_only_compatible_features_flags )
+
 	/* Currently there are no volume read-only compatible feature flags defined */
 }
 

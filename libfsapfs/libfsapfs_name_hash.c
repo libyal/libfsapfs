@@ -23,6 +23,10 @@
 #include <memory.h>
 #include <types.h>
 
+#if defined( HAVE_WCTYPE_H )
+#include <wctype.h>
+#endif
+
 #include "libfsapfs_checksum.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"

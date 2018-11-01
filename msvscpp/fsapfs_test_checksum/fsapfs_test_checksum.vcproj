@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_container"
-	ProjectGUID="{C02ED8FC-1AC6-46CB-A0A2-F41B8ECFCA67}"
-	RootNamespace="fsapfs_test_container"
+	Name="fsapfs_test_checksum"
+	ProjectGUID="{54670300-9762-426C-9A05-EE0028AD8081}"
+	RootNamespace="fsapfs_test_checksum"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,23 +176,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_container.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_functions.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_getopt.c"
+				RelativePath="..\..\tests\fsapfs_test_checksum.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\tests\fsapfs_test_memory.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_rwlock.c"
 				>
 			</File>
 		</Filter>
@@ -202,35 +190,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_functions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_getopt.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_libbfio.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\tests\fsapfs_test_libcerror.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libclocale.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_libcnotify.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\tests\fsapfs_test_libfsapfs.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_libuna.h"
 				>
 			</File>
 			<File
@@ -239,10 +203,6 @@
 			</File>
 			<File
 				RelativePath="..\..\tests\fsapfs_test_memory.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\tests\fsapfs_test_rwlock.h"
 				>
 			</File>
 			<File
