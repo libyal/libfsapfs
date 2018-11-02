@@ -21,6 +21,7 @@
 
 #include <common.h>
 #include <file_stream.h>
+#include <memory.h>
 #include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
@@ -319,6 +320,402 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libfsapfs_buffer_data_handle_read_segment_data function
+ * Returns 1 if successful or 0 if not
+ */
+int fsapfs_test_buffer_data_handle_read_segment_data(
+     void )
+{
+	uint8_t segment_data[ 16 ];
+
+	libcerror_error_t *error                           = NULL;
+	libfsapfs_buffer_data_handle_t *buffer_data_handle = NULL;
+	ssize_t read_count                                 = 0;
+	int result                                         = 0;
+
+	/* Initialize test
+	 */
+	result = libfsapfs_buffer_data_handle_initialize(
+	          &buffer_data_handle,
+	          fsapfs_test_buffer_data_handle_data1,
+	          16,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "buffer_data_handle",
+	 buffer_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	read_count = libfsapfs_buffer_data_handle_read_segment_data(
+	              buffer_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              12,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) 12 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = memory_compare(
+	          segment_data,
+	          fsapfs_test_buffer_data_handle_data1,
+	          12 );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	read_count = libfsapfs_buffer_data_handle_read_segment_data(
+	              buffer_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              8,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) 4 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = memory_compare(
+	          segment_data,
+	          &( fsapfs_test_buffer_data_handle_data1[ 12 ] ),
+	          4 );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	read_count = libfsapfs_buffer_data_handle_read_segment_data(
+	              buffer_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) 0 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	read_count = libfsapfs_buffer_data_handle_read_segment_data(
+	              NULL,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libfsapfs_buffer_data_handle_read_segment_data(
+	              buffer_data_handle,
+	              NULL,
+	              -1,
+	              0,
+	              segment_data,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libfsapfs_buffer_data_handle_read_segment_data(
+	              buffer_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              NULL,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	read_count = libfsapfs_buffer_data_handle_read_segment_data(
+	              buffer_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              (size_t) SSIZE_MAX + 1,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_buffer_data_handle_free(
+	          &buffer_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "buffer_data_handle",
+	 buffer_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( buffer_data_handle != NULL )
+	{
+		libfsapfs_buffer_data_handle_free(
+		 &buffer_data_handle,
+		 NULL );
+	}
+	return( 0 );
+}
+
+
+/* Tests the libfsapfs_buffer_data_handle_seek_segment_offset function
+ * Returns 1 if successful or 0 if not
+ */
+int fsapfs_test_buffer_data_handle_seek_segment_offset(
+     void )
+{
+	libcerror_error_t *error                           = NULL;
+	libfsapfs_buffer_data_handle_t *buffer_data_handle = NULL;
+	off64_t offset                                     = 0;
+	int result                                         = 0;
+
+	/* Initialize test
+	 */
+	result = libfsapfs_buffer_data_handle_initialize(
+	          &buffer_data_handle,
+	          fsapfs_test_buffer_data_handle_data1,
+	          16,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "buffer_data_handle",
+	 buffer_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	offset = libfsapfs_buffer_data_handle_seek_segment_offset(
+	          buffer_data_handle,
+	          NULL,
+	          0,
+	          0,
+	          0,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) 0 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	offset = libfsapfs_buffer_data_handle_seek_segment_offset(
+	          NULL,
+	          NULL,
+	          0,
+	          0,
+	          0,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	offset = libfsapfs_buffer_data_handle_seek_segment_offset(
+	          buffer_data_handle,
+	          NULL,
+	          -1,
+	          0,
+	          0,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	offset = libfsapfs_buffer_data_handle_seek_segment_offset(
+	          buffer_data_handle,
+	          NULL,
+	          0,
+	          0,
+	          -1,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "offset",
+	 offset,
+	 (int64_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_buffer_data_handle_free(
+	          &buffer_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "buffer_data_handle",
+	 buffer_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	if( buffer_data_handle != NULL )
+	{
+		libfsapfs_buffer_data_handle_free(
+		 &buffer_data_handle,
+		 NULL );
+	}
+	return( 0 );
+}
+
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 /* The main program
@@ -346,9 +743,13 @@ int main(
 	 "libfsapfs_buffer_data_handle_free",
 	 fsapfs_test_buffer_data_handle_free );
 
-/* TODO add tests for libfsapfs_buffer_data_handle_read_segment_data */
+	FSAPFS_TEST_RUN(
+	 "libfsapfs_buffer_data_handle_read_segment_data",
+	 fsapfs_test_buffer_data_handle_read_segment_data );
 
-/* TODO add tests for libfsapfs_buffer_data_handle_seek_segment_offset */
+	FSAPFS_TEST_RUN(
+	 "libfsapfs_buffer_data_handle_seek_segment_offset",
+	 fsapfs_test_buffer_data_handle_seek_segment_offset );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

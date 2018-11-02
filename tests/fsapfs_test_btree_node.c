@@ -34,6 +34,7 @@
 #include "fsapfs_test_unused.h"
 
 #include "../libfsapfs/libfsapfs_btree_node.h"
+#include "../libfsapfs/libfsapfs_btree_node_header.h"
 
 uint8_t fsapfs_test_btree_node_data1[ 4096 ] = {
 	0x2b, 0xd1, 0x61, 0x9d, 0xcc, 0x04, 0x11, 0xae, 0x04, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
@@ -1001,8 +1002,9 @@ on_error:
 int fsapfs_test_btree_node_is_leaf_node(
      libfsapfs_btree_node_t *btree_node )
 {
-	libcerror_error_t *error = NULL;
-	int result               = 0;
+	libcerror_error_t *error                         = NULL;
+	libfsapfs_btree_node_header_t *btree_node_header = NULL;
+	int result                                       = 0;
 
 	/* Test regular cases
 	 */
@@ -1024,6 +1026,27 @@ int fsapfs_test_btree_node_is_leaf_node(
 	result = libfsapfs_btree_node_is_leaf_node(
 	          NULL,
 	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	btree_node_header       = btree_node->node_header;
+	btree_node->node_header = NULL;
+
+	result = libfsapfs_btree_node_is_leaf_node(
+	          btree_node,
+	          &error );
+
+	btree_node->node_header = btree_node_header;
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",

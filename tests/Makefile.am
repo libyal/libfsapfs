@@ -332,6 +332,7 @@ fsapfs_test_compression_SOURCES = \
 	fsapfs_test_libcerror.h \
 	fsapfs_test_libfsapfs.h \
 	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
 	fsapfs_test_unused.h
 
 fsapfs_test_compression_LDADD = \
