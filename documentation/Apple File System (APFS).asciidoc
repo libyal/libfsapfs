@@ -42,6 +42,7 @@ in the section entitled "GNU Free Documentation License".
 | Version | Author | Date | Comments
 | 0.0.1 | J.B. Metz | September 2018 | Initial version.
 | 0.0.2 | J.B. Metz | October 2018 | Additional format information.
+| 0.0.3 | J.B. Metz | November 2018 | Additional format information.
 |===
 
 :numbered:
@@ -1666,6 +1667,7 @@ The signature is likely stored in little-endian and represents "cmpf".
 The compressed data is stored in the extended attribute after the compressed data header
 | 4 | | ZLIB (DEFLATE) compressed resource fork +
 The compressed data is stored in the resource fork
+| 5 | | [yellow-background]*Unknown (uncompressed data contains 0-byte values)*
 | | |
 | 7 | | LZVN compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
@@ -1674,8 +1676,13 @@ The compressed data is stored in the resource fork
 |===
 
 [NOTE]
+If the ZLIB (DEFLATE) compressed data starts with 0xff the data is stored
+uncompressed after the first compressed data byte. `[GANDER17]` indicates
+that this should be `( byte_value & 0x0f ) == 0x0f`.
+
+[NOTE]
 If the LZVN compressed data starts with 0x06 (end of stream oppcode) the data
-is stored uncompressed after the end of stream oppcode.
+is stored uncompressed after the first compressed data byte.
 
 === [[sibling_link]]Sibling link
 
@@ -2086,14 +2093,28 @@ identifier in defined by the <<file_extent,File extent>>.
 
 === Compressed data extended attribute
 
-<<compression_method,Compression method>> should be 3 or 7.
+<<compression_method,Compression method>> should be 3, 5 or 7.
 
 The file content size is stored in the compressed data header of
 a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
 
-The file content data is stored in a "com.apple.decmpfs" 
-<<extended_attribute,extended attribute>> after the
-<<compressed_data_header,compressed data header>>.
+For <<compression_method,Compression method>> 3 or 7 the file content data is
+stored in a "com.apple.decmpfs" <<extended_attribute,extended attribute>> after
+the <<compressed_data_header,compressed data header>>.
+
+For <<compression_method,Compression method>> 5 the file content data contains
+0-byte values. There are 12 bytes stored after the
+<<compressed_data_header,compressed data header>> that contain:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | [yellow-background]*Unknown* +
+Seen: 1
+| 4 | 4 | | [yellow-background]*Unknown*
+| 8 | 4 | | [yellow-background]*Unknown* +
+Seen: 0
+|===
 
 === Compressed data extended attribute with resource fork
 
@@ -2105,12 +2126,90 @@ a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
 The file content data is stored in a "com.apple.ResourceFork"
 <<extended_attribute,extended attribute>>.
 
+The compressed data starts with metadata that contains the offsets
+of the compressed data blocks.
+
+==== ZLIB (DEFLATE) compressed data
+
+* ZLIB (DEFLATE) compressed header
+* [yellow-background]*Unknown (empty values)*
+* ZLIB (DEFLATE) compressed data block offsets and sizes
+* ZLIB (DEFLATE) compressed data blocks
+* ZLIB (DEFLATE) compressed footer
+
+===== ZLIB (DEFLATE) compressed header
+
+The ZLIB (DEFLATE) compressed header is 16 bytes of size and consists of:
+
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 4 | | Compressed data offset
-| 4 | 4 x ... | | Array of compressed data block offsets
-| ... | ... | | Compressed data blocks
+| 0 | 4 | | Compressed data block descriptors offset +
+The offset is relative from the start of the ZLIB (DEFLATE) compressed data
+| 4 | 4 | | Compressed footer offset +
+The offset is relative from the start of the ZLIB (DEFLATE) compressed data
+| 8 | 4 | | Compressed data block descriptors and data size
+| 12 | 4 | | Compressed footer size
+|===
+
+[NOTE]
+The values in the ZLIB (DEFLATE) compressed header are stored in big-endian.
+
+===== ZLIB (DEFLATE) compressed data block descriptors
+
+The ZLIB (DEFLATE) compressed data block descriptors are variable in size and
+consist of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Compressed data size
+| 4 | 4 | | Number of compressed data block offset and size tuples
+| 8 | 8 x ... | | Array of compressed data block descriptors
+|===
+
+===== ZLIB (DEFLATE) compressed data block descriptor
+
+The ZLIB (DEFLATE) compressed data block descriptor is 8 bytes of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | Compressed block offset +
+The offset is relative from the start of the ZLIB (DEFLATE) compressed data + 20
+| 4 | 4 | | Compressed block size
+|===
+
+===== ZLIB (DEFLATE) compressed footer
+
+The ZLIB (DEFLATE) compressed footer is variable of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 24 | | [yellow-background]*Unknown (empty values)*
+| 24 | 2 | | [yellow-background]*Unknown*
+| 26 | 2 | | [yellow-background]*Unknown*
+| 28 | 2 | | [yellow-background]*Unknown*
+| 30 | 2 | | [yellow-background]*Unknown*
+| 32 | 4 | "cmpf" | [yellow-background]*Unknown (signature)*
+| 36 | 4 | | [yellow-background]*Unknown*
+| 40 | 4 | | [yellow-background]*Unknown*
+| 44 | 6 | | [yellow-background]*Unknown (empty values)*
+|===
+
+[NOTE]
+The values in the ZLIB (DEFLATE) compressed footer are stored in big-endian.
+
+==== LZVN compressed data
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 x ... | | Array of compressed data block offsets +
+The offset is relative from the start of the LZVN compressed data
+| ... | ... | | LZVN compressed data blocks
 |===
 
 [NOTE]

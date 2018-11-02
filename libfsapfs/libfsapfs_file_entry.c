@@ -3333,15 +3333,17 @@ int libfsapfs_internal_file_entry_get_data_stream(
 			goto on_error;
 		}
 	}
-/* TODO add support for compression method 3 and 4
 	if( ( internal_file_entry->compression_method == 3 )
 	 || ( internal_file_entry->compression_method == 4 ) )
 	{
 		compression_method = LIBFSAPFS_COMPRESSION_METHOD_DEFLATE;
 	}
- */
-	if( ( internal_file_entry->compression_method == 7 )
-	 || ( internal_file_entry->compression_method == 8 ) )
+	else if( internal_file_entry->compression_method == 5 )
+	{
+		compression_method = LIBFSAPFS_COMPRESSION_METHOD_UNKNOWN5;
+	}
+	else if( ( internal_file_entry->compression_method == 7 )
+	      || ( internal_file_entry->compression_method == 8 ) )
 	{
 		compression_method = LIBFSAPFS_COMPRESSION_METHOD_LZVN;
 	}
@@ -3351,8 +3353,9 @@ int libfsapfs_internal_file_entry_get_data_stream(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported compression method.",
-		 function );
+		 "%s: unsupported compression method: %d.",
+		 function,
+		 internal_file_entry->compression_method );
 
 		goto on_error;
 	}
@@ -3408,26 +3411,8 @@ int libfsapfs_internal_file_entry_get_data_stream(
 	}
 	else
 	{
-		if( ( internal_file_entry->compression_method == 3 )
-		 || ( internal_file_entry->compression_method == 7 ) )
-		{
-			if( libfsapfs_extended_attribute_get_data_stream(
-			     internal_file_entry->compressed_data_extended_attribute,
-			     &compressed_data_stream,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve data stream from compressed data extended attribute.",
-				 function );
-
-				goto on_error;
-			}
-		}
-		else if( ( internal_file_entry->compression_method == 4 )
-		      || ( internal_file_entry->compression_method == 8 ) )
+		if( ( internal_file_entry->compression_method == 4 )
+		 || ( internal_file_entry->compression_method == 8 ) )
 		{
 			if( libfsapfs_extended_attribute_get_data_stream(
 			     internal_file_entry->resource_fork_extended_attribute,
@@ -3439,6 +3424,23 @@ int libfsapfs_internal_file_entry_get_data_stream(
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to retrieve data stream from resource fork extended attribute.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		else
+		{
+			if( libfsapfs_extended_attribute_get_data_stream(
+			     internal_file_entry->compressed_data_extended_attribute,
+			     &compressed_data_stream,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve data stream from compressed data extended attribute.",
 				 function );
 
 				goto on_error;

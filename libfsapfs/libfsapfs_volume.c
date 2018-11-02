@@ -1844,7 +1844,7 @@ int libfsapfs_volume_get_identifier(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve UTF-8 string size.",
+		 "%s: unable to retrieve volume identifier.",
 		 function );
 
 		result = -1;

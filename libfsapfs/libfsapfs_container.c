@@ -1882,40 +1882,6 @@ int libfsapfs_container_get_identifier(
 	}
 	internal_container = (libfsapfs_internal_container_t *) container;
 
-	if( internal_container->superblock == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid container - missing superblock.",
-		 function );
-
-		return( -1 );
-	}
-	if( uuid_data == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid UUID data.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( uuid_data_size < 16 )
-	 || ( uuid_data_size > (size_t) SSIZE_MAX ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid UUID data size value out of bounds.",
-		 function );
-
-		return( -1 );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_container->read_write_lock,
@@ -1931,16 +1897,17 @@ int libfsapfs_container_get_identifier(
 		return( -1 );
 	}
 #endif
-	if( memory_copy(
+	if( libfsapfs_container_superblock_get_container_identifier(
+	     internal_container->superblock,
 	     uuid_data,
-	     internal_container->superblock->container_identifier,
-	     16 ) == NULL )
+	     uuid_data_size,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-		 "%s: unable to copy container identifier.",
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve container identifier.",
 		 function );
 
 		result = -1;

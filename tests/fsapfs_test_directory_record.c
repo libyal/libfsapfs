@@ -35,7 +35,7 @@
 
 #include "../libfsapfs/libfsapfs_directory_record.h"
 
-uint8_t fsapfs_test_directory_record_key_data1[ 24 ] = {
+uint8_t fsapfs_test_directory_record_key_data1[ 23 ] = {
 	0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x90, 0x0b, 0x14, 0xbe, 0x9c, 0x2e, 0x66, 0x73, 0x65,
 	0x76, 0x65, 0x6e, 0x74, 0x73, 0x64, 0x00 };
 
@@ -312,7 +312,7 @@ int fsapfs_test_directory_record_read_key_data(
 	result = libfsapfs_directory_record_read_key_data(
 	          directory_record,
 	          fsapfs_test_directory_record_key_data1,
-	          24,
+	          23,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -329,7 +329,7 @@ int fsapfs_test_directory_record_read_key_data(
 	result = libfsapfs_directory_record_read_key_data(
 	          NULL,
 	          fsapfs_test_directory_record_key_data1,
-	          24,
+	          23,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -347,7 +347,7 @@ int fsapfs_test_directory_record_read_key_data(
 	result = libfsapfs_directory_record_read_key_data(
 	          directory_record,
 	          NULL,
-	          24,
+	          23,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(

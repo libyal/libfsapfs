@@ -1,5 +1,5 @@
 /*
- * Compression handling functions
+ * Compression functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_COMPRESS_H )
-#define _LIBFSAPFS_COMPRESS_H
+#if !defined( _LIBFSAPFS_COMPRESSION_H )
+#define _LIBFSAPFS_COMPRESSION_H
 
 #include <common.h>
 #include <types.h>
@@ -43,5 +43,5 @@ int libfsapfs_decompress_data(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_COMPRESS_H ) */
+#endif /* !defined( _LIBFSAPFS_COMPRESSION_H ) */
 

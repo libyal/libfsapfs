@@ -1,5 +1,5 @@
 /*
- * Compression handling functions
+ * Compression functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -102,120 +102,177 @@ int libfsapfs_decompress_data(
 	}
 	if( compression_method == LIBFSAPFS_COMPRESSION_METHOD_DEFLATE )
 	{
-#if ( defined( HAVE_ZLIB ) && defined( HAVE_ZLIB_UNCOMPRESS ) ) || defined( ZLIB_DLL )
-		if( compressed_data_size > (size_t) ULONG_MAX )
+		if( ( compressed_data_size >= 1 )
+		 && ( compressed_data[ 0 ] == 0xff ) )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-			 "%s: invalid compressed data size value exceeds maximum.",
-			 function );
+			if( compressed_data_size > (size_t) SSIZE_MAX )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 "%s: invalid compressed data size value exceeds maximum.",
+				 function );
 
-			return( -1 );
-		}
-		if( *uncompressed_data_size > (size_t) ULONG_MAX )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-			 "%s: invalid uncompressed data size value exceeds maximum.",
-			 function );
+				return( -1 );
+			}
+			if( *uncompressed_data_size > (size_t) SSIZE_MAX )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 "%s: invalid uncompressed data size value exceeds maximum.",
+				 function );
 
-			return( -1 );
-		}
-		zlib_uncompressed_data_size = (uLongf) *uncompressed_data_size;
+				return( -1 );
+			}
+			if( ( compressed_data_size - 1 ) > *uncompressed_data_size )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: compressed data size value exceeds uncompressed data size.",
+				 function );
 
-		result = uncompress(
-			  (Bytef *) uncompressed_data,
-			  &zlib_uncompressed_data_size,
-			  (Bytef *) compressed_data,
-			  (uLong) compressed_data_size );
+				return( -1 );
+			}
+			*uncompressed_data_size = compressed_data_size - 1;
 
-		if( result == Z_OK )
-		{
-			*uncompressed_data_size = (size_t) zlib_uncompressed_data_size;
+			if( memory_copy(
+			     uncompressed_data,
+			     &( compressed_data[ 1 ] ),
+			     *uncompressed_data_size ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to compressed to uncompressed data.",
+				 function );
 
+				return( -1 );
+			}
 			result = 1;
-		}
-		else if( result == Z_DATA_ERROR )
-		{
-#if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				 "%s: unable to read compressed data: data error.\n",
-				 function );
-			}
-#endif
-			*uncompressed_data_size = 0;
-
-			result = -1;
-		}
-		else if( result == Z_BUF_ERROR )
-		{
-#if defined( HAVE_DEBUG_OUTPUT )
-			if( libcnotify_verbose != 0 )
-			{
-				libcnotify_printf(
-				"%s: unable to read compressed data: target buffer too small.\n",
-				 function );
-			}
-#endif
-			/* Estimate that a factor 2 enlargement should suffice
-			 */
-			*uncompressed_data_size *= 2;
-
-			result = 0;
-		}
-		else if( result == Z_MEM_ERROR )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to read compressed data: insufficient memory.",
-			 function );
-
-			*uncompressed_data_size = 0;
-
-			result = -1;
 		}
 		else
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_COMPRESSION,
-			 LIBCERROR_COMPRESSION_ERROR_DECOMPRESS_FAILED,
-			 "%s: zlib returned undefined error: %d.",
-			 function,
-			 result );
+#if ( defined( HAVE_ZLIB ) && defined( HAVE_ZLIB_UNCOMPRESS ) ) || defined( ZLIB_DLL )
+			if( compressed_data_size > (size_t) ULONG_MAX )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 "%s: invalid compressed data size value exceeds maximum.",
+				 function );
 
-			*uncompressed_data_size = 0;
+				return( -1 );
+			}
+			if( *uncompressed_data_size > (size_t) ULONG_MAX )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+				 "%s: invalid uncompressed data size value exceeds maximum.",
+				 function );
 
-			result = -1;
-		}
+				return( -1 );
+			}
+			zlib_uncompressed_data_size = (uLongf) *uncompressed_data_size;
+
+			result = uncompress(
+				  (Bytef *) uncompressed_data,
+				  &zlib_uncompressed_data_size,
+				  (Bytef *) compressed_data,
+				  (uLong) compressed_data_size );
+
+			if( result == Z_OK )
+			{
+				*uncompressed_data_size = (size_t) zlib_uncompressed_data_size;
+
+				result = 1;
+			}
+			else if( result == Z_DATA_ERROR )
+			{
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					 "%s: unable to read compressed data: data error.\n",
+					 function );
+				}
+#endif
+				*uncompressed_data_size = 0;
+
+				result = -1;
+			}
+			else if( result == Z_BUF_ERROR )
+			{
+#if defined( HAVE_DEBUG_OUTPUT )
+				if( libcnotify_verbose != 0 )
+				{
+					libcnotify_printf(
+					"%s: unable to read compressed data: target buffer too small.\n",
+					 function );
+				}
+#endif
+				/* Estimate that a factor 2 enlargement should suffice
+				 */
+				*uncompressed_data_size *= 2;
+
+				result = 0;
+			}
+			else if( result == Z_MEM_ERROR )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+				 "%s: unable to read compressed data: insufficient memory.",
+				 function );
+
+				*uncompressed_data_size = 0;
+
+				result = -1;
+			}
+			else
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_COMPRESSION,
+				 LIBCERROR_COMPRESSION_ERROR_DECOMPRESS_FAILED,
+				 "%s: zlib returned undefined error: %d.",
+				 function,
+				 result );
+
+				*uncompressed_data_size = 0;
+
+				result = -1;
+			}
 #else
-		result = libfsapfs_deflate_decompress(
-		          compressed_data,
-		          compressed_data_size,
-		          uncompressed_data,
-		          uncompressed_data_size,
-		          error );
+			result = libfsapfs_deflate_decompress(
+			          compressed_data,
+			          compressed_data_size,
+			          uncompressed_data,
+			          uncompressed_data_size,
+			          error );
 
-		if( result != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-			 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
-			 "%s: unable to decompress DEFLATE compressed data.",
-			 function );
+			if( result != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+				 LIBCERROR_ENCRYPTION_ERROR_GENERIC,
+				 "%s: unable to decompress DEFLATE compressed data.",
+				 function );
 
-			return( -1 );
-		}
+				return( -1 );
+			}
 #endif /* ( defined( HAVE_ZLIB ) && defined( HAVE_ZLIB_UNCOMPRESS ) ) || defined( ZLIB_DLL ) */
+		}
 	}
 	else if( compression_method == LIBFSAPFS_COMPRESSION_METHOD_LZVN )
 	{

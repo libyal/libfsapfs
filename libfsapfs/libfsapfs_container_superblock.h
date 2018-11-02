@@ -109,6 +109,12 @@ int libfsapfs_container_superblock_read_data(
      size_t data_size,
      libcerror_error_t **error );
 
+int libfsapfs_container_superblock_get_container_identifier(
+     libfsapfs_container_superblock_t *container_superblock,
+     uint8_t *uuid_data,
+     size_t uuid_data_size,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

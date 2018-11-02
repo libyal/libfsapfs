@@ -36,6 +36,8 @@
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
+extern int libfsapfs_checksum_crc32_table_computed;
+
 /* Tests the libfsapfs_checksum_initialize_crc32_table function
  * Returns 1 if successful or 0 if not
  */
@@ -62,6 +64,8 @@ int fsapfs_test_checksum_calculate_weak_crc32(
 	libcerror_error_t *error = NULL;
 	uint32_t checksum        = 0;
 	int result               = 0;
+
+	libfsapfs_checksum_crc32_table_computed = 0;
 
 	/* Test regular cases
 	 */

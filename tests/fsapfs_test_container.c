@@ -1140,10 +1140,10 @@ int fsapfs_test_container_get_size(
 	          &size,
 	          &error );
 
-	FSAPFS_TEST_ASSERT_NOT_EQUAL_INT(
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -1213,10 +1213,10 @@ int fsapfs_test_container_get_number_of_volumes(
 	          &number_of_volumes,
 	          &error );
 
-	FSAPFS_TEST_ASSERT_NOT_EQUAL_INT(
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",

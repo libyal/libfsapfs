@@ -8,22 +8,23 @@ TODO
 * add snapshot support
 
 library:
-* Add support for deflate compressed files
-* separate internal external attribute descriptor and API external descriptor
-* read inode and extended attributes at once
+* Add support for deflate compressed files edge case where first byte is 0x#f
 * expose directory entry added time
-* improve file content read support
+* format support
+** Add resource fork support
+** read zlib compressed resource fork data footer
 * change container read bootstap as advised in documentation
 ** validate checksum
 ** read backup container superblocks
-* refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
-* Create libfsapfs_container_superblock_get_identifier
-* Create libfsapfs_volume_superblock_get_identifier
-* Add support for extended attribute with data stream descriptor
-* Add resource fork support
-* Pass IO handle instead of container data handle?
-* Add function to provide volume size
-* Add function to provide volume date and time values
+* API
+** separate internal external attribute descriptor and API external descriptor
+** Add function to provide volume size
+** Add function to provide volume date and time values
+* optimization
+** read inode and extended attributes at once
+** cache uncompressed blocks
+* clean up / restructure
+** refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 
 Python bindings:
 * add extents object?

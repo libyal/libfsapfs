@@ -648,7 +648,7 @@ int libfsapfs_extended_attribute_read_value_data(
 
 			goto on_error;
 		}
-		internal_extended_attribute->data_stream_size = (size64_t) data_size;
+		internal_extended_attribute->data_stream_size = (size64_t) extended_attribute_data_size;
 
 		if( memory_copy(
 		     internal_extended_attribute->data,
