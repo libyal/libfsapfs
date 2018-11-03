@@ -1,5 +1,5 @@
 /*
- * LIBFSAPFS_LZVN (un)compression functions
+ * LZVN (un)compression functions
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -616,21 +616,12 @@ int libfsapfs_lzvn_decompress(
 
 				return( -1 );
 			}
-			if( memory_copy(
-			     &( uncompressed_data[ uncompressed_data_offset ] ),
-			     &( uncompressed_data[ match_offset ] ),
-			     (size_t) match_size ) == NULL )
+			while( match_size > 0 )
 			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy match to uncompressed data.",
-				 function );
+				uncompressed_data[ uncompressed_data_offset++ ] = uncompressed_data[ match_offset++ ];
 
-				return( -1 );
+				match_size--;
 			}
-			uncompressed_data_offset += (size_t) match_size;
 		}
 	}
 	*uncompressed_data_size = uncompressed_data_offset;
