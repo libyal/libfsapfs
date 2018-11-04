@@ -68,6 +68,7 @@ int libfsapfs_data_block_data_handle_initialize(
      libfsapfs_io_handle_t *io_handle,
      libfsapfs_encryption_context_t *encryption_context,
      libcdata_array_t *file_extents,
+     uint8_t is_sparse,
      libcerror_error_t **error );
 
 int libfsapfs_data_block_data_handle_free(

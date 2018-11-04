@@ -1,18 +1,19 @@
 TODO
 * Complete support for recovery password -r
 * Handle file size of 0, mapped file size does not support 0 ?
-* Add support for sparse files
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 * add support for case folding
 * Add container data handle? Add decryption support and use it to read container key bag?
 * add snapshot support
 
 library:
-* Add support for deflate compressed files edge case where first byte is 0x#f
+* check if data block vector allocated size matches size of file extents
+* get_extent function, check inode flags and set extent is sparse flag
 * expose directory entry added time
 * format support
 ** Add resource fork support
 ** read zlib compressed resource fork data footer
+** Check deflate compressed files edge case where first byte is 0x#f
 * change container read bootstap as advised in documentation
 ** validate checksum
 ** read backup container superblocks
@@ -44,6 +45,7 @@ Tools:
 ** add support for all volumes
 ** add volume selection support
 ** add extended attributes support
+** does fuse override file types such as socket?
 
 Tests:
 * add tests for container_key_bag

@@ -170,7 +170,7 @@ int libfsapfs_file_system_data_handle_read_data_block(
      int element_data_file_index,
      off64_t element_data_offset,
      size64_t element_data_size,
-     uint32_t element_data_flags LIBFSAPFS_ATTRIBUTE_UNUSED,
+     uint32_t element_data_flags,
      uint8_t read_flags LIBFSAPFS_ATTRIBUTE_UNUSED,
      libcerror_error_t **error )
 {
@@ -184,7 +184,6 @@ int libfsapfs_file_system_data_handle_read_data_block(
 	int64_t profiler_start_timestamp     = 0;
 #endif
 
-	LIBFSAPFS_UNREFERENCED_PARAMETER( element_data_flags );
 	LIBFSAPFS_UNREFERENCED_PARAMETER( read_flags );
 
 	if( file_system_data_handle == NULL )
@@ -254,58 +253,77 @@ int libfsapfs_file_system_data_handle_read_data_block(
 	}
 #endif /* defined( HAVE_PROFILER ) */
 
-	encryption_identifier = element_data_offset / element_data_size;
-
-	if( file_system_data_handle->file_extents != NULL )
+	if( ( element_data_flags & LIBFDATA_RANGE_FLAG_IS_SPARSE ) != 0 )
 	{
-		if( libcdata_array_get_entry_by_index(
-		     file_system_data_handle->file_extents,
-		     element_data_file_index,
-		     (intptr_t **) &file_extent,
+		if( libfsapfs_data_block_clear_data(
+		     data_block,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file extent: %d.",
-			 function,
-			 element_data_file_index );
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to clear data block.",
+			 function );
 
 			goto on_error;
 		}
-		if( file_extent == NULL )
+	}
+	else
+	{
+		encryption_identifier = element_data_offset / element_data_size;
+
+		if( file_system_data_handle->file_extents != NULL )
+		{
+			if( libcdata_array_get_entry_by_index(
+			     file_system_data_handle->file_extents,
+			     element_data_file_index,
+			     (intptr_t **) &file_extent,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve file extent: %d.",
+				 function,
+				 element_data_file_index );
+
+				goto on_error;
+			}
+			if( file_extent == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+				 "%s: missing file extent: %d.",
+				 function,
+				 element_data_file_index );
+
+				goto on_error;
+			}
+			file_extent_offset    = (int64_t) encryption_identifier - (int64_t) file_extent->physical_block_number;
+			encryption_identifier = file_extent->encryption_identifier + file_extent_offset;
+		}
+		if( libfsapfs_data_block_read(
+		     data_block,
+		     file_system_data_handle->io_handle,
+		     file_system_data_handle->encryption_context,
+		     file_io_handle,
+		     element_data_offset,
+		     encryption_identifier,
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: missing file extent: %d.",
-			 function,
-			 element_data_file_index );
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read data block.",
+			 function );
 
 			goto on_error;
 		}
-		file_extent_offset    = (int64_t) encryption_identifier - (int64_t) file_extent->block_number;
-		encryption_identifier = file_extent->encryption_identifier + file_extent_offset;
-	}
-	if( libfsapfs_data_block_read(
-	     data_block,
-	     file_system_data_handle->io_handle,
-	     file_system_data_handle->encryption_context,
-	     file_io_handle,
-	     element_data_offset,
-	     encryption_identifier,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read data block.",
-		 function );
-
-		goto on_error;
 	}
 #if defined( HAVE_PROFILER )
 	if( file_system_data_handle->io_handle->profiler != NULL )

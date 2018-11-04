@@ -158,7 +158,7 @@ void fsapfsmount_signal_handler(
 #error Size of off_t not supported
 #endif
 
-/* Opens a file entry
+/* Opens a file
  * Returns 0 if successful or a negative errno value otherwise
  */
 int fsapfsmount_fuse_open(
@@ -416,33 +416,23 @@ int fsapfsmount_fuse_release(
 
 		goto on_error;
 	}
-	if( file_info->fh == (uint64_t) NULL )
+	if( file_info->fh != (uint64_t) NULL )
 	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid file information - missing file handle.",
-		 function );
+		if( libfsapfs_file_entry_free(
+		     (libfsapfs_file_entry_t **) &( file_info->fh ),
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file entry.",
+			 function );
 
-		result = -EINVAL;
+			result = -ENOENT;
 
-		goto on_error;
-	}
-	if( libfsapfs_file_entry_free(
-	     (libfsapfs_file_entry_t **) &( file_info->fh ),
-	     &error ) != 1 )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free file entry.",
-		 function );
-
-		result = -ENOENT;
-
-		goto on_error;
+			goto on_error;
+		}
 	}
 	return( 0 );
 
@@ -709,6 +699,96 @@ int fsapfsmount_fuse_filldir(
 	return( 1 );
 }
 
+/* Opens a directory
+ * Returns 0 if successful or a negative errno value otherwise
+ */
+int fsapfsmount_fuse_opendir(
+     const char *path,
+     struct fuse_file_info *file_info )
+{
+	libcerror_error_t *error = NULL;
+	static char *function    = "fsapfsmount_fuse_opendir";
+	int result               = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: %s\n",
+		 function,
+		 path );
+	}
+#endif
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	if( file_info == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file information.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	if( file_info->fh != (uint64_t) NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file information - file handle already set.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	if( mount_handle_get_file_entry_by_path(
+	     fsapfsmount_mount_handle,
+	     path,
+	     (libfsapfs_file_entry_t **) &( file_info->fh ),
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file entry for path: %s.",
+		 function,
+		 path );
+
+		result = -ENOENT;
+
+		goto on_error;
+	}
+	return( 0 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcnotify_print_error_backtrace(
+		 error );
+		libcerror_error_free(
+		 &error );
+	}
+	return( result );
+}
+
 /* Reads a directory
  * Returns 0 if successful or a negative errno value otherwise
  */
@@ -769,24 +849,16 @@ int fsapfsmount_fuse_readdir(
 	}
 	if( file_info->fh == (uint64_t) NULL )
 	{
-		if( mount_handle_get_file_entry_by_path(
-		     fsapfsmount_mount_handle,
-		     path,
-		     (libfsapfs_file_entry_t **) &( file_info->fh ),
-		     &error ) != 1 )
-		{
-			libcerror_error_set(
-			 &error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file entry for path: %s.",
-			 function,
-			 path );
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid file information - missing file handle.",
+		 function );
 
-			result = -ENOENT;
+		result = -EINVAL;
 
-			goto on_error;
-		}
+		goto on_error;
 	}
 	if( libfsapfs_file_entry_get_number_of_sub_file_entries(
 	     (libfsapfs_file_entry_t *) file_info->fh,
@@ -983,6 +1055,11 @@ int fsapfsmount_fuse_readdir(
 
 			goto on_error;
 		}
+		memory_free(
+		 name );
+
+		name = NULL;
+
 		if( libfsapfs_file_entry_free(
 		     &sub_file_entry,
 		     &error ) != 1 )
@@ -1013,6 +1090,11 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
+	if( name != NULL )
+	{
+		memory_free(
+		 name );
+	}
 	if( sub_file_entry != NULL )
 	{
 		libfsapfs_file_entry_free(
@@ -1029,6 +1111,83 @@ on_error:
 	{
 		memory_free(
 		 stat_info );
+	}
+	return( result );
+}
+
+/* Releases a directory entry
+ * Returns 0 if successful or a negative errno value otherwise
+ */
+int fsapfsmount_fuse_releasedir(
+     const char *path,
+     struct fuse_file_info *file_info )
+{
+	libcerror_error_t *error = NULL;
+	static char *function    = "fsapfsmount_fuse_releasedir";
+	int result               = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: %s\n",
+		 function,
+		 path );
+	}
+#endif
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	if( file_info == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file information.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	if( file_info->fh != (uint64_t) NULL )
+	{
+		if( libfsapfs_file_entry_free(
+		     (libfsapfs_file_entry_t **) &( file_info->fh ),
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file entry.",
+			 function );
+
+			result = -ENOENT;
+
+			goto on_error;
+		}
+	}
+	return( 0 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcnotify_print_error_backtrace(
+		 error );
+		libcerror_error_free(
+		 &error );
 	}
 	return( result );
 }
@@ -1682,13 +1841,15 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-	fsapfsmount_fuse_operations.open     = &fsapfsmount_fuse_open;
-	fsapfsmount_fuse_operations.read     = &fsapfsmount_fuse_read;
-	fsapfsmount_fuse_operations.release  = &fsapfsmount_fuse_release;
-	fsapfsmount_fuse_operations.readdir  = &fsapfsmount_fuse_readdir;
-	fsapfsmount_fuse_operations.getattr  = &fsapfsmount_fuse_getattr;
-	fsapfsmount_fuse_operations.readlink = &fsapfsmount_fuse_readlink;
-	fsapfsmount_fuse_operations.destroy  = &fsapfsmount_fuse_destroy;
+	fsapfsmount_fuse_operations.open       = &fsapfsmount_fuse_open;
+	fsapfsmount_fuse_operations.read       = &fsapfsmount_fuse_read;
+	fsapfsmount_fuse_operations.release    = &fsapfsmount_fuse_release;
+	fsapfsmount_fuse_operations.opendir    = &fsapfsmount_fuse_opendir;
+	fsapfsmount_fuse_operations.readdir    = &fsapfsmount_fuse_readdir;
+	fsapfsmount_fuse_operations.releasedir = &fsapfsmount_fuse_releasedir;
+	fsapfsmount_fuse_operations.getattr    = &fsapfsmount_fuse_getattr;
+	fsapfsmount_fuse_operations.readlink   = &fsapfsmount_fuse_readlink;
+	fsapfsmount_fuse_operations.destroy    = &fsapfsmount_fuse_destroy;
 
 	fsapfsmount_fuse_channel = fuse_mount(
 	                            mount_point,

@@ -5253,7 +5253,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 		          &btree_entry,
 		          error );
 
-		if( result == -1 )
+		if( result != 0 )
 		{
 			libcerror_error_set(
 			 error,
@@ -5264,75 +5264,72 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 
 			goto on_error;
 		}
-		else if( result != 0 )
+		if( btree_node == NULL )
 		{
-			if( btree_node == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree node.",
-				 function );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree node.",
+			 function );
 
-				goto on_error;
-			}
-			if( btree_entry == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree entry.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_initialize(
-			     inode,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create inode.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_key_data(
-			     *inode,
-			     btree_entry->key_data,
-			     (size_t) btree_entry->key_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode key data.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_value_data(
-			     *inode,
-			     btree_entry->value_data,
-			     (size_t) btree_entry->value_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode value data.",
-				 function );
-
-				goto on_error;
-			}
-			btree_node = NULL;
+			goto on_error;
 		}
+		if( btree_entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_initialize(
+		     inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create inode.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_key_data(
+		     *inode,
+		     btree_entry->key_data,
+		     (size_t) btree_entry->key_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode key data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_value_data(
+		     *inode,
+		     btree_entry->value_data,
+		     (size_t) btree_entry->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode value data.",
+			 function );
+
+			goto on_error;
+		}
+		btree_node = NULL;
 	}
 	return( result );
 
@@ -5365,18 +5362,19 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry         = NULL;
-	libfsapfs_btree_node_t *btree_node           = NULL;
-	libfsapfs_btree_node_t *root_node            = NULL;
-	const uint8_t *utf8_string_segment           = NULL;
-	static char *function                        = "libfsapfs_file_system_btree_get_inode_by_utf8_path";
-	libuna_unicode_character_t unicode_character = 0;
-	size_t utf8_string_index                     = 0;
-	size_t utf8_string_segment_length            = 0;
-	uint64_t lookup_identifier                   = 0;
-	uint32_t name_hash                           = 0;
-	int is_leaf_node                             = 0;
-	int result                                   = 0;
+	libfsapfs_btree_entry_t *btree_entry                = NULL;
+	libfsapfs_btree_node_t *btree_node                  = NULL;
+	libfsapfs_btree_node_t *root_node                   = NULL;
+	libfsapfs_directory_record_t *safe_directory_record = NULL;
+	const uint8_t *utf8_string_segment                  = NULL;
+	static char *function                               = "libfsapfs_file_system_btree_get_inode_by_utf8_path";
+	libuna_unicode_character_t unicode_character        = 0;
+	size_t utf8_string_index                            = 0;
+	size_t utf8_string_segment_length                   = 0;
+	uint64_t lookup_identifier                          = 0;
+	uint32_t name_hash                                  = 0;
+	int is_leaf_node                                    = 0;
+	int result                                          = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -5557,6 +5555,22 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 
 				goto on_error;
 			}
+			if( safe_directory_record != NULL )
+			{
+				if( libfsapfs_directory_record_free(
+				     &safe_directory_record,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+					 "%s: unable to free directory record.",
+					 function );
+
+					goto on_error;
+				}
+			}
 			if( is_leaf_node != 0 )
 			{
 				result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name(
@@ -5566,7 +5580,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 					  utf8_string_segment,
 					  utf8_string_segment_length,
 				          name_hash,
-					  directory_record,
+					  &safe_directory_record,
 					  error );
 			}
 			else
@@ -5579,7 +5593,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 					  utf8_string_segment,
 					  utf8_string_segment_length,
 				          name_hash,
-					  directory_record,
+					  &safe_directory_record,
 					  error );
 			}
 		}
@@ -5599,7 +5613,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 			break;
 		}
 		if( libfsapfs_directory_record_get_identifier(
-		     *directory_record,
+		     safe_directory_record,
 		     &lookup_identifier,
 		     error ) != 1 )
 		{
@@ -5626,7 +5640,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 		          &btree_entry,
 		          error );
 
-		if( result == -1 )
+		if( result != 1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -5637,83 +5651,82 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 
 			goto on_error;
 		}
-		else if( result != 0 )
+		if( btree_node == NULL )
 		{
-			if( btree_node == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree node.",
-				 function );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree node.",
+			 function );
 
-				goto on_error;
-			}
-			if( btree_entry == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree entry.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_initialize(
-			     inode,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create inode.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_key_data(
-			     *inode,
-			     btree_entry->key_data,
-			     (size_t) btree_entry->key_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode key data.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_value_data(
-			     *inode,
-			     btree_entry->value_data,
-			     (size_t) btree_entry->value_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode value data.",
-				 function );
-
-				goto on_error;
-			}
-			btree_node = NULL;
+			goto on_error;
 		}
+		if( btree_entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_initialize(
+		     inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create inode.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_key_data(
+		     *inode,
+		     btree_entry->key_data,
+		     (size_t) btree_entry->key_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode key data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_value_data(
+		     *inode,
+		     btree_entry->value_data,
+		     (size_t) btree_entry->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode value data.",
+			 function );
+
+			goto on_error;
+		}
+		btree_node = NULL;
+
+		*directory_record = safe_directory_record;
 	}
 	return( result );
 
 on_error:
-	if( *directory_record != NULL )
+	if( safe_directory_record != NULL )
 	{
 		libfsapfs_directory_record_free(
-		 directory_record,
+		 &safe_directory_record,
 		 NULL );
 	}
 	if( *inode != NULL )
@@ -5937,7 +5950,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 		          &btree_entry,
 		          error );
 
-		if( result == -1 )
+		if( result != 0 )
 		{
 			libcerror_error_set(
 			 error,
@@ -5948,75 +5961,72 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 
 			goto on_error;
 		}
-		else if( result != 0 )
+		if( btree_node == NULL )
 		{
-			if( btree_node == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree node.",
-				 function );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree node.",
+			 function );
 
-				goto on_error;
-			}
-			if( btree_entry == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree entry.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_initialize(
-			     inode,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create inode.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_key_data(
-			     *inode,
-			     btree_entry->key_data,
-			     (size_t) btree_entry->key_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode key data.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_value_data(
-			     *inode,
-			     btree_entry->value_data,
-			     (size_t) btree_entry->value_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode value data.",
-				 function );
-
-				goto on_error;
-			}
-			btree_node = NULL;
+			goto on_error;
 		}
+		if( btree_entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_initialize(
+		     inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create inode.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_key_data(
+		     *inode,
+		     btree_entry->key_data,
+		     (size_t) btree_entry->key_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode key data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_value_data(
+		     *inode,
+		     btree_entry->value_data,
+		     (size_t) btree_entry->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode value data.",
+			 function );
+
+			goto on_error;
+		}
+		btree_node = NULL;
 	}
 	return( result );
 
@@ -6049,18 +6059,19 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry         = NULL;
-	libfsapfs_btree_node_t *btree_node           = NULL;
-	libfsapfs_btree_node_t *root_node            = NULL;
-	const uint16_t *utf16_string_segment         = NULL;
-	static char *function                        = "libfsapfs_file_system_btree_get_inode_by_utf16_path";
-	libuna_unicode_character_t unicode_character = 0;
-	size_t utf16_string_index                    = 0;
-	size_t utf16_string_segment_length           = 0;
-	uint64_t lookup_identifier                   = 0;
-	uint32_t name_hash                           = 0;
-	int is_leaf_node                             = 0;
-	int result                                   = 0;
+	libfsapfs_btree_entry_t *btree_entry                = NULL;
+	libfsapfs_btree_node_t *btree_node                  = NULL;
+	libfsapfs_btree_node_t *root_node                   = NULL;
+	libfsapfs_directory_record_t *safe_directory_record = NULL;
+	const uint16_t *utf16_string_segment                = NULL;
+	static char *function                               = "libfsapfs_file_system_btree_get_inode_by_utf16_path";
+	libuna_unicode_character_t unicode_character        = 0;
+	size_t utf16_string_index                           = 0;
+	size_t utf16_string_segment_length                  = 0;
+	uint64_t lookup_identifier                          = 0;
+	uint32_t name_hash                                  = 0;
+	int is_leaf_node                                    = 0;
+	int result                                          = 0;
 
 	if( file_system_btree == NULL )
 	{
@@ -6241,6 +6252,22 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 
 				goto on_error;
 			}
+			if( safe_directory_record != NULL )
+			{
+				if( libfsapfs_directory_record_free(
+				     &safe_directory_record,
+				     error ) != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+					 "%s: unable to free directory record.",
+					 function );
+
+					goto on_error;
+				}
+			}
 			if( is_leaf_node != 0 )
 			{
 				result = libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name(
@@ -6250,7 +6277,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 					  utf16_string_segment,
 					  utf16_string_segment_length,
 				          name_hash,
-					  directory_record,
+					  &safe_directory_record,
 					  error );
 			}
 			else
@@ -6263,7 +6290,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 					  utf16_string_segment,
 					  utf16_string_segment_length,
 				          name_hash,
-					  directory_record,
+					  &safe_directory_record,
 					  error );
 			}
 		}
@@ -6283,7 +6310,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 			break;
 		}
 		if( libfsapfs_directory_record_get_identifier(
-		     *directory_record,
+		     safe_directory_record,
 		     &lookup_identifier,
 		     error ) != 1 )
 		{
@@ -6310,7 +6337,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 		          &btree_entry,
 		          error );
 
-		if( result == -1 )
+		if( result != 1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -6321,83 +6348,82 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 
 			goto on_error;
 		}
-		else if( result != 0 )
+		if( btree_node == NULL )
 		{
-			if( btree_node == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree node.",
-				 function );
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree node.",
+			 function );
 
-				goto on_error;
-			}
-			if( btree_entry == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-				 "%s: invalid B-tree entry.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_initialize(
-			     inode,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create inode.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_key_data(
-			     *inode,
-			     btree_entry->key_data,
-			     (size_t) btree_entry->key_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode key data.",
-				 function );
-
-				goto on_error;
-			}
-			if( libfsapfs_inode_read_value_data(
-			     *inode,
-			     btree_entry->value_data,
-			     (size_t) btree_entry->value_data_size,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_IO,
-				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read inode value data.",
-				 function );
-
-				goto on_error;
-			}
-			btree_node = NULL;
+			goto on_error;
 		}
+		if( btree_entry == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: invalid B-tree entry.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_initialize(
+		     inode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create inode.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_key_data(
+		     *inode,
+		     btree_entry->key_data,
+		     (size_t) btree_entry->key_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode key data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_inode_read_value_data(
+		     *inode,
+		     btree_entry->value_data,
+		     (size_t) btree_entry->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read inode value data.",
+			 function );
+
+			goto on_error;
+		}
+		btree_node = NULL;
+
+		*directory_record = safe_directory_record;
 	}
 	return( result );
 
 on_error:
-	if( *directory_record != NULL )
+	if( safe_directory_record != NULL )
 	{
 		libfsapfs_directory_record_free(
-		 directory_record,
+		 &safe_directory_record,
 		 NULL );
 	}
 	if( *inode != NULL )

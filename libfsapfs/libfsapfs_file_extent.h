@@ -35,9 +35,13 @@ typedef struct libfsapfs_file_extent libfsapfs_file_extent_t;
 
 struct libfsapfs_file_extent
 {
-	/* Block number
+	/* The logical offset
 	 */
-	uint64_t block_number;
+	uint64_t logical_offset;
+
+	/* The physical bclock number
+	 */
+	uint64_t physical_block_number;
 
 	/* Data size
 	 */

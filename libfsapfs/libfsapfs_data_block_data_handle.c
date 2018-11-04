@@ -43,10 +43,13 @@ int libfsapfs_data_block_data_handle_initialize(
      libfsapfs_io_handle_t *io_handle,
      libfsapfs_encryption_context_t *encryption_context,
      libcdata_array_t *file_extents,
+     uint8_t is_sparse,
      libcerror_error_t **error )
 {
 	libfsapfs_file_extent_t *file_extent = NULL;
 	static char *function                = "libfsapfs_data_block_data_handle_initialize";	
+	uint64_t logical_offset              = 0;
+	uint32_t segment_flags               = 0;
 	int extent_index                     = 0;
 	int number_of_extents                = 0;
 	int segment_index                    = 0;
@@ -199,13 +202,36 @@ int libfsapfs_data_block_data_handle_initialize(
 
 			goto on_error;
 		}
+		if( ( is_sparse == 0 )
+		 || ( file_extent->physical_block_number != 0 ) )
+		{
+			if( file_extent->logical_offset != logical_offset )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid file extent: %d - logical offset value out of bounds.",
+				 function,
+				 extent_index );
+
+				goto on_error;
+			}
+		}
+		segment_flags = 0;
+
+		if( ( is_sparse != 0 )
+		 && ( file_extent->physical_block_number == 0 ) )
+		{
+			segment_flags = LIBFDATA_RANGE_FLAG_IS_SPARSE;
+		}
 		if( libfdata_vector_append_segment(
 		     ( *data_handle )->data_block_vector,
 		     &segment_index,
 		     extent_index,
-		     file_extent->block_number * io_handle->block_size,
+		     file_extent->physical_block_number * io_handle->block_size,
 		     file_extent->data_size,
-		     0,
+		     segment_flags,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -218,6 +244,7 @@ int libfsapfs_data_block_data_handle_initialize(
 
 			goto on_error;
 		}
+		logical_offset += file_extent->data_size;
 	}
 	if( libfcache_cache_initialize(
 	     &( ( *data_handle )->data_block_cache ),

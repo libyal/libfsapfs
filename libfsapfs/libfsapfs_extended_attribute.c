@@ -1367,6 +1367,7 @@ int libfsapfs_internal_extended_attribute_get_data_stream(
 		     internal_extended_attribute->encryption_context,
 		     internal_extended_attribute->file_extents,
 		     internal_extended_attribute->data_stream_size,
+		     0,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

@@ -35,55 +35,59 @@ typedef struct libfsapfs_inode libfsapfs_inode_t;
 
 struct libfsapfs_inode
 {
-	/* Identifier
+	/* The identifier
 	 */
 	uint64_t identifier;
 
-	/* Parent identifier
+	/* The parent identifier
 	 */
 	uint64_t parent_identifier;
 
-	/* Modification time
+	/* The modification time
 	 */
 	uint64_t modification_time;
 
-	/* Creation time
+	/* The creation time
 	 */
 	uint64_t creation_time;
 
-	/* Inode change time
+	/* The inode change time
 	 */
 	uint64_t inode_change_time;
 
-	/* Access time
+	/* The access time
 	 */
 	uint64_t access_time;
 
-	/* Owner identifier
+	/* The owner identifier
 	 */
 	uint32_t owner_identifier;
 
-	/* Group identifier
+	/* The group identifier
 	 */
 	uint32_t group_identifier;
 
-	/* File mode
+	/* The file mode
 	 */
 	uint16_t file_mode;
 
-	/* Name size
+	/* The name size
 	 */
 	uint16_t name_size;
 
-	/* Name
+	/* The name
 	 */
 	uint8_t *name;
 
-	/* Data stream identifier
+	/* The inode flags
+	 */
+	uint64_t flags;
+
+	/* The data stream identifier
 	 */
 	uint64_t data_stream_identifier;
 
-	/* Data stream size
+	/* The data stream size
 	 */
 	uint64_t data_stream_size;
 };
@@ -173,6 +177,11 @@ int libfsapfs_inode_get_utf16_name(
      libfsapfs_inode_t *inode,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_flags(
+     libfsapfs_inode_t *inode,
+     uint64_t *flags,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_data_stream_identifier(

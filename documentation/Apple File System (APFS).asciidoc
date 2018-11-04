@@ -1450,40 +1450,40 @@ See section: <<extended_fields,Extended fields>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000001 | INODE_IS_APFS_PRIVATE | Is private +
+| 0x0000000000000001 | INODE_IS_APFS_PRIVATE | Is private +
 The inode is used internally, typically for a data stream
-| 0x00000002 | INODE_MAINTAIN_DIR_STATS | Maintains directory stats +
+| 0x0000000000000002 | INODE_MAINTAIN_DIR_STATS | Maintains directory stats +
 The inode tracks the size of all of its children
-| 0x00000004 | INODE_DIR_STATS_ORIGIN | [yellow-background]*Unknown (TODO)* +
+| 0x0000000000000004 | INODE_DIR_STATS_ORIGIN | Maintains directory stats explicitly set, not inherited +
 The inode has the INODE_MAINTAIN_DIR_STATS flag set explicitly, not due to inheritance
-| 0x00000008 | INODE_PROT_CLASS_EXPLICIT | [yellow-background]*Unknown (TODO)* +
+| 0x0000000000000008 | INODE_PROT_CLASS_EXPLICIT | Protection class explicitly set, not inherited +
 The inode data protection class was set explicitly when the inode was created
-| 0x00000010 | INODE_WAS_CLONED | Was cloned +
+| 0x0000000000000010 | INODE_WAS_CLONED | Was cloned +
 The inode was created by cloning another inode
-| 0x00000020 | INODE_FLAG_UNUSED | [yellow-background]*Unknown (Reserved)*
-| 0x00000040 | INODE_HAS_SECURITY_EA | Has security extended attribute +
+| 0x0000000000000020 | INODE_FLAG_UNUSED | [yellow-background]*Unknown (Reserved)*
+| 0x0000000000000040 | INODE_HAS_SECURITY_EA | Has security extended attribute +
 The inode has an access control list
-| 0x00000080 | INODE_BEING_TRUNCATED | Is truncated +
+| 0x0000000000000080 | INODE_BEING_TRUNCATED | Is truncated +
 The inode was truncated
-| 0x00000100 | INODE_HAS_FINDER_INFO | Has Finder information +
+| 0x0000000000000100 | INODE_HAS_FINDER_INFO | Has Finder information +
 The inode has a Finder info extended field
-| 0x00000200 | INODE_IS_SPARSE | Is sparse +
+| 0x0000000000000200 | INODE_IS_SPARSE | Is sparse +
 The inode has a sparse byte count extended field
-| 0x00000400 | INODE_WAS_EVER_CLONED | Was cloned +
+| 0x0000000000000400 | INODE_WAS_EVER_CLONED | Was cloned +
 The inode has been cloned at least once
-| 0x00000800 | INODE_ACTIVE_FILE_TRIMMED | [yellow-background]*Unknown (TODO)* +
+| 0x0000000000000800 | INODE_ACTIVE_FILE_TRIMMED | [yellow-background]*Unknown (TODO)* +
 The inode is an overprovisioning file that has been trimmed
-| 0x00001000 | INODE_PINNED_TO_MAIN | [yellow-background]*Unknown (TODO)* +
+| 0x0000000000001000 | INODE_PINNED_TO_MAIN | [yellow-background]*Unknown (TODO)* +
 The inode file content is always on the main storage device +
 This flag is used for Fusion drives where the main storage is a solid-state drive
-| 0x00002000 | INODE_PINNED_TO_TIER2 | [yellow-background]*Unknown (TODO)* +
+| 0x0000000000002000 | INODE_PINNED_TO_TIER2 | [yellow-background]*Unknown (TODO)* +
 The inode file content is always on the secondary storage device +
 This flag is used for Fusion drives where the secondary storage is a (magnetic) hard drive
-| 0x00004000 | INODE_HAS_RSRC_FORK | Has resource fork +
+| 0x0000000000004000 | INODE_HAS_RSRC_FORK | Has resource fork +
 The inode has a resource fork
-| 0x00008000 | INODE_NO_RSRC_FORK | Has no resource fork +
+| 0x0000000000008000 | INODE_NO_RSRC_FORK | Has no resource fork +
 The inode does not have a resource fork
-| 0x00010000 | INODE_ALLOCATION_SPILLEDOVER | [yellow-background]*Unknown (TODO)* +
+| 0x0000000000010000 | INODE_ALLOCATION_SPILLEDOVER | [yellow-background]*Unknown (TODO)* +
 The inode file content has some space allocated outside of the preferred storage tier for that file
 |===
 
@@ -2090,6 +2090,10 @@ for the data stream file system object identifier in the
 
 If the volume is encrypted the file content is encrypted with the encryption
 identifier in defined by the <<file_extent,File extent>>.
+
+If the <<inode_flags,inode flag>> INODE_IS_SPARSE is set the file contains
+one or more spare file extents. A sparse file extent has a physical block
+number of 0.
 
 === Compressed data extended attribute
 

@@ -3282,6 +3282,8 @@ int libfsapfs_internal_file_entry_get_data_stream(
 	libfdata_stream_t *compressed_data_stream = NULL;
 	static char *function                     = "libfsapfs_internal_file_entry_get_data_stream";
 	uint64_t data_stream_size                 = 0;
+	uint64_t inode_flags                      = 0;
+	uint8_t is_sparse                         = 0;
 	int compression_method                    = 0;
 
 	if( internal_file_entry == NULL )
@@ -3377,6 +3379,20 @@ int libfsapfs_internal_file_entry_get_data_stream(
 				goto on_error;
 			}
 		}
+		if( libfsapfs_inode_get_flags(
+		     internal_file_entry->inode,
+		     &inode_flags,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve flags from inode.",
+			 function );
+
+			goto on_error;
+		}
 		if( libfsapfs_inode_get_data_stream_size(
 		     internal_file_entry->inode,
 		     &data_stream_size,
@@ -3391,12 +3407,15 @@ int libfsapfs_internal_file_entry_get_data_stream(
 
 			goto on_error;
 		}
+		is_sparse = (uint8_t) ( ( inode_flags & 0x00000200 ) != 0 );
+
 		if( libfsapfs_data_stream_initialize_from_file_extents(
 		     &( internal_file_entry->data_stream ),
 		     internal_file_entry->io_handle,
 		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_extents,
 		     (size64_t) data_stream_size,
+		     is_sparse,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -4333,7 +4352,7 @@ int libfsapfs_file_entry_get_extent_by_index(
 
 		goto on_error;
 	}
-	*extent_offset = file_extent->block_number * internal_file_entry->io_handle->block_size;
+	*extent_offset = file_extent->physical_block_number * internal_file_entry->io_handle->block_size;
 	*extent_size   = file_extent->data_size;
 	*extent_flags  = 0;
 

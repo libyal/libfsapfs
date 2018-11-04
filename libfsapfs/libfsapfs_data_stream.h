@@ -46,6 +46,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
      libfsapfs_encryption_context_t *encryption_context,
      libcdata_array_t *file_extents,
      size64_t data_stream_size,
+     uint8_t is_sparse,
      libcerror_error_t **error );
 
 int libfsapfs_data_stream_initialize_from_compressed_data_stream(

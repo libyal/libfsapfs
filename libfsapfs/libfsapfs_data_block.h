@@ -56,6 +56,10 @@ int libfsapfs_data_block_free(
      libfsapfs_data_block_t **data_block,
      libcerror_error_t **error );
 
+int libfsapfs_data_block_clear_data(
+     libfsapfs_data_block_t *data_block,
+     libcerror_error_t **error );
+
 int libfsapfs_data_block_read(
      libfsapfs_data_block_t *data_block,
      libfsapfs_io_handle_t *io_handle,

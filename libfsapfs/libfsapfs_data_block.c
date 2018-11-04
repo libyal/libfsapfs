@@ -190,6 +190,65 @@ int libfsapfs_data_block_free(
 	return( result );
 }
 
+/* Clears the data
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_data_block_clear_data(
+     libfsapfs_data_block_t *data_block,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_data_block_clear_data";
+
+	if( data_block == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid data block.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_block->data == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid data block - missing data.",
+		 function );
+
+		return( -1 );
+	}
+	if( data_block->data_size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data block - data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( memory_set(
+	     data_block->data,
+	     0,
+	     data_block->data_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+		 "%s: unable to clear data.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
 /* Reads data block
  * Returns 1 if successful or -1 on error
  */

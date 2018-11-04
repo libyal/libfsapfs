@@ -141,6 +141,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
      libfsapfs_encryption_context_t *encryption_context,
      libcdata_array_t *file_extents,
      size64_t data_stream_size,
+     uint8_t is_sparse,
      libcerror_error_t **error )
 {
 	libfsapfs_data_block_data_handle_t *data_handle = NULL;
@@ -174,6 +175,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
 	     io_handle,
 	     encryption_context,
 	     file_extents,
+	     is_sparse,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -315,7 +317,7 @@ int libfsapfs_data_stream_initialize_from_compressed_data_stream(
 	     0,
 	     0,
 	     uncompressed_data_size,
-	     0,
+	     LIBFDATA_RANGE_FLAG_IS_COMPRESSED,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

@@ -3,9 +3,12 @@ MSVSCPP_FILES = \
 	fsapfs_test_btree_footer/fsapfs_test_btree_footer.vcproj \
 	fsapfs_test_btree_node/fsapfs_test_btree_node.vcproj \
 	fsapfs_test_btree_node_header/fsapfs_test_btree_node_header.vcproj \
+	fsapfs_test_buffer_data_handle/fsapfs_test_buffer_data_handle.vcproj \
 	fsapfs_test_checkpoint_map/fsapfs_test_checkpoint_map.vcproj \
 	fsapfs_test_checkpoint_map_entry/fsapfs_test_checkpoint_map_entry.vcproj \
 	fsapfs_test_checksum/fsapfs_test_checksum.vcproj \
+	fsapfs_test_compressed_data_handle/fsapfs_test_compressed_data_handle.vcproj \
+	fsapfs_test_compression/fsapfs_test_compression.vcproj \
 	fsapfs_test_container/fsapfs_test_container.vcproj \
 	fsapfs_test_container_data_handle/fsapfs_test_container_data_handle.vcproj \
 	fsapfs_test_container_key_bag/fsapfs_test_container_key_bag.vcproj \

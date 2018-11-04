@@ -196,6 +196,9 @@ int libfsapfs_file_extent_read_key_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_file_system_btree_key_file_extent_t *) data )->logical_address,
+	 file_extent->logical_offset );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -208,13 +211,10 @@ int libfsapfs_file_extent_read_key_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_file_system_btree_key_file_extent_t *) data )->logical_address,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: logical address\t\t\t: %" PRIu64 "\n",
+		 "%s: logical address\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 file_extent->logical_offset );
 
 		libcnotify_printf(
 		 "\n" );
@@ -293,7 +293,7 @@ int libfsapfs_file_extent_read_value_data(
 
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_file_system_btree_value_file_extent_t *) data )->physical_block_number,
-	 file_extent->block_number );
+	 file_extent->physical_block_number );
 
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_file_system_btree_value_file_extent_t *) data )->encryption_identifier,
@@ -315,7 +315,7 @@ int libfsapfs_file_extent_read_value_data(
 		libcnotify_printf(
 		 "%s: physical block number\t\t: %" PRIu64 "\n",
 		 function,
-		 file_extent->block_number );
+		 file_extent->physical_block_number );
 
 		libcnotify_printf(
 		 "%s: encryption identifier\t\t: %" PRIu64 "\n",

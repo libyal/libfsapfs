@@ -326,6 +326,10 @@ int libfsapfs_inode_read_value_data(
 	 ( (fsapfs_file_system_btree_value_inode_t *) data )->access_time,
 	 inode->access_time );
 
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_file_system_btree_value_inode_t *) data )->inode_flags,
+	 inode->flags );
+
 	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_file_system_btree_value_inode_t *) data )->owner_identifier,
 	 inode->owner_identifier );
@@ -427,15 +431,12 @@ int libfsapfs_inode_read_value_data(
 
 			goto on_error;
 		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_file_system_btree_value_inode_t *) data )->inode_flags,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: inode flags\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 inode->flags );
 		libfsapfs_debug_print_inode_flags(
-		 value_64bit );
+		 inode->flags );
 		libcnotify_printf(
 		 "\n" );
 
@@ -1291,6 +1292,43 @@ int libfsapfs_inode_get_utf16_name(
 
 		return( -1 );
 	}
+	return( 1 );
+}
+
+/* Retrieves the flags
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_flags(
+     libfsapfs_inode_t *inode,
+     uint64_t *flags,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_flags";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( flags == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid flags.",
+		 function );
+
+		return( -1 );
+	}
+	*flags = inode->flags;
+
 	return( 1 );
 }
 
