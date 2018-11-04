@@ -4366,6 +4366,7 @@ libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0
 	/* 0x0002fa1e */ { 1, { 0x0002fa1e } },
 	/* 0x0002fa1f */ { 1, { 0x0002fa1f } }
 };
+
 /* Compares an UTF-8 string with a file entry name
  * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */

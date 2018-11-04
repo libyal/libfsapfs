@@ -1778,90 +1778,79 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 #endif
 		file_system_identifier &= 0x0fffffffffffffffUL;
 
-		compare_result = LIBUNA_COMPARE_LESS;
-
-		if( file_system_identifier > parent_identifier )
+		if( ( file_system_identifier > parent_identifier )
+		 || ( ( file_system_identifier == parent_identifier )
+		  &&  ( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
 		{
-			compare_result = LIBUNA_COMPARE_GREATER;
-		}
-		else if( file_system_identifier == parent_identifier )
-		{
-			if( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
-			{
-				compare_result = LIBUNA_COMPARE_GREATER;
-			}
-			else if( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
-			{
-				if( libfsapfs_directory_record_initialize(
-				     &safe_directory_record,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-					 "%s: unable to create directory record.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsapfs_directory_record_read_key_data(
-				     safe_directory_record,
-				     entry->key_data,
-				     (size_t) entry->key_data_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_IO,
-					 LIBCERROR_IO_ERROR_READ_FAILED,
-					 "%s: unable to read directory record key data.",
-					 function );
-
-					goto on_error;
-				}
-				compare_result = libfsapfs_directory_record_compare_name_with_utf8_string(
-				                  safe_directory_record,
-				                  utf8_string,
-				                  utf8_string_length,
-				                  name_hash,
-				                  file_system_btree->use_case_folding,
-				                  error );
-
-				if( compare_result == -1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GENERIC,
-					 "%s: unable to compare UTF-8 string with name of directory record.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsapfs_directory_record_free(
-				     &safe_directory_record,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free directory record.",
-					 function );
-
-					goto on_error;
-				}
-			}
-		}
-		if( compare_result != LIBUNA_COMPARE_LESS )
-		{
-			if( ( previous_entry == NULL )
-			 || ( compare_result == LIBUNA_COMPARE_EQUAL ) )
-			{
-				previous_entry = entry;
-			}
 			break;
+		}
+		if( ( file_system_identifier == parent_identifier )
+		 && ( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) )
+		{
+			if( libfsapfs_directory_record_initialize(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create directory record.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_directory_record_read_key_data(
+			     safe_directory_record,
+			     entry->key_data,
+			     (size_t) entry->key_data_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read directory record key data.",
+				 function );
+
+				goto on_error;
+			}
+			compare_result = libfsapfs_directory_record_compare_name_with_utf8_string(
+			                  safe_directory_record,
+			                  utf8_string,
+			                  utf8_string_length,
+			                  name_hash,
+			                  file_system_btree->use_case_folding,
+			                  error );
+
+			if( compare_result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GENERIC,
+				 "%s: unable to compare UTF-8 string with name of directory record.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_directory_record_free(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free directory record.",
+				 function );
+
+				goto on_error;
+			}
+			if( compare_result == LIBUNA_COMPARE_LESS )
+			{
+				break;
+			}
 		}
 		previous_entry = entry;
 	}
@@ -2402,90 +2391,79 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 #endif
 		file_system_identifier &= 0x0fffffffffffffffUL;
 
-		compare_result = LIBUNA_COMPARE_LESS;
-
-		if( file_system_identifier > parent_identifier )
+		if( ( file_system_identifier > parent_identifier )
+		 || ( ( file_system_identifier == parent_identifier )
+		  &&  ( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) ) )
 		{
-			compare_result = LIBUNA_COMPARE_GREATER;
-		}
-		else if( file_system_identifier == parent_identifier )
-		{
-			if( file_system_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
-			{
-				compare_result = LIBUNA_COMPARE_GREATER;
-			}
-			else if( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
-			{
-				if( libfsapfs_directory_record_initialize(
-				     &safe_directory_record,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-					 "%s: unable to create directory record.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsapfs_directory_record_read_key_data(
-				     safe_directory_record,
-				     entry->key_data,
-				     (size_t) entry->key_data_size,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_IO,
-					 LIBCERROR_IO_ERROR_READ_FAILED,
-					 "%s: unable to read directory record key data.",
-					 function );
-
-					goto on_error;
-				}
-				compare_result = libfsapfs_directory_record_compare_name_with_utf16_string(
-				                  safe_directory_record,
-				                  utf16_string,
-				                  utf16_string_length,
-				                  name_hash,
-				                  file_system_btree->use_case_folding,
-				                  error );
-
-				if( compare_result == -1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_GENERIC,
-					 "%s: unable to compare UTF-16 string with name of directory record.",
-					 function );
-
-					goto on_error;
-				}
-				if( libfsapfs_directory_record_free(
-				     &safe_directory_record,
-				     error ) != 1 )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-					 "%s: unable to free directory record.",
-					 function );
-
-					goto on_error;
-				}
-			}
-		}
-		if( compare_result != LIBUNA_COMPARE_LESS )
-		{
-			if( ( previous_entry == NULL )
-			 || ( compare_result == LIBUNA_COMPARE_EQUAL ) )
-			{
-				previous_entry = entry;
-			}
 			break;
+		}
+		if( ( file_system_identifier == parent_identifier )
+		 && ( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD ) )
+		{
+			if( libfsapfs_directory_record_initialize(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create directory record.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_directory_record_read_key_data(
+			     safe_directory_record,
+			     entry->key_data,
+			     (size_t) entry->key_data_size,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read directory record key data.",
+				 function );
+
+				goto on_error;
+			}
+			compare_result = libfsapfs_directory_record_compare_name_with_utf16_string(
+			                  safe_directory_record,
+			                  utf16_string,
+			                  utf16_string_length,
+			                  name_hash,
+			                  file_system_btree->use_case_folding,
+			                  error );
+
+			if( compare_result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GENERIC,
+				 "%s: unable to compare UTF-16 string with name of directory record.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_directory_record_free(
+			     &safe_directory_record,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free directory record.",
+				 function );
+
+				goto on_error;
+			}
+			if( compare_result == LIBUNA_COMPARE_LESS )
+			{
+				break;
+			}
 		}
 		previous_entry = entry;
 	}
@@ -3005,8 +2983,8 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 		{
 			break;
 		}
-/* TODO include file_system_data_type in check ? */
 		if( ( file_system_identifier == parent_identifier )
+		 && ( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_DIRECTORY_RECORD )
 		 && ( previous_entry != NULL ) )
 		{
 			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
@@ -3773,8 +3751,8 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 		{
 			break;
 		}
-/* TODO include file_system_data_type in check ? */
 		if( ( file_system_identifier == identifier )
+		 && ( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_EXTENDED_ATTRIBUTE )
 		 && ( previous_entry != NULL ) )
 		{
 			if( libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
@@ -4540,8 +4518,8 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 		{
 			file_extent_logical_address = 0;
 		}
-/* TODO include file_system_data_type in check ? */
 		if( ( file_system_identifier == identifier )
+		 && ( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_FILE_EXTENT )
 		 && ( file_extent_logical_address > 0 )
 		 && ( previous_entry != NULL ) )
 		{

@@ -956,7 +956,7 @@ int libfsapfs_extended_attribute_get_utf8_name(
 	return( result );
 }
 
-/* Compares the name with an UTF-8 encoded string
+/* Compares an UTF-8 string with an extended attribute name
  * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_extended_attribute_compare_name_with_utf8_string(
@@ -1156,7 +1156,7 @@ int libfsapfs_extended_attribute_get_utf16_name(
 	return( result );
 }
 
-/* Compares the name with an UTF-16 encoded string
+/* Compares an UTF-16 string with an extended attribute name
  * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_extended_attribute_compare_name_with_utf16_string(

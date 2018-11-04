@@ -905,7 +905,7 @@ int libfsapfs_directory_record_get_utf8_name(
 	return( 1 );
 }
 
-/* Compares the name with an UTF-8 encoded string
+/* Compares an UTF-8 string with a directory record name
  * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_directory_record_compare_name_with_utf8_string(
@@ -917,7 +917,7 @@ int libfsapfs_directory_record_compare_name_with_utf8_string(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_directory_record_compare_name_with_utf8_string";
-	int result            = 0;
+	int result            = LIBUNA_COMPARE_EQUAL;
 
 	if( directory_record == NULL )
 	{
@@ -933,11 +933,11 @@ int libfsapfs_directory_record_compare_name_with_utf8_string(
 	if( ( directory_record->name_hash != 0 )
 	 && ( name_hash != 0 ) )
 	{
-		if( directory_record->name_hash < name_hash )
+		if( name_hash < directory_record->name_hash )
 		{
 			return( LIBUNA_COMPARE_LESS );
 		}
-		else if( directory_record->name_hash > name_hash )
+		else if( name_hash > directory_record->name_hash )
 		{
 			return( LIBUNA_COMPARE_GREATER );
 		}
@@ -1049,7 +1049,7 @@ int libfsapfs_directory_record_get_utf16_name(
 	return( 1 );
 }
 
-/* Compares the name with an UTF-16 encoded string
+/* Compares an UTF-16 string with a directory record name
  * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_directory_record_compare_name_with_utf16_string(
@@ -1061,7 +1061,7 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_directory_record_compare_name_with_utf16_string";
-	int result            = 0;
+	int result            = LIBUNA_COMPARE_EQUAL;
 
 	if( directory_record == NULL )
 	{
@@ -1077,11 +1077,11 @@ int libfsapfs_directory_record_compare_name_with_utf16_string(
 	if( ( directory_record->name_hash != 0 )
 	 && ( name_hash != 0 ) )
 	{
-		if( directory_record->name_hash < name_hash )
+		if( name_hash < directory_record->name_hash )
 		{
 			return( LIBUNA_COMPARE_LESS );
 		}
-		else if( directory_record->name_hash > name_hash )
+		else if( name_hash > directory_record->name_hash )
 		{
 			return( LIBUNA_COMPARE_GREATER );
 		}
