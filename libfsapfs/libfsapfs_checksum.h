@@ -26,10 +26,17 @@
 #include <types.h>
 
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_extern.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
+
+LIBFSAPFS_EXTERN_VARIABLE \
+uint32_t libfsapfs_checksum_crc32_table[ 256 ];
+
+LIBFSAPFS_EXTERN_VARIABLE \
+int libfsapfs_checksum_crc32_table_computed;
 
 void libfsapfs_checksum_initialize_crc32_table(
       uint32_t polynomial );

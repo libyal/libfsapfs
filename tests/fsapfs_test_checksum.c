@@ -1,5 +1,5 @@
 /*
- * Library checksum type test program
+ * Library checksum functions test program
  *
  * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -35,8 +35,6 @@
 #include "../libfsapfs/libfsapfs_checksum.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
-
-extern int libfsapfs_checksum_crc32_table_computed;
 
 /* Tests the libfsapfs_checksum_initialize_crc32_table function
  * Returns 1 if successful or 0 if not

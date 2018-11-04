@@ -1667,7 +1667,8 @@ The signature is likely stored in little-endian and represents "cmpf".
 The compressed data is stored in the extended attribute after the compressed data header
 | 4 | | ZLIB (DEFLATE) compressed resource fork +
 The compressed data is stored in the resource fork
-| 5 | | [yellow-background]*Unknown (uncompressed data contains 0-byte values)*
+| 5 | | [yellow-background]*Unknown (sparse compressed extended attribute data)* +
+Uncompressed data contains 0-byte values
 | | |
 | 7 | | LZVN compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
@@ -2102,11 +2103,11 @@ number of 0.
 The file content size is stored in the compressed data header of
 a "com.apple.decmpfs" <<extended_attribute,extended attribute>>.
 
-For <<compression_method,Compression method>> 3 or 7 the file content data is
+For <<compression_method,compression method>> 3 or 7 the file content data is
 stored in a "com.apple.decmpfs" <<extended_attribute,extended attribute>> after
 the <<compressed_data_header,compressed data header>>.
 
-For <<compression_method,Compression method>> 5 the file content data contains
+For <<compression_method,compression method>> 5 the file content data contains
 0-byte values. There are 12 bytes stored after the
 <<compressed_data_header,compressed data header>> that contain:
 

@@ -1,7 +1,10 @@
 TODO
+* Add tests
+** Add Normalization Form Canonical Decomposition (NFD) tests
 * Complete support for recovery password -r
 * Handle file size of 0, mapped file size does not support 0 ?
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
+** in name compare
 * add support for case folding
 * Add container data handle? Add decryption support and use it to read container key bag?
 * add snapshot support
@@ -10,20 +13,25 @@ library:
 * check if data block vector allocated size matches size of file extents
 * get_extent function, check inode flags and set extent is sparse flag
 * expose directory entry added time
-* format support
+
+* improve format support
 ** Add resource fork support
 ** read zlib compressed resource fork data footer
 ** Check deflate compressed files edge case where first byte is 0x#f
+
 * change container read bootstap as advised in documentation
 ** validate checksum
 ** read backup container superblocks
+
 * API
 ** separate internal external attribute descriptor and API external descriptor
 ** Add function to provide volume size
 ** Add function to provide volume date and time values
+
 * optimization
 ** read inode and extended attributes at once
 ** cache uncompressed blocks
+
 * clean up / restructure
 ** refactor libfsapfs_encryption_aes_key_unwrap to use encryption context?
 

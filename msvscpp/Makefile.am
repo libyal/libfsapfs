@@ -26,6 +26,8 @@ MSVSCPP_FILES = \
 	fsapfs_test_key_bag_entry/fsapfs_test_key_bag_entry.vcproj \
 	fsapfs_test_key_bag_header/fsapfs_test_key_bag_header.vcproj \
 	fsapfs_test_key_encrypted_key/fsapfs_test_key_encrypted_key.vcproj \
+	fsapfs_test_name/fsapfs_test_name.vcproj \
+	fsapfs_test_name_hash/fsapfs_test_name_hash.vcproj \
 	fsapfs_test_notify/fsapfs_test_notify.vcproj \
 	fsapfs_test_object/fsapfs_test_object.vcproj \
 	fsapfs_test_object_map/fsapfs_test_object_map.vcproj \

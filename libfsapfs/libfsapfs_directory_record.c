@@ -458,6 +458,15 @@ int libfsapfs_directory_record_read_key_data(
 	}
 	directory_record->name_hash = name_hash;
 
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: name\t\t\t\t\t: %s\n",
+		 function,
+		 directory_record->name );
+	}
+#endif
 	return( 1 );
 
 on_error:

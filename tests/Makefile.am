@@ -70,6 +70,8 @@ check_PROGRAMS = \
 	fsapfs_test_key_bag_entry \
 	fsapfs_test_key_bag_header \
 	fsapfs_test_key_encrypted_key \
+	fsapfs_test_name \
+	fsapfs_test_name_hash \
 	fsapfs_test_notify \
 	fsapfs_test_object \
 	fsapfs_test_object_map \
@@ -475,6 +477,28 @@ fsapfs_test_key_encrypted_key_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_key_encrypted_key_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_name_SOURCES = \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_name.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_name_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_name_hash_SOURCES = \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_name_hash.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_name_hash_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

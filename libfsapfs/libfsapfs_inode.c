@@ -678,6 +678,15 @@ int libfsapfs_inode_read_value_data(
 
 						goto on_error;
 					}
+#if defined( HAVE_DEBUG_OUTPUT )
+					if( libcnotify_verbose != 0 )
+					{
+						libcnotify_printf(
+						 "%s: name\t\t\t\t\t: %s\n",
+						 function,
+						 inode->name );
+					}
+#endif
 					break;
 
 				case 8:
