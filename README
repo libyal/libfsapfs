@@ -1,15 +1,22 @@
 libfsapfs is a library to access the Apple File System (APFS).
 
-Note that this project currently only focuses on the analysis of the format.
-
 Project information:
 
 * Status: experimental
 * Licence: LGPLv3+
 
-Planned:
+Read-only supported APFS formats:
 
-* Finish library
+* version 2
+
+Supported APFS format features:
+
+* compression
+* encryption
+
+Unsupported APFS format features:
+
+* snapshots
 
 For more information see:
 

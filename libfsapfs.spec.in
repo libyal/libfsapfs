@@ -7,45 +7,47 @@ License: LGPL
 Source: %{name}-%{version}.tar.gz
 URL: https://github.com/libyal/libfsapfs
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
-@libfsapfs_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcaes_spec_requires@ @ax_libcdata_spec_requires@ @ax_libcerror_spec_requires@ @ax_libcfile_spec_requires@ @ax_libclocale_spec_requires@ @ax_libcnotify_spec_requires@ @ax_libcpath_spec_requires@ @ax_libcrypto_spec_requires@ @ax_libcsplit_spec_requires@ @ax_libcthreads_spec_requires@ @ax_libfcache_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_libfguid_spec_requires@ @ax_libhmac_spec_requires@ @ax_libuna_spec_requires@
-BuildRequires: gcc @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libcthreads_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libhmac_spec_build_requires@ @ax_libuna_spec_build_requires@
+@libfsapfs_spec_requires@ @ax_libbfio_spec_requires@ @ax_libcaes_spec_requires@ @ax_libcdata_spec_requires@ @ax_libcerror_spec_requires@ @ax_libcfile_spec_requires@ @ax_libclocale_spec_requires@ @ax_libcnotify_spec_requires@ @ax_libcpath_spec_requires@ @ax_libcrypto_spec_requires@ @ax_libcsplit_spec_requires@ @ax_libcthreads_spec_requires@ @ax_libfcache_spec_requires@ @ax_libfdata_spec_requires@ @ax_libfdatetime_spec_requires@ @ax_libfguid_spec_requires@ @ax_libhmac_spec_requires@ @ax_libuna_spec_requires@ @ax_zlib_spec_requires@
+BuildRequires: gcc @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requires@ @ax_libcdata_spec_build_requires@ @ax_libcerror_spec_build_requires@ @ax_libcfile_spec_build_requires@ @ax_libclocale_spec_build_requires@ @ax_libcnotify_spec_build_requires@ @ax_libcpath_spec_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libcsplit_spec_build_requires@ @ax_libcthreads_spec_build_requires@ @ax_libfcache_spec_build_requires@ @ax_libfdata_spec_build_requires@ @ax_libfdatetime_spec_build_requires@ @ax_libfguid_spec_build_requires@ @ax_libhmac_spec_build_requires@ @ax_libuna_spec_build_requires@ @ax_zlib_spec_build_requires@
 
-%description
+%description -n libfsapfs
 Library to access the Apple File System (APFS) format
 
-%package devel
+%package -n libfsapfs-devel
 Summary: Header files and libraries for developing applications for libfsapfs
 Group: Development/Libraries
 Requires: libfsapfs = %{version}-%{release}
 
-%description devel
+%description -n libfsapfs-devel
 Header files and libraries for developing applications for libfsapfs.
 
-%package python
+%package -n libfsapfs-python2
+Obsoletes: libfsapfs-python < %{version}
+Provides: libfsapfs-python = %{version}
 Summary: Python 2 bindings for libfsapfs
 Group: System Environment/Libraries
-Requires: libfsapfs = %{version}-%{release} python
-BuildRequires: python-devel
+Requires: libfsapfs = %{version}-%{release} python2
+BuildRequires: python2-devel
 
-%description python
+%description -n libfsapfs-python2
 Python 2 bindings for libfsapfs
 
-%package python3
+%package -n libfsapfs-python3
 Summary: Python 3 bindings for libfsapfs
 Group: System Environment/Libraries
 Requires: libfsapfs = %{version}-%{release} python3
 BuildRequires: python3-devel
 
-%description python3
+%description -n libfsapfs-python3
 Python 3 bindings for libfsapfs
 
-%package tools
+%package -n libfsapfs-tools
 Summary: Several tools for reading Apple File System (APFS) volumes
 Group: Applications/System
 Requires: libfsapfs = %{version}-%{release} @ax_libfuse_spec_requires@
 @libfsapfs_spec_tools_build_requires@ @ax_libfuse_spec_build_requires@
 
-%description tools
+%description -n libfsapfs-tools
 Several tools for reading Apple File System (APFS) volumes
 
 %prep
@@ -66,13 +68,13 @@ rm -rf %{buildroot}
 
 %postun -p /sbin/ldconfig
 
-%files
+%files -n libfsapfs
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
-%files devel
+%files -n libfsapfs-devel
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README ChangeLog
@@ -83,7 +85,7 @@ rm -rf %{buildroot}
 %{_includedir}/*
 %{_mandir}/man3/*
 
-%files python
+%files -n libfsapfs-python2
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
@@ -91,7 +93,7 @@ rm -rf %{buildroot}
 %{_libdir}/python2*/site-packages/*.la
 %{_libdir}/python2*/site-packages/*.so
 
-%files python3
+%files -n libfsapfs-python3
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
@@ -99,7 +101,7 @@ rm -rf %{buildroot}
 %{_libdir}/python3*/site-packages/*.la
 %{_libdir}/python3*/site-packages/*.so
 
-%files tools
+%files -n libfsapfs-tools
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README

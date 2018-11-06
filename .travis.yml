@@ -46,6 +46,39 @@ matrix:
     dist: trusty
     sudo: required
     group: edge
+  - name: "Linux with gcc without OpenSSL"
+    env:
+    - CONFIGURE_OPTIONS="--with-openssl=no"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-no-openssl"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc with OpenSSL EVP"
+    env:
+    - CONFIGURE_OPTIONS="--enable-openssl-evp-cipher=yes --enable-openssl-evp-md=yes"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-openssl-evp"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
+  - name: "Linux with gcc with OpenSSL non-EVP"
+    env:
+    - CONFIGURE_OPTIONS="--enable-openssl-evp-cipher=no --enable-openssl-evp-md=no"
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc-openssl"
+    compiler: gcc
+    os: linux
+    dist: trusty
+    sudo: required
+    group: edge
   - name: "Linux with gcc and Python module"
     env:
     - CONFIGURE_OPTIONS="--enable-python"
@@ -143,7 +176,6 @@ matrix:
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-gcc"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
@@ -151,7 +183,6 @@ matrix:
     env:
     - CONFIGURE_OPTIONS="--enable-python"
     - TARGET="macos-gcc-python"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
@@ -160,14 +191,12 @@ matrix:
     - CONFIGURE_OPTIONS="--enable-python2"
     - PYTHON_VERSION=2
     - TARGET="macos-gcc-python2"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
   - name: "MacOS with gcc and Python 2 module (setup.py)"
     env:
     - TARGET="macos-gcc-python-setup-py"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
@@ -175,13 +204,12 @@ matrix:
     env:
     - CONFIGURE_OPTIONS="--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
     - TARGET="macos-gcc-pkgbuild"
-    compiler: clang
     compiler: gcc
     os: osx
     osx_image: xcode8.3
 before_install:
   - if test ${TRAVIS_OS_NAME} = "linux"; then
-      sudo apt-get update && sudo apt-mark hold oracle-java8-installer oracle-java9-installer postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6 postgresql-client postgresql-client-common postgresql-common postgresql-contrib-9.2 postgresql-contrib-9.3 postgresql-contrib-9.4 postgresql-contrib-9.5 postgresql-contrib-9.6 postgresql-doc && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint;
+      sudo apt-get update && sudo apt-mark hold oracle-java8-installer oracle-java9-installer postgresql-9.2 postgresql-9.3 postgresql-9.4 postgresql-9.5 postgresql-9.6 postgresql-client postgresql-client-common postgresql-common postgresql-contrib-9.2 postgresql-contrib-9.3 postgresql-contrib-9.4 postgresql-contrib-9.5 postgresql-contrib-9.6 postgresql-doc && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint zlib1g-dev libssl-dev libfuse-dev;
     elif test ${TRAVIS_OS_NAME} = "osx"; then
       brew update && brew install gettext gnu-sed && brew link --force gettext;
     fi

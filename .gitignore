@@ -133,14 +133,14 @@ stamp-h[1-9]
 /tests/fsapfs_test_checkpoint_map
 /tests/fsapfs_test_checkpoint_map_entry
 /tests/fsapfs_test_checksum
+/tests/fsapfs_test_compressed_data_handle
+/tests/fsapfs_test_compression
 /tests/fsapfs_test_container
 /tests/fsapfs_test_container_data_handle
 /tests/fsapfs_test_container_key_bag
 /tests/fsapfs_test_container_reaper
 /tests/fsapfs_test_container_space_manager
 /tests/fsapfs_test_container_superblock
-/tests/fsapfs_test_compressed_data_handle
-/tests/fsapfs_test_compression
 /tests/fsapfs_test_data_block
 /tests/fsapfs_test_directory_record
 /tests/fsapfs_test_encryption_context

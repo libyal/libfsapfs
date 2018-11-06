@@ -1,57 +1,156 @@
 environment:
   matrix:
   - TARGET: vs2008
+    BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 9.0
     platform: Win32
     configuration: Release
   - TARGET: vs2010
+    BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 10.0
     platform: Win32
     configuration: VSDebug
   - TARGET: vs2012
+    BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 11.0
     platform: x64
     configuration: Release
   - TARGET: vs2013
+    BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 12.0
     platform: Win32
     configuration: Release
   - TARGET: vs2015
+    BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     VisualStudioVersion: 14.0
     platform: Win32
     configuration: Release
   - TARGET: vs2017
+    BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     VisualStudioVersion: 15.0
     configuration: Release
   - TARGET: python27
+    BUILD_ENVIRONMENT: python
+    PYTHON: "C:\\Python27"
+  - TARGET: python27-x64
+    BUILD_ENVIRONMENT: python
+    PYTHON: "C:\\Python27-x64"
   - TARGET: python36
-  - TARGET: cygwin
-  - TARGET: cygwin64
-  - TARGET: mingw
-  - TARGET: mingw-w64
+    BUILD_ENVIRONMENT: python
+    PYTHON: "C:\\Python36"
+  - TARGET: python36-x64
+    BUILD_ENVIRONMENT: python
+    PYTHON: "C:\\Python36-x64"
+  - TARGET: cygwin-gcc
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: ""
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin-gcc-no-optimization
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: "--enable-shared=no"
+    CFLAGS: "--coverage -O0"
+    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin-gcc-python
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: "--enable-python"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin-gcc-python2
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: "--enable-python2"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin-gcc-python3
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: "--enable-python3"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin-gcc-static-executables
+    BUILD_ENVIRONMENT: cygwin
+    CONFIGURE_OPTIONS: "--enable-static-executables"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: ""
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc-no-optimization
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-shared=no"
+    CFLAGS: "--coverage -O0"
+    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc-python
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-python"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc-python2
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-python2"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc-python3
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-python3"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: cygwin64-gcc-static-executables
+    BUILD_ENVIRONMENT: cygwin64
+    CONFIGURE_OPTIONS: "--enable-static-executables"
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: mingw-gcc
+    BUILD_ENVIRONMENT: mingw
+    CONFIGURE_OPTIONS: ""
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: mingw-gcc-no-optimization
+    BUILD_ENVIRONMENT: mingw
+    CONFIGURE_OPTIONS: "--enable-shared=no"
+    CFLAGS: "--coverage -O0"
+    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
+    LDFLAGS: "--coverage"
+  - TARGET: mingw-w64-gcc
+    BUILD_ENVIRONMENT: mingw-w64
+    CONFIGURE_OPTIONS: ""
+    CFLAGS: "--coverage"
+    LDFLAGS: "--coverage"
+  - TARGET: mingw-w64-gcc-no-optimization
+    BUILD_ENVIRONMENT: mingw-w64
+    CONFIGURE_OPTIONS: "--enable-shared=no"
+    CFLAGS: "--coverage -O0"
+    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
+    LDFLAGS: "--coverage"
 
 install:
 - cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
-- cmd: git clone https://github.com/libyal/vstools.git ..\vstools
-- cmd: if [%TARGET%]==[cygwin] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
+    git clone https://github.com/libyal/vstools.git ..\vstools )
+- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
+    .\synczlib.ps1 }
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     C:\cygwin\setup-x86.exe -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s http://cygwin.mirror.constant.com -P zlib-devel -P openssl-devel -P python2-devel -P python3-devel )
-- cmd: if [%TARGET%]==[cygwin64] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P zlib-devel -P openssl-devel -P python2-devel -P python3-devel )
-- cmd: if [%TARGET%]==[mingw] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     C:\MinGW\bin\mingw-get install libz-dev )
-- cmd: if [%TARGET%]==[mingw-w64] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\pacman -S --noconfirm --needed msys/zlib-devel )
 
 build_script:
-- ps: .\synclibs.ps1
-- ps: .\autogen.ps1
-- ps: .\synczlib.ps1
+- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
+    .\synclibs.ps1
+    .\autogen.ps1 }
 - cmd: if [%TARGET%]==[vs2008] (
     msbuild /verbosity:quiet msvscpp\libfsapfs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2010] (
@@ -72,41 +171,39 @@ build_script:
     msbuild /verbosity:quiet vs2015\libfsapfs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%TARGET%]==[vs2017] (
     set PYTHONPATH=..\vstools &&
-    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 --with-dokany msvscpp\libfsapfs.sln &&
+    C:\Python27\python.exe ..\vstools\scripts\msvscpp-convert.py --extend-with-x64 --no-python-dll --output-format 2017 msvscpp\libfsapfs.sln &&
     msbuild /verbosity:quiet vs2017\libfsapfs.sln /property:Platform=Win32 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
     msbuild /verbosity:quiet vs2017\libfsapfs.sln /property:Platform=x64 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
-- cmd: if [%TARGET%]==[python27] (
-    C:\Python27\python.exe setup.py bdist_msi )
-- cmd: if [%TARGET%]==[python36] (
-    C:\Python36\python.exe setup.py bdist_msi )
-- cmd: if [%TARGET%]==[cygwin] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[python] (
+    "%PYTHON%\\python.exe" setup.py bdist_msi )
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin\home\appveyor\libfsapfs &&
     C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )
-- cmd: if [%TARGET%]==[cygwin64] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
     C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )
-- cmd: if [%TARGET%]==[mingw] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     xcopy /i /q /s C:\projects\libfsapfs C:\MinGW\msys\1.0\home\appveyor\libfsapfs &&
     C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh" )
-- cmd: if [%TARGET%]==[mingw-w64] (
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
     C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )
 
 test_script:
 - cmd: rem Run tests
-- ps: If ($env:TARGET -eq "vs2008" -or $env:TARGET -eq "vs2010" -or $env:TARGET -eq "vs2012" -or $env:TARGET -eq "vs2013" -or $env:TARGET -eq "vs2015" -or $env:TARGET -eq "vs2017") {
+- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\runtests.ps1 }
-- cmd: if [%TARGET%]==[cygwin] (
-    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./runtests.sh" )
-- cmd: if [%TARGET%]==[cygwin64] (
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./runtests.sh" )
-- cmd: if [%TARGET%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && ./runtests.sh" )
-- cmd: if [%TARGET%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./runtests.sh" )
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
+    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
+    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
+- cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
 
 after_test:
-- cmd: if [%TARGET%]==[mingw] (
+- cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
     copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\libfsapfs\codecov.sh &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n mingw -y .codecov.yml" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n ${TARGET} -y .codecov.yml" )
 
