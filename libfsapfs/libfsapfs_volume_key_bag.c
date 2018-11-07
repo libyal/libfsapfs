@@ -737,13 +737,15 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves the volume key that can be unlocked with the password
+/* Retrieves the volume key that can be unlocked
  * Returns 1 if successful, 0 if no such volume key or -1 on error
  */
 int libfsapfs_volume_key_bag_get_volume_key(
      libfsapfs_volume_key_bag_t *volume_key_bag,
-     const uint8_t *password,
-     size_t password_length,
+     const uint8_t *user_password,
+     size_t user_password_length,
+     const uint8_t *recovery_password,
+     size_t recovery_password_length,
      uint8_t *key,
      size_t key_size,
      libcerror_error_t **error )
@@ -844,24 +846,50 @@ int libfsapfs_volume_key_bag_get_volume_key(
 
 			goto on_error;
 		}
-		result = libfsapfs_key_encrypted_key_unlock_with_password(
-		          key_encrypted_key,
-		          password,
-		          password_length,
-		          key,
-		          key_size,
-		          error );
-
-		if( result == -1 )
+		if( user_password != NULL )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to unlock key encrypted key with password.",
-			 function );
+			result = libfsapfs_key_encrypted_key_unlock_with_password(
+			          key_encrypted_key,
+			          user_password,
+			          user_password_length,
+			          key,
+			          key_size,
+			          error );
 
-			goto on_error;
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to unlock key encrypted key with user password.",
+				 function );
+
+				goto on_error;
+			}
+		}
+		if( ( result == 0 )
+		 && ( recovery_password != NULL ) )
+		{
+			result = libfsapfs_key_encrypted_key_unlock_with_password(
+			          key_encrypted_key,
+			          recovery_password,
+			          recovery_password_length,
+			          key,
+			          key_size,
+			          error );
+
+			if( result == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to unlock key encrypted key with recovery password.",
+				 function );
+
+				goto on_error;
+			}
 		}
 		if( libfsapfs_key_encrypted_key_free(
 		     &key_encrypted_key,

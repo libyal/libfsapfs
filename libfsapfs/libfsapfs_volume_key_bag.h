@@ -68,8 +68,10 @@ int libfsapfs_volume_key_bag_read_data(
 
 int libfsapfs_volume_key_bag_get_volume_key(
      libfsapfs_volume_key_bag_t *volume_key_bag,
-     const uint8_t *password,
-     size_t password_length,
+     const uint8_t *user_password,
+     size_t user_password_length,
+     const uint8_t *recovery_password,
+     size_t recovery_password_length,
      uint8_t *key,
      size_t key_size,
      libcerror_error_t **error );

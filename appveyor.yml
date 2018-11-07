@@ -149,7 +149,7 @@ install:
 
 build_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
-    .\synclibs.ps1
+    .\synclibs.ps1;
     .\autogen.ps1 }
 - cmd: if [%TARGET%]==[vs2008] (
     msbuild /verbosity:quiet msvscpp\libfsapfs.sln /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
@@ -194,13 +194,13 @@ test_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\runtests.ps1 }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
+    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 || if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
+    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 || if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 || if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 && if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1 || if test $? -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi" )
 
 after_test:
 - cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (

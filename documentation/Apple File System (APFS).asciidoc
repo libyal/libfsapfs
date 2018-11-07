@@ -1805,6 +1805,10 @@ It apprears that current APFS file system use a key with name and hash.
 `[APPLE18]` does not indicate how to distinguish between the two, but one
 method is to compare calculated and stored size of the key data.
 
+[NOTE]
+In B-Tree branch nodes are sorted using the case-sensitive name, even when the
+file system is case-insensitive.
+
 ==== Directory record key data with name
 
 The directory record key data with name (j_drec_key_t) is variable of size and

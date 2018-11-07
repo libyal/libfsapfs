@@ -828,6 +828,236 @@ int libfsapfs_key_encrypted_key_read_data(
 	return( 1 );
 }
 
+/* Unlocks the key encrypted key with a key
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int libfsapfs_key_encrypted_key_unlock_with_key(
+     libfsapfs_key_encrypted_key_t *key_encrypted_key,
+     const uint8_t *key,
+     size_t key_size,
+     uint8_t *unlocked_key,
+     size_t unlocked_key_size,
+     libcerror_error_t **error )
+{
+	uint8_t hash_buffer[ LIBHMAC_SHA256_HASH_SIZE ];
+	uint8_t wrapped_kek[ 40 ];
+
+	static char *function     = "libfsapfs_key_encrypted_key_unlock_with_key";
+	size_t used_kek_data_size = 0;
+	size_t used_key_size      = 0;
+	int result                = 0;
+
+	if( key_encrypted_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key encrypted key.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_encrypted_key->encryption_method == 0 )
+	{
+		used_kek_data_size = 40;
+		used_key_size      = 32;
+	}
+	else if( key_encrypted_key->encryption_method == 2 )
+	{
+		used_kek_data_size = 24;
+		used_key_size      = 16;
+	}
+	else
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported encryption method.",
+		 function );
+
+		return( -1 );
+	}
+	if( key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid key.",
+		 function );
+
+		return( -1 );
+	}
+	if( key_size != 256 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid key size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( unlocked_key == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid unlocked key.",
+		 function );
+
+		return( -1 );
+	}
+	if( unlocked_key_size != 256 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid unlocked key size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: key:\n",
+		 function );
+		libcnotify_print_data(
+		 key,
+		 32,
+		 0 );
+	}
+#endif
+	if( libfsapfs_encryption_aes_key_unwrap(
+	     key,
+	     used_key_size * 8,
+	     key_encrypted_key->wrapped_kek,
+	     used_kek_data_size,
+	     wrapped_kek,
+	     used_kek_data_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GENERIC,
+		 "%s: unable to unwrap wrapped KEK with key.",
+		 function );
+
+		goto on_error;
+	}
+	if( memory_compare(
+	     wrapped_kek,
+	     libfsapfs_key_encrypted_key_wrapped_kek_initialization_vector,
+	     8 ) == 0 )
+	{
+		if( memory_copy(
+		     unlocked_key,
+		     &( wrapped_kek[ 8 ] ),
+		     used_key_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy unlocked key.",
+			 function );
+
+			goto on_error;
+		}
+		if( key_encrypted_key->encryption_method == 2 )
+		{
+			if( memory_copy(
+			     &( unlocked_key[ 16 ] ),
+			     key_encrypted_key->identifier,
+			     16 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy identifier to unlocked key.",
+				 function );
+
+				goto on_error;
+			}
+			if( libhmac_sha256_calculate(
+			     unlocked_key,
+			     32,
+			     hash_buffer,
+			     LIBHMAC_SHA256_HASH_SIZE,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to calculate SHA-256 of tweak key data.",
+				 function );
+
+				goto on_error;
+			}
+			if( memory_copy(
+			     &( unlocked_key[ 16 ] ),
+			     hash_buffer,
+			     16 ) == NULL )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_MEMORY,
+				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+				 "%s: unable to copy SHA-256 hash to unlocked key.",
+				 function );
+
+				goto on_error;
+			}
+			memory_set(
+			 hash_buffer,
+			 0,
+			 LIBHMAC_SHA256_HASH_SIZE );
+		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: unlocked key:\n",
+			 function );
+			libcnotify_print_data(
+			 unlocked_key,
+			 unlocked_key_size / 8,
+			 0 );
+		}
+#endif
+		result = 1;
+	}
+	memory_set(
+	 wrapped_kek,
+	 0,
+	 40 );
+
+	return( result );
+
+on_error:
+	memory_set(
+	 wrapped_kek,
+	 0,
+	 40 );
+
+	memory_set(
+	 hash_buffer,
+	 0,
+	 LIBHMAC_SHA256_HASH_SIZE );
+
+	return( -1 );
+}
+
 /* Unlocks the key encrypted key with a password
  * Returns 1 if successful, 0 if not or -1 on error
  */
@@ -835,8 +1065,8 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
      libfsapfs_key_encrypted_key_t *key_encrypted_key,
      const uint8_t *password,
      size_t password_length,
-     uint8_t *key,
-     size_t key_size,
+     uint8_t *unlocked_key,
+     size_t unlocked_key_size,
      libcerror_error_t **error )
 {
 	uint8_t password_key[ 32 ];
@@ -880,18 +1110,18 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 
 		return( -1 );
 	}
-	if( key == NULL )
+	if( unlocked_key == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid key.",
+		 "%s: invalid unlocked key.",
 		 function );
 
 		return( -1 );
 	}
-	if( key_size != 256 )
+	if( unlocked_key_size != 256 )
 	{
 		libcerror_error_set(
 		 error,
@@ -962,7 +1192,7 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 	     8 ) == 0 )
 	{
 		if( memory_copy(
-		     key,
+		     unlocked_key,
 		     &( wrapped_kek[ 8 ] ),
 		     password_key_size ) == NULL )
 		{
@@ -970,7 +1200,7 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_MEMORY,
 			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy key.",
+			 "%s: unable to copy unlocked key.",
 			 function );
 
 			goto on_error;
@@ -979,11 +1209,11 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: volume key:\n",
+			 "%s: unlocked key:\n",
 			 function );
 			libcnotify_print_data(
-			 key,
-			 key_size / 8,
+			 unlocked_key,
+			 unlocked_key_size / 8,
 			 0 );
 		}
 #endif
@@ -1006,236 +1236,6 @@ on_error:
 	 password_key,
 	 0,
 	 32 );
-
-	return( -1 );
-}
-
-/* Unlocks the key encrypted key with a volume key
- * Returns 1 if successful, 0 if not or -1 on error
- */
-int libfsapfs_key_encrypted_key_unlock_with_volume_key(
-     libfsapfs_key_encrypted_key_t *key_encrypted_key,
-     const uint8_t *volume_key,
-     size_t volume_key_size,
-     uint8_t *key,
-     size_t key_size,
-     libcerror_error_t **error )
-{
-	uint8_t hash_buffer[ LIBHMAC_SHA256_HASH_SIZE ];
-	uint8_t wrapped_kek[ 40 ];
-
-	static char *function       = "libfsapfs_key_encrypted_key_unlock_with_volume_key";
-	size_t used_kek_data_size   = 0;
-	size_t used_volume_key_size = 0;
-	int result                  = 0;
-
-	if( key_encrypted_key == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid key encrypted key.",
-		 function );
-
-		return( -1 );
-	}
-	if( key_encrypted_key->encryption_method == 0 )
-	{
-		used_kek_data_size   = 40;
-		used_volume_key_size = 32;
-	}
-	else if( key_encrypted_key->encryption_method == 2 )
-	{
-		used_kek_data_size   = 24;
-		used_volume_key_size = 16;
-	}
-	else
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported encryption method.",
-		 function );
-
-		return( -1 );
-	}
-	if( volume_key == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume key.",
-		 function );
-
-		return( -1 );
-	}
-	if( volume_key_size != 256 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid volume key size value out of bounds.",
-		 function );
-
-		return( -1 );
-	}
-	if( key == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid key.",
-		 function );
-
-		return( -1 );
-	}
-	if( key_size != 256 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid key size value out of bounds.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		libcnotify_printf(
-		 "%s: volume key:\n",
-		 function );
-		libcnotify_print_data(
-		 volume_key,
-		 32,
-		 0 );
-	}
-#endif
-	if( libfsapfs_encryption_aes_key_unwrap(
-	     volume_key,
-	     used_volume_key_size * 8,
-	     key_encrypted_key->wrapped_kek,
-	     used_kek_data_size,
-	     wrapped_kek,
-	     used_kek_data_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GENERIC,
-		 "%s: unable to unwrap wrapped KEK with volume key.",
-		 function );
-
-		goto on_error;
-	}
-	if( memory_compare(
-	     wrapped_kek,
-	     libfsapfs_key_encrypted_key_wrapped_kek_initialization_vector,
-	     8 ) == 0 )
-	{
-		if( memory_copy(
-		     key,
-		     &( wrapped_kek[ 8 ] ),
-		     used_volume_key_size ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy key.",
-			 function );
-
-			goto on_error;
-		}
-		if( key_encrypted_key->encryption_method == 2 )
-		{
-			if( memory_copy(
-			     &( key[ 16 ] ),
-			     key_encrypted_key->identifier,
-			     16 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy identifier to key.",
-				 function );
-
-				goto on_error;
-			}
-			if( libhmac_sha256_calculate(
-			     key,
-			     32,
-			     hash_buffer,
-			     LIBHMAC_SHA256_HASH_SIZE,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to calculate SHA-256 of tweak key data.",
-				 function );
-
-				goto on_error;
-			}
-			if( memory_copy(
-			     &( key[ 16 ] ),
-			     hash_buffer,
-			     16 ) == NULL )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_MEMORY,
-				 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-				 "%s: unable to copy SHA-256 hash to key.",
-				 function );
-
-				goto on_error;
-			}
-			memory_set(
-			 hash_buffer,
-			 0,
-			 LIBHMAC_SHA256_HASH_SIZE );
-		}
-#if defined( HAVE_DEBUG_OUTPUT )
-		if( libcnotify_verbose != 0 )
-		{
-			libcnotify_printf(
-			 "%s: volume master key:\n",
-			 function );
-			libcnotify_print_data(
-			 key,
-			 key_size / 8,
-			 0 );
-		}
-#endif
-		result = 1;
-	}
-	memory_set(
-	 wrapped_kek,
-	 0,
-	 40 );
-
-	return( result );
-
-on_error:
-	memory_set(
-	 wrapped_kek,
-	 0,
-	 40 );
-
-	memory_set(
-	 hash_buffer,
-	 0,
-	 LIBHMAC_SHA256_HASH_SIZE );
 
 	return( -1 );
 }

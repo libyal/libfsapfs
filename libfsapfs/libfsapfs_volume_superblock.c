@@ -366,6 +366,12 @@ int libfsapfs_volume_superblock_read_data(
 
 		return( -1 );
 	}
+/* TODO preserve modification time */
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->volume_flags,
+	 volume_superblock->volume_flags );
+
 	if( memory_copy(
 	     volume_superblock->volume_name,
 	     ( (fsapfs_volume_superblock_t *) data )->volume_name,
@@ -705,15 +711,12 @@ int libfsapfs_volume_superblock_read_data(
 
 			return( -1 );
 		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->volume_flags,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: volume flags\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: volume flags\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->volume_flags );
 		libfsapfs_debug_print_volume_flags(
-		 value_64bit );
+		 volume_superblock->volume_flags );
 		libcnotify_printf(
 		 "\n" );
 

@@ -1039,7 +1039,7 @@ int libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
 
 			goto on_error;
 		}
-		result = libfsapfs_key_encrypted_key_unlock_with_volume_key(
+		result = libfsapfs_key_encrypted_key_unlock_with_key(
 		         key_encrypted_key,
 		         volume_key,
 		         volume_key_size,

@@ -74,20 +74,20 @@ int libfsapfs_key_encrypted_key_read_data(
      size_t data_size,
      libcerror_error_t **error );
 
+int libfsapfs_key_encrypted_key_unlock_with_key(
+     libfsapfs_key_encrypted_key_t *key_encrypted_key,
+     const uint8_t *key,
+     size_t key_size,
+     uint8_t *unlocked_key,
+     size_t unlocked_key_size,
+     libcerror_error_t **error );
+
 int libfsapfs_key_encrypted_key_unlock_with_password(
      libfsapfs_key_encrypted_key_t *key_encrypted_key,
      const uint8_t *password,
      size_t password_length,
-     uint8_t *key,
-     size_t key_size,
-     libcerror_error_t **error );
-
-int libfsapfs_key_encrypted_key_unlock_with_volume_key(
-     libfsapfs_key_encrypted_key_t *key_encrypted_key,
-     const uint8_t *volume_key,
-     size_t volume_key_size,
-     uint8_t *key,
-     size_t key_size,
+     uint8_t *unlocked_key,
+     size_t unlocked_key_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

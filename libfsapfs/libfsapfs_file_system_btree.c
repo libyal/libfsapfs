@@ -1815,12 +1815,14 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 
 				goto on_error;
 			}
+			/* The directory records are sorted by case-sensitive name
+			 */
 			compare_result = libfsapfs_directory_record_compare_name_with_utf8_string(
 			                  safe_directory_record,
 			                  utf8_string,
 			                  utf8_string_length,
 			                  name_hash,
-			                  file_system_btree->use_case_folding,
+			                  0,
 			                  error );
 
 			if( compare_result == -1 )
@@ -2428,12 +2430,14 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 
 				goto on_error;
 			}
+			/* The directory records are sorted by case-sensitive name
+			 */
 			compare_result = libfsapfs_directory_record_compare_name_with_utf16_string(
 			                  safe_directory_record,
 			                  utf16_string,
 			                  utf16_string_length,
 			                  name_hash,
-			                  file_system_btree->use_case_folding,
+			                  0,
 			                  error );
 
 			if( compare_result == -1 )

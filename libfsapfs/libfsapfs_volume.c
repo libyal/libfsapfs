@@ -1356,7 +1356,8 @@ int libfsapfs_internal_volume_open_read(
 	}
 	internal_volume->is_locked = 0;
 
-	if( internal_volume->container_key_bag != NULL )
+	if( ( internal_volume->container_key_bag != NULL )
+	 && ( ( internal_volume->superblock->volume_flags & 0x00000001UL ) == 0 ) )
 	{
 		result = libfsapfs_container_key_bag_get_volume_key_bag_extent_by_identifier(
 		          internal_volume->container_key_bag,
@@ -1616,11 +1617,12 @@ int libfsapfs_internal_volume_unlock(
 
 		return( -1 );
 	}
-/* TODO add support for recovery password */
 	result = libfsapfs_volume_key_bag_get_volume_key(
 	          internal_volume->key_bag,
 	          internal_volume->user_password,
 	          internal_volume->user_password_size - 1,
+	          internal_volume->recovery_password,
+	          internal_volume->recovery_password_size - 1,
 	          volume_key,
 	          256,
 	          error );
@@ -1631,7 +1633,7 @@ int libfsapfs_internal_volume_unlock(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume key.",
+		 "%s: unable to retrieve volume key using password.",
 		 function );
 
 		goto on_error;

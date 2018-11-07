@@ -1,7 +1,6 @@
 TODO
 * Add tests
 ** Add Normalization Form Canonical Decomposition (NFD) tests
-* Complete support for recovery password -r
 * Handle file size of 0, mapped file size does not support 0 ?
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 ** in name compare
@@ -48,6 +47,7 @@ Tools:
 ** print hardlinks for -E option?
 ** "-E all" instead of using next_object_identifier walk leaf nodes
 * fsapfsmount tool
+** prompt user for password or recovery password when needed
 ** make symbolic links an absolute path which accounts for mount point
 ** add owner and group identifier support?
 ** add support for all volumes

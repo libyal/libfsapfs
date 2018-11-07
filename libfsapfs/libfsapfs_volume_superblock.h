@@ -56,6 +56,10 @@ struct libfsapfs_volume_superblock
 	 */
 	uint8_t volume_identifier[ 16 ];
 
+	/* The volume flags
+	 */
+	uint64_t volume_flags;
+
 	/* The volume name
 	 */
 	uint8_t volume_name[ 256 ];
