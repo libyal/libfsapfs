@@ -148,7 +148,7 @@ install:
     C:\msys64\usr\bin\pacman -S --noconfirm --needed msys/zlib-devel )
 
 build_script:
-- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
+- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or $env:BUILD_ENVIRONMENT -eq "python") {
     .\synclibs.ps1;
     .\autogen.ps1 }
 - cmd: if [%TARGET%]==[vs2008] (
