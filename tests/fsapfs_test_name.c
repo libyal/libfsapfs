@@ -31,11 +31,56 @@
 #include "fsapfs_test_libfsapfs.h"
 #include "fsapfs_test_libuna.h"
 #include "fsapfs_test_macros.h"
+#include "fsapfs_test_types.h"
 #include "fsapfs_test_unused.h"
+#include "fsapfs_test_unicode_decomposition_mappings.h"
 
 #include "../libfsapfs/libfsapfs_name.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
+/* Tests the libfsapfs_name_decomposition_mappings
+ * Returns 1 if successful or 0 if not
+ */
+int fsapfs_test_name_decomposition_mappings(
+     void )
+{
+	libfsapfs_name_decomposition_mapping_t single_nfd_mapping = { 1, { 0 } };
+
+	fsapfs_test_unicode_decomposition_mapping_t *mapping      = NULL;
+	libfsapfs_name_decomposition_mapping_t *nfd_mapping       = NULL;
+	libuna_unicode_character_t unicode_character              = 0;
+	int character_index                                       = 0;
+	int mapping_index                                         = 0;
+
+	for( mapping_index = 0;
+	     mapping_index < 30592;
+	     mapping_index++ )
+	{
+		mapping           = &( fsapfs_test_unicode_nfd_mappings[ mapping_index ] );
+		unicode_character = mapping->unicode_character;
+
+		libfsapfs_name_get_decomposition_mapping(
+		 unicode_character,
+		 nfd_mapping,
+		 single_nfd_mapping );
+
+		if( mapping->number_of_characters != nfd_mapping->number_of_characters )
+		{
+			return( 0 );
+		}
+		for( character_index = 0;
+		     character_index < mapping->number_of_characters;
+		     character_index++ )
+		{
+			if( mapping->characters[ character_index ] != nfd_mapping->characters[ character_index ] )
+			{
+				return( 0 );
+			}
+		}
+	}
+	return( 1 );
+}
 
 /* Tests the libfsapfs_name_compare_with_utf8_string function
  * Returns 1 if successful or 0 if not
@@ -475,6 +520,10 @@ int main(
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argv )
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
+	FSAPFS_TEST_RUN(
+	 "libfsapfs_name_decomposition_mappings",
+	 fsapfs_test_name_decomposition_mappings );
 
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_name_compare_with_utf8_string",

@@ -51,7 +51,14 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 	size_t utf8_string_index                                  = 0;
 	uint32_t calculated_checksum                              = 0;
 	uint32_t checksum_table_index                             = 0;
+	uint8_t byte_value                                        = 0;
 	uint8_t nfd_character_index                               = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint8_t utf32_stream[ 512 ];
+
+	size_t utf32_stream_index                                 = 0;
+#endif
 
 	if( name_hash == NULL )
 	{
@@ -98,167 +105,63 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 /* TODO add case folding */
 			unicode_character = towlower( unicode_character );
 		}
-		if( ( unicode_character >= 0x000000c0UL )
-		 && ( unicode_character <= 0x0000017fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000000c0[ unicode_character - 0x000000c0UL ] );
-		}
-		else if( ( unicode_character >= 0x000001a0UL )
-		      && ( unicode_character <= 0x00000237UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000001a0[ unicode_character - 0x000001a0UL ] );
-		}
-		else if( ( unicode_character >= 0x00000340UL )
-		      && ( unicode_character <= 0x000003d7UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000340[ unicode_character - 0x00000340UL ] );
-		}
-		else if( ( unicode_character >= 0x00000400UL )
-		      && ( unicode_character <= 0x000004ffUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000400[ unicode_character - 0x00000400UL ] );
-		}
-		else if( ( unicode_character >= 0x00000620UL )
-		      && ( unicode_character <= 0x000006d7UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000620[ unicode_character - 0x00000620UL ] );
-		}
-		else if( ( unicode_character >= 0x00000928UL )
-		      && ( unicode_character <= 0x000009dfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000928[ unicode_character - 0x00000928UL ] );
-		}
-		else if( ( unicode_character >= 0x00000a30UL )
-		      && ( unicode_character <= 0x00000a5fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000a30[ unicode_character - 0x00000a30UL ] );
-		}
-		else if( ( unicode_character >= 0x00000b48UL )
-		      && ( unicode_character <= 0x00000bcfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000b48[ unicode_character - 0x00000b48UL ] );
-		}
-		else if( ( unicode_character >= 0x00000c48UL )
-		      && ( unicode_character <= 0x00000ccfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000c48[ unicode_character - 0x00000c48UL ] );
-		}
-		else if( ( unicode_character >= 0x00000d48UL )
-		      && ( unicode_character <= 0x00000ddfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000d48[ unicode_character - 0x00000d48UL ] );
-		}
-		else if( ( unicode_character >= 0x00000f40UL )
-		      && ( unicode_character <= 0x00001027UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000f40[ unicode_character - 0x00000f40UL ] );
-		}
-		else if( ( unicode_character >= 0x00001b00UL )
-		      && ( unicode_character <= 0x00001b47UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00001b00[ unicode_character - 0x00001b00UL ] );
-		}
-		else if( ( unicode_character >= 0x00001e00UL )
-		      && ( unicode_character <= 0x00002007UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00001e00[ unicode_character - 0x00001e00UL ] );
-		}
-		else if( ( unicode_character >= 0x00002120UL )
-		      && ( unicode_character <= 0x000021cfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00002120[ unicode_character - 0x00002120UL ] );
-		}
-		else if( ( unicode_character >= 0x00002200UL )
-		      && ( unicode_character <= 0x0000232fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00002200[ unicode_character - 0x00002200UL ] );
-		}
-		else if( ( unicode_character >= 0x00002ad8UL )
-		      && ( unicode_character <= 0x00002adfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00002ad8[ unicode_character - 0x00002ad8UL ] );
-		}
-		else if( ( unicode_character >= 0x00003048UL )
-		      && ( unicode_character <= 0x000030ffUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00003048[ unicode_character - 0x00003048UL ] );
-		}
-		else if( ( unicode_character >= 0x0000f900UL )
-		      && ( unicode_character <= 0x0000fadfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0000f900[ unicode_character - 0x0000f900UL ] );
-		}
-		else if( ( unicode_character >= 0x0000fb18UL )
-		      && ( unicode_character <= 0x0000fb4fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0000fb18[ unicode_character - 0x0000fb18UL ] );
-		}
-		else if( ( unicode_character >= 0x00011098UL )
-		      && ( unicode_character <= 0x000110afUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00011098[ unicode_character - 0x00011098UL ] );
-		}
-		else if( ( unicode_character >= 0x00011128UL )
-		      && ( unicode_character <= 0x0001112fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00011128[ unicode_character - 0x00011128UL ] );
-		}
-		else if( ( unicode_character >= 0x00011348UL )
-		      && ( unicode_character <= 0x0001134fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00011348[ unicode_character - 0x00011348UL ] );
-		}
-		else if( ( unicode_character >= 0x000114b8UL )
-		      && ( unicode_character <= 0x000114bfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000114b8[ unicode_character - 0x000114b8UL ] );
-		}
-		else if( ( unicode_character >= 0x000115b8UL )
-		      && ( unicode_character <= 0x000115bfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000115b8[ unicode_character - 0x000115b8UL ] );
-		}
-		else if( ( unicode_character >= 0x0001d158UL )
-		      && ( unicode_character <= 0x0001d167UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0001d158[ unicode_character - 0x0001d158UL ] );
-		}
-		else if( ( unicode_character >= 0x0001d1b8UL )
-		      && ( unicode_character <= 0x0001d1c7UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0001d1b8[ unicode_character - 0x0001d1b8UL ] );
-		}
-		else if( ( unicode_character >= 0x0002f800UL )
-		      && ( unicode_character <= 0x0002fa1fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0002f800[ unicode_character - 0x0002f800UL ] );
-		}
-		else
-		{
-			single_nfd_mapping.characters[ 0 ] = unicode_character;
+		libfsapfs_name_get_decomposition_mapping(
+		 unicode_character,
+		 nfd_mapping,
+		 single_nfd_mapping );
 
-			nfd_mapping = &single_nfd_mapping;
-		}
 		for( nfd_character_index = 0;
 		     nfd_character_index < nfd_mapping->number_of_characters;
 		     nfd_character_index++ )
 		{
 			unicode_character = nfd_mapping->characters[ nfd_character_index ];
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
 			unicode_character  >>= 8;
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
+
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
 			unicode_character  >>= 8;
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
+
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
 			unicode_character  >>= 8;
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
+
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
 		}
 	}
 	*name_hash = calculated_checksum & 0x003fffffUL;
@@ -266,6 +169,14 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
+		libcnotify_printf(
+		 "%s: UTF-32 stream data:\n",
+		 function );
+		libcnotify_print_data(
+		 utf32_stream,
+		 utf32_stream_index,
+		 0 );
+
 		libcnotify_printf(
 		 "%s: CRC-32 checkum\t\t: 0x%08" PRIx32 "\n",
 		 function,
@@ -302,7 +213,14 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 	size_t utf16_string_index                                 = 0;
 	uint32_t calculated_checksum                              = 0;
 	uint32_t checksum_table_index                             = 0;
+	uint8_t byte_value                                        = 0;
 	uint8_t nfd_character_index                               = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint8_t utf32_stream[ 512 ];
+
+	size_t utf32_stream_index                                 = 0;
+#endif
 
 	if( name_hash == NULL )
 	{
@@ -349,167 +267,63 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 /* TODO add case folding */
 			unicode_character = towlower( unicode_character );
 		}
-		if( ( unicode_character >= 0x000000c0UL )
-		 && ( unicode_character <= 0x0000017fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000000c0[ unicode_character - 0x000000c0UL ] );
-		}
-		else if( ( unicode_character >= 0x000001a0UL )
-		      && ( unicode_character <= 0x00000237UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000001a0[ unicode_character - 0x000001a0UL ] );
-		}
-		else if( ( unicode_character >= 0x00000340UL )
-		      && ( unicode_character <= 0x000003d7UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000340[ unicode_character - 0x00000340UL ] );
-		}
-		else if( ( unicode_character >= 0x00000400UL )
-		      && ( unicode_character <= 0x000004ffUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000400[ unicode_character - 0x00000400UL ] );
-		}
-		else if( ( unicode_character >= 0x00000620UL )
-		      && ( unicode_character <= 0x000006d7UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000620[ unicode_character - 0x00000620UL ] );
-		}
-		else if( ( unicode_character >= 0x00000928UL )
-		      && ( unicode_character <= 0x000009dfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000928[ unicode_character - 0x00000928UL ] );
-		}
-		else if( ( unicode_character >= 0x00000a30UL )
-		      && ( unicode_character <= 0x00000a5fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000a30[ unicode_character - 0x00000a30UL ] );
-		}
-		else if( ( unicode_character >= 0x00000b48UL )
-		      && ( unicode_character <= 0x00000bcfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000b48[ unicode_character - 0x00000b48UL ] );
-		}
-		else if( ( unicode_character >= 0x00000c48UL )
-		      && ( unicode_character <= 0x00000ccfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000c48[ unicode_character - 0x00000c48UL ] );
-		}
-		else if( ( unicode_character >= 0x00000d48UL )
-		      && ( unicode_character <= 0x00000ddfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000d48[ unicode_character - 0x00000d48UL ] );
-		}
-		else if( ( unicode_character >= 0x00000f40UL )
-		      && ( unicode_character <= 0x00001027UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00000f40[ unicode_character - 0x00000f40UL ] );
-		}
-		else if( ( unicode_character >= 0x00001b00UL )
-		      && ( unicode_character <= 0x00001b47UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00001b00[ unicode_character - 0x00001b00UL ] );
-		}
-		else if( ( unicode_character >= 0x00001e00UL )
-		      && ( unicode_character <= 0x00002007UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00001e00[ unicode_character - 0x00001e00UL ] );
-		}
-		else if( ( unicode_character >= 0x00002120UL )
-		      && ( unicode_character <= 0x000021cfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00002120[ unicode_character - 0x00002120UL ] );
-		}
-		else if( ( unicode_character >= 0x00002200UL )
-		      && ( unicode_character <= 0x0000232fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00002200[ unicode_character - 0x00002200UL ] );
-		}
-		else if( ( unicode_character >= 0x00002ad8UL )
-		      && ( unicode_character <= 0x00002adfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00002ad8[ unicode_character - 0x00002ad8UL ] );
-		}
-		else if( ( unicode_character >= 0x00003048UL )
-		      && ( unicode_character <= 0x000030ffUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00003048[ unicode_character - 0x00003048UL ] );
-		}
-		else if( ( unicode_character >= 0x0000f900UL )
-		      && ( unicode_character <= 0x0000fadfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0000f900[ unicode_character - 0x0000f900UL ] );
-		}
-		else if( ( unicode_character >= 0x0000fb18UL )
-		      && ( unicode_character <= 0x0000fb4fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0000fb18[ unicode_character - 0x0000fb18UL ] );
-		}
-		else if( ( unicode_character >= 0x00011098UL )
-		      && ( unicode_character <= 0x000110afUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00011098[ unicode_character - 0x00011098UL ] );
-		}
-		else if( ( unicode_character >= 0x00011128UL )
-		      && ( unicode_character <= 0x0001112fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00011128[ unicode_character - 0x00011128UL ] );
-		}
-		else if( ( unicode_character >= 0x00011348UL )
-		      && ( unicode_character <= 0x0001134fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x00011348[ unicode_character - 0x00011348UL ] );
-		}
-		else if( ( unicode_character >= 0x000114b8UL )
-		      && ( unicode_character <= 0x000114bfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000114b8[ unicode_character - 0x000114b8UL ] );
-		}
-		else if( ( unicode_character >= 0x000115b8UL )
-		      && ( unicode_character <= 0x000115bfUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x000115b8[ unicode_character - 0x000115b8UL ] );
-		}
-		else if( ( unicode_character >= 0x0001d158UL )
-		      && ( unicode_character <= 0x0001d167UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0001d158[ unicode_character - 0x0001d158UL ] );
-		}
-		else if( ( unicode_character >= 0x0001d1b8UL )
-		      && ( unicode_character <= 0x0001d1c7UL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0001d1b8[ unicode_character - 0x0001d1b8UL ] );
-		}
-		else if( ( unicode_character >= 0x0002f800UL )
-		      && ( unicode_character <= 0x0002fa1fUL ) )
-		{
-			nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0002f800[ unicode_character - 0x0002f800UL ] );
-		}
-		else
-		{
-			single_nfd_mapping.characters[ 0 ] = unicode_character;
+		libfsapfs_name_get_decomposition_mapping(
+		 unicode_character,
+		 nfd_mapping,
+		 single_nfd_mapping );
 
-			nfd_mapping = &single_nfd_mapping;
-		}
 		for( nfd_character_index = 0;
 		     nfd_character_index < nfd_mapping->number_of_characters;
 		     nfd_character_index++ )
 		{
 			unicode_character = nfd_mapping->characters[ nfd_character_index ];
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
 			unicode_character  >>= 8;
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
+
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
 			unicode_character  >>= 8;
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
+
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
 			unicode_character  >>= 8;
 
-			checksum_table_index = ( calculated_checksum ^ ( unicode_character & 0x000000ffUL ) ) & 0x000000ffUL;
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
+
+			byte_value           = (uint8_t) ( unicode_character & 0x000000ffUL );
+			checksum_table_index = ( calculated_checksum ^ (uint32_t) byte_value ) & 0x000000ffUL;
 			calculated_checksum  = libfsapfs_checksum_crc32_table[ checksum_table_index ] ^ ( calculated_checksum >> 8 );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+			if( utf32_stream_index < 512 )
+			{
+				utf32_stream[ utf32_stream_index++ ] = byte_value;
+			}
+#endif
 		}
 	}
 	*name_hash = calculated_checksum & 0x003fffffUL;
@@ -517,6 +331,14 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
+		libcnotify_printf(
+		 "%s: UTF-32 stream data:\n",
+		 function );
+		libcnotify_print_data(
+		 utf32_stream,
+		 utf32_stream_index,
+		 0 );
+
 		libcnotify_printf(
 		 "%s: CRC-32 checkum\t\t: 0x%08" PRIx32 "\n",
 		 function,

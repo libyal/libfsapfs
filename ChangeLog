@@ -1,6 +1,6 @@
 TODO
-* Add tests
-** Add Normalization Form Canonical Decomposition (NFD) tests
+* Check which Unicode characters are treated different by the name hashing
+  algorithm, such as (\U00B5)
 * Handle file size of 0, mapped file size does not support 0 ?
 * Add support for Unicode Normalization Form Canonical Decomposition (NFD)
 ** in name compare

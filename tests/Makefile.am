@@ -483,8 +483,11 @@ fsapfs_test_key_encrypted_key_LDADD = \
 fsapfs_test_name_SOURCES = \
 	fsapfs_test_libcerror.h \
 	fsapfs_test_libfsapfs.h \
+	fsapfs_test_libuna.h \
 	fsapfs_test_memory.c fsapfs_test_memory.h \
 	fsapfs_test_name.c \
+	fsapfs_test_types.h \
+	fsapfs_test_unicode_decomposition_mappings.h \
 	fsapfs_test_unused.h
 
 fsapfs_test_name_LDADD = \

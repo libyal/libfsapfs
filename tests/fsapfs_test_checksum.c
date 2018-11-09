@@ -79,6 +79,11 @@ int fsapfs_test_checksum_calculate_weak_crc32(
 	 result,
 	 1 );
 
+	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
+	 "checksum",
+	 checksum,
+	 (uint32_t) 0x9bb99201UL );
+
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
