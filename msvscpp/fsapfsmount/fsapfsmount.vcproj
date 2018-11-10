@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="fsapfsmount"
-	ProjectGUID="{7281D11F-9719-43E4-9A8D-ADB46504DBE3}"
+	ProjectGUID="{82F521E5-3ABE-4421-87AB-39A9530ECE1D}"
 	RootNamespace="fsapfsmount"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"

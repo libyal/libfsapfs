@@ -92,12 +92,14 @@ void usage_fprint(
 	}
 	fprintf( stream, "Use fsapfsmount to mount an APFS container\n\n" );
 
-	fprintf( stream, "Usage: fsapfsmount [ -o offset ] [ -p password ] [ -r password ]\n"
-	                 "                   [ -X extended_options ] [ -hvV ] container mount_point\n\n" );
+	fprintf( stream, "Usage: fsapfsmount [ -f file_system_index ] [ -o offset ] [ -p password ]\n"
+	                 "                   [ -r password ] [ -X extended_options ] [ -hvV ]\n"
+	                 "                   container mount_point\n\n" );
 
 	fprintf( stream, "\tcontainer:   an APFS container\n\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
+	fprintf( stream, "\t-f:          mounts a specific file system or \"all\".\n" );
 	fprintf( stream, "\t-h:          shows this help\n" );
 	fprintf( stream, "\t-o:          specify the volume offset\n" );
 	fprintf( stream, "\t-p:          specify the password\n" );
@@ -1589,6 +1591,7 @@ int main( int argc, char * const argv[] )
 	libfsapfs_error_t *error                     = NULL;
 	system_character_t *mount_point              = NULL;
 	system_character_t *option_extended_options  = NULL;
+	system_character_t *option_file_system_index = NULL;
 	system_character_t *option_password          = NULL;
 	system_character_t *option_recovery_password = NULL;
 	system_character_t *option_volume_offset     = NULL;
@@ -1639,7 +1642,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "ho:p:r:vVX:" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "f:ho:p:r:vVX:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -1654,6 +1657,11 @@ int main( int argc, char * const argv[] )
 				 stdout );
 
 				return( EXIT_FAILURE );
+
+			case (system_integer_t) 'f':
+				option_file_system_index = optarg;
+
+				break;
 
 			case (system_integer_t) 'h':
 				usage_fprint(
@@ -1736,6 +1744,23 @@ int main( int argc, char * const argv[] )
 		 "Unable to initialize mount handle.\n" );
 
 		goto on_error;
+	}
+	if( option_file_system_index != NULL )
+	{
+		if( mount_handle_set_file_system_index(
+		     fsapfsmount_mount_handle,
+		     option_file_system_index,
+		     &error ) != 1 )
+		{
+			libcnotify_print_error_backtrace(
+			 error );
+			libcerror_error_free(
+			 &error );
+
+			fprintf(
+			 stderr,
+			 "Unsupported file system index defaulting to: all.\n" );
+		}
 	}
 	if( option_password != NULL )
 	{

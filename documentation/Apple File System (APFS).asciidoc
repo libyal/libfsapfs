@@ -1663,17 +1663,29 @@ The signature is likely stored in little-endian and represents "cmpf".
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
+| 1 | CMP_Type1 | [yellow-background]*Unknown (uncompressed extended attribute data)*
+| | |
 | 3 | | ZLIB (DEFLATE) compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
-| 4 | | ZLIB (DEFLATE) compressed resource fork +
+| 4 | | 64k chunked ZLIB (DEFLATE) compressed resource fork +
 The compressed data is stored in the resource fork
 | 5 | | [yellow-background]*Unknown (sparse compressed extended attribute data)* +
-Uncompressed data contains 0-byte values
-| | |
+Uncompressed data contains 0-byte values +
+According to `[APPLE04]` specifies de-dup within the generation store.
+| 6 | | [yellow-background]*Unknown (unused)*
 | 7 | | LZVN compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
-| 8 | | LZVN compressed resource fork +
+| 8 | | 64k chunked LZVN compressed resource fork +
 The compressed data is stored in the resource fork
+| 9 | | [yellow-background]*Unknown (uncompressed extended attribute data, different than CMP_Type1)*
+| 10 | | [yellow-background]*Unknown (64k chunked uncompressed data resource fork)* +
+The compressed data is stored in the resource fork
+| 11 | | LZFSE compressed extended attribute data +
+The compressed data is stored in the extended attribute after the compressed data header
+| 12 | | 64k chunked LZFSE compressed resource fork +
+The compressed data is stored in the resource fork
+| | |
+| 0x80000001 | | [yellow-background]*Unknown (faulting file)*
 |===
 
 [NOTE]
@@ -2327,6 +2339,16 @@ find /Volumes/SingleVolume
 :numbered!:
 [appendix]
 == References
+
+`[APPLE04]`
+
+[cols="1,5",options="header"]
+|===
+| Title: | copyfile.c
+| Author(s): | Apple
+| Date: | 2004
+| URL: | https://opensource.apple.com/source/copyfile/copyfile-127/copyfile.c
+|===
 
 `[APPLE18]`
 

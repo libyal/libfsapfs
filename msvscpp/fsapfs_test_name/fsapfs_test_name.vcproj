@@ -198,7 +198,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tests\fsapfs_test_libuna.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tests\fsapfs_test_memory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsapfs_test_types.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsapfs_test_unicode_case_folding_mappings.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsapfs_test_unicode_decomposition_mappings.h"
 				>
 			</File>
 			<File

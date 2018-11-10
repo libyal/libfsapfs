@@ -33,11 +33,43 @@
 #include "fsapfs_test_macros.h"
 #include "fsapfs_test_types.h"
 #include "fsapfs_test_unused.h"
+#include "fsapfs_test_unicode_case_folding_mappings.h"
 #include "fsapfs_test_unicode_decomposition_mappings.h"
 
 #include "../libfsapfs/libfsapfs_name.h"
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
+/* Tests the libfsapfs_name_case_folding_mappings
+ * Returns 1 if successful or 0 if not
+ */
+int fsapfs_test_name_case_folding_mappings(
+     void )
+{
+	fsapfs_test_unicode_case_folding_mapping_t *mapping = NULL;
+	libuna_unicode_character_t unicode_character        = 0;
+	int mapping_index                                   = 0;
+
+	for( mapping_index = 0;
+	     mapping_index < 1325;
+	     mapping_index++ )
+	{
+		mapping           = &( fsapfs_test_unicode_case_folding_mappings[ mapping_index ] );
+		unicode_character = mapping->unicode_character;
+
+		libfsapfs_name_get_case_folding_mapping(
+		 unicode_character );
+
+		if( mapping->character != unicode_character )
+		{
+			goto on_error;
+		}
+	}
+	return( 1 );
+
+on_error:
+	return( 0 );
+}
 
 /* Tests the libfsapfs_name_decomposition_mappings
  * Returns 1 if successful or 0 if not
@@ -67,7 +99,7 @@ int fsapfs_test_name_decomposition_mappings(
 
 		if( mapping->number_of_characters != nfd_mapping->number_of_characters )
 		{
-			return( 0 );
+			goto on_error;
 		}
 		for( character_index = 0;
 		     character_index < mapping->number_of_characters;
@@ -75,11 +107,14 @@ int fsapfs_test_name_decomposition_mappings(
 		{
 			if( mapping->characters[ character_index ] != nfd_mapping->characters[ character_index ] )
 			{
-				return( 0 );
+				goto on_error;
 			}
 		}
 	}
 	return( 1 );
+
+on_error:
+	return( 0 );
 }
 
 /* Tests the libfsapfs_name_compare_with_utf8_string function
@@ -520,6 +555,10 @@ int main(
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argv )
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
+	FSAPFS_TEST_RUN(
+	 "libfsapfs_name_case_folding_mappings",
+	 fsapfs_test_name_case_folding_mappings );
 
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_name_decomposition_mappings",

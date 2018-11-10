@@ -131,6 +131,8 @@ environment:
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
     LDFLAGS: "--coverage"
+  allow_failures:
+  - TARGET: python27-x64
 
 install:
 - cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash

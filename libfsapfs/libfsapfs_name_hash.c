@@ -23,10 +23,6 @@
 #include <memory.h>
 #include <types.h>
 
-#if defined( HAVE_WCTYPE_H )
-#include <wctype.h>
-#endif
-
 #include "libfsapfs_checksum.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
@@ -102,8 +98,8 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 		}
 		if( use_case_folding != 0 )
 		{
-/* TODO add case folding */
-			unicode_character = towlower( unicode_character );
+			libfsapfs_name_get_case_folding_mapping(
+			 unicode_character );
 		}
 		libfsapfs_name_get_decomposition_mapping(
 		 unicode_character,
@@ -264,8 +260,8 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 		}
 		if( use_case_folding != 0 )
 		{
-/* TODO add case folding */
-			unicode_character = towlower( unicode_character );
+			libfsapfs_name_get_case_folding_mapping(
+			 unicode_character );
 		}
 		libfsapfs_name_get_decomposition_mapping(
 		 unicode_character,

@@ -1,10 +1,5 @@
 TODO
-* Check which Unicode characters are treated different by the name hashing
-  algorithm, such as (\U00B5)
 * Handle file size of 0, mapped file size does not support 0 ?
-* Add support for Unicode Normalization Form Canonical Decomposition (NFD)
-** in name compare
-* add support for case folding
 * Add container data handle? Add decryption support and use it to read container key bag?
 * add snapshot support
 
@@ -14,6 +9,7 @@ library:
 * expose directory entry added time
 
 * improve format support
+** check for more compression methods
 ** Add resource fork support
 ** read zlib compressed resource fork data footer
 ** Check deflate compressed files edge case where first byte is 0x#f

@@ -31,6 +31,19 @@
 extern "C" {
 #endif
 
+typedef struct fsapfs_test_unicode_case_folding_mapping fsapfs_test_unicode_case_folding_mapping_t;
+
+struct fsapfs_test_unicode_case_folding_mapping
+{
+	/* The Unicode character
+	 */
+	libuna_unicode_character_t unicode_character;
+
+	/* The character
+	 */
+	uint32_t character;
+};
+
 typedef struct fsapfs_test_unicode_decomposition_mapping fsapfs_test_unicode_decomposition_mapping_t;
 
 struct fsapfs_test_unicode_decomposition_mapping

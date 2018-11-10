@@ -487,6 +487,7 @@ fsapfs_test_name_SOURCES = \
 	fsapfs_test_memory.c fsapfs_test_memory.h \
 	fsapfs_test_name.c \
 	fsapfs_test_types.h \
+	fsapfs_test_unicode_case_folding_mappings.h \
 	fsapfs_test_unicode_decomposition_mappings.h \
 	fsapfs_test_unused.h
 

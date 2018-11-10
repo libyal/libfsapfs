@@ -721,6 +721,8 @@ int mount_handle_open_input(
 {
 	static char *function  = "mount_handle_open_input";
 	size_t filename_length = 0;
+	int number_of_volumes  = 0;
+	int volume_index       = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -790,9 +792,44 @@ int mount_handle_open_input(
 		return( -1 );
 	}
 /* TODO add support for volume selection including all volumes */
+	if( libfsapfs_container_get_number_of_volumes(
+	     mount_handle->input_container,
+	     &number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		return( -1 );
+	}
+	volume_index = mount_handle->file_system_index;
+
+	if( ( volume_index == 0 )
+	 && ( number_of_volumes == 1 ) )
+	{
+		volume_index = 1;
+	}
+	if( ( volume_index <= 0 )
+	 || ( volume_index > number_of_volumes ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid file system index value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	volume_index -= 1;
+
 	if( mount_handle_get_volume_by_index(
 	     mount_handle,
-	     0,
+	     volume_index,
 	     &( mount_handle->input_volume ),
 	     error ) != 1 )
 	{
@@ -802,7 +839,7 @@ int mount_handle_open_input(
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve volume: %d.",
 		 function,
-		 0 );
+		 volume_index );
 
 		return( -1 );
 	}
