@@ -131,6 +131,8 @@ environment:
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
     LDFLAGS: "--coverage"
+
+matrix:
   allow_failures:
   - TARGET: python27-x64
 
