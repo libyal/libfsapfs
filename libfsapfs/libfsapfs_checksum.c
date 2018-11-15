@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <types.h>
 
 #include "libfsapfs_libcerror.h"
@@ -66,7 +67,7 @@ void libfsapfs_checksum_initialize_crc32_table(
 	libfsapfs_checksum_crc32_table_computed = 1;
 }
 
-/* Calculates the weak CRC-32 checksum of a buffer
+/* Calculates the weak CRC-32 checksum of a buffer of data
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_checksum_calculate_weak_crc32(
@@ -130,6 +131,91 @@ int libfsapfs_checksum_calculate_weak_crc32(
 		safe_checksum = libfsapfs_checksum_crc32_table[ table_index ] ^ ( safe_checksum >> 8 );
         }
 	*checksum = safe_checksum;
+
+	return( 1 );
+}
+
+/* Calculates the Fletcher-64 of a buffer of data
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_checksum_calculate_fletcher64(
+     uint64_t *checksum,
+     const uint8_t *buffer,
+     size_t size,
+     uint64_t initial_value,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_checksum_calculate_fletcher64";
+	size_t buffer_offset  = 0;
+	uint64_t lower_32bit  = 0;
+	uint64_t upper_32bit  = 0;
+	uint32_t value_32bit  = 0;
+
+	if( buffer == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid buffer.",
+		 function );
+
+		return( -1 );
+	}
+	if( size > (size_t) SSIZE_MAX )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid size value exceeds maximum.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( size % 4 ) != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	if( checksum == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid checksum.",
+		 function );
+
+		return( -1 );
+	}
+	lower_32bit = initial_value & 0xffffffffUL;
+	upper_32bit = ( initial_value >> 32 ) & 0xffffffffUL;
+
+        for( buffer_offset = 0;
+	     buffer_offset < size;
+	     buffer_offset += 4 )
+	{
+		byte_stream_copy_to_uint32_little_endian(
+		 &( buffer[ buffer_offset ] ),
+		 value_32bit );
+
+		lower_32bit += value_32bit;
+		upper_32bit += lower_32bit;
+	}
+	lower_32bit %= 0xffffffffUL;
+	upper_32bit %= 0xffffffffUL;
+
+	value_32bit = 0xffffffffUL - ( ( lower_32bit + upper_32bit ) % 0xffffffffUL );
+	upper_32bit = 0xffffffffUL - ( ( lower_32bit + value_32bit ) % 0xffffffffUL );
+
+	*checksum = ( upper_32bit << 32 ) | value_32bit;
 
 	return( 1 );
 }

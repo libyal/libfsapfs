@@ -1,6 +1,18 @@
 TODO
+* Validate checksum
+** B-tree node
+** Container key bag
+** Volume key bag
+** Reaper
+** Object map
+** Space manager
+* Container superblock read file IO handle add block size support
+* use container data block vector in read file IO handle
+** Volume superblock
+** Container map
+** Container key bag?
 * Handle file size of 0, mapped file size does not support 0 ?
-* Add container data handle? Add decryption support and use it to read container key bag?
+* Container data handle add decryption support and use it to read container key bag?
 * add snapshot support
 
 library:
@@ -15,7 +27,6 @@ library:
 ** Check deflate compressed files edge case where first byte is 0x#f
 
 * change container read bootstap as advised in documentation
-** validate checksum
 ** read backup container superblocks
 
 * API

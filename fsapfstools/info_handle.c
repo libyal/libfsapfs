@@ -2127,8 +2127,13 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 	}
 	if( number_of_sub_file_entries > 0 )
 	{
-		sub_path_size = path_length + file_entry_name_size + 1;
+		sub_path_size = path_length + 1;
 
+		if( ( file_entry_name != NULL )
+		 && ( identifier != 2 ) )
+		{
+			sub_path_size += file_entry_name_size;
+		}
 		sub_path = system_string_allocate(
 		            sub_path_size );
 

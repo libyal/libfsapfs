@@ -1,14 +1,14 @@
 #!/bin/bash
 # Info tool testing script
 #
-# Version: 20180924
+# Version: 20181111
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
 OPTION_SETS="offset password";
-OPTIONS="";
+OPTIONS=();
 
 INPUT_GLOB="*";
 
@@ -91,7 +91,7 @@ do
 	then
 		for INPUT_FILE in `cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?"`;
 		do
-			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "fsapfsinfo" "with_stdout_reference" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "${OPTIONS}";
+			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "fsapfsinfo" "with_stdout_reference" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "${OPTIONS[@]}";
 			RESULT=$?;
 
 			if test ${RESULT} -ne ${EXIT_SUCCESS};
@@ -102,7 +102,7 @@ do
 	else
 		for INPUT_FILE in `ls -1 ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
 		do
-			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "fsapfsinfo" "with_stdout_reference" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "${OPTIONS}";
+			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "fsapfsinfo" "with_stdout_reference" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "${OPTIONS[@]}";
 			RESULT=$?;
 
 			if test ${RESULT} -ne ${EXIT_SUCCESS};

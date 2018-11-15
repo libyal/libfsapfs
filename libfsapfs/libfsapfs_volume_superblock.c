@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_checksum.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
@@ -148,7 +149,7 @@ int libfsapfs_volume_superblock_read_file_io_handle(
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	fsapfs_volume_superblock_t volume_superblock_data;
+	uint8_t volume_superblock_data[ 4096 ];
 
 	static char *function = "libfsapfs_volume_superblock_read_file_io_handle";
 	ssize_t read_count    = 0;
@@ -194,10 +195,10 @@ int libfsapfs_volume_superblock_read_file_io_handle(
 	read_count = libbfio_handle_read_buffer(
 	              file_io_handle,
 	              (uint8_t *) &volume_superblock_data,
-	              sizeof( fsapfs_volume_superblock_t ),
+	              4096,
 	              error );
 
-	if( read_count != (ssize_t) sizeof( fsapfs_volume_superblock_t ) )
+	if( read_count != (ssize_t) 4096 )
 	{
 		libcerror_error_set(
 		 error,
@@ -211,7 +212,7 @@ int libfsapfs_volume_superblock_read_file_io_handle(
 	if( libfsapfs_volume_superblock_read_data(
 	     volume_superblock,
 	     (uint8_t *) &volume_superblock_data,
-	     sizeof( fsapfs_volume_superblock_t ),
+	     4096,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -235,13 +236,15 @@ int libfsapfs_volume_superblock_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function   = "libfsapfs_volume_superblock_read_data";
-	uint32_t object_subtype = 0;
-	uint32_t object_type    = 0;
+	static char *function        = "libfsapfs_volume_superblock_read_data";
+	uint64_t calculated_checksum = 0;
+	uint64_t stored_checksum     = 0;
+	uint32_t object_subtype      = 0;
+	uint32_t object_type         = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit    = 0;
-	uint32_t value_32bit    = 0;
+	uint64_t value_64bit         = 0;
+	uint32_t value_32bit         = 0;
 #endif
 
 	if( volume_superblock == NULL )
@@ -290,6 +293,10 @@ int libfsapfs_volume_superblock_read_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->object_checksum,
+	 stored_checksum );
+
 	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_volume_superblock_t *) data )->object_type,
 	 object_type );
@@ -389,13 +396,10 @@ int libfsapfs_volume_superblock_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->object_checksum,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: object checksum\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 stored_checksum );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->object_identifier,
@@ -1077,6 +1081,35 @@ int libfsapfs_volume_superblock_read_data(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
+	if( libfsapfs_checksum_calculate_fletcher64(
+	     &calculated_checksum,
+	     &( data[ 8 ] ),
+	     data_size - 8,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to calculate Fletcher-64 checksum.",
+		 function );
+
+		return( -1 );
+	}
+	if( stored_checksum != calculated_checksum )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_INPUT,
+		 LIBCERROR_INPUT_ERROR_CHECKSUM_MISMATCH,
+		 "%s: mismatch in checksum ( 0x%08" PRIx64 " != 0x%08" PRIx64 " ).\n",
+		 function,
+		 stored_checksum,
+		 calculated_checksum );
+
+		return( -1 );
+	}
 	return( 1 );
 }
 

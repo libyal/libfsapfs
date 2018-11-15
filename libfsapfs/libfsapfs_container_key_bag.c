@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_checksum.h"
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_encryption_context.h"
@@ -445,8 +446,10 @@ int libfsapfs_container_key_bag_read_data(
 	static char *function                  = "libfsapfs_container_key_bag_read_data";
 	size_t alignment_padding_size          = 0;
 	size_t data_offset                     = 0;
+	uint64_t calculated_checksum           = 0;
 	uint64_t object_subtype                = 0;
 	uint64_t object_type                   = 0;
+	uint64_t stored_checksum               = 0;
 	uint16_t bag_entry_index               = 0;
 	int entry_index                        = 0;
 
@@ -500,6 +503,10 @@ int libfsapfs_container_key_bag_read_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_object_t *) data )->checksum,
+	 stored_checksum );
+
 	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_object_t *) data )->type,
 	 object_type );
@@ -535,13 +542,10 @@ int libfsapfs_container_key_bag_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_t *) data )->checksum,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: object checksum\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 stored_checksum );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_object_t *) data )->identifier,
@@ -574,6 +578,35 @@ int libfsapfs_container_key_bag_read_data(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
+	if( libfsapfs_checksum_calculate_fletcher64(
+	     &calculated_checksum,
+	     &( data[ 8 ] ),
+	     data_size - 8,
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to calculate Fletcher-64 checksum.",
+		 function );
+
+		return( -1 );
+	}
+	if( stored_checksum != calculated_checksum )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_INPUT,
+		 LIBCERROR_INPUT_ERROR_CHECKSUM_MISMATCH,
+		 "%s: mismatch in checksum ( 0x%08" PRIx64 " != 0x%08" PRIx64 " ).\n",
+		 function,
+		 stored_checksum,
+		 calculated_checksum );
+
+		return( -1 );
+	}
 	data_offset = sizeof( fsapfs_object_t );
 
 	if( libfsapfs_key_bag_header_initialize(
@@ -748,7 +781,7 @@ int libfsapfs_container_key_bag_get_volume_key_bag_extent_by_identifier(
      libcerror_error_t **error )
 {
 	libfsapfs_key_bag_entry_t *bag_entry = NULL;
-	static char *function                = "libfsapfs_container_key_bag_read_data";
+	static char *function                = "libfsapfs_container_key_bag_get_volume_key_bag_extent_by_identifier";
 	uint64_t block_number                = 0;
 	uint64_t number_of_blocks            = 0;
 	int entry_index                      = 0;

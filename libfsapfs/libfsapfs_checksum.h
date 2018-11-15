@@ -48,6 +48,13 @@ int libfsapfs_checksum_calculate_weak_crc32(
      uint32_t initial_value,
      libcerror_error_t **error );
 
+int libfsapfs_checksum_calculate_fletcher64(
+     uint64_t *checksum,
+     const uint8_t *buffer,
+     size_t size,
+     uint64_t initial_value,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif
