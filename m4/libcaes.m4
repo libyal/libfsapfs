@@ -1,38 +1,42 @@
 dnl Checks for libcaes required headers and functions
 dnl
-dnl Version: 20180812
+dnl Version: 20181117
 
 dnl Function to detect if libcaes is available
 dnl ac_libcaes_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBCAES_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libcaes" != x && test "x$ac_cv_with_libcaes" != xno && test "x$ac_cv_with_libcaes" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libcaes"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libcaes}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libcaes}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libcaes])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libcaes" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libcaes" = xno],
     [ac_cv_libcaes=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libcaes],
-        [libcaes >= 20161025],
-        [ac_cv_libcaes=yes],
-        [ac_cv_libcaes=no])
+      [test "x$ac_cv_with_libcaes" != x && test "x$ac_cv_with_libcaes" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libcaes"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libcaes}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcaes}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libcaes],
+          [1])
+        ])
+        ac_cv_libcaes=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libcaes],
+          [libcaes >= 20161025],
+          [ac_cv_libcaes=yes],
+          [ac_cv_libcaes=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libcaes" = xyes],
+        [ac_cv_libcaes_CPPFLAGS="$pkg_cv_libcaes_CFLAGS"
+        ac_cv_libcaes_LIBADD="$pkg_cv_libcaes_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libcaes" = xyes],
-      [ac_cv_libcaes_CPPFLAGS="$pkg_cv_libcaes_CFLAGS"
-      ac_cv_libcaes_LIBADD="$pkg_cv_libcaes_LIBS"],
+      [test "x$ac_cv_libcaes" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libcaes.h])
 
@@ -104,8 +108,13 @@ AC_DEFUN([AX_LIBCAES_CHECK_LIB],
           [ac_cv_libcaes_dummy=yes],
           [ac_cv_libcaes=no])
 
-        ac_cv_libcaes_LIBADD="-lcaes"
-        ])
+        ac_cv_libcaes_LIBADD="-lcaes"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libcaes" != x && test "x$ac_cv_with_libcaes" != xauto-detect && test "x$ac_cv_libcaes" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libcaes in directory: $ac_cv_with_libcaes],
+        [1])
       ])
     ])
 

@@ -1,38 +1,42 @@
 dnl Checks for libuna or required headers and functions
 dnl
-dnl Version: 20181006
+dnl Version: 20181117
 
-dnl Function to detect if libuna is available as library
+dnl Function to detect if libuna is available
 dnl ac_libuna_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBUNA_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libuna" != x && test "x$ac_cv_with_libuna" != xno && test "x$ac_cv_with_libuna" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libuna"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libuna}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libuna}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libuna])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libuna" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libuna" = xno],
     [ac_cv_libuna=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libuna],
-        [libuna >= 20181006],
-        [ac_cv_libuna=yes],
-        [ac_cv_libuna=no])
+      [test "x$ac_cv_with_libuna" != x && test "x$ac_cv_with_libuna" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libuna"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libuna}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libuna}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libuna],
+          [1])
+        ])
+        ac_cv_libuna=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libuna],
+          [libuna >= 20181006],
+          [ac_cv_libuna=yes],
+          [ac_cv_libuna=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libuna" = xyes],
+        [ac_cv_libuna_CPPFLAGS="$pkg_cv_libuna_CFLAGS"
+        ac_cv_libuna_LIBADD="$pkg_cv_libuna_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libuna" = xyes],
-      [ac_cv_libuna_CPPFLAGS="$pkg_cv_libuna_CFLAGS"
-      ac_cv_libuna_LIBADD="$pkg_cv_libuna_LIBS"],
+      [test "x$ac_cv_libuna" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libuna.h])
 
@@ -619,8 +623,13 @@ AC_DEFUN([AX_LIBUNA_CHECK_LIB],
           [ac_cv_libuna_dummy=yes],
           [ac_cv_libuna=no])
 
-        ac_cv_libuna_LIBADD="-luna"
-        ])
+        ac_cv_libuna_LIBADD="-luna"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libuna" != x && test "x$ac_cv_with_libuna" != xauto-detect && test "x$ac_cv_libuna" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libuna in directory: $ac_cv_with_libuna],
+        [1])
       ])
     ])
 

@@ -1,60 +1,60 @@
-dnl Checks for libcfile or required headers and functions
+dnl Checks for libcfile required headers and functions
 dnl
-dnl Version: 20180407
+dnl Version: 20181117
 
 dnl Function to detect if libcfile is available
 dnl ac_libcfile_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBCFILE_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libcfile" != x && test "x$ac_cv_with_libcfile" != xno && test "x$ac_cv_with_libcfile" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libcfile"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libcfile}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libcfile}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libcfile])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libcfile" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libcfile" = xno],
     [ac_cv_libcfile=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libcfile],
-        [libcfile >= 20160409],
-        [ac_cv_libcfile=yes],
-        [ac_cv_libcfile=check])
-      ])
-
-    AS_IF(
-      [test "x$ac_cv_libcfile" = xyes && test "x$ac_cv_enable_wide_character_type" != xno],
-      [AC_CACHE_CHECK(
-       [whether libcfile/features.h defines LIBCFILE_HAVE_WIDE_CHARACTER_TYPE as 1],
-       [ac_cv_header_libcfile_features_h_have_wide_character_type],
-       [AC_LANG_PUSH(C)
-       AC_COMPILE_IFELSE(
-         [AC_LANG_PROGRAM(
-           [[#include <libcfile/features.h>]],
-           [[#if !defined( LIBCFILE_HAVE_WIDE_CHARACTER_TYPE ) || ( LIBCFILE_HAVE_WIDE_CHARACTER_TYPE != 1 )
+      [test "x$ac_cv_with_libcfile" != x && test "x$ac_cv_with_libcfile" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libcfile"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libcfile}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcfile}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libcfile],
+          [1])
+        ])
+        ac_cv_libcfile=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libcfile],
+          [libcfile >= 20160409],
+          [ac_cv_libcfile=yes],
+          [ac_cv_libcfile=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libcfile" = xyes && test "x$ac_cv_enable_wide_character_type" != xno],
+        [AC_CACHE_CHECK(
+         [whether libcfile/features.h defines LIBCFILE_HAVE_WIDE_CHARACTER_TYPE as 1],
+         [ac_cv_header_libcfile_features_h_have_wide_character_type],
+         [AC_LANG_PUSH(C)
+         AC_COMPILE_IFELSE(
+           [AC_LANG_PROGRAM(
+             [[#include <libcfile/features.h>]],
+             [[#if !defined( LIBCFILE_HAVE_WIDE_CHARACTER_TYPE ) || ( LIBCFILE_HAVE_WIDE_CHARACTER_TYPE != 1 )
 #error LIBCFILE_HAVE_WIDE_CHARACTER_TYPE not defined
 #endif]] )],
-         [ac_cv_header_libcfile_features_h_have_wide_character_type=yes],
+           [ac_cv_header_libcfile_features_h_have_wide_character_type=yes],
+           [ac_cv_header_libcfile_features_h_have_wide_character_type=no])
+         AC_LANG_POP(C)],
          [ac_cv_header_libcfile_features_h_have_wide_character_type=no])
-       AC_LANG_POP(C)],
-       [ac_cv_header_libcfile_features_h_have_wide_character_type=no])
 
+        AS_IF(
+          [test "x$ac_cv_header_libcfile_features_h_have_wide_character_type" = xno],
+          [ac_cv_libcfile=no])
+        ])
       AS_IF(
-        [test "x$ac_cv_header_libcfile_features_h_have_wide_character_type" = xno],
-        [ac_cv_libcfile=no])
-    ])
-
-    AS_IF(
-      [test "x$ac_cv_libcfile" = xyes],
-      [ac_cv_libcfile_CPPFLAGS="$pkg_cv_libcfile_CFLAGS"
-      ac_cv_libcfile_LIBADD="$pkg_cv_libcfile_LIBS"])
+        [test "x$ac_cv_libcfile" = xyes],
+        [ac_cv_libcfile_CPPFLAGS="$pkg_cv_libcfile_CFLAGS"
+        ac_cv_libcfile_LIBADD="$pkg_cv_libcfile_LIBS"])
+      ])
 
     AS_IF(
       [test "x$ac_cv_libcfile" = xcheck],
@@ -200,8 +200,13 @@ AC_DEFUN([AX_LIBCFILE_CHECK_LIB],
             [ac_cv_libcfile=no])
           ])
 
-        ac_cv_libcfile_LIBADD="-lcfile"
-        ])
+        ac_cv_libcfile_LIBADD="-lcfile"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libcfile" != x && test "x$ac_cv_with_libcfile" != xauto-detect && test "x$ac_cv_libcfile" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libcfile in directory: $ac_cv_with_libcfile],
+        [1])
       ])
     ])
 

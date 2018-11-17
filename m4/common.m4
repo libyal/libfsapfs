@@ -1,6 +1,23 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20180729
+dnl Version: 20181117
+
+dnl Function to test if a certain feature was disabled
+AC_DEFUN([AX_COMMON_ARG_DISABLE],
+[
+  AC_ARG_ENABLE(
+    [$1],
+    [AS_HELP_STRING(
+      [--disable-$1],
+      [$3])],
+    [ac_cv_enable_$2=$enableval],
+    [ac_cv_enable_$2="yes"])dnl
+
+    AC_CACHE_CHECK(
+      [whether to disable $3],
+      [ac_cv_enable_$2],
+      [ac_cv_enable_$2="yes"])dnl
+])
 
 dnl Function to test if a certain feature was enabled
 AC_DEFUN([AX_COMMON_ARG_ENABLE],
@@ -36,6 +53,83 @@ AC_DEFUN([AX_COMMON_ARG_WITH],
       [ac_cv_with_$2=$4])dnl
 ])
 
+dnl Function to detect whether shared libary support should be disabled
+AC_DEFUN([AX_COMMON_CHECK_DISABLE_SHARED_LIBS],
+[
+  AX_COMMON_ARG_DISABLE(
+    [shared-libs],
+    [shared_libs],
+    [disable shared library support])
+])
+
+dnl Function to detect whether debug output should be enabled
+AC_DEFUN([AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT],
+[
+  AX_COMMON_ARG_ENABLE(
+    [debug-output],
+    [debug_output],
+    [enable debug output],
+    [no])
+
+  AS_IF(
+    [test "x$ac_cv_enable_debug_output" != xno ],
+    [AC_DEFINE(
+      [HAVE_DEBUG_OUTPUT],
+      [1],
+      [Define to 1 if debug output should be used.])
+
+    ac_cv_enable_debug_output=yes])
+])
+
+dnl Function to detect whether static executables support should be enabled
+AC_DEFUN([AX_COMMON_CHECK_ENABLE_STATIC_EXECUTABLES],
+[
+  AX_COMMON_ARG_ENABLE(
+    [static-executables],
+    [static_executables],
+    [build static executables (binaries)],
+    [no])
+
+  AS_IF(
+    [test "x$ac_cv_enable_static_executables" != xno],
+    [STATIC_LDFLAGS="-all-static";
+
+    AC_SUBST(
+      [STATIC_LDFLAGS])
+
+    ac_cv_enable_static_executables=yes
+    enable_shared=no])
+])
+
+dnl Function to detect whether verbose output should be enabled
+AC_DEFUN([AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT],
+[
+  AX_COMMON_ARG_ENABLE(
+    [verbose-output],
+    [verbose_output],
+    [enable verbose output],
+    [no])
+
+  AS_IF(
+    [test "x$ac_cv_enable_verbose_output" != xno ],
+    [AC_DEFINE(
+      [HAVE_VERBOSE_OUTPUT],
+      [1],
+      [Define to 1 if verbose output should be used.])
+
+    ac_cv_enable_verbose_output=yes])
+])
+
+dnl Function to detect whether static executables support should be enabled
+AC_DEFUN([AX_COMMON_CHECK_ENABLE_WIDE_CHARACTER_TYPE],
+[
+  AX_COMMON_ARG_ENABLE(
+    [wide-character-type],
+    [wide_character_type],
+    [enable wide character type support],
+    [no])
+])
+
 dnl Function to detect whether WINAPI support should be enabled
 AC_DEFUN([AX_COMMON_CHECK_ENABLE_WINAPI],
 [
@@ -63,74 +157,6 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_WINAPI],
         ac_cv_enable_winapi=yes],
       [*],[ac_cv_enable_winapi=no])
   ])
-])
-
-dnl Function to detect whether static executables support should be enabled
-AC_DEFUN([AX_COMMON_CHECK_ENABLE_STATIC_EXECUTABLES],
-[
-  AX_COMMON_ARG_ENABLE(
-    [static-executables],
-    [static_executables],
-    [build static executables (binaries)],
-    [no])
-
-  AS_IF(
-    [test "x$ac_cv_enable_static_executables" != xno],
-    [STATIC_LDFLAGS="-all-static";
-
-    AC_SUBST(
-      [STATIC_LDFLAGS])
-
-    ac_cv_enable_static_executables=yes
-    enable_shared=no])
-])
-
-dnl Function to detect whether static executables support should be enabled
-AC_DEFUN([AX_COMMON_CHECK_ENABLE_WIDE_CHARACTER_TYPE],
-[
-  AX_COMMON_ARG_ENABLE(
-    [wide-character-type],
-    [wide_character_type],
-    [enable wide character type support],
-    [no])
-])
-
-dnl Function to detect whether verbose output should be enabled
-AC_DEFUN([AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT],
-[
-  AX_COMMON_ARG_ENABLE(
-    [verbose-output],
-    [verbose_output],
-    [enable verbose output],
-    [no])
-
-  AS_IF(
-    [test "x$ac_cv_enable_verbose_output" != xno ],
-    [AC_DEFINE(
-      [HAVE_VERBOSE_OUTPUT],
-      [1],
-      [Define to 1 if verbose output should be used.])
-
-    ac_cv_enable_verbose_output=yes])
-])
-
-dnl Function to detect whether debug output should be enabled
-AC_DEFUN([AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT],
-[
-  AX_COMMON_ARG_ENABLE(
-    [debug-output],
-    [debug_output],
-    [enable debug output],
-    [no])
-
-  AS_IF(
-    [test "x$ac_cv_enable_debug_output" != xno ],
-    [AC_DEFINE(
-      [HAVE_DEBUG_OUTPUT],
-      [1],
-      [Define to 1 if debug output should be used.])
-
-    ac_cv_enable_debug_output=yes])
 ])
 
 dnl Function to detect whether printf conversion specifier "%jd" is available

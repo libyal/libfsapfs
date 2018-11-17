@@ -1,38 +1,39 @@
-dnl Checks for libcthreads or required headers and functions
+dnl Checks for libcthreads required headers and functions
 dnl
-dnl Version: 20170904
+dnl Version: 20181117
 
 dnl Function to detect if libcthreads is available
 dnl ac_libcthreads_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBCTHREADS_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libcthreads" != x && test "x$ac_cv_with_libcthreads" != xno && test "x$ac_cv_with_libcthreads" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libcthreads"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libcthreads}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libcthreads}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libcthreads])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libcthreads" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libcthreads" = xno],
     [ac_cv_libcthreads=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libcthreads],
-        [libcthreads >= 20160404],
-        [ac_cv_libcthreads=yes],
-        [ac_cv_libcthreads=check])
+      [test "x$ac_cv_with_libcthreads" != x && test "x$ac_cv_with_libcthreads" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libcthreads"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libcthreads}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcthreads}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libcthreads],
+          [1])
+        ])
+        ac_cv_libcthreads=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libcthreads],
+          [libcthreads >= 20160404],
+          [ac_cv_libcthreads=yes],
+          [ac_cv_libcthreads=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libcthreads" = xyes],
+        [ac_cv_libcthreads_CPPFLAGS="$pkg_cv_libcthreads_CFLAGS"
+        ac_cv_libcthreads_LIBADD="$pkg_cv_libcthreads_LIBS"])
       ])
-
-    AS_IF(
-      [test "x$ac_cv_libcthreads" = xyes],
-      [ac_cv_libcthreads_CPPFLAGS="$pkg_cv_libcthreads_CFLAGS"
-      ac_cv_libcthreads_LIBADD="$pkg_cv_libcthreads_LIBS"])
 
     AS_IF(
       [test "x$ac_cv_libcthreads" = xcheck],
@@ -242,8 +243,14 @@ AC_DEFUN([AX_LIBCTHREADS_CHECK_LIB],
           [ac_cv_libcthreads_dummy=yes],
           [ac_cv_libcthreads=no])
 
-        ac_cv_libcthreads_LIBADD="-lcthreads"
-        ])
+        ac_cv_libcthreads_LIBADD="-lcthreads"])
+      ])
+
+    AS_IF(
+      [test "x$ac_cv_with_libcthreads" != x && test "x$ac_cv_with_libcthreads" != xauto-detect && test "x$ac_cv_libcthreads" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libcthreads in directory: $ac_cv_with_libcthreads],
+        [1])
       ])
     ])
 

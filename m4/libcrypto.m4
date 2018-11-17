@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20180727
+dnl Version: 20181117
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -472,36 +472,39 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_AES],
 
 dnl Function to detect if libcrypto (openssl) dependencies are available
 AC_DEFUN([AX_LIBCRYPTO_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_openssl" != x && test "x$ac_cv_with_openssl" != xno && test "x$ac_cv_with_openssl" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_openssl"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_openssl}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_openssl}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_openssl])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_openssl" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_openssl" = xno],
     [ac_cv_libcrypto=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [openssl],
-        [openssl >= 1.0],
-        [ac_cv_libcrypto=yes
-        ac_cv_libcrypto_evp=yes],
-        [ac_cv_libcrypto=no
-        ac_cv_libcrypto_evp=no])
+      [test "x$ac_cv_with_openssl" != x && test "x$ac_cv_with_openssl" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_openssl"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_openssl}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_openssl}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_openssl],
+          [1])
+        ])],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [openssl],
+          [openssl >= 1.0],
+          [ac_cv_libcrypto=yes
+          ac_cv_libcrypto_evp=yes],
+          [ac_cv_libcrypto=no
+          ac_cv_libcrypto_evp=no])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libcrypto" = xyes],
+        [ac_cv_libcrypto_CPPFLAGS="$pkg_cv_openssl_CFLAGS"
+        ac_cv_libcrypto_LIBADD="$pkg_cv_openssl_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libcrypto" = xyes],
-      [ac_cv_libcrypto_CPPFLAGS="$pkg_cv_openssl_CFLAGS"
-      ac_cv_libcrypto_LIBADD="$pkg_cv_openssl_LIBS"],
+      [test "x$ac_cv_libcrypto" != xyes],
       [dnl Check for headers
       AC_CHECK_HEADERS([openssl/opensslv.h])
 

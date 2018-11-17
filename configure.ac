@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsapfs],
- [20181115],
+ [20181117],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -41,6 +41,9 @@ AC_C_VOLATILE
 
 dnl Check for large file support
 AC_SYS_LARGEFILE
+
+dnl Check if shared library support should be disabled
+AX_COMMON_CHECK_DISABLE_SHARED_LIBS
 
 dnl Check if WINAPI support should be enabled
 AX_COMMON_CHECK_ENABLE_WINAPI

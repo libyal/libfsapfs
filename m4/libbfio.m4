@@ -1,59 +1,60 @@
-dnl Checks for libbfio or required headers and functions
+dnl Checks for libbfio required headers and functions
 dnl
-dnl Version: 20180407
+dnl Version: 20181117
 
 dnl Function to detect if libbfio is available
+dnl ac_libbfio_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBBFIO_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libbfio" != x && test "x$ac_cv_with_libbfio" != xno && test "x$ac_cv_with_libbfio" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libbfio"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libbfio}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libbfio}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libbfio])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libbfio" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libbfio" = xno],
     [ac_cv_libbfio=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libbfio],
-        [libbfio >= 20160108],
-        [ac_cv_libbfio=yes],
-        [ac_cv_libbfio=check])
-      ])
-
-    AS_IF(
-      [test "x$ac_cv_libbfio" = xyes && test "x$ac_cv_enable_wide_character_type" != xno],
-      [AC_CACHE_CHECK(
-       [whether libbfio/features.h defines LIBBFIO_HAVE_WIDE_CHARACTER_TYPE as 1],
-       [ac_cv_header_libbfio_features_h_have_wide_character_type],
-       [AC_LANG_PUSH(C)
-       AC_COMPILE_IFELSE(
-         [AC_LANG_PROGRAM(
-           [[#include <libbfio/features.h>]],
-           [[#if !defined( LIBBFIO_HAVE_WIDE_CHARACTER_TYPE ) || ( LIBBFIO_HAVE_WIDE_CHARACTER_TYPE != 1 )
+      [test "x$ac_cv_with_libbfio" != x && test "x$ac_cv_with_libbfio" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libbfio"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libbfio}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libbfio}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libbfio],
+          [1])
+        ])
+        ac_cv_libbfio=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libbfio],
+          [libbfio >= 20160108],
+          [ac_cv_libbfio=yes],
+          [ac_cv_libbfio=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libbfio" = xyes && test "x$ac_cv_enable_wide_character_type" != xno],
+        [AC_CACHE_CHECK(
+         [whether libbfio/features.h defines LIBBFIO_HAVE_WIDE_CHARACTER_TYPE as 1],
+         [ac_cv_header_libbfio_features_h_have_wide_character_type],
+         [AC_LANG_PUSH(C)
+         AC_COMPILE_IFELSE(
+           [AC_LANG_PROGRAM(
+             [[#include <libbfio/features.h>]],
+             [[#if !defined( LIBBFIO_HAVE_WIDE_CHARACTER_TYPE ) || ( LIBBFIO_HAVE_WIDE_CHARACTER_TYPE != 1 )
 #error LIBBFIO_HAVE_WIDE_CHARACTER_TYPE not defined
 #endif]] )],
-         [ac_cv_header_libbfio_features_h_have_wide_character_type=yes],
+           [ac_cv_header_libbfio_features_h_have_wide_character_type=yes],
+           [ac_cv_header_libbfio_features_h_have_wide_character_type=no])
+         AC_LANG_POP(C)],
          [ac_cv_header_libbfio_features_h_have_wide_character_type=no])
-       AC_LANG_POP(C)],
-       [ac_cv_header_libbfio_features_h_have_wide_character_type=no])
 
+        AS_IF(
+          [test "x$ac_cv_header_libbfio_features_h_have_wide_character_type" = xno],
+          [ac_cv_libbfio=no])
+        ])
       AS_IF(
-        [test "x$ac_cv_header_libbfio_features_h_have_wide_character_type" = xno],
-        [ac_cv_libbfio=no])
-    ])
-
-    AS_IF(
-      [test "x$ac_cv_libbfio" = xyes],
-      [ac_cv_libbfio_CPPFLAGS="$pkg_cv_libbfio_CFLAGS"
-      ac_cv_libbfio_LIBADD="$pkg_cv_libbfio_LIBS"])
+        [test "x$ac_cv_libbfio" = xyes],
+        [ac_cv_libbfio_CPPFLAGS="$pkg_cv_libbfio_CFLAGS"
+        ac_cv_libbfio_LIBADD="$pkg_cv_libbfio_LIBS"])
+      ])
 
     AS_IF(
       [test "x$ac_cv_libbfio" = xcheck],
@@ -280,8 +281,13 @@ AC_DEFUN([AX_LIBBFIO_CHECK_LIB],
           [ac_cv_libbfio_dummy=yes],
           [ac_cv_libbfio=no])
 
-        ac_cv_libbfio_LIBADD="-lbfio"
-        ])
+        ac_cv_libbfio_LIBADD="-lbfio"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libbfio" != x && test "x$ac_cv_with_libbfio" != xauto-detect && test "x$ac_cv_libbfio" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libbfio in directory: $ac_cv_with_libbfio],
+        [1])
       ])
     ])
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20180728
+# Version: 20181117
 
 from __future__ import print_function
 import glob
@@ -87,27 +87,7 @@ class custom_build_ext(build_ext):
       ]
 
     else:
-      # We need to run "configure" to make sure config.h is generated
-      # properly. We invoke "configure" with "sh" here to make sure
-      # that it works on mingw32 with the standard python.org binaries.
-      command = "sh configure --help"
-      output = self._RunCommand(command)
-
-      # We want to build as much as possible self contained Python binding.
-      configure_arguments = []
-      for line in output.split("\n"):
-        line = line.strip()
-        line, _, _ = line.rpartition("[=DIR]")
-        if line.startswith("--with-lib") and not line.endswith("-prefix"):
-          configure_arguments.append("{0:s}=no".format(line))
-        elif line == "--with-bzip2":
-          configure_arguments.append("--with-bzip2=no")
-        elif line == "--with-openssl":
-          configure_arguments.append("--with-openssl=no")
-        elif line == "--with-zlib":
-          configure_arguments.append("--with-zlib=no")
-
-      command = "sh configure {0:s}".format(" ".join(configure_arguments))
+      command = "sh configure --disable-shared-libs"
       output = self._RunCommand(command)
 
       print_line = False

@@ -1,38 +1,42 @@
 dnl Checks for libhmac required headers and functions
 dnl
-dnl Version: 20180812
+dnl Version: 20181117
 
 dnl Function to detect if libhmac is available
 dnl ac_libhmac_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
 AC_DEFUN([AX_LIBHMAC_CHECK_LIB],
-  [dnl Check if parameters were provided
-  AS_IF(
-    [test "x$ac_cv_with_libhmac" != x && test "x$ac_cv_with_libhmac" != xno && test "x$ac_cv_with_libhmac" != xauto-detect],
-    [AS_IF(
-      [test -d "$ac_cv_with_libhmac"],
-      [CFLAGS="$CFLAGS -I${ac_cv_with_libhmac}/include"
-      LDFLAGS="$LDFLAGS -L${ac_cv_with_libhmac}/lib"],
-      [AC_MSG_WARN([no such directory: $ac_cv_with_libhmac])
-      ])
-    ])
-
-  AS_IF(
-    [test "x$ac_cv_with_libhmac" = xno],
+  [AS_IF(
+    [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libhmac" = xno],
     [ac_cv_libhmac=no],
-    [dnl Check for a pkg-config file
+    [dnl Check if the directory provided as parameter exists
     AS_IF(
-      [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
-      [PKG_CHECK_MODULES(
-        [libhmac],
-        [libhmac >= 20160802],
-        [ac_cv_libhmac=yes],
-        [ac_cv_libhmac=no])
+      [test "x$ac_cv_with_libhmac" != x && test "x$ac_cv_with_libhmac" != xauto-detect],
+      [AS_IF(
+        [test -d "$ac_cv_with_libhmac"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_libhmac}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_libhmac}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_libhmac],
+          [1])
+        ])
+        ac_cv_libhmac=check],
+      [dnl Check for a pkg-config file
+      AS_IF(
+        [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
+        [PKG_CHECK_MODULES(
+          [libhmac],
+          [libhmac >= 20160802],
+          [ac_cv_libhmac=yes],
+          [ac_cv_libhmac=check])
+        ])
+      AS_IF(
+        [test "x$ac_cv_libhmac" = xyes],
+        [ac_cv_libhmac_CPPFLAGS="$pkg_cv_libhmac_CFLAGS"
+        ac_cv_libhmac_LIBADD="$pkg_cv_libhmac_LIBS"])
       ])
 
     AS_IF(
-      [test "x$ac_cv_libhmac" = xyes],
-      [ac_cv_libhmac_CPPFLAGS="$pkg_cv_libhmac_CFLAGS"
-      ac_cv_libhmac_LIBADD="$pkg_cv_libhmac_LIBS"],
+      [test "x$ac_cv_libhmac" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([libhmac.h])
 
@@ -158,8 +162,13 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LIB],
           [ac_cv_libhmac_dummy=yes],
           [ac_cv_libhmac=no])
 
-        ac_cv_libhmac_LIBADD="-lhmac"
-        ])
+        ac_cv_libhmac_LIBADD="-lhmac"])
+      ])
+    AS_IF(
+      [test "x$ac_cv_with_libhmac" != x && test "x$ac_cv_with_libhmac" != xauto-detect && test "x$ac_cv_libhmac" != xyes],
+      [AC_MSG_FAILURE(
+        [unable to find supported libhmac in directory: $ac_cv_with_libhmac],
+        [1])
       ])
     ])
 
