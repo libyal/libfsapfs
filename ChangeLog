@@ -1,4 +1,6 @@
 TODO
+* B-tree
+** Validate (expected) btree level to detect loops
 * Validate checksum
 ** B-tree node
 ** Container key bag

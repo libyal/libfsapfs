@@ -3,7 +3,7 @@
 	ProjectType="Visual C++"
 	Version="9,00"
 	Name="fsapfsmount"
-	ProjectGUID="{82F521E5-3ABE-4421-87AB-39A9530ECE1D}"
+	ProjectGUID="{67C5C431-90F7-47E0-996D-C68A91C60E88}"
 	RootNamespace="fsapfsmount"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
@@ -194,6 +194,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\fsapfstools\mount_fuse.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\fsapfstools\mount_handle.c"
 				>
 			</File>
@@ -249,6 +253,10 @@
 			</File>
 			<File
 				RelativePath="..\..\fsapfstools\fsapfstools_unused.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsapfstools\mount_fuse.h"
 				>
 			</File>
 			<File

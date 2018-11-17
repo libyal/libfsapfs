@@ -38,6 +38,7 @@ MSVSCPP_FILES = \
 	fsapfs_test_volume_key_bag/fsapfs_test_volume_key_bag.vcproj \
 	fsapfs_test_volume_superblock/fsapfs_test_volume_superblock.vcproj \
 	fsapfsinfo/fsapfsinfo.vcproj \
+	fsapfsmount/fsapfsmount.vcproj \
 	libbfio/libbfio.vcproj \
 	libcaes/libcaes.vcproj \
 	libcdata/libcdata.vcproj \

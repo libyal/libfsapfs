@@ -68,6 +68,7 @@ fsapfsmount_SOURCES = \
 	fsapfstools_output.c fsapfstools_output.h \
 	fsapfstools_signal.c fsapfstools_signal.h \
 	fsapfstools_unused.h \
+	mount_fuse.c mount_fuse.h \
 	mount_handle.c mount_handle.h
 
 fsapfsmount_LDADD = \
