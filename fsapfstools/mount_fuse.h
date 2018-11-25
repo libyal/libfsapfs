@@ -40,21 +40,6 @@ extern "C" {
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 
-int mount_fuse_open(
-     const char *path,
-     struct fuse_file_info *file_info );
-
-int mount_fuse_read(
-     const char *path,
-     char *buffer,
-     size_t size,
-     off_t offset,
-     struct fuse_file_info *file_info );
-
-int mount_fuse_release(
-     const char *path,
-     struct fuse_file_info *file_info );
-
 int mount_fuse_set_stat_info(
      struct stat *stat_info,
      size64_t size,
@@ -71,6 +56,21 @@ int mount_fuse_filldir(
      struct stat *stat_info,
      libfsapfs_file_entry_t *file_entry,
      libcerror_error_t **error );
+
+int mount_fuse_open(
+     const char *path,
+     struct fuse_file_info *file_info );
+
+int mount_fuse_read(
+     const char *path,
+     char *buffer,
+     size_t size,
+     off_t offset,
+     struct fuse_file_info *file_info );
+
+int mount_fuse_release(
+     const char *path,
+     struct fuse_file_info *file_info );
 
 int mount_fuse_opendir(
      const char *path,
