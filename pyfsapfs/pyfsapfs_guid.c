@@ -61,7 +61,7 @@ PyObject *pyfsapfs_string_new_from_guid(
 	     guid,
 	     guid_buffer,
 	     guid_buffer_size,
-	     LIBFGUID_ENDIAN_LITTLE,
+	     LIBFGUID_ENDIAN_BIG,
 	     &error ) != 1 )
 	{
 		pyfsapfs_error_raise(
