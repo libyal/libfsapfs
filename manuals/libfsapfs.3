@@ -1,4 +1,4 @@
-.Dd November  6, 2018
+.Dd December  3, 2018
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -94,6 +94,8 @@ Volume functions
 .Fn libfsapfs_volume_open "libfsapfs_volume_t *volume, const char *filename, int access_flags, libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_close "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_unlock "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_get_size "libfsapfs_volume_t *volume, size64_t *size, libfsapfs_error_t **error"
 .Ft int

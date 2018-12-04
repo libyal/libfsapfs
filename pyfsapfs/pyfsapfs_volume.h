@@ -85,6 +85,10 @@ PyObject *pyfsapfs_volume_close(
            pyfsapfs_volume_t *pyfsapfs_volume,
            PyObject *arguments );
 
+PyObject *pyfsapfs_volume_unlock(
+           pyfsapfs_volume_t *pyfsapfs_volume,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_volume_get_size(
            pyfsapfs_volume_t *pyfsapfs_volume,
            PyObject *arguments );

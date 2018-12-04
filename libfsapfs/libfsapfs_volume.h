@@ -198,6 +198,11 @@ int libfsapfs_internal_volume_unlock(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_volume_unlock(
+     libfsapfs_volume_t *volume,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_size(
      libfsapfs_volume_t *volume,
      size64_t *size,

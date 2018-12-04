@@ -1572,7 +1572,7 @@ on_error:
 }
 
 /* Unlocks an encrypted volume
- * Returns 1 if successful or -1 on error
+ * Returns 1 if the volume is unlocked, 0 if not or -1 on error
  */
 int libfsapfs_internal_volume_unlock(
      libfsapfs_internal_volume_t *internal_volume,
@@ -1685,6 +1685,10 @@ int libfsapfs_internal_volume_unlock(
 		 0,
 		 32 );
 	}
+	if( result != 0 )
+	{
+		internal_volume->is_locked = 0;
+	}
 	return( result );
 
 on_error:
@@ -1699,6 +1703,81 @@ on_error:
 	 32 );
 
 	return( -1 );
+}
+
+/* Unlocks the volume
+ * Returns 1 if the volume is unlocked, 0 if not or -1 on error
+ */
+int libfsapfs_volume_unlock(
+     libfsapfs_volume_t *volume,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_unlock";
+	int result                                   = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->is_locked != 0 )
+	{
+		result = libfsapfs_internal_volume_unlock(
+		          internal_volume,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to unlock volume.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
 }
 
 /* Retrieves the size
@@ -2225,7 +2304,7 @@ int libfsapfs_volume_is_locked(
 }
 
 /* Sets an UTF-8 formatted password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if password is invalid or -1 on error
  */
 int libfsapfs_volume_set_utf8_password(
@@ -2371,7 +2450,7 @@ on_error:
 }
 
 /* Sets an UTF-16 formatted password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if password is invalid or -1 on error
  */
 int libfsapfs_volume_set_utf16_password(
@@ -2533,7 +2612,7 @@ on_error:
 }
 
 /* Sets an UTF-8 formatted recovery password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
  */
 int libfsapfs_volume_set_utf8_recovery_password(
@@ -2679,7 +2758,7 @@ on_error:
 }
 
 /* Sets an UTF-16 formatted recovery password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
  */
 int libfsapfs_volume_set_utf16_recovery_password(

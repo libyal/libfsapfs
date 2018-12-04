@@ -80,6 +80,13 @@ PyMethodDef pyfsapfs_volume_object_methods[] = {
 	  "\n"
 	  "Closes a volume." },
 
+	{ "unlock",
+	  (PyCFunction) pyfsapfs_volume_unlock,
+	  METH_NOARGS,
+	  "unlock() -> Boolean\n"
+	  "\n"
+	  "Unlock a volume." },
+
 	{ "get_size",
 	  (PyCFunction) pyfsapfs_volume_get_size,
 	  METH_NOARGS,
@@ -866,6 +873,62 @@ PyObject *pyfsapfs_volume_close(
 	 Py_None );
 
 	return( Py_None );
+}
+
+/* Unlocks a volume
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_volume_unlock(
+           pyfsapfs_volume_t *pyfsapfs_volume,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	static char *function    = "pyfsapfs_volume_unlock";
+	int result               = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_volume_unlock(
+	          pyfsapfs_volume->volume,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to unlock volume.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	if( result != 0 )
+	{
+		Py_IncRef(
+		 (PyObject *) Py_True );
+
+		return( Py_True );
+	}
+	Py_IncRef(
+	 (PyObject *) Py_False );
+
+	return( Py_False );
 }
 
 /* Retrieves the size

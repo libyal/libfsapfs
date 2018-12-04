@@ -390,6 +390,14 @@ int libfsapfs_volume_close(
      libfsapfs_volume_t *volume,
      libfsapfs_error_t **error );
 
+/* Unlocks the volume
+ * Returns 1 if the volume is unlocked, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_unlock(
+     libfsapfs_volume_t *volume,
+     libfsapfs_error_t **error );
+
 /* Retrieves the size
  * Returns 1 if successful or -1 on error
  */
@@ -461,7 +469,7 @@ int libfsapfs_volume_is_locked(
      libfsapfs_error_t **error );
 
 /* Sets an UTF-8 formatted password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if password is invalid or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -472,7 +480,7 @@ int libfsapfs_volume_set_utf8_password(
      libfsapfs_error_t **error );
 
 /* Sets an UTF-16 formatted password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if password is invalid or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -483,7 +491,7 @@ int libfsapfs_volume_set_utf16_password(
      libfsapfs_error_t **error );
 
 /* Sets an UTF-8 formatted recovery password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -494,7 +502,7 @@ int libfsapfs_volume_set_utf8_recovery_password(
      libfsapfs_error_t **error );
 
 /* Sets an UTF-16 formatted recovery password
- * This function needs to be used before one of the open functions
+ * This function needs to be used before one of the open or unlock functions
  * Returns 1 if successful, 0 if recovery password is invalid or -1 on error
  */
 LIBFSAPFS_EXTERN \
