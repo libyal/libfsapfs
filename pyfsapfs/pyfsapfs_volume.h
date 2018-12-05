@@ -110,6 +110,11 @@ PyObject *pyfsapfs_volume_set_password(
            PyObject *arguments,
            PyObject *keywords );
 
+PyObject *pyfsapfs_volume_set_recovery_password(
+           pyfsapfs_volume_t *pyfsapfs_volume,
+           PyObject *arguments,
+           PyObject *keywords );
+
 PyObject *pyfsapfs_volume_get_next_file_entry_identifier(
            pyfsapfs_volume_t *pyfsapfs_volume,
            PyObject *arguments );

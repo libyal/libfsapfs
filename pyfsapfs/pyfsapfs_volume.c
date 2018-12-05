@@ -122,6 +122,13 @@ PyMethodDef pyfsapfs_volume_object_methods[] = {
 	  "\n"
 	  "Sets the password." },
 
+	{ "set_recovery_password",
+	  (PyCFunction) pyfsapfs_volume_set_recovery_password,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "set_recovery_password(recovery_password) -> None\n"
+	  "\n"
+	  "Sets the recovery password." },
+
 	{ "get_next_file_entry_identifier",
 	  (PyCFunction) pyfsapfs_volume_get_next_file_entry_identifier,
 	  METH_NOARGS,
@@ -1299,6 +1306,80 @@ PyObject *pyfsapfs_volume_set_password(
 	return( Py_None );
 }
 
+/* Sets the recovery password
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_volume_set_recovery_password(
+           pyfsapfs_volume_t *pyfsapfs_volume,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	libcerror_error_t *error    = NULL;
+	static char *function       = "pyfsapfs_volume_set_recovery_password";
+	static char *keyword_list[] = { "recovery_password", NULL };
+	char *utf8_string           = NULL;
+	size_t utf8_string_length   = 0;
+	int result                  = 0;
+
+	if( pyfsapfs_volume == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid volume.",
+		 function );
+
+		return( NULL );
+	}
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "s",
+	     keyword_list,
+	     &utf8_string ) == 0 )
+	{
+		return( NULL );
+	}
+	if( utf8_string == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid .",
+		 function );
+
+		return( NULL );
+	}
+	utf8_string_length = narrow_string_length(
+	                      utf8_string );
+
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_volume_set_utf8_recovery_password(
+	          pyfsapfs_volume->volume,
+	          (uint8_t *) utf8_string,
+	          utf8_string_length,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to set .",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	Py_IncRef(
+	 Py_None );
+
+	return( Py_None );
+}
+
 /* Retrieves the next file entry identifier
  * Returns a Python object if successful or NULL on error
  */
@@ -1359,13 +1440,13 @@ PyObject *pyfsapfs_volume_get_file_entry_by_identifier(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *file_entry_object        = NULL;
-	libcerror_error_t *error           = NULL;
-	libfsapfs_file_entry_t *file_entry = NULL;
-	static char *function              = "pyfsapfs_volume_get_file_entry_by_identifier";
-	static char *keyword_list[]        = { "file_entry_identifier", NULL };
-	int file_entry_identifier          = 0;
-	int result                         = 0;
+	PyObject *file_entry_object              = NULL;
+	libcerror_error_t *error                 = NULL;
+	libfsapfs_file_entry_t *file_entry       = NULL;
+	static char *function                    = "pyfsapfs_volume_get_file_entry_by_identifier";
+	static char *keyword_list[]              = { "file_entry_identifier", NULL };
+	unsigned long long file_entry_identifier = 0;
+	int result                               = 0;
 
 	if( pyfsapfs_volume == NULL )
 	{
@@ -1379,7 +1460,7 @@ PyObject *pyfsapfs_volume_get_file_entry_by_identifier(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "i",
+	     "K",
 	     keyword_list,
 	     &file_entry_identifier ) == 0 )
 	{
