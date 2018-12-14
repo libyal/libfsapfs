@@ -63,7 +63,6 @@ Tools:
 ** add volume selection support
 ** add extended attributes support
 ** does fuse override file types such as socket?
-** add man/fsapfsmount.3
 
 Tests:
 * add tests for container_key_bag
