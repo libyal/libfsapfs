@@ -1620,6 +1620,11 @@ int libfsapfs_deflate_decompress(
 	}
 	if( ( bit_stream.byte_stream_size - bit_stream.byte_stream_offset ) >= 4 )
 	{
+		while( bit_stream.bit_buffer_size >= 8 )
+		{
+			bit_stream.byte_stream_offset -= 1;
+			bit_stream.bit_buffer_size    -= 8;
+		}
 		byte_stream_copy_to_uint32_big_endian(
 		 &( bit_stream.byte_stream[ bit_stream.byte_stream_offset ] ),
 		 stored_checksum );
