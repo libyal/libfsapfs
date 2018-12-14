@@ -1,51 +1,39 @@
 .Dd December 14, 2018
-.Dt fsapfsinfo
+.Dt fsapfsmount
 .Os libfsapfs
 .Sh NAME
-.Nm fsapfsinfo
-.Nd determines information about an Apple File System (APFS)
+.Nm fsapfsmount
+.Nd mounts an Apple File System (APFS) volume
 .Sh SYNOPSIS
-.Nm fsapfsinfo
-.Op Fl B Ar bodyfile
-.Op Fl E Ar identifier
+.Nm fsapfsmount
 .Op Fl f Ar file_system_index
-.Op Fl F Ar path
-.Op Fl F Ar path
 .Op Fl o Ar offset
 .Op Fl p Ar password
 .Op Fl r Ar password
 .Op Fl hvV
 .Va Ar source
 .Sh DESCRIPTION
-.Nm fsapfsinfo
-is a utility to determine information about an Apple File System (APFS)
+.Nm fsapfsmount
+is a utility to mount an n Apple File System (APFS) volume
 .Pp
-.Nm fsapfsinfo
+.Nm fsapfsmount
 is part of the
 .Nm libfsapfs
 package.
 .Nm libfsapfs
-is a library to access the Apple File System (APFS) format
+is a library to access the n Apple File System (APFS) format
 .Pp
 .Ar source
 is the source file.
 .Pp
 The options are as follows:
 .Bl -tag -width Ds
-.It Fl B Ar bodyfile
-output file system information as a bodyfile
-.It Fl E Ar identifier
-show information about a specific file system entry or "all"
 .It Fl f Ar file_system_index
-show information about a specific file system or "all"
-.It Fl F Ar path
-show information about a specific file entry path
+mounts a specific file system or "all"
 .It Fl h
 shows this help
-.It Fl H
-shows the file system hierarchy
 .It Fl o Ar offset
-specify the volume offset
+specify the volume offset in bytes
 .It Fl p Ar password
 specify the password
 .It Fl r Ar password
@@ -54,6 +42,8 @@ specify the recovery password
 verbose output to stderr
 .It Fl V
 print version
+.It Fl X Ar extended_options
+extended options to pass to sub system
 .El
 .Sh ENVIRONMENT
 None
@@ -61,15 +51,8 @@ None
 None
 .Sh EXAMPLES
 .Bd -literal
-# fsapfsinfo -H -o 20480 image.dmg
-fsapfsinfo 20181214
-
-Apple File System (APFS) information:
-
-File system hierarchy:
-/{3e0077e4-eafa-495e-a8de-016284a49b29}/
-/{3e0077e4-eafa-495e-a8de-016284a49b29}/.fseventsd
-.Dl        ...
+# fsapfsmount -f 1 -p Password /dev/sda1
+fsapfsmount 20181214
 
 .Ed
 .Sh DIAGNOSTICS
@@ -81,7 +64,7 @@ https://github.com/libyal/libfsapfs/
 .Sh AUTHOR
 These man pages were written by Joachim Metz.
 .Sh COPYRIGHT
-Copyright 2018, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>.
 This is free software; see the source for copying conditions. There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 .Sh SEE ALSO
-.Xr fsapfsmount 1
+.Xr fsapfsinfo 1

@@ -70,14 +70,14 @@ void usage_fprint(
 	fprintf( stream, "Usage: fsapfsinfo [ -B bodyfile ] [ -E identifier ]\n"
 	                 "                  [ -f file_system_index ] [ -F path ]\n"
 	                 "                  [ -o offset ] [ -p password ]\n"
-	                 "                  [ -r password ] [ -BhHvV ] source\n\n" );
+	                 "                  [ -r password ] [ -hHvV ] source\n\n" );
 
 	fprintf( stream, "\tsource: the source file or device\n\n" );
 
-	fprintf( stream, "\t-B:     output file system information as a bodyfile.\n" );
-	fprintf( stream, "\t-E:     show information about a specific file system entry or \"all\".\n" );
-	fprintf( stream, "\t-f:     show information about a specific file system or \"all\".\n" );
-	fprintf( stream, "\t-F:     show information about a specific file entry path.\n" );
+	fprintf( stream, "\t-B:     output file system information as a bodyfile\n" );
+	fprintf( stream, "\t-E:     show information about a specific file system entry or \"all\"\n" );
+	fprintf( stream, "\t-f:     show information about a specific file system or \"all\"\n" );
+	fprintf( stream, "\t-F:     show information about a specific file entry path\n" );
 	fprintf( stream, "\t-h:     shows this help\n" );
 	fprintf( stream, "\t-H:     shows the file system hierarchy\n" );
 	fprintf( stream, "\t-o:     specify the volume offset\n" );

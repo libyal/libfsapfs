@@ -79,7 +79,7 @@ void usage_fprint(
 	fprintf( stream, "\tcontainer:   an APFS container\n\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
-	fprintf( stream, "\t-f:          mounts a specific file system or \"all\".\n" );
+	fprintf( stream, "\t-f:          mounts a specific file system or \"all\"\n" );
 	fprintf( stream, "\t-h:          shows this help\n" );
 	fprintf( stream, "\t-o:          specify the volume offset\n" );
 	fprintf( stream, "\t-p:          specify the password\n" );

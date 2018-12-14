@@ -2206,7 +2206,7 @@ The offset is relative from the start of the ZLIB (DEFLATE) compressed data + 20
 
 ===== ZLIB (DEFLATE) compressed footer
 
-The ZLIB (DEFLATE) compressed footer is variable of size and consists of:
+The ZLIB (DEFLATE) compressed footer is 50 bytes size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
