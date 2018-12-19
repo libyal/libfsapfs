@@ -43,6 +43,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.1 | J.B. Metz | September 2018 | Initial version.
 | 0.0.2 | J.B. Metz | October 2018 | Additional format information.
 | 0.0.3 | J.B. Metz | November 2018 | Additional format information.
+| 0.0.4 | J.B. Metz | December 2018 | Additional format information.
 |===
 
 :numbered:
@@ -1163,7 +1164,7 @@ See section: <<object_types,Object types>>
 | 56 | 8 | | Incompatible feature flags (apfs_incompatible_features) +
 <<volume_incompatible_superblock_feature,Volume incompatible superblock features>>
 | 64 | 8 | | [yellow-background]*Unknown (apfs_unmount_time)* +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 72 | 8 | | Number of reserved blocks (apfs_reserve_block_count)
 | 80 | 8 | | Number of quota blocks (apfs_quota_block_count)
 | 88 | 8 | | [yellow-background]*Unknown (apfs_fs_alloc_count)*
@@ -1193,7 +1194,7 @@ Contains a block number relative to the start of the container of the <<object_m
 | 244 | 16 | | Volume identifier (apfs_vol_uuid) +
 Contains a UUID stored in big-endian
 | 260 | 8 | | Modification date and time (apfs_last_mod_time) +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 268 | 8 | | Volume flags (apfs_fs_flags) +
 <<volume_superblock_flags,Volume superblock flags>>
 | 276 | 40 | | Creation change information (apfs_formatted_by) +
@@ -1242,7 +1243,7 @@ The change information (apfs_modified_by_t) is 48 bytes of size and consists of:
 String that contains the first 31 characters of the name and version of the application that changed the file system +
 Contains 0 if not set
 | 32 | 8 | | Change date and time (timestamp) +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 40 | 8 | | Change object transaction number (last_xid) +
 Contains 0 if not set
 |===
@@ -1423,13 +1424,13 @@ The inode value data (APFS_TYPE_INVALID) is 8 bytes of size and consists of:
 | 8 | 8 | | Data stream file system object identifier (private_id) +
 Contains the file system object identifier of the file extents that make up the data stream
 | 16 | 8 | | Creation date and time (create_time) +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 24 | 8 | | Modification date and time (mod_time) +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 32 | 8 | | Inode change date and time (change_time) +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 48 | 8 | | Access date and time (access_time) +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 56 | 8 | | Inode flags (internal_flags) +
 See section: <<inode_flags,Inode flags>>
 | 64 | 4 | | Number of children (nchildren) or number of links (nlink)
@@ -1874,7 +1875,7 @@ of:
 | Offset | Size | Value | Description
 | 0 | 8 | | File system object identifier of the directory entry (file_id)
 | 8 | 8 | | Date and time the directory entry was added (date_added) +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC of 0 if not set
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 16 | 2 | | Directory entry flags +
 See section: <<directory_entry_flags,Directory entry flags>>
 | 18 | ... | | Extended fields (xfields) +
