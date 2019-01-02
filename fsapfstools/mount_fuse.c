@@ -1,7 +1,7 @@
 /*
- * Fuse functions for mount tool
+ * Mount tool fuse functions
  *
- * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -35,35 +35,12 @@
 #include <unistd.h>
 #endif
 
-#if !defined( WINAPI )
-#if defined( TIME_WITH_SYS_TIME )
-#include <sys/time.h>
-#include <time.h>
-#elif defined( HAVE_SYS_TIME_H )
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
-#endif
-
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
-#define FUSE_USE_VERSION	26
-
-#if defined( HAVE_LIBFUSE )
-#include <fuse.h>
-
-#elif defined( HAVE_LIBOSXFUSE )
-#include <osxfuse/fuse.h>
-#endif
-
-#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
-
-#include "mount_fuse.h"
-#include "mount_handle.h"
 #include "fsapfstools_libcerror.h"
 #include "fsapfstools_libcnotify.h"
 #include "fsapfstools_libfsapfs.h"
 #include "fsapfstools_unused.h"
+#include "mount_fuse.h"
+#include "mount_handle.h"
 
 extern mount_handle_t *fsapfsmount_mount_handle;
 
@@ -74,6 +51,7 @@ extern mount_handle_t *fsapfsmount_mount_handle;
 #endif
 
 /* Sets the values in a stat info structure
+ * The time values are a signed 64-bit POSIX date and time value in number of nanoseconds
  * Returns 1 if successful or -1 on error
  */
 int mount_fuse_set_stat_info(
@@ -114,38 +92,8 @@ int mount_fuse_set_stat_info(
 		return( -1 );
 	}
 	stat_info->st_size  = (off_t) size;
-	stat_info->st_mode  = file_mode & 0x0fff;
+	stat_info->st_mode  = file_mode;
 
-	switch( file_mode & 0xf000 )
-	{
-		case 0x1000:
-			stat_info->st_mode |= S_IFIFO;
-			break;
-
-		case 0x2000:
-			stat_info->st_mode |= S_IFCHR;
-			break;
-
-		case 0x4000:
-			stat_info->st_mode |= S_IFDIR;
-			break;
-
-		case 0x6000:
-			stat_info->st_mode |= S_IFBLK;
-			break;
-
-		case 0xa000:
-			stat_info->st_mode |= S_IFLNK;
-			break;
-
-		case 0xe000:
-			stat_info->st_mode |= S_IFSOCK;
-			break;
-
-		default:
-			stat_info->st_mode |= S_IFREG;
-			break;
-	}
 	if( ( file_mode & 0x4000 ) != 0 )
 	{
 		stat_info->st_nlink = 2;
@@ -162,13 +110,13 @@ int mount_fuse_set_stat_info(
 #endif
 
 	stat_info->st_atime = access_time / 1000000000;
-	stat_info->st_mtime = modification_time / 1000000000;
 	stat_info->st_ctime = inode_change_time / 1000000000;
+	stat_info->st_mtime = modification_time / 1000000000;
 
 #if defined( STAT_HAVE_NSEC )
 	stat_info->st_atime_nsec = access_time % 1000000000;
-	stat_info->st_mtime_nsec = modification_time % 1000000000;
 	stat_info->st_ctime_nsec = inode_change_time % 1000000000;
+	stat_info->st_mtime_nsec = modification_time % 1000000000;
 #endif
 	return( 1 );
 }
@@ -181,15 +129,15 @@ int mount_fuse_filldir(
      fuse_fill_dir_t filler,
      const char *name,
      struct stat *stat_info,
-     libfsapfs_file_entry_t *file_entry,
+     mount_file_entry_t *file_entry,
      libcerror_error_t **error )
 {
-	static char *function     = "mount_fuse_filldir";
-	size64_t file_size        = 0;
-	int64_t access_time       = 0;
-	int64_t inode_change_time = 0;
-	int64_t modification_time = 0;
-	uint16_t file_mode        = 0;
+	static char *function      = "mount_fuse_filldir";
+	size64_t file_size         = 0;
+	uint64_t access_time       = 0;
+	uint64_t inode_change_time = 0;
+	uint64_t modification_time = 0;
+	uint16_t file_mode         = 0;
 
 	if( filler == NULL )
 	{
@@ -201,6 +149,79 @@ int mount_fuse_filldir(
 		 function );
 
 		return( -1 );
+	}
+	if( file_entry != NULL )
+	{
+		if( mount_file_entry_get_size(
+		     file_entry,
+		     &file_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file entry size.",
+			 function );
+
+			return( -1 );
+		}
+		if( mount_file_entry_get_file_mode(
+		     file_entry,
+		     &file_mode,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file mode.",
+			 function );
+
+			return( -1 );
+		}
+		if( mount_file_entry_get_access_time(
+		     file_entry,
+		     &access_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve access time.",
+			 function );
+
+			return( -1 );
+		}
+		if( mount_file_entry_get_modification_time(
+		     file_entry,
+		     &modification_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve modification time.",
+			 function );
+
+			return( -1 );
+		}
+		if( mount_file_entry_get_inode_change_time(
+		     file_entry,
+		     &inode_change_time,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve inode change time.",
+			 function );
+
+			return( -1 );
+		}
 	}
 	if( memory_set(
 	     stat_info,
@@ -216,86 +237,13 @@ int mount_fuse_filldir(
 
 		return( -1 );
 	}
-	if( file_entry != NULL )
-	{
-		if( libfsapfs_file_entry_get_size(
-		     file_entry,
-		     &file_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file entry size.",
-			 function );
-
-			return( -1 );
-		}
-		if( libfsapfs_file_entry_get_file_mode(
-		     file_entry,
-		     &file_mode,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve file mode.",
-			 function );
-
-			return( -1 );
-		}
-		if( libfsapfs_file_entry_get_access_time(
-		     file_entry,
-		     &access_time,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve access time.",
-			 function );
-
-			return( -1 );
-		}
-		if( libfsapfs_file_entry_get_modification_time(
-		     file_entry,
-		     &modification_time,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve modification time.",
-			 function );
-
-			return( -1 );
-		}
-		if( libfsapfs_file_entry_get_inode_change_time(
-		     file_entry,
-		     &inode_change_time,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve inode change time.",
-			 function );
-
-			return( -1 );
-		}
-	}
 	if( mount_fuse_set_stat_info(
 	     stat_info,
 	     file_size,
 	     file_mode,
-	     access_time,
-	     modification_time,
-	     inode_change_time,
+	     (int64_t) access_time,
+	     (int64_t) inode_change_time,
+	     (int64_t) modification_time,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -325,7 +273,7 @@ int mount_fuse_filldir(
 	return( 1 );
 }
 
-/* Opens a file
+/* Opens a file or directory
  * Returns 0 if successful or a negative errno value otherwise
  */
 int mount_fuse_open(
@@ -400,7 +348,7 @@ int mount_fuse_open(
 	if( mount_handle_get_file_entry_by_path(
 	     fsapfsmount_mount_handle,
 	     path,
-	     (libfsapfs_file_entry_t **) &( file_info->fh ),
+	     (mount_file_entry_t **) &( file_info->fh ),
 	     &error ) != 1 )
 	{
 		libcerror_error_set(
@@ -504,9 +452,9 @@ int mount_fuse_read(
 
 		goto on_error;
 	}
-	read_count = libfsapfs_file_entry_read_buffer_at_offset(
-	              (libfsapfs_file_entry_t *) file_info->fh,
-	              (uint8_t *) buffer,
+	read_count = mount_file_entry_read_buffer_at_offset(
+	              (mount_file_entry_t *) file_info->fh,
+	              (void *) buffer,
 	              size,
 	              (off64_t) offset,
 	              &error );
@@ -585,8 +533,8 @@ int mount_fuse_release(
 	}
 	if( file_info->fh != (uint64_t) NULL )
 	{
-		if( libfsapfs_file_entry_free(
-		     (libfsapfs_file_entry_t **) &( file_info->fh ),
+		if( mount_file_entry_free(
+		     (mount_file_entry_t **) &( file_info->fh ),
 		     &error ) != 1 )
 		{
 			libcerror_error_set(
@@ -676,7 +624,7 @@ int mount_fuse_opendir(
 	if( mount_handle_get_file_entry_by_path(
 	     fsapfsmount_mount_handle,
 	     path,
-	     (libfsapfs_file_entry_t **) &( file_info->fh ),
+	     (mount_file_entry_t **) &( file_info->fh ),
 	     &error ) != 1 )
 	{
 		libcerror_error_set(
@@ -712,18 +660,18 @@ int mount_fuse_readdir(
      void *buffer,
      fuse_fill_dir_t filler,
      off_t offset FSAPFSTOOLS_ATTRIBUTE_UNUSED,
-     struct fuse_file_info *file_info )
+     struct fuse_file_info *file_info FSAPFSTOOLS_ATTRIBUTE_UNUSED )
 {
-	libfsapfs_file_entry_t *parent_file_entry = NULL;
-	libfsapfs_file_entry_t *sub_file_entry    = NULL;
-	libcerror_error_t *error                  = NULL;
-	struct stat *stat_info                    = NULL;
-	static char *function                     = "mount_fuse_readdir";
-	char *name                                = NULL;
-	size_t name_size                          = 0;
-	int number_of_sub_file_entries            = 0;
-	int result                                = 0;
-	int sub_file_entry_index                  = 0;
+	struct stat *stat_info                = NULL;
+	libcerror_error_t *error              = NULL;
+	mount_file_entry_t *parent_file_entry = NULL;
+	mount_file_entry_t *sub_file_entry    = NULL;
+	static char *function                 = "mount_fuse_readdir";
+	char *name                            = NULL;
+	size_t name_size                      = 0;
+	int number_of_sub_file_entries        = 0;
+	int result                            = 0;
+	int sub_file_entry_index              = 0;
 
 	FSAPFSTOOLS_UNREFERENCED_PARAMETER( offset )
 
@@ -775,22 +723,6 @@ int mount_fuse_readdir(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_get_number_of_sub_file_entries(
-	     (libfsapfs_file_entry_t *) file_info->fh,
-	     &number_of_sub_file_entries,
-	     &error ) != 1 )
-	{
-		libcerror_error_set(
-		 &error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of sub file entries.",
-		 function );
-
-		result = -EIO;
-
-		goto on_error;
-	}
 	stat_info = memory_allocate_structure(
 	             struct stat );
 
@@ -812,7 +744,7 @@ int mount_fuse_readdir(
 	     filler,
 	     ".",
 	     stat_info,
-	     (libfsapfs_file_entry_t *) file_info->fh,
+	     (mount_file_entry_t *) file_info->fh,
 	     &error ) != 1 )
 	{
 		libcerror_error_set(
@@ -826,8 +758,8 @@ int mount_fuse_readdir(
 
 		goto on_error;
 	}
-	result = libfsapfs_file_entry_get_parent_file_entry(
-	          (libfsapfs_file_entry_t *) file_info->fh,
+	result = mount_file_entry_get_parent_file_entry(
+	          (mount_file_entry_t *) file_info->fh,
 	          &parent_file_entry,
 	          &error );
 
@@ -863,7 +795,7 @@ int mount_fuse_readdir(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_free(
+	if( mount_file_entry_free(
 	     &parent_file_entry,
 	     &error ) != 1 )
 	{
@@ -878,12 +810,28 @@ int mount_fuse_readdir(
 
 		goto on_error;
 	}
+	if( mount_file_entry_get_number_of_sub_file_entries(
+	     (mount_file_entry_t *) file_info->fh,
+	     &number_of_sub_file_entries,
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of sub file entries.",
+		 function );
+
+		result = -EIO;
+
+		goto on_error;
+	}
 	for( sub_file_entry_index = 0;
 	     sub_file_entry_index < number_of_sub_file_entries;
 	     sub_file_entry_index++ )
 	{
-		if( libfsapfs_file_entry_get_sub_file_entry_by_index(
-		     (libfsapfs_file_entry_t *) file_info->fh,
+		if( mount_file_entry_get_sub_file_entry_by_index(
+		     (mount_file_entry_t *) file_info->fh,
 		     sub_file_entry_index,
 		     &sub_file_entry,
 		     &error ) != 1 )
@@ -900,7 +848,7 @@ int mount_fuse_readdir(
 
 			goto on_error;
 		}
-		if( libfsapfs_file_entry_get_utf8_name_size(
+		if( mount_file_entry_get_name_size(
 		     sub_file_entry,
 		     &name_size,
 		     &error ) != 1 )
@@ -933,9 +881,9 @@ int mount_fuse_readdir(
 
 			goto on_error;
 		}
-		if( libfsapfs_file_entry_get_utf8_name(
+		if( mount_file_entry_get_name(
 		     sub_file_entry,
-		     (uint8_t *) name,
+		     name,
 		     name_size,
 		     &error ) != 1 )
 		{
@@ -975,7 +923,7 @@ int mount_fuse_readdir(
 
 		name = NULL;
 
-		if( libfsapfs_file_entry_free(
+		if( mount_file_entry_free(
 		     &sub_file_entry,
 		     &error ) != 1 )
 		{
@@ -1012,13 +960,13 @@ on_error:
 	}
 	if( sub_file_entry != NULL )
 	{
-		libfsapfs_file_entry_free(
+		mount_file_entry_free(
 		 &sub_file_entry,
 		 NULL );
 	}
 	if( parent_file_entry != NULL )
 	{
-		libfsapfs_file_entry_free(
+		mount_file_entry_free(
 		 &parent_file_entry,
 		 NULL );
 	}
@@ -1078,21 +1026,7 @@ int mount_fuse_releasedir(
 	}
 	if( file_info->fh != (uint64_t) NULL )
 	{
-		if( libfsapfs_file_entry_free(
-		     (libfsapfs_file_entry_t **) &( file_info->fh ),
-		     &error ) != 1 )
-		{
-			libcerror_error_set(
-			 &error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file entry.",
-			 function );
-
-			result = -ENOENT;
-
-			goto on_error;
-		}
+		file_info->fh = (uint64_t) NULL;
 	}
 	return( 0 );
 
@@ -1114,15 +1048,15 @@ int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info )
 {
-	libcerror_error_t *error           = NULL;
-	libfsapfs_file_entry_t *file_entry = NULL;
-	static char *function              = "mount_fuse_getattr";
-	size64_t file_size                 = 0;
-	int64_t access_time                = 0;
-	int64_t inode_change_time          = 0;
-	int64_t modification_time          = 0;
-	uint16_t file_mode                 = 0;
-	int result                         = 0;
+	libcerror_error_t *error       = NULL;
+	mount_file_entry_t *file_entry = NULL;
+	static char *function          = "mount_fuse_getattr";
+	size64_t file_size             = 0;
+	uint64_t access_time           = 0;
+	uint64_t inode_change_time     = 0;
+	uint64_t modification_time     = 0;
+	uint16_t file_mode             = 0;
+	int result                     = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -1199,7 +1133,7 @@ int mount_fuse_getattr(
 	{
 		return( -ENOENT );
 	}
-	if( libfsapfs_file_entry_get_size(
+	if( mount_file_entry_get_size(
 	     file_entry,
 	     &file_size,
 	     &error ) != 1 )
@@ -1215,7 +1149,7 @@ int mount_fuse_getattr(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_get_file_mode(
+	if( mount_file_entry_get_file_mode(
 	     file_entry,
 	     &file_mode,
 	     &error ) != 1 )
@@ -1231,7 +1165,7 @@ int mount_fuse_getattr(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_get_access_time(
+	if( mount_file_entry_get_access_time(
 	     file_entry,
 	     &access_time,
 	     &error ) != 1 )
@@ -1247,7 +1181,7 @@ int mount_fuse_getattr(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_get_modification_time(
+	if( mount_file_entry_get_modification_time(
 	     file_entry,
 	     &modification_time,
 	     &error ) != 1 )
@@ -1263,7 +1197,7 @@ int mount_fuse_getattr(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_get_inode_change_time(
+	if( mount_file_entry_get_inode_change_time(
 	     file_entry,
 	     &inode_change_time,
 	     &error ) != 1 )
@@ -1283,9 +1217,9 @@ int mount_fuse_getattr(
 	     stat_info,
 	     file_size,
 	     file_mode,
-	     access_time,
-	     modification_time,
-	     inode_change_time,
+	     (int64_t) access_time,
+	     (int64_t) inode_change_time,
+	     (int64_t) modification_time,
 	     &error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1299,7 +1233,7 @@ int mount_fuse_getattr(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_free(
+	if( mount_file_entry_free(
 	     &file_entry,
 	     &error ) != 1 )
 	{
@@ -1326,7 +1260,7 @@ on_error:
 	}
 	if( file_entry != NULL )
 	{
-		libfsapfs_file_entry_free(
+		mount_file_entry_free(
 		 &file_entry,
 		 NULL );
 	}
@@ -1341,10 +1275,10 @@ int mount_fuse_readlink(
      char *buffer,
      size_t size )
 {
-	libcerror_error_t *error           = NULL;
-	libfsapfs_file_entry_t *file_entry = NULL;
-	static char *function              = "mount_fuse_readlink";
-	int result                         = 0;
+	libcerror_error_t *error       = NULL;
+	mount_file_entry_t *file_entry = NULL;
+	static char *function          = "mount_fuse_readlink";
+	int result                     = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -1392,9 +1326,9 @@ int mount_fuse_readlink(
 	{
 		return( -ENOENT );
 	}
-	if( libfsapfs_file_entry_get_utf8_symbolic_link_target(
+	if( mount_file_entry_get_symbolic_link_target(
 	     file_entry,
-	     (uint8_t *) buffer,
+	     buffer,
 	     size,
 	     &error ) != 1 )
 	{
@@ -1409,7 +1343,7 @@ int mount_fuse_readlink(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_entry_free(
+	if( mount_file_entry_free(
 	     &file_entry,
 	     &error ) != 1 )
 	{
@@ -1436,13 +1370,12 @@ on_error:
 	}
 	if( file_entry != NULL )
 	{
-		libfsapfs_file_entry_free(
+		mount_file_entry_free(
 		 &file_entry,
 		 NULL );
 	}
 	return( result );
 }
-
 
 /* Cleans up when fuse is done
  */

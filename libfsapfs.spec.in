@@ -77,7 +77,7 @@ rm -rf %{buildroot}
 %files -n libfsapfs-devel
 %defattr(644,root,root,755)
 %license COPYING
-%doc AUTHORS README ChangeLog
+%doc AUTHORS README
 %{_libdir}/*.a
 %{_libdir}/*.la
 %{_libdir}/*.so

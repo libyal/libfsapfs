@@ -59,6 +59,7 @@ fsapfsmount_SOURCES = \
 	fsapfstools_getopt.c fsapfstools_getopt.h \
 	fsapfstools_i18n.h \
 	fsapfstools_libbfio.h \
+	fsapfstools_libcdata.h \
 	fsapfstools_libcerror.h \
 	fsapfstools_libclocale.h \
 	fsapfstools_libcnotify.h \
@@ -68,6 +69,9 @@ fsapfsmount_SOURCES = \
 	fsapfstools_output.c fsapfstools_output.h \
 	fsapfstools_signal.c fsapfstools_signal.h \
 	fsapfstools_unused.h \
+	mount_dokan.c mount_dokan.h \
+	mount_file_entry.c mount_file_entry.h \
+	mount_file_system.c mount_file_system.h \
 	mount_fuse.c mount_fuse.h \
 	mount_handle.c mount_handle.h
 

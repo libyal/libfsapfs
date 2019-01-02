@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsapfs],
- [20181219],
+ [20190102],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -263,7 +263,8 @@ Building:
    libhmac support:                             $ac_cv_libhmac
    SHA256 support:                              $ac_cv_libhmac_sha256
    libcaes support:                             $ac_cv_libcaes
-   AES support:                                 $ac_cv_libcaes_aes
+   AES-ECB support:                             $ac_cv_libcaes_aes_ecb
+   AES-XTS support:                             $ac_cv_libcaes_aes_xts
    FUSE support:                                $ac_cv_libfuse
 
 Features:

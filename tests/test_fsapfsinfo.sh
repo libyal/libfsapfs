@@ -1,7 +1,7 @@
 #!/bin/bash
 # Info tool testing script
 #
-# Version: 20181111
+# Version: 20190101
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -100,7 +100,7 @@ do
 			fi
 		done
 	else
-		for INPUT_FILE in `ls -1 ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
+		for INPUT_FILE in `ls -1d ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
 		do
 			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "fsapfsinfo" "with_stdout_reference" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" "${OPTIONS[@]}";
 			RESULT=$?;

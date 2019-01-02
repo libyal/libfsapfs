@@ -1,6 +1,6 @@
 dnl Checks for libcaes required headers and functions
 dnl
-dnl Version: 20181117
+dnl Version: 20190102
 
 dnl Function to detect if libcaes is available
 dnl ac_libcaes_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -144,29 +144,29 @@ AC_DEFUN([AX_LIBCAES_CHECK_LIB],
 
 dnl Function to detect if libcaes dependencies are available
 AC_DEFUN([AX_LIBCAES_CHECK_LOCAL],
-  [ac_cv_libcaes_aes=no
+  [dnl Check for libcrypto (openssl) support
+  AX_LIBCRYPTO_CHECK_ENABLE
 
-  dnl Check for Windows crypto API support
   AS_IF(
-    [test "x$ac_cv_enable_winapi" = xyes],
-    [ac_cv_libcaes_aes=libadvapi32])
-
-  dnl Check for libcrypto (openssl) support
-  AS_IF(
-    [test "x$ac_cv_libcaes_aes" = xno],
-    [AX_LIBCRYPTO_CHECK_ENABLE
-
-    AS_IF(
-      [test "x$ac_cv_libcrypto" != xno],
-      [AX_LIBCRYPTO_CHECK_AES
-
-      ac_cv_libcaes_aes=$ac_cv_libcrypto_aes])
-    ])
+    [test "x$ac_cv_libcrypto" != xno],
+    [AX_LIBCRYPTO_CHECK_AES
+    AX_LIBCRYPTO_CHECK_AES_XTS])
 
   dnl Fallback to local versions if necessary
   AS_IF(
-    [test "x$ac_cv_libcaes_aes" = xno],
-    [ac_cv_libcaes_aes=local])
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_aes_cbc" = xno],
+    [ac_cv_libcaes_aes_cbc=local],
+    [ac_cv_libcaes_aes_cbc=$ac_cv_libcrypto_aes_cbc])
+
+  AS_IF(
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_aes_ecb" = xno],
+    [ac_cv_libcaes_aes_ecb=local],
+    [ac_cv_libcaes_aes_ecb=$ac_cv_libcrypto_aes_ecb])
+
+  AS_IF(
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_aes_xts" = xno],
+    [ac_cv_libcaes_aes_xts=local],
+    [ac_cv_libcaes_aes_xts=$ac_cv_libcrypto_aes_xts])
 
   ac_cv_libcaes_CPPFLAGS="-I../libcaes";
   ac_cv_libcaes_LIBADD="../libcaes/libcaes.la";

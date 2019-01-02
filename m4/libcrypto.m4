@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20181117
+dnl Version: 20190102
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -355,7 +355,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_SHA512],
     [ac_cv_libcrypto=yes])
   ])
 
-dnl Function to detect if openssl EVP AES functions are available
+dnl Function to detect if openssl EVP CIPHER functions are available
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
   [ac_cv_libcrypto_evp_cipher=yes
 
@@ -440,34 +440,71 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
     ])
   ])
 
-dnl Function to detect if openssl AES functions are available
+dnl Function to detect if openssl AES-CBC and AES-ECB functions are available
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_AES],
   [AC_CHECK_HEADERS([openssl/aes.h])
 
   AS_IF(
     [test "x$ac_cv_header_openssl_aes_h" = xno],
-    [ac_cv_libcrypto_aes=no],
-    [ac_cv_libcrypto_aes=libcrypto
+    [ac_cv_libcrypto_aes_cbc=no
+    ac_cv_libcrypto_aes_ecb=no],
+    [ac_cv_libcrypto_aes_cbc=libcrypto
+    ac_cv_libcrypto_aes_ecb=libcrypto
+
     AC_CHECK_LIB(
       crypto,
-      EVP_aes_128_ecb,
+      AES_set_decrypt_key,
       [ac_cv_libcrypto_dummy=yes],
-      [ac_cv_libcrypto_aes=no])
+      [ac_cv_libcrypto_aes_cbc=no,
+      ac_cv_libcrypto_aes_ecb=no])
     AC_CHECK_LIB(
       crypto,
-      EVP_aes_192_ecb,
+      AES_set_encrypt_key,
       [ac_cv_libcrypto_dummy=yes],
-      [ac_cv_libcrypto_aes=no])
+      [ac_cv_libcrypto_aes_cbc=no,
+      ac_cv_libcrypto_aes_ecb=no])
+
     AC_CHECK_LIB(
       crypto,
-      EVP_aes_256_ecb,
+      AES_cbc_encrypt,
       [ac_cv_libcrypto_dummy=yes],
-      [ac_cv_libcrypto_aes=no])
+      [ac_cv_libcrypto_aes_cbc=no])
+
+    AC_CHECK_LIB(
+      crypto,
+      AES_ecb_encrypt,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_ecb=no])
+
+    AS_IF(
+      [test "x$ac_cv_lib_crypto_AES_cbc_encrypt" = xyes],
+      [AC_DEFINE(
+        [HAVE_AES_CBC_ENCRYPT],
+        [1],
+        [Define to 1 if you have the `AES_cbc_encrypt' function".])
+      ])
+
+    AS_IF(
+      [test "x$ac_cv_lib_crypto_AES_ecb_encrypt" = xyes],
+      [AC_DEFINE(
+        [HAVE_AES_ECB_ENCRYPT],
+        [1],
+        [Define to 1 if you have the `AES_ecb_encrypt' function".])
+      ])
     ])
 
   AS_IF(
-    [test "x$ac_cv_libcrypto" = xno && test "x$ac_cv_libcrypto_aes" = xlibcrypto],
-    [ac_cv_libcrypto=yes])
+    [test "x$ac_cv_libcrypto" = xno],
+    [AS_IF(
+      [test "x$ac_cv_libcrypto_aes_cbc" = xno || test "x$ac_cv_libcrypto_aes_ecb" = xno],
+      [ac_cv_libcrypto=yes])
+    ])
+
+  dnl ac_cv_libcrypto_aes is deprecated but kept for backwards compatibility
+  AS_IF(
+    [test "x$ac_cv_libcrypto_aes_cbc" = xno || test "x$ac_cv_libcrypto_aes_ecb" = xno],
+    [ac_cv_libcrypto_aes=no],
+    [ac_cv_libcrypto_aes=libcrypto])
   ])
 
 dnl Function to detect if libcrypto (openssl) dependencies are available
@@ -651,24 +688,128 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_SHA512],
     [AX_LIBCRYPTO_CHECK_OPENSSL_SHA512])
   ])
 
-dnl Function to detect if libcrypto AES functions are available
+dnl Function to detect if libcrypto AES-CBC and AES-ECB functions are available
 AC_DEFUN([AX_LIBCRYPTO_CHECK_AES],
-  [ac_cv_libcrypto_aes=no
+  [dnl Check for libcrypto (openssl) EVP CIPHER AES-CBC and AES-ECB support
+  AX_LIBCRYPTO_CHECK_AES_CBC
+  AX_LIBCRYPTO_CHECK_AES_ECB
 
-  dnl Check for libcrypto (openssl) EVP CIPHER support
+  dnl ac_cv_libcrypto_aes is deprecated but kept for backwards compatibility
   AS_IF(
+    [test "x$ac_cv_libcrypto_aes_cbc" = xno || test "x$ac_cv_libcrypto_aes_ecb" = xno],
+    [ac_cv_libcrypto_aes=no],
+    [ac_cv_libcrypto_aes=libcrypto_evp])
+
+  dnl Check for libcrypto (openssl) AES-CBC and AES-ECB support
+  AS_IF(
+    [test "x$ac_cv_libcrypto_aes_cbc" = xno || test "x$ac_cv_libcrypto_aes_ecb" = xno],
+    [AX_LIBCRYPTO_CHECK_OPENSSL_AES])
+  ])
+
+dnl Function to detect if libcrypto AES-CBC functions are available
+AC_DEFUN([AX_LIBCRYPTO_CHECK_AES_CBC],
+  [AS_IF(
     [test "x$ac_cv_libcrypto_evp" = xyes && test "x$ac_cv_enable_openssl_evp_cipher" != xno && test "x$ac_cv_libcrypto_evp_cipher" != xyes],
-    [AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER
+    [AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER])
+
+  AS_IF(
+    [test "x$ac_cv_libcrypto_evp_cipher" != xyes],
+    [ac_cv_libcrypto_aes_cbc=no],
+    [ac_cv_libcrypto_aes_cbc=libcrypto_evp
+
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_128_cbc,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_cbc=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_192_cbc,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_cbc=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_256_cbc,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_cbc=no])
 
     AS_IF(
-      [test "x$ac_cv_libcrypto_evp_cipher" = xyes],
-      [ac_cv_libcrypto_aes=libcrypto_evp])
+      [test "x$ac_cv_lib_crypto_EVP_aes_128_cbc" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_192_cbc" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_256_cbc" = xyes],
+      [AC_DEFINE(
+        [HAVE_EVP_CRYPTO_AES_CBC],
+        [1],
+        [Define to 1 if you have the `EVP_aes_128_cbc', `EVP_aes_192_cbc' and `EVP_aes_256_cbc' functions".])
+      ])
     ])
+  ])
 
-  dnl Check for libcrypto (openssl) AES support
+dnl Function to detect if libcrypto AES-ECB functions are available
+AC_DEFUN([AX_LIBCRYPTO_CHECK_AES_ECB],
+  [AS_IF(
+    [test "x$ac_cv_libcrypto_evp" = xyes && test "x$ac_cv_enable_openssl_evp_cipher" != xno && test "x$ac_cv_libcrypto_evp_cipher" != xyes],
+    [AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER])
+
   AS_IF(
-    [test "x$ac_cv_libcrypto_aes" = xno],
-    [AX_LIBCRYPTO_CHECK_OPENSSL_AES])
+    [test "x$ac_cv_libcrypto_evp_cipher" != xyes],
+    [ac_cv_libcrypto_aes_ecb=no],
+    [ac_cv_libcrypto_aes_ecb=libcrypto_evp
+
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_128_ecb,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_ecb=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_192_ecb,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_ecb=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_256_ecb,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_ecb=no])
+
+    AS_IF(
+      [test "x$ac_cv_lib_crypto_EVP_aes_128_ecb" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_192_ecb" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_256_ecb" = xyes],
+      [AC_DEFINE(
+        [HAVE_EVP_CRYPTO_AES_ECB],
+        [1],
+        [Define to 1 if you have the `EVP_aes_128_ecb', `EVP_aes_192_ecb' and `EVP_aes_256_ecb' functions".])
+      ])
+    ])
+  ])
+
+dnl Function to detect if libcrypto AES-XTS functions are available
+AC_DEFUN([AX_LIBCRYPTO_CHECK_AES_XTS],
+  [AS_IF(
+    [test "x$ac_cv_libcrypto_evp" = xyes && test "x$ac_cv_enable_openssl_evp_cipher" != xno && test "x$ac_cv_libcrypto_evp_cipher" != xyes],
+    [AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER])
+
+  AS_IF(
+    [test "x$ac_cv_libcrypto_evp_cipher" != xyes],
+    [ac_cv_libcrypto_aes_xts=no],
+    [ac_cv_libcrypto_aes_xts=libcrypto_evp
+
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_128_xts,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_xts=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_aes_256_xts,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_aes_xts=no])
+
+    AS_IF(
+      [test "x$ac_cv_lib_crypto_EVP_aes_128_xts" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_256_xts" = xyes],
+      [AC_DEFINE(
+        [HAVE_EVP_CRYPTO_AES_XTS],
+        [1],
+        [Define to 1 if you have the `EVP_aes_128_xts' and `EVP_aes_256_xts' functions".])
+      ])
+    ])
   ])
 
 dnl Function to detect how to enable libcrypto (openssl)

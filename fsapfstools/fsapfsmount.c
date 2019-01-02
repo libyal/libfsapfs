@@ -1,7 +1,7 @@
 /*
- * Mounts an APFS container
+ * Mounts an Apple File System (APFS) container
  *
- * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -35,21 +35,12 @@
 #include <stdlib.h>
 #endif
 
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
-#define FUSE_USE_VERSION	26
-
-#if defined( HAVE_LIBFUSE )
-#include <fuse.h>
-
-#elif defined( HAVE_LIBOSXFUSE )
-#include <osxfuse/fuse.h>
+#if defined( HAVE_UNISTD_H )
+#include <unistd.h>
 #endif
 
-#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
-
-#include "mount_fuse.h"
-#include "mount_handle.h"
 #include "fsapfstools_getopt.h"
+#include "fsapfstools_i18n.h"
 #include "fsapfstools_libcerror.h"
 #include "fsapfstools_libclocale.h"
 #include "fsapfstools_libcnotify.h"
@@ -57,11 +48,14 @@
 #include "fsapfstools_output.h"
 #include "fsapfstools_signal.h"
 #include "fsapfstools_unused.h"
+#include "mount_dokan.h"
+#include "mount_fuse.h"
+#include "mount_handle.h"
 
 mount_handle_t *fsapfsmount_mount_handle = NULL;
 int fsapfsmount_abort                    = 0;
 
-/* Prints the executable usage information
+/* Prints usage information
  */
 void usage_fprint(
       FILE *stream )
@@ -70,20 +64,20 @@ void usage_fprint(
 	{
 		return;
 	}
-	fprintf( stream, "Use fsapfsmount to mount an APFS container\n\n" );
+	fprintf( stream, "Use fsapfsmount to mount an Apple File System (APFS) container\n\n" );
 
 	fprintf( stream, "Usage: fsapfsmount [ -f file_system_index ] [ -o offset ] [ -p password ]\n"
-	                 "                   [ -r password ] [ -X extended_options ] [ -hvV ]\n"
-	                 "                   container mount_point\n\n" );
+	                 "                   [ -r recovery_password ] [ -X extended_options ]\n"
+	                 "                   [ -hvV ] container mount_point\n\n" );
 
-	fprintf( stream, "\tcontainer:   an APFS container\n\n" );
+	fprintf( stream, "\tcontainer:   an Apple File System (APFS) container\n\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
 	fprintf( stream, "\t-f:          mounts a specific file system or \"all\"\n" );
 	fprintf( stream, "\t-h:          shows this help\n" );
-	fprintf( stream, "\t-o:          specify the volume offset\n" );
-	fprintf( stream, "\t-p:          specify the password\n" );
-	fprintf( stream, "\t-r:          specify the recovery password\n" );
+	fprintf( stream, "\t-o:          specify the container offset in bytes\n" );
+	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
+	fprintf( stream, "\t-r:          specify the recovery password/passphrase\n" );
 	fprintf( stream, "\t-v:          verbose output to stderr, while fsapfsmount will remain running in the\n"
 	                 "\t             foreground\n" );
 	fprintf( stream, "\t-V:          print version\n" );
@@ -146,9 +140,9 @@ int main( int argc, char * const argv[] )
 	system_character_t *mount_point              = NULL;
 	system_character_t *option_extended_options  = NULL;
 	system_character_t *option_file_system_index = NULL;
+	system_character_t *option_offset            = NULL;
 	system_character_t *option_password          = NULL;
 	system_character_t *option_recovery_password = NULL;
-	system_character_t *option_volume_offset     = NULL;
 	system_character_t *source                   = NULL;
 	char *program                                = "fsapfsmount";
 	system_integer_t option                      = 0;
@@ -161,6 +155,10 @@ int main( int argc, char * const argv[] )
 	struct fuse_args fsapfsmount_fuse_arguments  = FUSE_ARGS_INIT(0, NULL);
 	struct fuse_chan *fsapfsmount_fuse_channel   = NULL;
 	struct fuse *fsapfsmount_fuse_handle         = NULL;
+
+#elif defined( HAVE_LIBDOKAN )
+	DOKAN_OPERATIONS fsapfsmount_dokan_operations;
+	DOKAN_OPTIONS fsapfsmount_dokan_options;
 #endif
 
 	libcnotify_stream_set(
@@ -170,7 +168,7 @@ int main( int argc, char * const argv[] )
 	 1 );
 
 	if( libclocale_initialize(
-             "fsapfstools",
+	     "fsapfstools",
 	     &error ) != 1 )
 	{
 		fprintf(
@@ -180,8 +178,8 @@ int main( int argc, char * const argv[] )
 		goto on_error;
 	}
 	if( fsapfstools_output_initialize(
-             _IONBF,
-             &error ) != 1 )
+	     _IONBF,
+	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
@@ -224,7 +222,7 @@ int main( int argc, char * const argv[] )
 				return( EXIT_SUCCESS );
 
 			case (system_integer_t) 'o':
-				option_volume_offset = optarg;
+				option_offset = optarg;
 
 				break;
 
@@ -316,6 +314,20 @@ int main( int argc, char * const argv[] )
 			 "Unsupported file system index defaulting to: all.\n" );
 		}
 	}
+	if( option_offset != NULL )
+	{
+		if( mount_handle_set_offset(
+		     fsapfsmount_mount_handle,
+		     option_offset,
+		     &error ) != 1 )
+		{
+			fprintf(
+			 stderr,
+			 "Unable to set container offset.\n" );
+
+			goto on_error;
+		}
+	}
 	if( option_password != NULL )
 	{
 		if( mount_handle_set_password(
@@ -344,47 +356,28 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
-	if( option_volume_offset != NULL )
-	{
-		if( mount_handle_set_volume_offset(
-		     fsapfsmount_mount_handle,
-		     option_volume_offset,
-		     &error ) != 1 )
-		{
-			libcnotify_print_error_backtrace(
-			 error );
-			libcerror_error_free(
-			 &error );
-
-			fprintf(
-			 stderr,
-			 "Unsupported volume offset defaulting to: %" PRIi64 ".\n",
-			 fsapfsmount_mount_handle->volume_offset );
-		}
-	}
-	if( mount_handle_open_input(
+	if( mount_handle_open(
 	     fsapfsmount_mount_handle,
 	     source,
 	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to open input.\n" );
+		 "Unable to open source container\n" );
+
+		goto on_error;
+	}
+	if( mount_handle_is_locked(
+	     fsapfsmount_mount_handle,
+	     &error ) != 0 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to unlock source container\n" );
 
 		goto on_error;
 	}
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
-	if( memory_set(
-	     &fsapfsmount_fuse_operations,
-	     0,
-	     sizeof( struct fuse_operations ) ) == NULL )
-	{
-		fprintf(
-		 stderr,
-		 "Unable to clear fuse operations.\n" );
-
-		goto on_error;
-	}
 	if( option_extended_options != NULL )
 	{
 		/* This argument is required but ignored
@@ -420,6 +413,17 @@ int main( int argc, char * const argv[] )
 			goto on_error;
 		}
 	}
+	if( memory_set(
+	     &fsapfsmount_fuse_operations,
+	     0,
+	     sizeof( struct fuse_operations ) ) == NULL )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to clear fuse operations.\n" );
+
+		goto on_error;
+	}
 	fsapfsmount_fuse_operations.open       = &mount_fuse_open;
 	fsapfsmount_fuse_operations.read       = &mount_fuse_read;
 	fsapfsmount_fuse_operations.release    = &mount_fuse_release;
@@ -448,7 +452,7 @@ int main( int argc, char * const argv[] )
 	                           &fsapfsmount_fuse_operations,
 	                           sizeof( struct fuse_operations ),
 	                           fsapfsmount_mount_handle );
-	
+
 	if( fsapfsmount_fuse_handle == NULL )
 	{
 		fprintf(
@@ -488,10 +492,160 @@ int main( int argc, char * const argv[] )
 
 	return( EXIT_SUCCESS );
 
+#elif defined( HAVE_LIBDOKAN )
+	if( memory_set(
+	     &fsapfsmount_dokan_operations,
+	     0,
+	     sizeof( DOKAN_OPERATIONS ) ) == NULL )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to clear dokan operations.\n" );
+
+		goto on_error;
+	}
+	if( memory_set(
+	     &fsapfsmount_dokan_options,
+	     0,
+	     sizeof( DOKAN_OPTIONS ) ) == NULL )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to clear dokan options.\n" );
+
+		goto on_error;
+	}
+	fsapfsmount_dokan_options.Version     = DOKAN_VERSION;
+	fsapfsmount_dokan_options.ThreadCount = 0;
+	fsapfsmount_dokan_options.MountPoint  = mount_point;
+
+	if( verbose != 0 )
+	{
+		fsapfsmount_dokan_options.Options |= DOKAN_OPTION_STDERR;
+#if defined( HAVE_DEBUG_OUTPUT )
+		fsapfsmount_dokan_options.Options |= DOKAN_OPTION_DEBUG;
+#endif
+	}
+/* This will only affect the drive properties
+	fsapfsmount_dokan_options.Options |= DOKAN_OPTION_REMOVABLE;
+*/
+
+#if ( DOKAN_VERSION >= 600 ) && ( DOKAN_VERSION < 800 )
+	fsapfsmount_dokan_options.Options |= DOKAN_OPTION_KEEP_ALIVE;
+
+	fsapfsmount_dokan_operations.CreateFile           = &mount_dokan_CreateFile;
+	fsapfsmount_dokan_operations.OpenDirectory        = &mount_dokan_OpenDirectory;
+	fsapfsmount_dokan_operations.CreateDirectory      = NULL;
+	fsapfsmount_dokan_operations.Cleanup              = NULL;
+	fsapfsmount_dokan_operations.CloseFile            = &mount_dokan_CloseFile;
+	fsapfsmount_dokan_operations.ReadFile             = &mount_dokan_ReadFile;
+	fsapfsmount_dokan_operations.WriteFile            = NULL;
+	fsapfsmount_dokan_operations.FlushFileBuffers     = NULL;
+	fsapfsmount_dokan_operations.GetFileInformation   = &mount_dokan_GetFileInformation;
+	fsapfsmount_dokan_operations.FindFiles            = &mount_dokan_FindFiles;
+	fsapfsmount_dokan_operations.FindFilesWithPattern = NULL;
+	fsapfsmount_dokan_operations.SetFileAttributes    = NULL;
+	fsapfsmount_dokan_operations.SetFileTime          = NULL;
+	fsapfsmount_dokan_operations.DeleteFile           = NULL;
+	fsapfsmount_dokan_operations.DeleteDirectory      = NULL;
+	fsapfsmount_dokan_operations.MoveFile             = NULL;
+	fsapfsmount_dokan_operations.SetEndOfFile         = NULL;
+	fsapfsmount_dokan_operations.SetAllocationSize    = NULL;
+	fsapfsmount_dokan_operations.LockFile             = NULL;
+	fsapfsmount_dokan_operations.UnlockFile           = NULL;
+	fsapfsmount_dokan_operations.GetFileSecurity      = NULL;
+	fsapfsmount_dokan_operations.SetFileSecurity      = NULL;
+	fsapfsmount_dokan_operations.GetDiskFreeSpace     = NULL;
+	fsapfsmount_dokan_operations.GetVolumeInformation = &mount_dokan_GetVolumeInformation;
+	fsapfsmount_dokan_operations.Unmount              = &mount_dokan_Unmount;
+
+#else
+	fsapfsmount_dokan_operations.ZwCreateFile         = &mount_dokan_ZwCreateFile;
+	fsapfsmount_dokan_operations.Cleanup              = NULL;
+	fsapfsmount_dokan_operations.CloseFile            = &mount_dokan_CloseFile;
+	fsapfsmount_dokan_operations.ReadFile             = &mount_dokan_ReadFile;
+	fsapfsmount_dokan_operations.WriteFile            = NULL;
+	fsapfsmount_dokan_operations.FlushFileBuffers     = NULL;
+	fsapfsmount_dokan_operations.GetFileInformation   = &mount_dokan_GetFileInformation;
+	fsapfsmount_dokan_operations.FindFiles            = &mount_dokan_FindFiles;
+	fsapfsmount_dokan_operations.FindFilesWithPattern = NULL;
+	fsapfsmount_dokan_operations.SetFileAttributes    = NULL;
+	fsapfsmount_dokan_operations.SetFileTime          = NULL;
+	fsapfsmount_dokan_operations.DeleteFile           = NULL;
+	fsapfsmount_dokan_operations.DeleteDirectory      = NULL;
+	fsapfsmount_dokan_operations.MoveFile             = NULL;
+	fsapfsmount_dokan_operations.SetEndOfFile         = NULL;
+	fsapfsmount_dokan_operations.SetAllocationSize    = NULL;
+	fsapfsmount_dokan_operations.LockFile             = NULL;
+	fsapfsmount_dokan_operations.UnlockFile           = NULL;
+	fsapfsmount_dokan_operations.GetFileSecurity      = NULL;
+	fsapfsmount_dokan_operations.SetFileSecurity      = NULL;
+	fsapfsmount_dokan_operations.GetDiskFreeSpace     = NULL;
+	fsapfsmount_dokan_operations.GetVolumeInformation = &mount_dokan_GetVolumeInformation;
+	fsapfsmount_dokan_operations.Unmounted            = NULL;
+	fsapfsmount_dokan_operations.FindStreams          = NULL;
+	fsapfsmount_dokan_operations.Mounted              = NULL;
+
+#endif /* ( DOKAN_VERSION >= 600 ) && ( DOKAN_VERSION < 800 ) */
+
+	result = DokanMain(
+	          &fsapfsmount_dokan_options,
+	          &fsapfsmount_dokan_operations );
+
+	switch( result )
+	{
+		case DOKAN_SUCCESS:
+			break;
+
+		case DOKAN_ERROR:
+			fprintf(
+			 stderr,
+			 "Unable to run dokan main: generic error\n" );
+			break;
+
+		case DOKAN_DRIVE_LETTER_ERROR:
+			fprintf(
+			 stderr,
+			 "Unable to run dokan main: bad drive letter\n" );
+			break;
+
+		case DOKAN_DRIVER_INSTALL_ERROR:
+			fprintf(
+			 stderr,
+			 "Unable to run dokan main: unable to load driver\n" );
+			break;
+
+		case DOKAN_START_ERROR:
+			fprintf(
+			 stderr,
+			 "Unable to run dokan main: driver error\n" );
+			break;
+
+		case DOKAN_MOUNT_ERROR:
+			fprintf(
+			 stderr,
+			 "Unable to run dokan main: unable to assign drive letter\n" );
+			break;
+
+		case DOKAN_MOUNT_POINT_ERROR:
+			fprintf(
+			 stderr,
+			 "Unable to run dokan main: mount point error\n" );
+			break;
+
+		default:
+			fprintf(
+			 stderr,
+			 "Unable to run dokan main: unknown error: %d\n",
+			 result );
+			break;
+	}
+	return( EXIT_SUCCESS );
+
 #else
 	fprintf(
 	 stderr,
-	 "No sub system to mount APFS container.\n" );
+	 "No sub system to mount APFS format.\n" );
 
 	return( EXIT_FAILURE );
 

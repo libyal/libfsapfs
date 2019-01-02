@@ -1,7 +1,7 @@
 /*
  * Common output functions for the fsapfstools
  *
- * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -105,7 +105,7 @@ void fsapfstools_output_copyright_fprint(
 	 */
 	fprintf(
 	 stream,
-	 _( "Copyright (C) 2018, %s.\n" ),
+	 _( "Copyright (C) 2018-2019, %s.\n" ),
 	 _( "Joachim Metz" ) );
 
 	fprintf(

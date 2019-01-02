@@ -63,6 +63,7 @@ Tools:
 ** add volume selection support
 ** add extended attributes support
 ** does fuse override file types such as socket?
+** dokan add symbolic link support
 
 Tests:
 * add tests for container_key_bag

@@ -1,6 +1,6 @@
 dnl Checks for libhmac required headers and functions
 dnl
-dnl Version: 20181117
+dnl Version: 20190102
 
 dnl Function to detect if libhmac is available
 dnl ac_libhmac_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -206,53 +206,42 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LIB],
 
 dnl Function to detect if libhmac dependencies are available
 AC_DEFUN([AX_LIBHMAC_CHECK_LOCAL],
-  [ac_cv_libhmac_md5=no
-  ac_cv_libhmac_sha1=no
-  ac_cv_libhmac_sha224=no
-  ac_cv_libhmac_sha256=no
-  ac_cv_libhmac_sha512=no
+  [dnl Check for libcrypto (openssl) support
+  AX_LIBCRYPTO_CHECK_ENABLE
 
-  dnl Check for libcrypto (openssl) support
   AS_IF(
-    [test "x$ac_cv_libhmac_md5" = xno && test "x$ac_cv_libhmac_sha1" = xno && test "x$ac_cv_libhmac_sha224" = xno && test "x$ac_cv_libhmac_sha256" = xno && test "x$ac_cv_libhmac_sha512" = xno],
-    [AX_LIBCRYPTO_CHECK_ENABLE
-
-    AS_IF(
-      [test "x$ac_cv_libcrypto" != xno],
-      [AX_LIBCRYPTO_CHECK_MD5
-      AX_LIBCRYPTO_CHECK_SHA1
-      AX_LIBCRYPTO_CHECK_SHA224
-      AX_LIBCRYPTO_CHECK_SHA256
-      AX_LIBCRYPTO_CHECK_SHA512
-
-      ac_cv_libhmac_md5=$ac_cv_libcrypto_md5
-      ac_cv_libhmac_sha1=$ac_cv_libcrypto_sha1
-      ac_cv_libhmac_sha224=$ac_cv_libcrypto_sha224
-      ac_cv_libhmac_sha256=$ac_cv_libcrypto_sha256
-      ac_cv_libhmac_sha512=$ac_cv_libcrypto_sha512
-    ])
-  ])
+    [test "x$ac_cv_libcrypto" != xno],
+    [AX_LIBCRYPTO_CHECK_MD5
+    AX_LIBCRYPTO_CHECK_SHA1
+    AX_LIBCRYPTO_CHECK_SHA224
+    AX_LIBCRYPTO_CHECK_SHA256
+    AX_LIBCRYPTO_CHECK_SHA512])
 
   dnl Fallback to local versions if necessary
   AS_IF(
-    [test "x$ac_cv_libhmac_md5" = xno],
-    [ac_cv_libhmac_md5=local])
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_md5" = xno],
+    [ac_cv_libhmac_md5=local],
+    [ac_cv_libhmac_md5=$ac_cv_libcrypto_md5])
 
   AS_IF(
-    [test "x$ac_cv_libhmac_sha1" = xno],
-    [ac_cv_libhmac_sha1=local])
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_sha1" = xno],
+    [ac_cv_libhmac_sha1=local],
+    [ac_cv_libhmac_sha1=$ac_cv_libcrypto_sha1])
 
   AS_IF(
-    [test "x$ac_cv_libhmac_sha224" = xno],
-    [ac_cv_libhmac_sha224=local])
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_sha224" = xno],
+    [ac_cv_libhmac_sha224=local],
+    [ac_cv_libhmac_sha224=$ac_cv_libcrypto_sha224])
 
   AS_IF(
-    [test "x$ac_cv_libhmac_sha256" = xno],
-    [ac_cv_libhmac_sha256=local])
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_sha256" = xno],
+    [ac_cv_libhmac_sha256=local],
+    [ac_cv_libhmac_sha256=$ac_cv_libcrypto_sha256])
 
   AS_IF(
-    [test "x$ac_cv_libhmac_sha512" = xno],
-    [ac_cv_libhmac_sha512=local])
+    [test "x$ac_cv_libcrypto" = xno || test "x$ac_cv_libcrypto_sha512" = xno],
+    [ac_cv_libhmac_sha512=local],
+    [ac_cv_libhmac_sha512=$ac_cv_libcrypto_sha512])
 
   ac_cv_libhmac_CPPFLAGS="-I../libhmac";
   ac_cv_libhmac_LIBADD="../libhmac/libhmac.la";

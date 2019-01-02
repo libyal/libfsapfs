@@ -9,6 +9,8 @@ Homepage: https://github.com/libyal/libfsapfs
 Package: libfsapfs
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libfsapfs1
+Replaces: libfsapfs1
 Suggests: libfsapfs-dbg
 Description: Library to access the Apple File System (APFS) format
  libfsapfs is a library to access the Apple File System (APFS) format.
@@ -31,6 +33,8 @@ Package: libfsapfs-tools
 Section: utils
 Architecture: any
 Depends: libfsapfs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: libfsapfs-utils
+Replaces: libfsapfs-utils
 Description: Several tools for reading Apple File System (APFS) volumes
  Several tools for reading Apple File System (APFS) volumes.
 
@@ -45,6 +49,8 @@ Package: libfsapfs-python
 Section: python
 Architecture: any
 Depends: libfsapfs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: python-libfsapfs
+Replaces: python-libfsapfs
 Suggests: libfsapfs-python-dbg
 Description: Python 2 bindings for libfsapfs
  Python 2 bindings for libfsapfs.
@@ -60,6 +66,8 @@ Package: libfsapfs-python3
 Section: python
 Architecture: any
 Depends: libfsapfs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Conflicts: python3-libfsapfs
+Replaces: python3-libfsapfs
 Suggests: libfsapfs-python3-dbg
 Description: Python 3 bindings for libfsapfs
  Python 3 bindings for libfsapfs.

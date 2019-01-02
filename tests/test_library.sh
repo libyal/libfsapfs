@@ -1,14 +1,14 @@
 #!/bin/bash
 # Tests C library functions and types.
 #
-# Version: 20180907
+# Version: 20190101
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
 LIBRARY_TESTS="btree_entry btree_footer btree_node btree_node_header buffer_data_handle checkpoint_map checkpoint_map_entry checksum container_data_handle container_key_bag container_reaper container_space_manager container_superblock compressed_data_handle compression data_block directory_record encryption_context error file_extent file_system_btree inode io_handle key_bag_entry key_bag_header key_encrypted_key name name_hash notify object object_map object_map_btree object_map_descriptor volume_key_bag";
-LIBRARY_TESTS_WITH_INPUT="container support volume";
+LIBRARY_TESTS_WITH_INPUT="container support";
 OPTION_SETS="offset password";
 
 INPUT_GLOB="*";
@@ -102,7 +102,7 @@ run_test_with_input()
 				fi
 			done
 		else
-			for INPUT_FILE in `ls -1 ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
+			for INPUT_FILE in `ls -1d ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
 			do
 				if test "${OSTYPE}" = "msys";
 				then

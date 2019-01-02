@@ -1,7 +1,7 @@
 /*
- * Fuse functions for mount tool
+ * Mount tool fuse functions
  *
- * Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -25,6 +25,9 @@
 #include <common.h>
 #include <types.h>
 
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#define FUSE_USE_VERSION	26
+
 #if defined( HAVE_LIBFUSE )
 #include <fuse.h>
 
@@ -32,7 +35,12 @@
 #include <osxfuse/fuse.h>
 #endif
 
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
+
 #include "fsapfstools_libcerror.h"
+#include "fsapfstools_libfsapfs.h"
+#include "mount_file_entry.h"
+#include "mount_handle.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -54,7 +62,7 @@ int mount_fuse_filldir(
      fuse_fill_dir_t filler,
      const char *name,
      struct stat *stat_info,
-     libfsapfs_file_entry_t *file_entry,
+     mount_file_entry_t *file_entry,
      libcerror_error_t **error );
 
 int mount_fuse_open(

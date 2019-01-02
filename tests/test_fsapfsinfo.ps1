@@ -1,6 +1,6 @@
 # Info tool testing script
 #
-# Version: 20180805
+# Version: 20181221
 
 $ExitSuccess = 0
 $ExitFailure = 1
