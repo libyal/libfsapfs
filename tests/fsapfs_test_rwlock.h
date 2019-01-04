@@ -24,11 +24,13 @@
 
 #include <common.h>
 
+#include "fsapfs_test_libfsapfs.h"
+
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#if defined( LIBFSAPFS_HAVE_MULTI_THREAD_SUPPORT ) && defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
 #define HAVE_FSAPFS_TEST_RWLOCK		1
 #endif
 

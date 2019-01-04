@@ -121,7 +121,7 @@ int libfsapfs_extended_attribute_initialize(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to intialize read/write lock.",
+		 "%s: unable to initialize read/write lock.",
 		 function );
 
 		goto on_error;

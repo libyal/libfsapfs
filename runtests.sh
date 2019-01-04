@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20181228
+# Version: 20190103
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -209,6 +209,10 @@ echo "${CONFIGURE_HELP}" | grep -- '--enable-debug-output' > /dev/null;
 
 HAVE_ENABLE_DEBUG_OUTPUT=$?;
 
+echo "${CONFIGURE_HELP}" | grep -- '--with-pthread' > /dev/null;
+
+HAVE_WITH_PTHREAD=$?;
+
 echo "${CONFIGURE_HELP}" | grep -- '--with-zlib' > /dev/null;
 
 HAVE_WITH_ZLIB=$?;
@@ -247,6 +251,19 @@ then
 	# Test "./configure && make && make check" with verbose and debug output.
 
 	run_configure_make_check "--enable-verbose-output --enable-debug-output";
+	RESULT=$?;
+
+	if test ${RESULT} -ne ${EXIT_SUCCESS};
+	then
+		exit ${EXIT_FAILURE};
+	fi
+fi
+
+if test ${HAVE_WITH_PTHREAD} -eq 0;
+then
+	# Test "./configure && make && make check" without multi-threading support.
+
+	run_configure_make_check "--with-pthread=no";
 	RESULT=$?;
 
 	if test ${RESULT} -ne ${EXIT_SUCCESS};
