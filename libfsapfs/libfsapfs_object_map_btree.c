@@ -990,6 +990,7 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
 	static char *function          = "libfsapfs_object_map_btree_get_entry_by_identifier";
 	uint64_t sub_node_block_number = 0;
 	int is_leaf_node               = 0;
+	int recursion_depth            = 0;
 	int result                     = 0;
 
 	if( object_map_btree == NULL )
@@ -1043,6 +1044,18 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
 	}
 	do
 	{
+		if( ( recursion_depth < 0 )
+		 || ( recursion_depth > LIBFSAPFS_MAXIMUM_BTREE_NODE_RECURSION_DEPTH ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid recursion depth value out of bounds.",
+			 function );
+
+			return( -1 );
+		}
 		is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 		                node,
 		                error );
@@ -1152,6 +1165,7 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
 
 			return( -1 );
 		}
+		recursion_depth++;
 	}
 	while( is_leaf_node == 0 );
 

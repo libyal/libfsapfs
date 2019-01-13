@@ -1,6 +1,6 @@
 TODO
 * B-tree
-** Validate (expected) btree level to detect loops
+** Validate (expected) btree level to detect loops - added maximum recursion depth for now
 * Validate checksum
 ** B-tree node
 ** Container key bag

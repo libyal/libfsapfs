@@ -149,6 +149,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
      size_t utf8_string_length,
      uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
+     int recursion_depth,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_name(
@@ -170,6 +171,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
      size_t utf16_string_length,
      uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
+     int recursion_depth,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
@@ -185,6 +187,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
      libfsapfs_btree_node_t *node,
      uint64_t parent_identifier,
      libcdata_array_t *directory_entries,
+     int recursion_depth,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_directory_entries(
@@ -208,6 +211,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
      libcdata_array_t *extended_attributes,
+     int recursion_depth,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_extended_attributes(
@@ -230,6 +234,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
      libcdata_array_t *file_extents,
+     int recursion_depth,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_btree_get_file_extents(

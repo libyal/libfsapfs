@@ -212,6 +212,7 @@ before_install:
       sudo apt-get update && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint zlib1g-dev libssl-dev libfuse-dev;
     elif test ${TRAVIS_OS_NAME} = "osx"; then
       brew update && brew install gettext gnu-sed && brew link --force gettext;
+      brew tap homebrew/cask && brew cask install osxfuse;
     fi
   - if test ${TARGET} = "coverity"; then
       echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
@@ -248,5 +249,5 @@ script:
     fi
 after_success:
   - if test ${TARGET} = "linux-gcc-no-optimization"; then
-      curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
+      curl -o codecov.sh -s https://codecov.io/bash && sed 's/ -execdir / -exec /' -i ./codecov.sh && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
     fi

@@ -1178,7 +1178,9 @@ int main(
 		 "libfsapfs_volume_open_close",
 		 fsapfs_test_volume_open_close,
 		 source );
-
+	}
+	if( result != 0 )
+	{
 		/* Initialize test
 		 */
 		result = fsapfs_test_volume_open_source(

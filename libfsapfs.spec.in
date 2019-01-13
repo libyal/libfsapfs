@@ -13,6 +13,14 @@ BuildRequires: gcc @ax_libbfio_spec_build_requires@ @ax_libcaes_spec_build_requi
 %description -n libfsapfs
 Library to access the Apple File System (APFS) format
 
+%package -n libfsapfs-static
+Summary: Library to access the Apple File System (APFS) format
+Group: Development/Libraries
+Requires: libfsapfs = %{version}-%{release}
+
+%description -n libfsapfs-static
+Static library version of libfsapfs.
+
 %package -n libfsapfs-devel
 Summary: Header files and libraries for developing applications for libfsapfs
 Group: Development/Libraries
@@ -74,11 +82,16 @@ rm -rf %{buildroot}
 %doc AUTHORS README
 %attr(755,root,root) %{_libdir}/*.so.*
 
+%files -n libfsapfs-static
+%defattr(644,root,root,755)
+%license COPYING
+%doc AUTHORS README
+%attr(755,root,root) %{_libdir}/*.a
+
 %files -n libfsapfs-devel
 %defattr(644,root,root,755)
 %license COPYING
 %doc AUTHORS README
-%{_libdir}/*.a
 %{_libdir}/*.la
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/libfsapfs.pc

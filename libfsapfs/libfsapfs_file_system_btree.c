@@ -1206,6 +1206,7 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 	static char *function          = "libfsapfs_file_system_btree_get_entry_by_identifier";
 	uint64_t sub_node_block_number = 0;
 	int is_leaf_node               = 0;
+	int recursion_depth            = 0;
 	int result                     = 0;
 
 	if( file_system_btree == NULL )
@@ -1259,6 +1260,18 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 	}
 	do
 	{
+		if( ( recursion_depth < 0 )
+		 || ( recursion_depth > LIBFSAPFS_MAXIMUM_BTREE_NODE_RECURSION_DEPTH ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid recursion depth value out of bounds.",
+			 function );
+
+			return( -1 );
+		}
 		is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 		                node,
 		                error );
@@ -1339,6 +1352,7 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 
 			return( -1 );
 		}
+		recursion_depth++;
 	}
 	while( is_leaf_node == 0 );
 
@@ -1616,6 +1630,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
      size_t utf8_string_length,
      uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
+     int recursion_depth,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *entry                      = NULL;
@@ -1661,6 +1676,18 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( recursion_depth < 0 )
+	 || ( recursion_depth > LIBFSAPFS_MAXIMUM_BTREE_NODE_RECURSION_DEPTH ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid recursion depth value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -1927,6 +1954,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 			  utf8_string_length,
 			  name_hash,
 			  directory_record,
+			  recursion_depth + 1,
 			  error );
 	}
 	if( result == -1 )
@@ -2231,6 +2259,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
      size_t utf16_string_length,
      uint32_t name_hash,
      libfsapfs_directory_record_t **directory_record,
+     int recursion_depth,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *entry                      = NULL;
@@ -2276,6 +2305,18 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid directory record.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( recursion_depth < 0 )
+	 || ( recursion_depth > LIBFSAPFS_MAXIMUM_BTREE_NODE_RECURSION_DEPTH ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid recursion depth value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -2542,6 +2583,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 			  utf16_string_length,
 			  name_hash,
 			  directory_record,
+			  recursion_depth + 1,
 			  error );
 	}
 	if( result == -1 )
@@ -2831,6 +2873,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
      libfsapfs_btree_node_t *node,
      uint64_t parent_identifier,
      libcdata_array_t *directory_entries,
+     int recursion_depth,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *entry          = NULL;
@@ -2864,6 +2907,18 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( recursion_depth < 0 )
+	 || ( recursion_depth > LIBFSAPFS_MAXIMUM_BTREE_NODE_RECURSION_DEPTH ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid recursion depth value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -3056,6 +3111,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 				          sub_node,
 				          parent_identifier,
 				          directory_entries,
+				          recursion_depth + 1,
 				          error );
 			}
 			if( result == -1 )
@@ -3143,6 +3199,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 		          sub_node,
 		          parent_identifier,
 		          directory_entries,
+		          recursion_depth + 1,
 		          error );
 	}
 	if( result == -1 )
@@ -3290,6 +3347,7 @@ int libfsapfs_file_system_btree_get_directory_entries(
 		          root_node,
 		          parent_identifier,
 		          directory_entries,
+		          0,
 		          error );
 	}
 	if( result == -1 )
@@ -3599,6 +3657,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
      libcdata_array_t *extended_attributes,
+     int recursion_depth,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *entry          = NULL;
@@ -3632,6 +3691,18 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( recursion_depth < 0 )
+	 || ( recursion_depth > LIBFSAPFS_MAXIMUM_BTREE_NODE_RECURSION_DEPTH ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid recursion depth value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -3825,6 +3896,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 				          sub_node,
 				          identifier,
 				          extended_attributes,
+				          recursion_depth + 1,
 				          error );
 			}
 			if( result == -1 )
@@ -3913,6 +3985,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 		          sub_node,
 		          identifier,
 		          extended_attributes,
+		          recursion_depth + 1,
 		          error );
 	}
 	if( result == -1 )
@@ -4061,6 +4134,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 		          root_node,
 		          identifier,
 		          extended_attributes,
+		          0,
 		          error );
 	}
 	if( result == -1 )
@@ -4354,6 +4428,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
      libcdata_array_t *file_extents,
+     int recursion_depth,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *entry          = NULL;
@@ -4388,6 +4463,18 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid node.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( recursion_depth < 0 )
+	 || ( recursion_depth > LIBFSAPFS_MAXIMUM_BTREE_NODE_RECURSION_DEPTH ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid recursion depth value out of bounds.",
 		 function );
 
 		return( -1 );
@@ -4592,6 +4679,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 				          sub_node,
 				          identifier,
 				          file_extents,
+				          recursion_depth + 1,
 				          error );
 			}
 			if( result == -1 )
@@ -4681,6 +4769,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 		          sub_node,
 		          identifier,
 		          file_extents,
+		          recursion_depth + 1,
 		          error );
 	}
 	if( result == -1 )
@@ -4793,6 +4882,7 @@ int libfsapfs_file_system_btree_get_file_extents(
 		          root_node,
 		          identifier,
 		          file_extents,
+		          0,
 		          error );
 	}
 	if( result == -1 )
@@ -5192,6 +5282,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 			  utf8_string_length,
 			  name_hash,
 			  directory_record,
+			  0,
 			  error );
 	}
 	if( result == -1 )
@@ -5576,6 +5667,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 					  utf8_string_segment_length,
 				          name_hash,
 					  &safe_directory_record,
+					  0,
 					  error );
 			}
 		}
@@ -5889,6 +5981,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 			  utf16_string_length,
 			  name_hash,
 			  directory_record,
+			  0,
 			  error );
 	}
 	if( result == -1 )
@@ -6273,6 +6366,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 					  utf16_string_segment_length,
 				          name_hash,
 					  &safe_directory_record,
+					  0,
 					  error );
 			}
 		}
