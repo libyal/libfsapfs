@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_container_space_manager"
-	ProjectGUID="{B9AB3EF5-2424-428E-A57F-D256D4170487}"
-	RootNamespace="fsapfs_test_container_space_manager"
+	Name="fsapfs_test_chunk_information_block"
+	ProjectGUID="{69BD1901-531F-449B-B57C-A72A046CEB96}"
+	RootNamespace="fsapfs_test_chunk_information_block"
 	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
@@ -176,7 +176,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_container_space_manager.c"
+				RelativePath="..\..\tests\fsapfs_test_chunk_information_block.c"
 				>
 			</File>
 			<File

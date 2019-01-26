@@ -485,6 +485,15 @@ int libfsapfs_checkpoint_map_read_data(
 
 			goto on_error;
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: entry: %" PRIu32 "\n",
+			 function,
+			 map_entry_index );
+		}
+#endif
 		if( libfsapfs_checkpoint_map_entry_read_data(
 		     map_entry,
 		     &( data[ data_offset ] ),

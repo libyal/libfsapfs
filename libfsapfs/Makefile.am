@@ -27,13 +27,14 @@ lib_LTLIBRARIES = libfsapfs.la
 libfsapfs_la_SOURCES = \
 	fsapfs_btree.h \
 	fsapfs_checkpoint_map.h \
+	fsapfs_chunk_information_block.h \
 	fsapfs_container_reaper.h \
-	fsapfs_container_space_manager.h \
 	fsapfs_container_superblock.h \
 	fsapfs_file_system.h \
 	fsapfs_key_bag.h \
 	fsapfs_object.h \
 	fsapfs_object_map.h \
+	fsapfs_space_manager.h \
 	fsapfs_volume_superblock.h \
 	libfsapfs.c \
 	libfsapfs_btree_entry.c libfsapfs_btree_entry.h \
@@ -44,13 +45,13 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_checkpoint_map.c libfsapfs_checkpoint_map.h \
 	libfsapfs_checkpoint_map_entry.c libfsapfs_checkpoint_map_entry.h \
 	libfsapfs_checksum.c libfsapfs_checksum.h \
+	libfsapfs_chunk_information_block.c libfsapfs_chunk_information_block.h \
 	libfsapfs_compressed_data_handle.c libfsapfs_compressed_data_handle.h \
 	libfsapfs_compression.c libfsapfs_compression.h \
 	libfsapfs_container.c libfsapfs_container.h \
 	libfsapfs_container_data_handle.c libfsapfs_container_data_handle.h \
 	libfsapfs_container_key_bag.c libfsapfs_container_key_bag.h \
 	libfsapfs_container_reaper.c libfsapfs_container_reaper.h \
-	libfsapfs_container_space_manager.c libfsapfs_container_space_manager.h \
 	libfsapfs_container_superblock.c libfsapfs_container_superblock.h \
 	libfsapfs_data_block.c libfsapfs_data_block.h \
 	libfsapfs_data_block_data_handle.c libfsapfs_data_block_data_handle.h \
@@ -95,6 +96,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_object_map_descriptor.c libfsapfs_object_map_descriptor.h \
 	libfsapfs_password.c libfsapfs_password.h \
 	libfsapfs_profiler.c libfsapfs_profiler.h \
+	libfsapfs_space_manager.c libfsapfs_space_manager.h \
 	libfsapfs_support.c libfsapfs_support.h \
 	libfsapfs_types.h \
 	libfsapfs_unused.h \

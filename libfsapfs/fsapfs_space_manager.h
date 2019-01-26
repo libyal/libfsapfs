@@ -1,5 +1,5 @@
 /*
- * The APFS container space manager definition
+ * The APFS space manager definition
  *
  * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _FSAPFS_CONTAINER_SPACE_MANAGER_H )
-#define _FSAPFS_CONTAINER_SPACE_MANAGER_H
+#if !defined( _FSAPFS_SPACE_MANAGER_H )
+#define _FSAPFS_SPACE_MANAGER_H
 
 #include <common.h>
 #include <types.h>
@@ -29,9 +29,9 @@
 extern "C" {
 #endif
 
-typedef struct fsapfs_container_space_manager fsapfs_container_space_manager_t;
+typedef struct fsapfs_space_manager fsapfs_space_manager_t;
 
-struct fsapfs_container_space_manager
+struct fsapfs_space_manager
 {
 	/* The object checksum
 	 * Consists of 8 bytes
@@ -78,80 +78,90 @@ struct fsapfs_container_space_manager
 	 */
 	uint8_t cibs_per_cab[ 4 ];
 
-	/* The number of blocks
+	/* The number of blocks of the main device
 	 * Consists of 8 bytes
 	 */
-	uint8_t number_of_blocks[ 8 ];
+	uint8_t main_device_number_of_blocks[ 8 ];
 
-	/* The number of chunks
+	/* The number of chunks of the main device
 	 * Consists of 8 bytes
 	 */
-	uint8_t number_of_chunks[ 8 ];
+	uint8_t main_device_number_of_chunks[ 8 ];
 
-	/* The number of CIBs
+	/* The number of CIBs of the main device
 	 * Consists of 4 bytes
 	 */
-	uint8_t number_of_cibs[ 4 ];
+	uint8_t main_device_number_of_cibs[ 4 ];
 
-	/* The number of CABs
+	/* The number of CABs of the main device
 	 * Consists of 4 bytes
 	 */
-	uint8_t number_of_cabs[ 4 ];
+	uint8_t main_device_number_of_cabs[ 4 ];
 
-	/* The number of unsused blocks
+	/* The number of unsused blocks of the main device
 	 * Consists of 8 bytes
 	 */
-	uint8_t number_of_unused_blocks[ 8 ];
+	uint8_t main_device_number_of_unused_blocks[ 8 ];
+
+	/* The offset of the main device
+	 * Consists of 4 bytes
+	 */
+	uint8_t main_device_offset[ 4 ];
 
 	/* Unknown
-	 * Consists of 8 bytes
+	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 8 ];
+	uint8_t unknown1[ 4 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown2[ 8 ];
 
-	/* Unknown
+	/* The number of blocks of the tier2 device
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown3[ 8 ];
+	uint8_t tier2_device_number_of_blocks[ 8 ];
 
-	/* Unknown
+	/* The number of chunks of the tier2 device
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown4[ 8 ];
+	uint8_t tier2_device_number_of_chunks[ 8 ];
+
+	/* The number of CIBs of the tier2 device
+	 * Consists of 4 bytes
+	 */
+	uint8_t tier2_device_number_of_cibs[ 4 ];
+
+	/* The number of CABs of the tier2 device
+	 * Consists of 4 bytes
+	 */
+	uint8_t tier2_device_number_of_cabs[ 4 ];
+
+	/* The number of unsused blocks of the tier2 device
+	 * Consists of 8 bytes
+	 */
+	uint8_t tier2_device_number_of_unused_blocks[ 8 ];
+
+	/* The offset of the tier2 device
+	 * Consists of 4 bytes
+	 */
+	uint8_t tier2_device_offset[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown5[ 4 ];
-
-	/* Unknown
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown6[ 4 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown7[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown8[ 8 ];
+	uint8_t unknown8[ 4 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown9[ 8 ];
 
-	/* Unknown
+	/* The flags
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown10[ 4 ];
+	uint8_t flags[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
@@ -268,12 +278,55 @@ struct fsapfs_container_space_manager
 	 */
 	uint8_t unknown33[ 8 ];
 
-/* TODO add values starting with bitmap_next_array_free */
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown34[ 2 ];
+
+	/* Unknown
+	 * Consists of 2 bytes
+	 */
+	uint8_t unknown35[ 2 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown36[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown37[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown38[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown39[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown40[ 4 ];
+
+	/* The main allocation zones
+	 * Consists of 8 x 72 bytes
+	 */
+	uint8_t unknown41[ 8 * 72 ];
+
+	/* The tier2 allocation zones
+	 * Consists of 8 x 72 bytes
+	 */
+	uint8_t unknown42[ 8 * 72 ];
 };
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _FSAPFS_CONTAINER_SPACE_MANAGER_H ) */
+#endif /* !defined( _FSAPFS_SPACE_MANAGER_H ) */
 

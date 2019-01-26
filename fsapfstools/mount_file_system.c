@@ -558,7 +558,7 @@ int mount_file_system_get_file_entry_path_from_path(
 		 *   \x## by values <= 0x1f and 0x7f
 		 *   / by \
 		 */
-		if( unicode_character == escape_character )
+		if( unicode_character == (libuna_unicode_character_t) escape_character )
 		{
 			if( ( path_index + 1 ) > path_length )
 			{
@@ -1091,7 +1091,7 @@ int mount_file_system_get_filename_from_name(
 				safe_filename[ filename_index++ ] = (system_character_t) 'a' + hex_digit - 10;
 			}
 		}
-		else if( unicode_character == escape_character )
+		else if( unicode_character == (libuna_unicode_character_t) escape_character )
 		{
 			if( ( filename_index + 2 ) > safe_filename_size )
 			{

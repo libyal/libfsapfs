@@ -7,13 +7,13 @@ MSVSCPP_FILES = \
 	fsapfs_test_checkpoint_map/fsapfs_test_checkpoint_map.vcproj \
 	fsapfs_test_checkpoint_map_entry/fsapfs_test_checkpoint_map_entry.vcproj \
 	fsapfs_test_checksum/fsapfs_test_checksum.vcproj \
+	fsapfs_test_chunk_information_block/fsapfs_test_chunk_information_block.vcproj \
 	fsapfs_test_compressed_data_handle/fsapfs_test_compressed_data_handle.vcproj \
 	fsapfs_test_compression/fsapfs_test_compression.vcproj \
 	fsapfs_test_container/fsapfs_test_container.vcproj \
 	fsapfs_test_container_data_handle/fsapfs_test_container_data_handle.vcproj \
 	fsapfs_test_container_key_bag/fsapfs_test_container_key_bag.vcproj \
 	fsapfs_test_container_reaper/fsapfs_test_container_reaper.vcproj \
-	fsapfs_test_container_space_manager/fsapfs_test_container_space_manager.vcproj \
 	fsapfs_test_container_superblock/fsapfs_test_container_superblock.vcproj \
 	fsapfs_test_data_block/fsapfs_test_data_block.vcproj \
 	fsapfs_test_directory_record/fsapfs_test_directory_record.vcproj \
@@ -33,6 +33,7 @@ MSVSCPP_FILES = \
 	fsapfs_test_object_map/fsapfs_test_object_map.vcproj \
 	fsapfs_test_object_map_btree/fsapfs_test_object_map_btree.vcproj \
 	fsapfs_test_object_map_descriptor/fsapfs_test_object_map_descriptor.vcproj \
+	fsapfs_test_space_manager/fsapfs_test_space_manager.vcproj \
 	fsapfs_test_support/fsapfs_test_support.vcproj \
 	fsapfs_test_volume/fsapfs_test_volume.vcproj \
 	fsapfs_test_volume_key_bag/fsapfs_test_volume_key_bag.vcproj \

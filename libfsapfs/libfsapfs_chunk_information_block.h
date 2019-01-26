@@ -1,5 +1,5 @@
 /*
- * The object map functions
+ * The chunk information block functions
  *
  * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,8 +19,8 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_OBJECT_MAP_H )
-#define _LIBFSAPFS_OBJECT_MAP_H
+#if !defined( _LIBFSAPFS_CHUNK_INFORMATION_BLOCK_H )
+#define _LIBFSAPFS_CHUNK_INFORMATION_BLOCK_H
 
 #include <common.h>
 #include <types.h>
@@ -32,35 +32,31 @@
 extern "C" {
 #endif
 
-typedef struct libfsapfs_object_map libfsapfs_object_map_t;
+typedef struct libfsapfs_chunk_information_block libfsapfs_chunk_information_block_t;
 
-struct libfsapfs_object_map
+struct libfsapfs_chunk_information_block
 {
-	/* The B-tree block number
+	/* Dummy
 	 */
-	uint64_t btree_block_number;
-
-	/* The snapshots B-tree block number
-	 */
-	uint64_t snapshots_btree_block_number;
+	int dummy;
 };
 
-int libfsapfs_object_map_initialize(
-     libfsapfs_object_map_t **object_map,
+int libfsapfs_chunk_information_block_initialize(
+     libfsapfs_chunk_information_block_t **chunk_information_block,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_free(
-     libfsapfs_object_map_t **object_map,
+int libfsapfs_chunk_information_block_free(
+     libfsapfs_chunk_information_block_t **chunk_information_block,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_read_file_io_handle(
-     libfsapfs_object_map_t *object_map,
+int libfsapfs_chunk_information_block_read_file_io_handle(
+     libfsapfs_chunk_information_block_t *chunk_information_block,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error );
 
-int libfsapfs_object_map_read_data(
-     libfsapfs_object_map_t *object_map,
+int libfsapfs_chunk_information_block_read_data(
+     libfsapfs_chunk_information_block_t *chunk_information_block,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error );
@@ -69,5 +65,5 @@ int libfsapfs_object_map_read_data(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_OBJECT_MAP_H ) */
+#endif /* !defined( _LIBFSAPFS_CHUNK_INFORMATION_BLOCK_H ) */
 

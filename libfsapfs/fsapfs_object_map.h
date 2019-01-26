@@ -58,40 +58,50 @@ struct fsapfs_object_map
 	 */
 	uint8_t object_subtype[ 4 ];
 
-	/* Unknown
+	/* The flags
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown1[ 4 ];
+	uint8_t flags[ 4 ];
 
-	/* Unknown
+	/* The number of snapshots
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown2[ 4 ];
+	uint8_t number_of_snapshots[ 4 ];
 
-	/* Unknown
+	/* The B-tree type
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown3[ 4 ];
+	uint8_t btree_type[ 4 ];
 
-	/* Unknown
+	/* The snapshots B-tree type
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown4[ 4 ];
+	uint8_t snaphots_btree_type[ 4 ];
 
-	/* The object map B-tree block number
+	/* The B-tree block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t object_map_btree_block_number[ 8 ];
+	uint8_t btree_block_number[ 8 ];
+
+	/* The snapshots B-tree block number
+	 * Consists of 8 bytes
+	 */
+	uint8_t snapshots_btree_block_number[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown6[ 8 ];
+	uint8_t unknown1[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown7[ 8 ];
+	uint8_t unknown2[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown3[ 8 ];
 };
 
 typedef struct fsapfs_object_map_btree_key fsapfs_object_map_btree_key_t;

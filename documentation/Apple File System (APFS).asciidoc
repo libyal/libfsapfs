@@ -7,6 +7,7 @@ Analysis of APFS
 :numbered!:
 [abstract]
 == Summary
+
 The Apple File System (APFS) is a volume and file system mainly used on
 the Apple platforms such as MacOS and iOS. APFS succeeds the Hierarchical
 File System (HFS) and Core Storage (CS). This specification is based on
@@ -16,6 +17,7 @@ This document is intended as a working document for the APFS format.
 
 [preface]
 == Document information
+
 [cols="1,5"]
 |===
 | Author(s): | Joachim Metz <joachim.metz@gmail.com>
@@ -26,8 +28,9 @@ This document is intended as a working document for the APFS format.
 
 [preface]
 == License
+
 ....
-Copyright (C) 2018, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>.
 Permission is granted to copy, distribute and/or modify this document under the
 terms of the GNU Free Documentation License, Version 1.3 or any later version
 published by the Free Software Foundation; with no Invariant Sections, no
@@ -37,6 +40,7 @@ in the section entitled "GNU Free Documentation License".
 
 [preface]
 == Revision history
+
 [cols="1,1,1,5",options="header"]
 |===
 | Version | Author | Date | Comments
@@ -44,6 +48,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.2 | J.B. Metz | October 2018 | Additional format information.
 | 0.0.3 | J.B. Metz | November 2018 | Additional format information.
 | 0.0.4 | J.B. Metz | December 2018 | Additional format information.
+| 0.0.5 | J.B. Metz | January 2019 | Additional format information.
 |===
 
 :numbered:
@@ -81,14 +86,17 @@ The following version of programs were used to test the information within this 
 "Logical" volume, the volume in which an APFS file system is stored.
 
 == Keys
+
 To encrypt storage media APFS uses different kind of keys.
 
 === Volume master key
+
 The Volume Master Key (VMK) is used to encrypt the data of a specific volume.
 
 [yellow-background]*TODO: complete this section.*
 
 === Volume key
+
 For every volume on an Mac OS system with APFS, APFS provides for a volume
 password to unlock the encrypted data. The volume password is used to determine a
 volume key.
@@ -194,8 +202,10 @@ See section: <<container_superblock,Container superblock>>
 | 0x00000003 | OBJECT_TYPE_BTREE_NODE | B-Tree node
 | 0x00000004 | | [yellow-background]*Unknown (MTree?)*
 | 0x00000005 | OBJECT_TYPE_SPACEMAN | Space manager header
-| 0x00000006 | OBJECT_TYPE_SPACEMAN_CAB | [yellow-background]*Unknown (Spacemanager CAB?)*
-| 0x00000007 | OBJECT_TYPE_SPACEMAN_CIB | [yellow-background]*Unknown (Spacemanager CIB (Chunk information block)?*
+| 0x00000006 | OBJECT_TYPE_SPACEMAN_CAB | Space manager chunk information address block +
+See section: <<chunk_information_address_block,Chunk information address block>>
+| 0x00000007 | OBJECT_TYPE_SPACEMAN_CIB | Space manager chunk information block +
+See section: <<chunk_information_block,Chunk information block>>
 | 0x00000008 | OBJECT_TYPE_SPACEMAN_BITMAP | Space manager bitmap
 | 0x00000009 | OBJECT_TYPE_SPACEMAN_FREE_QUEUE | Space manager free queue
 | 0x0000000a | OBJECT_TYPE_EXTENT_LIST_TREE | Extent list tree
@@ -674,11 +684,11 @@ See section: <<object_types,Object types>>
 4+| _Object values_
 | 32 | 4 | | Flags (om_flags) +
 See section: <<object_map_flags,Object map flags>>
-| 36 | 4 | | [yellow-background]*Unknown (om_snap_count)*
-| 40 | 4 | | [yellow-background]*Unknown (om_tree_type)*
-| 44 | 4 | | [yellow-background]*Unknown (om_snapshot_tree_type)*
+| 36 | 4 | | Number of snapshots (om_snap_count)
+| 40 | 4 | | Object map B-tree type (om_tree_type)
+| 44 | 4 | | Object map snapshots B-tree type (om_snapshot_tree_type)
 | 48 | 8 | | Object map B-tree object identifier (om_tree_oid)
-| 56 | 8 | | [yellow-background]*Unknown object identifier (om_snapshot_tree_oid)*
+| 56 | 8 | | Object map snapshots B-tree object identifier (om_snapshot_tree_oid)
 | 64 | 8 | | [yellow-background]*Unknown transaction identifier (om_most_recent_snap)*
 | 72 | 8 | | [yellow-background]*Unknown transaction identifier (om_pending_revert_min)*
 | 80 | 8 | | [yellow-background]*Unknown transaction identifier (om_pending_revert_max)*
@@ -689,11 +699,11 @@ See section: <<object_map_flags,Object map flags>>
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0x00000001 | OMAP_MANUALLY_MANAGED | [yellow-background]*Unknown*
-| 0x00000002 | OMAP_ENCRYPTING | [yellow-background]*Unknown*
-| 0x00000004 | OMAP_DECRYPTING | [yellow-background]*Unknown*
-| 0x00000008 | OMAP_KEYROLLING | [yellow-background]*Unknown*
-| 0x00000010 | OMAP_CRYPTO_GENERATION | [yellow-background]*Unknown*
+| 0x00000001 | OMAP_MANUALLY_MANAGED | No snapshot support
+| 0x00000002 | OMAP_ENCRYPTING | Encryption in progress
+| 0x00000004 | OMAP_DECRYPTING | Decryption in progress
+| 0x00000008 | OMAP_KEYROLLING | Re-encryption with new key in progress
+| 0x00000010 | OMAP_CRYPTO_GENERATION | Encryption configuation has changed
 |===
 
 === Object map B-tree
@@ -760,12 +770,12 @@ TODO document Object Map Reaper Phases
 
 === Space manager
 
-The space manager is [yellow-background]*unknown* of size and consists of:
+The space manager (spaceman_phys_t) is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object header_
+4+| _Object header (sm_o)_
 | 0 | 8 | | Object checksum +
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
@@ -774,68 +784,200 @@ See section: <<object_checksum,Object checkum>>
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
 4+| _Object values_
-| 32 | 4 | | Block size (block_size)
-| | 4 | | Number of blocks per chunk (blocks_per_chunk)
-| | 4 | | Number of chunks per CIB (chunks_per_cib)
-| | 4 | | Number of CIBs per CAB (cibs_per_cab)
-| | 8 | | Number of blocks (block_count)
-| | 8 | | Number of chunks (chunk_count)
-| | 4 | | Number of CIBs (cib_count)
-| | 4 | | Number of CABs (cab_count)
-| | 8 | | Number of unused blocks (free_count)
-| | 8 | | [yellow-background]*Unknown (cib_arr_offs)*
-| | 8 | | [yellow-background]*Unknown (cab_arr_offs?)*
-| | 8 | | [yellow-background]*Unknown (tier2_block_count)*
-| | 8 | | [yellow-background]*Unknown (tier2_chunk_count)*
-| | 4 | | [yellow-background]*Unknown (tier2_cib_count)*
-| | 4 | | [yellow-background]*Unknown (tier2_cab_count)*
-| | 8 | | [yellow-background]*Unknown (tier2_free_count)*
-| | 8 | | [yellow-background]*Unknown (tier2_cib_arr_offs)*
-| | 8 | | [yellow-background]*Unknown (tier2_cab_arr_offs?)*
-| | 4 | | [yellow-background]*Unknown*
-| | 4 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown (ip_block_count)*
-| | 4 | | [yellow-background]*Unknown (ip_bm_block_count)*
-| | 4 | | [yellow-background]*Unknown (ip_bitmap_block_count)*
-| | 8 | | [yellow-background]*Unknown (ip_bm_base_address)*
-| | 8 | | [yellow-background]*Unknown (ip_base_address)*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown (free_queue_count_1)*
-| | 8 | | [yellow-background]*Unknown (free_queue_tree_1)*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown (free_queue_count_2)*
-| | 8 | | [yellow-background]*Unknown (free_queue_tree_2)*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown (free_queue_count_3)*
-| | 8 | | [yellow-background]*Unknown (free_queue_tree_3)*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 2 | | [yellow-background]*Unknown (bitmap_next_array_free)*
-| | 2 | | [yellow-background]*Unknown*
-| | 4 | | [yellow-background]*Unknown*
-| | 4 | | [yellow-background]*Unknown*
-| | 4 | | [yellow-background]*Unknown (unk_array_offs)*
-| | 4 | | [yellow-background]*Unknown*
-| | 4 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 16 x 2 = 32 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown (blockid_vol_bitmap_hdr)*
-| | 2128 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 8 | | [yellow-background]*Unknown*
-| | 16 x 2 = 32 | | [yellow-background]*Unknown*
-| | 191 x 8 = 1528 | | [yellow-background]*Unknown (bid_bmp_hdr_list)*
-| | ... | | [yellow-background]*Unknown*
+| 32 | 4 | | Block size (sm_block_size)
+| 36 | 4 | | Number of blocks per chunk (sm_blocks_per_chunk)
+| 40 | 4 | | Number of chunks per chunk information block (CIB) (sm_chunks_per_cib)
+| 44 | 4 | | Number of chunk information blocks (CIBs) per chunk information address block (CAB) (sm_cibs_per_cab)
+4+| _Space manager devices (sm_dev)_
+| 48 | 48 | | Main device (SD_MAIN) +
+Contains a <<space_manager_device,Space manager device>>
+| | 96 | 48 | Tier2 device (SD_TIER2) +
+Contains a <<space_manager_device,Space manager device>>
+4+|
+| 144 | 4 | | Flags +
+See section: <<space_manager_flags,Space manager flags>>
+| 148 | 4 | | [yellow-background]*Unknown (sm_ip_bm_tx_multiplier)*
+| 152 | 8 | | [yellow-background]*Unknown (sm_ip_block_count)*
+| 160 | 4 | | [yellow-background]*Unknown (sm_ip_bm_size_in_blocks)*
+| 164 | 4 | | [yellow-background]*Unknown (sm_ip_bm_block_count)*
+| 168 | 8 | | [yellow-background]*Unknown (sm_ip_bm_base)*
+| 176 | 8 | | [yellow-background]*Unknown (sm_ip_base)*
+| 184 | 8 | | [yellow-background]*Unknown (sm_fs_reserve_block_count)*
+| 192 | 8 | | [yellow-background]*Unknown (sm_fs_reserve_alloc_count)*
+4+| _Space manager free queues (sm_fq)_
+| 200 | 40 | | [yellow-background]*Unknown space free queue (SFQ_IP)* +
+Contains a <<space_manager_free_queue,Space manager free queue>>
+| 240 | 40 | | Main space free queue (SFQ_MAIN)* +
+Contains a <<space_manager_free_queue,Space manager free queue>>
+| 280 | 40 | | Tier2 space free queue (SFQ_TIER2)* +
+Contains a <<space_manager_free_queue,Space manager free queue>>
+4+|
+| 320 | 2 | | [yellow-background]*Unknown (sm_ip_bm_free_head)*
+| 322 | 2 | | [yellow-background]*Unknown (sm_ip_bm_free_tail)*
+| 324 | 4 | | [yellow-background]*Unknown (sm_ip_bm_xid_offset)* +
+Contains an offset in bytes relative to the start of the space manager
+| 328 | 4 | | [yellow-background]*Unknown (sm_ip_bitmap_offset)* +
+Contains an offset in bytes relative to the start of the space manager
+| 332 | 4 | | [yellow-background]*Unknown (sm_ip_bm_free_next_offset)* +
+Contains an offset in bytes relative to the start of the space manager
+| 336 | 4 | 1 | [yellow-background]*Unknown (sm_version)*
+| 340 | 4 | | [yellow-background]*Unknown (sm_struct_size)*
+4+| _Space manager data zone (sm_datazone)_
+| 344 | 8 x 72 | | Main allocation zones
+| 920 | 8 x 72 | | Tier2 allocation zones
+4+|
+| 1492 | ... | | [yellow-background]*Unknown (data)*
 |===
 
-[NOTE]
-CIB could be short for chunk indirect block
+==== [[space_manager_flags]]Space manager flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | SM_FLAG_VERSIONED | [yellow-background]*Unknown*
+|===
+
+==== [[space_manager_device]]Space manager device
+
+A space manager device (spaceman_device_t) is 48 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Number of blocks (sm_block_count)
+| 8 | 8 | | Number of chunks (sm_chunk_count)
+| 16 | 4 | | Number of chunk information blocks (CIBs) (sm_cib_count)
+| 20 | 4 | | Number of chunk information address blocks (CABs) (sm_cab_count)
+| 24 | 8 | | Number of unused blocks (sm_free_count)
+| 32 | 4 | | [yellow-background]*Unknown (sm_addr_offset)* +
+Contains an offset in bytes relative to the start of the space manager
+| 36 | 4 | | [yellow-background]*Unknown (sm_reserved)*
+| 40 | 8 | | [yellow-background]*Unknown (sm_reserved2)*
+|===
+
+==== [[space_manager_free_queue]]Space manager free queue
+
+A space manager free queue (spaceman_free_queue_t) is 40 bytes of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (sfq_count)*
+| 8 | 8 | | Space manager free queue tree object identifier (sfq_tree_oid)
+| 16 | 8 | | Space manager free queue oldest transaction identifier (sfq_oldest_xid)
+| 24 | 2 | | [yellow-background]*Unknown (sfq_tree_node_limit)*
+| 26 | 2 | | [yellow-background]*Unknown (sfq_pad16)*
+| 28 | 4 | | [yellow-background]*Unknown (sfq_pad32)*
+| 32 | 8 | | [yellow-background]*Unknown (sfq_reserved)*
+|===
+
+==== [[space_manager_allocation_zone]]Space manager allocation zone
+
+A space manager allocation zone (spaceman_allocation_zone_info_phys_t) is
+72 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Current allocation zone boundaries (saz_current_boundaries) +
+Contains <<space_manager_zone_boundaries,Space manager zone boundaries>>
+| 8 | 7 x 8 | | Previous allocation zone boundaries (saz_previous_boundaries) +
+Contains <<space_manager_zone_boundaries,Space manager zone boundaries>>
+| 64 | 2 | | [yellow-background]*Unknown (saz_zone_id)*
+| 66 | 2 | | [yellow-background]*Unknown (saz_previous_boundary_index)*
+| 68 | 4 | | [yellow-background]*Unknown (saz_reserved)*
+|===
+
+==== [[space_manager_zone_boundaries]]Space manager zone_boundaries
+
+A space manager zone boundaries (spaceman_allocation_zone_boundaries_t) is
+8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (saz_zone_start)*
+| 8 | 8 | | [yellow-background]*Unknown (saz_zone_end)*
+|===
+
+==== Notes
+
+sm_addr_offset points to block number which points to a OBJECT_TYPE_SPACEMAN_CIB block.
+Probably an OBJECT_TYPE_SPACEMAN_CAB block when necessary.
+
+....
+00052000  0d cd df 3f cb 2a 20 80  4d 00 00 00 00 00 00 00  |...?.* .M.......|
+00052010  04 00 00 00 00 00 00 00  07 00 00 40 00 00 00 00  |...........@....|
+00052020  00 00 00 00 01 00 00 00  04 00 00 00 00 00 00 00  |................|
+00052030  00 00 00 00 00 00 00 00  f6 03 00 00 86 03 00 00  |................|
+00052040  4e 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |N...............|
+00052050  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+00053000  ff ff ff ff ff ff ff ff  ff ff ff ff ff ff 00 00  |................|
+00053010  00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00  |................|
+*
+....
+
+=== [[chunk_information_address_block]]Chunk information address block
+
+The chunk information address block (cib_addr_block_t) is variable of size
+and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object header (cab_o)_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object transaction identifier (xid)
+| 24 | 4 | 0x40000006 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000000 | Object subtype
+4+| _Object values_
+| 32 | 4 | | [yellow-background]*Unknown (cab_index)*
+| 36 | 4 | | Number of chunk information blocks (CIBs) (cab_cib_count)
+4+| _Chunk information block physical addresses (cab_cib_addr)_
+| 40 | 8 x Number of CIBs | | Physical address of chunk information blocks (CIB)
+|===
+
+=== [[chunk_information_block]]Chunk information block
+
+The chunk information block (chunk_info_block_t) is variable of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object header (cib_o)_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object transaction identifier (xid)
+| 24 | 4 | 0x40000007 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000000 | Object subtype
+4+| _Object values_
+| 32 | 4 | | [yellow-background]*Unknown (cib_index)*
+| 36 | 4 | | Number of chunk information entries (cib_chunk_info_count)
+4+| _Chunk information entries (cib_chunk_info)_
+| 40 | 8 x Number of entries | | Array of chunk information entries
+|===
+
+==== [[chunk_information_entry]]Chunk information entry
+
+The chunk information entry (chunk_info_t) is 32 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | [yellow-background]*Unknown (ci_xid)*
+| 8 | 8 | | [yellow-background]*Unknown (ci_addr)*
+| 16 | 4 | | [yellow-background]*Unknown (ci_block_count)*
+| 20 | 4 | | [yellow-background]*Unknown (ci_free_count)*
+| 24 | 8 | | [yellow-background]*Unknown (ci_bitmap_addr)*
+|===
 
 === Reaper
 

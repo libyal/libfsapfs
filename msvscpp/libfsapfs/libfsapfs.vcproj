@@ -206,6 +206,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_chunk_information_block.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_compressed_data_handle.c"
 				>
 			</File>
@@ -227,10 +231,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container_reaper.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_container_space_manager.c"
 				>
 			</File>
 			<File
@@ -350,6 +350,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_space_manager.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_support.c"
 				>
 			</File>
@@ -380,11 +384,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\fsapfs_container_reaper.h"
+				RelativePath="..\..\libfsapfs\fsapfs_chunk_information_block.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfsapfs\fsapfs_container_space_manager.h"
+				RelativePath="..\..\libfsapfs\fsapfs_container_reaper.h"
 				>
 			</File>
 			<File
@@ -405,6 +409,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\fsapfs_object_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_space_manager.h"
 				>
 			</File>
 			<File
@@ -444,6 +452,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_chunk_information_block.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_compressed_data_handle.h"
 				>
 			</File>
@@ -465,10 +477,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_container_reaper.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfsapfs\libfsapfs_container_space_manager.h"
 				>
 			</File>
 			<File
@@ -645,6 +653,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_profiler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_space_manager.h"
 				>
 			</File>
 			<File

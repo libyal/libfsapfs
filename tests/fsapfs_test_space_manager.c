@@ -1,5 +1,5 @@
 /*
- * Library container_space_manager type test program
+ * Library space_manager type test program
  *
  * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -34,9 +34,9 @@
 #include "fsapfs_test_memory.h"
 #include "fsapfs_test_unused.h"
 
-#include "../libfsapfs/libfsapfs_container_space_manager.h"
+#include "../libfsapfs/libfsapfs_space_manager.h"
 
-uint8_t fsapfs_test_container_space_manager_data1[ 4096 ] = {
+uint8_t fsapfs_test_space_manager_data1[ 4096 ] = {
 	0xca, 0x56, 0x9b, 0xf0, 0x49, 0xce, 0x1c, 0x8f, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x05, 0x00, 0x00, 0x80, 0x00, 0x00, 0x00, 0x00,
 	0x00, 0x10, 0x00, 0x00, 0x00, 0x80, 0x00, 0x00, 0x7e, 0x00, 0x00, 0x00, 0xfb, 0x01, 0x00, 0x00,
@@ -296,26 +296,26 @@ uint8_t fsapfs_test_container_space_manager_data1[ 4096 ] = {
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_container_space_manager_initialize function
+/* Tests the libfsapfs_space_manager_initialize function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_container_space_manager_initialize(
+int fsapfs_test_space_manager_initialize(
      void )
 {
-	libcerror_error_t *error                                     = NULL;
-	libfsapfs_container_space_manager_t *container_space_manager = NULL;
-	int result                                                   = 0;
+	libcerror_error_t *error                 = NULL;
+	libfsapfs_space_manager_t *space_manager = NULL;
+	int result                               = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests                              = 1;
-	int number_of_memset_fail_tests                              = 1;
-	int test_number                                              = 0;
+	int number_of_malloc_fail_tests          = 1;
+	int number_of_memset_fail_tests          = 1;
+	int test_number                          = 0;
 #endif
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_container_space_manager_initialize(
-	          &container_space_manager,
+	result = libfsapfs_space_manager_initialize(
+	          &space_manager,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -324,15 +324,15 @@ int fsapfs_test_container_space_manager_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "container_space_manager",
-	 container_space_manager );
+	 "space_manager",
+	 space_manager );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	result = libfsapfs_container_space_manager_free(
-	          &container_space_manager,
+	result = libfsapfs_space_manager_free(
+	          &space_manager,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -341,8 +341,8 @@ int fsapfs_test_container_space_manager_initialize(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "container_space_manager",
-	 container_space_manager );
+	 "space_manager",
+	 space_manager );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -350,7 +350,7 @@ int fsapfs_test_container_space_manager_initialize(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_container_space_manager_initialize(
+	result = libfsapfs_space_manager_initialize(
 	          NULL,
 	          &error );
 
@@ -366,13 +366,13 @@ int fsapfs_test_container_space_manager_initialize(
 	libcerror_error_free(
 	 &error );
 
-	container_space_manager = (libfsapfs_container_space_manager_t *) 0x12345678UL;
+	space_manager = (libfsapfs_space_manager_t *) 0x12345678UL;
 
-	result = libfsapfs_container_space_manager_initialize(
-	          &container_space_manager,
+	result = libfsapfs_space_manager_initialize(
+	          &space_manager,
 	          &error );
 
-	container_space_manager = NULL;
+	space_manager = NULL;
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -392,22 +392,22 @@ int fsapfs_test_container_space_manager_initialize(
 	     test_number < number_of_malloc_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_container_space_manager_initialize with malloc failing
+		/* Test libfsapfs_space_manager_initialize with malloc failing
 		 */
 		fsapfs_test_malloc_attempts_before_fail = test_number;
 
-		result = libfsapfs_container_space_manager_initialize(
-		          &container_space_manager,
+		result = libfsapfs_space_manager_initialize(
+		          &space_manager,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
 		{
 			fsapfs_test_malloc_attempts_before_fail = -1;
 
-			if( container_space_manager != NULL )
+			if( space_manager != NULL )
 			{
-				libfsapfs_container_space_manager_free(
-				 &container_space_manager,
+				libfsapfs_space_manager_free(
+				 &space_manager,
 				 NULL );
 			}
 		}
@@ -419,8 +419,8 @@ int fsapfs_test_container_space_manager_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "container_space_manager",
-			 container_space_manager );
+			 "space_manager",
+			 space_manager );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -434,22 +434,22 @@ int fsapfs_test_container_space_manager_initialize(
 	     test_number < number_of_memset_fail_tests;
 	     test_number++ )
 	{
-		/* Test libfsapfs_container_space_manager_initialize with memset failing
+		/* Test libfsapfs_space_manager_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_container_space_manager_initialize(
-		          &container_space_manager,
+		result = libfsapfs_space_manager_initialize(
+		          &space_manager,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
 		{
 			fsapfs_test_memset_attempts_before_fail = -1;
 
-			if( container_space_manager != NULL )
+			if( space_manager != NULL )
 			{
-				libfsapfs_container_space_manager_free(
-				 &container_space_manager,
+				libfsapfs_space_manager_free(
+				 &space_manager,
 				 NULL );
 			}
 		}
@@ -461,8 +461,8 @@ int fsapfs_test_container_space_manager_initialize(
 			 -1 );
 
 			FSAPFS_TEST_ASSERT_IS_NULL(
-			 "container_space_manager",
-			 container_space_manager );
+			 "space_manager",
+			 space_manager );
 
 			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
 			 "error",
@@ -482,19 +482,19 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( container_space_manager != NULL )
+	if( space_manager != NULL )
 	{
-		libfsapfs_container_space_manager_free(
-		 &container_space_manager,
+		libfsapfs_space_manager_free(
+		 &space_manager,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_container_space_manager_free function
+/* Tests the libfsapfs_space_manager_free function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_container_space_manager_free(
+int fsapfs_test_space_manager_free(
      void )
 {
 	libcerror_error_t *error = NULL;
@@ -502,7 +502,7 @@ int fsapfs_test_container_space_manager_free(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_container_space_manager_free(
+	result = libfsapfs_space_manager_free(
 	          NULL,
 	          &error );
 
@@ -529,21 +529,21 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_container_space_manager_read_file_io_handle function
+/* Tests the libfsapfs_space_manager_read_file_io_handle function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_container_space_manager_read_file_io_handle(
+int fsapfs_test_space_manager_read_file_io_handle(
      void )
 {
-	libbfio_handle_t *file_io_handle                             = NULL;
-	libcerror_error_t *error                                     = NULL;
-	libfsapfs_container_space_manager_t *container_space_manager = NULL;
-	int result                                                   = 0;
+	libbfio_handle_t *file_io_handle         = NULL;
+	libcerror_error_t *error                 = NULL;
+	libfsapfs_space_manager_t *space_manager = NULL;
+	int result                               = 0;
 
 	/* Initialize test
 	 */
-	result = libfsapfs_container_space_manager_initialize(
-	          &container_space_manager,
+	result = libfsapfs_space_manager_initialize(
+	          &space_manager,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -552,8 +552,8 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "container_space_manager",
-	 container_space_manager );
+	 "space_manager",
+	 space_manager );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -563,7 +563,7 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 	 */
 	result = fsapfs_test_open_file_io_handle(
 	          &file_io_handle,
-	          fsapfs_test_container_space_manager_data1,
+	          fsapfs_test_space_manager_data1,
 	          4096,
 	          &error );
 
@@ -582,8 +582,8 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_container_space_manager_read_file_io_handle(
-	          container_space_manager,
+	result = libfsapfs_space_manager_read_file_io_handle(
+	          space_manager,
 	          file_io_handle,
 	          0,
 	          &error );
@@ -599,7 +599,7 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_container_space_manager_read_file_io_handle(
+	result = libfsapfs_space_manager_read_file_io_handle(
 	          NULL,
 	          file_io_handle,
 	          0,
@@ -617,8 +617,8 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_space_manager_read_file_io_handle(
-	          container_space_manager,
+	result = libfsapfs_space_manager_read_file_io_handle(
+	          space_manager,
 	          NULL,
 	          0,
 	          &error );
@@ -635,8 +635,8 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_space_manager_read_file_io_handle(
-	          container_space_manager,
+	result = libfsapfs_space_manager_read_file_io_handle(
+	          space_manager,
 	          file_io_handle,
 	          -1,
 	          &error );
@@ -672,7 +672,7 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 	 */
 	result = fsapfs_test_open_file_io_handle(
 	          &file_io_handle,
-	          fsapfs_test_container_space_manager_data1,
+	          fsapfs_test_space_manager_data1,
 	          8,
 	          &error );
 
@@ -689,8 +689,8 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 	 "error",
 	 error );
 
-	result = libfsapfs_container_space_manager_read_file_io_handle(
-	          container_space_manager,
+	result = libfsapfs_space_manager_read_file_io_handle(
+	          space_manager,
 	          file_io_handle,
 	          0,
 	          &error );
@@ -724,8 +724,8 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 
 	/* Clean up
 	 */
-	result = libfsapfs_container_space_manager_free(
-	          &container_space_manager,
+	result = libfsapfs_space_manager_free(
+	          &space_manager,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -734,8 +734,8 @@ int fsapfs_test_container_space_manager_read_file_io_handle(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "container_space_manager",
-	 container_space_manager );
+	 "space_manager",
+	 space_manager );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -755,29 +755,29 @@ on_error:
 		 &file_io_handle,
 		 NULL );
 	}
-	if( container_space_manager != NULL )
+	if( space_manager != NULL )
 	{
-		libfsapfs_container_space_manager_free(
-		 &container_space_manager,
+		libfsapfs_space_manager_free(
+		 &space_manager,
 		 NULL );
 	}
 	return( 0 );
 }
 
-/* Tests the libfsapfs_container_space_manager_read_data function
+/* Tests the libfsapfs_space_manager_read_data function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_container_space_manager_read_data(
+int fsapfs_test_space_manager_read_data(
      void )
 {
-	libcerror_error_t *error                                     = NULL;
-	libfsapfs_container_space_manager_t *container_space_manager = NULL;
-	int result                                                   = 0;
+	libcerror_error_t *error                 = NULL;
+	libfsapfs_space_manager_t *space_manager = NULL;
+	int result                               = 0;
 
 	/* Initialize test
 	 */
-	result = libfsapfs_container_space_manager_initialize(
-	          &container_space_manager,
+	result = libfsapfs_space_manager_initialize(
+	          &space_manager,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -786,8 +786,8 @@ int fsapfs_test_container_space_manager_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "container_space_manager",
-	 container_space_manager );
+	 "space_manager",
+	 space_manager );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -795,9 +795,9 @@ int fsapfs_test_container_space_manager_read_data(
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_container_space_manager_read_data(
-	          container_space_manager,
-	          fsapfs_test_container_space_manager_data1,
+	result = libfsapfs_space_manager_read_data(
+	          space_manager,
+	          fsapfs_test_space_manager_data1,
 	          4096,
 	          &error );
 
@@ -812,9 +812,9 @@ int fsapfs_test_container_space_manager_read_data(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_container_space_manager_read_data(
+	result = libfsapfs_space_manager_read_data(
 	          NULL,
-	          fsapfs_test_container_space_manager_data1,
+	          fsapfs_test_space_manager_data1,
 	          4096,
 	          &error );
 
@@ -830,8 +830,8 @@ int fsapfs_test_container_space_manager_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_space_manager_read_data(
-	          container_space_manager,
+	result = libfsapfs_space_manager_read_data(
+	          space_manager,
 	          NULL,
 	          4096,
 	          &error );
@@ -848,9 +848,9 @@ int fsapfs_test_container_space_manager_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_space_manager_read_data(
-	          container_space_manager,
-	          fsapfs_test_container_space_manager_data1,
+	result = libfsapfs_space_manager_read_data(
+	          space_manager,
+	          fsapfs_test_space_manager_data1,
 	          (size_t) SSIZE_MAX + 1,
 	          &error );
 
@@ -866,9 +866,9 @@ int fsapfs_test_container_space_manager_read_data(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_container_space_manager_read_data(
-	          container_space_manager,
-	          fsapfs_test_container_space_manager_data1,
+	result = libfsapfs_space_manager_read_data(
+	          space_manager,
+	          fsapfs_test_space_manager_data1,
 	          0,
 	          &error );
 
@@ -886,8 +886,8 @@ int fsapfs_test_container_space_manager_read_data(
 
 	/* Clean up
 	 */
-	result = libfsapfs_container_space_manager_free(
-	          &container_space_manager,
+	result = libfsapfs_space_manager_free(
+	          &space_manager,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -896,8 +896,8 @@ int fsapfs_test_container_space_manager_read_data(
 	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "container_space_manager",
-	 container_space_manager );
+	 "space_manager",
+	 space_manager );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -911,10 +911,10 @@ on_error:
 		libcerror_error_free(
 		 &error );
 	}
-	if( container_space_manager != NULL )
+	if( space_manager != NULL )
 	{
-		libfsapfs_container_space_manager_free(
-		 &container_space_manager,
+		libfsapfs_space_manager_free(
+		 &space_manager,
 		 NULL );
 	}
 	return( 0 );
@@ -940,20 +940,20 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_container_space_manager_initialize",
-	 fsapfs_test_container_space_manager_initialize );
+	 "libfsapfs_space_manager_initialize",
+	 fsapfs_test_space_manager_initialize );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_container_space_manager_free",
-	 fsapfs_test_container_space_manager_free );
+	 "libfsapfs_space_manager_free",
+	 fsapfs_test_space_manager_free );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_container_space_manager_read_file_io_handle",
-	 fsapfs_test_container_space_manager_read_file_io_handle );
+	 "libfsapfs_space_manager_read_file_io_handle",
+	 fsapfs_test_space_manager_read_file_io_handle );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_container_space_manager_read_data",
-	 fsapfs_test_container_space_manager_read_data );
+	 "libfsapfs_space_manager_read_data",
+	 fsapfs_test_space_manager_read_data );
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 

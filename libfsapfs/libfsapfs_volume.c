@@ -1307,7 +1307,7 @@ int libfsapfs_internal_volume_open_read(
 
 		goto on_error;
 	}
-	if( object_map->object_map_btree_block_number == 0 )
+	if( object_map->btree_block_number == 0 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1329,7 +1329,7 @@ int libfsapfs_internal_volume_open_read(
 	     &( internal_volume->object_map_btree ),
 	     internal_volume->io_handle,
 	     internal_volume->container_data_block_vector,
-	     object_map->object_map_btree_block_number,
+	     object_map->btree_block_number,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

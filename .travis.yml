@@ -209,7 +209,7 @@ matrix:
     osx_image: xcode8.3
 before_install:
   - if test ${TRAVIS_OS_NAME} = "linux"; then
-      sudo apt-get update && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint zlib1g-dev libssl-dev libfuse-dev;
+      sudo apt-get update && sudo apt-mark hold mysql-server-5.7 && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint zlib1g-dev libssl-dev libfuse-dev;
     elif test ${TRAVIS_OS_NAME} = "osx"; then
       brew update && brew install gettext gnu-sed && brew link --force gettext;
       brew tap homebrew/cask && brew cask install osxfuse;

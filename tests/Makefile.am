@@ -51,13 +51,13 @@ check_PROGRAMS = \
 	fsapfs_test_checkpoint_map \
 	fsapfs_test_checkpoint_map_entry \
 	fsapfs_test_checksum \
+	fsapfs_test_chunk_information_block \
 	fsapfs_test_compressed_data_handle \
 	fsapfs_test_compression \
 	fsapfs_test_container \
 	fsapfs_test_container_data_handle \
 	fsapfs_test_container_key_bag \
 	fsapfs_test_container_reaper \
-	fsapfs_test_container_space_manager \
 	fsapfs_test_container_superblock \
 	fsapfs_test_data_block \
 	fsapfs_test_directory_record \
@@ -77,6 +77,7 @@ check_PROGRAMS = \
 	fsapfs_test_object_map \
 	fsapfs_test_object_map_btree \
 	fsapfs_test_object_map_descriptor \
+	fsapfs_test_space_manager \
 	fsapfs_test_support \
 	fsapfs_test_volume \
 	fsapfs_test_volume_key_bag \
@@ -187,6 +188,28 @@ fsapfs_test_checksum_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
+fsapfs_test_chunk_information_block_SOURCES = \
+	fsapfs_test_chunk_information_block.c \
+	fsapfs_test_functions.c fsapfs_test_functions.h \
+	fsapfs_test_libbfio.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_chunk_information_block_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
 fsapfs_test_compressed_data_handle_SOURCES = \
 	fsapfs_test_compressed_data_handle.c \
 	fsapfs_test_libcerror.h \
@@ -286,28 +309,6 @@ fsapfs_test_container_reaper_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_container_reaper_LDADD = \
-	@LIBBFIO_LIBADD@ \
-	@LIBCPATH_LIBADD@ \
-	@LIBCFILE_LIBADD@ \
-	@LIBUNA_LIBADD@ \
-	@LIBCSPLIT_LIBADD@ \
-	@LIBCNOTIFY_LIBADD@ \
-	@LIBCLOCALE_LIBADD@ \
-	@LIBCDATA_LIBADD@ \
-	../libfsapfs/libfsapfs.la \
-	@LIBCERROR_LIBADD@
-
-fsapfs_test_container_space_manager_SOURCES = \
-	fsapfs_test_container_space_manager.c \
-	fsapfs_test_functions.c fsapfs_test_functions.h \
-	fsapfs_test_libbfio.h \
-	fsapfs_test_libcerror.h \
-	fsapfs_test_libfsapfs.h \
-	fsapfs_test_macros.h \
-	fsapfs_test_memory.c fsapfs_test_memory.h \
-	fsapfs_test_unused.h
-
-fsapfs_test_container_space_manager_LDADD = \
 	@LIBBFIO_LIBADD@ \
 	@LIBCPATH_LIBADD@ \
 	@LIBCFILE_LIBADD@ \
@@ -592,6 +593,28 @@ fsapfs_test_object_map_descriptor_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_object_map_descriptor_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_space_manager_SOURCES = \
+	fsapfs_test_functions.c fsapfs_test_functions.h \
+	fsapfs_test_libbfio.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_space_manager.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_space_manager_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

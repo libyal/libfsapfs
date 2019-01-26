@@ -30,7 +30,7 @@
 #include "libfsapfs_container_data_handle.h"
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_container_reaper.h"
-#include "libfsapfs_container_space_manager.h"
+#include "libfsapfs_space_manager.h"
 #include "libfsapfs_container_superblock.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
@@ -1013,7 +1013,7 @@ int libfsapfs_internal_container_open_read(
 #if defined( HAVE_DEBUG_OUTPUT )
 	libfsapfs_checkpoint_map_t *checkpoint_map                   = NULL;
 	libfsapfs_container_reaper_t *container_reaper               = NULL;
-	libfsapfs_container_space_manager_t *container_space_manager = NULL;
+	libfsapfs_space_manager_t *space_manager = NULL;
 	uint64_t reaper_block_number                                 = 0;
 	uint64_t space_manager_block_number                          = 0;
 #endif
@@ -1231,7 +1231,7 @@ int libfsapfs_internal_container_open_read(
 						goto on_error;
 					}
 				}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 				if( object->transaction_identifier > checkpoint_map_transaction_identifier )
 				{
 					checkpoint_map_block_number           = internal_container->superblock->metadata_area_block_number + metadata_block_index;
@@ -1381,21 +1381,21 @@ int libfsapfs_internal_container_open_read(
 			}
 			file_offset = space_manager_block_number * internal_container->io_handle->block_size;
 
-			if( libfsapfs_container_space_manager_initialize(
-			     &container_space_manager,
+			if( libfsapfs_space_manager_initialize(
+			     &space_manager,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create container space manager.",
+				 "%s: unable to create space manager.",
 				 function );
 
 				goto on_error;
 			}
-			if( libfsapfs_container_space_manager_read_file_io_handle(
-			     container_space_manager,
+			if( libfsapfs_space_manager_read_file_io_handle(
+			     space_manager,
 			     file_io_handle,
 			     file_offset,
 			     error ) != 1 )
@@ -1404,22 +1404,22 @@ int libfsapfs_internal_container_open_read(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_IO,
 				 LIBCERROR_IO_ERROR_READ_FAILED,
-				 "%s: unable to read container space manager at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+				 "%s: unable to read space manager at offset: %" PRIi64 " (0x%08" PRIx64 ").",
 				 function,
 				 file_offset,
 				 file_offset );
 
 				goto on_error;
 			}
-			if( libfsapfs_container_space_manager_free(
-			     &container_space_manager,
+			if( libfsapfs_space_manager_free(
+			     &space_manager,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-				 "%s: unable to free container space manager.",
+				 "%s: unable to free space manager.",
 				 function );
 
 				goto on_error;
@@ -1601,7 +1601,7 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	if( object_map->object_map_btree_block_number == 0 )
+	if( object_map->btree_block_number == 0 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1623,7 +1623,7 @@ int libfsapfs_internal_container_open_read(
 	     &( internal_container->object_map_btree ),
 	     internal_container->io_handle,
 	     internal_container->data_block_vector,
-	     object_map->object_map_btree_block_number,
+	     object_map->btree_block_number,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1721,10 +1721,10 @@ on_error:
 		 &container_reaper,
 		 NULL );
 	}
-	if( container_space_manager != NULL )
+	if( space_manager != NULL )
 	{
-		libfsapfs_container_space_manager_free(
-		 &container_space_manager,
+		libfsapfs_space_manager_free(
+		 &space_manager,
 		 NULL );
 	}
 #endif
