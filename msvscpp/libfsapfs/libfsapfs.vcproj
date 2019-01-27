@@ -274,6 +274,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_extent_reference_tree.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_file_entry.c"
 				>
 			</File>
@@ -287,6 +291,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_file_system_data_handle.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_fusion_middle_tree.c"
 				>
 			</File>
 			<File
@@ -350,6 +358,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_snapshot_metadata_tree.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_space_manager.c"
 				>
 			</File>
@@ -396,7 +408,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\fsapfs_extent_reference_tree.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\fsapfs_file_system.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_fusion_middle_tree.h"
 				>
 			</File>
 			<File
@@ -409,6 +429,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\fsapfs_object_map.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\fsapfs_snapshot_metadata_tree.h"
 				>
 			</File>
 			<File
@@ -524,6 +548,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_extent_reference_tree.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_extern.h"
 				>
 			</File>
@@ -541,6 +569,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_file_system_data_handle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_fusion_middle_tree.h"
 				>
 			</File>
 			<File
@@ -653,6 +685,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_profiler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_snapshot_metadata_tree.h"
 				>
 			</File>
 			<File

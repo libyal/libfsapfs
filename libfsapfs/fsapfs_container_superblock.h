@@ -105,25 +105,25 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t next_transaction_identifier[ 8 ];
 
-	/* The metadata area number of blocks
+	/* The checkpoint descriptor area number of blocks
 	 * Consists of 4 bytes
 	 */
-	uint8_t metadata_area_number_of_blocks[ 4 ];
+	uint8_t checkpoint_descriptor_area_number_of_blocks[ 4 ];
 
-	/* Unknown
+	/* The checkpoint data area number of blocks
 	 * Consists of 4 bytes
 	 */
-	uint8_t unknown5[ 4 ];
+	uint8_t checkpoint_data_area_number_of_blocks[ 4 ];
 
-	/* The metadata area block number
+	/* The checkpoint descriptor area block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t metadata_area_block_number[ 8 ];
+	uint8_t checkpoint_descriptor_area_block_number[ 8 ];
 
-	/* Unknown
+	/* The checkpoint data area block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown7[ 8 ];
+	uint8_t checkpoint_data_area_block_number[ 8 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
@@ -185,10 +185,10 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t volume_object_identifiers[ 800 ];
 
-	/* Unknown
+	/* The counters
 	 * Consists of 32 x 8 bytes
 	 */
-	uint8_t unknown19[ 256 ];
+	uint8_t counters[ 256 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
@@ -215,15 +215,11 @@ struct fsapfs_container_superblock
 	 */
 	uint8_t unknown24[ 8 ];
 
-	/* Unknown
-	 * Consists of 8 bytes
+	/* The Fusion set identifier
+	 * Consists of 16 bytes
+	 * Contains an UUID
 	 */
-	uint8_t unknown25[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown26[ 8 ];
+	uint8_t fusion_set_identifier[ 16 ];
 
 	/* The key bag block number
 	 * Consists of 8 bytes
@@ -236,29 +232,34 @@ struct fsapfs_container_superblock
 	uint8_t key_bag_number_of_blocks[ 8 ];
 
 	/* Unknown
-	 * Consists of 5 x 8 bytes
+	 * Consists of 4 x 8 bytes
 	 */
-	uint8_t unknown29[ 40 ];
+	uint8_t unknown29[ 32 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown30[ 8 ];
 
-	/* Unknown
+	/* The Fusion middle tree block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown31[ 8 ];
+	uint8_t fusion_middle_tree_block_number[ 8 ];
 
-	/* Unknown
+	/* The Fusion write-back cache object identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown32[ 8 ];
+	uint8_t fusion_write_back_cache_object_identifier[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
 	 */
 	uint8_t unknown33[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown34[ 8 ];
 };
 
 #if defined( __cplusplus )

@@ -48,6 +48,14 @@ struct libfsapfs_volume_superblock
 	 */
 	uint64_t file_system_root_object_identifier;
 
+	/* The extent-reference tree block number
+	 */
+	uint64_t extent_reference_tree_block_number;
+
+	/* The snapshot metadata tree block number
+	 */
+	uint64_t snapshot_metadata_tree_block_number;
+
 	/* The next file system object identifier
 	 */
 	uint64_t next_file_system_object_identifier;

@@ -356,6 +356,14 @@ int libfsapfs_volume_superblock_read_data(
 	 volume_superblock->file_system_root_object_identifier );
 
 	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->extent_reference_tree_block_number,
+	 volume_superblock->extent_reference_tree_block_number );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->snapshot_metadata_tree_block_number,
+	 volume_superblock->snapshot_metadata_tree_block_number );
+
+	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_volume_superblock_t *) data )->next_file_system_object_identifier,
 	 volume_superblock->next_file_system_object_identifier );
 
@@ -560,10 +568,10 @@ int libfsapfs_volume_superblock_read_data(
 		 value_32bit );
 
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown14,
+		 ( (fsapfs_volume_superblock_t *) data )->extent_reference_tree_object_type,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown14 object type\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: extent-reference tree object type\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -585,21 +593,15 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 volume_superblock->file_system_root_object_identifier );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown18,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown18\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: extent-reference tree block number\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->extent_reference_tree_block_number );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown19,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown19\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: snapshot metadata tree block number\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->snapshot_metadata_tree_block_number );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown20,

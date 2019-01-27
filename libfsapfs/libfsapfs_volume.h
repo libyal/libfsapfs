@@ -37,6 +37,7 @@
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_object_map_btree.h"
+#include "libfsapfs_snapshot_metadata_tree.h"
 #include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
 #include "libfsapfs_types.h"
@@ -65,9 +66,13 @@ struct libfsapfs_internal_volume
 	 */
 	libfdata_vector_t *container_data_block_vector;
 
-	/* The volume object map B-tree
+	/* The object map B-tree
 	 */
 	libfsapfs_object_map_btree_t *object_map_btree;
+
+	/* The snapshot metadata tree
+	 */
+	libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree;
 
 	/* The volume key bag
 	 */

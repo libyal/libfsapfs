@@ -30,10 +30,13 @@ libfsapfs_la_SOURCES = \
 	fsapfs_chunk_information_block.h \
 	fsapfs_container_reaper.h \
 	fsapfs_container_superblock.h \
+	fsapfs_extent_reference_tree.h \
 	fsapfs_file_system.h \
+	fsapfs_fusion_middle_tree.h \
 	fsapfs_key_bag.h \
 	fsapfs_object.h \
 	fsapfs_object_map.h \
+	fsapfs_snapshot_metadata_tree.h \
 	fsapfs_space_manager.h \
 	fsapfs_volume_superblock.h \
 	libfsapfs.c \
@@ -64,10 +67,12 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_encryption_context.c libfsapfs_encryption_context.h \
 	libfsapfs_extended_attribute.c libfsapfs_extended_attribute.h \
 	libfsapfs_extern.h \
+	libfsapfs_extent_reference_tree.c libfsapfs_extent_reference_tree.h \
 	libfsapfs_file_entry.c libfsapfs_file_entry.h \
 	libfsapfs_file_extent.c libfsapfs_file_extent.h \
 	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
 	libfsapfs_file_system_data_handle.c libfsapfs_file_system_data_handle.h \
+	libfsapfs_fusion_middle_tree.c libfsapfs_fusion_middle_tree.h \
 	libfsapfs_inode.c libfsapfs_inode.h \
 	libfsapfs_io_handle.c libfsapfs_io_handle.h \
 	libfsapfs_key_bag_entry.c libfsapfs_key_bag_entry.h \
@@ -96,6 +101,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_object_map_descriptor.c libfsapfs_object_map_descriptor.h \
 	libfsapfs_password.c libfsapfs_password.h \
 	libfsapfs_profiler.c libfsapfs_profiler.h \
+	libfsapfs_snapshot_metadata_tree.c libfsapfs_snapshot_metadata_tree.h \
 	libfsapfs_space_manager.c libfsapfs_space_manager.h \
 	libfsapfs_support.c libfsapfs_support.h \
 	libfsapfs_types.h \

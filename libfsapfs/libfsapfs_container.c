@@ -34,6 +34,7 @@
 #include "libfsapfs_container_superblock.h"
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
+#include "libfsapfs_fusion_middle_tree.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
@@ -911,6 +912,22 @@ int libfsapfs_container_close(
 			result = -1;
 		}
 	}
+	if( internal_container->fusion_middle_tree != NULL )
+	{
+		if( libfsapfs_fusion_middle_tree_free(
+		     &( internal_container->fusion_middle_tree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free Fusion middle tree.",
+			 function );
+
+			result = -1;
+		}
+	}
 	if( internal_container->checkpoint_map != NULL )
 	{
 		if( libfsapfs_checkpoint_map_free(
@@ -999,23 +1016,23 @@ int libfsapfs_internal_container_open_read(
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	libfsapfs_container_data_handle_t *container_data_handle     = NULL;
-	libfsapfs_container_superblock_t *container_superblock       = NULL;
-	libfsapfs_container_superblock_t *container_superblock_swap  = NULL;
-	libfsapfs_object_t *object                                   = NULL;
-	libfsapfs_object_map_t *object_map                           = NULL;
-	static char *function                                        = "libfsapfs_internal_container_open_read";
-	uint64_t checkpoint_map_block_number                         = 0;
-	uint64_t checkpoint_map_transaction_identifier               = 0;
-	uint64_t metadata_block_index                                = 0;
-	int element_index                                            = 0;
+	libfsapfs_container_data_handle_t *container_data_handle    = NULL;
+	libfsapfs_container_superblock_t *container_superblock      = NULL;
+	libfsapfs_container_superblock_t *container_superblock_swap = NULL;
+	libfsapfs_object_t *object                                  = NULL;
+	libfsapfs_object_map_t *object_map                          = NULL;
+	static char *function                                       = "libfsapfs_internal_container_open_read";
+	uint64_t checkpoint_map_block_number                        = 0;
+	uint64_t checkpoint_map_transaction_identifier              = 0;
+	uint64_t metadata_block_index                               = 0;
+	int element_index                                           = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	libfsapfs_checkpoint_map_t *checkpoint_map                   = NULL;
-	libfsapfs_container_reaper_t *container_reaper               = NULL;
-	libfsapfs_space_manager_t *space_manager = NULL;
-	uint64_t reaper_block_number                                 = 0;
-	uint64_t space_manager_block_number                          = 0;
+	libfsapfs_checkpoint_map_t *checkpoint_map                  = NULL;
+	libfsapfs_container_reaper_t *container_reaper              = NULL;
+	libfsapfs_space_manager_t *space_manager                    = NULL;
+	uint64_t reaper_block_number                                = 0;
+	uint64_t space_manager_block_number                         = 0;
 #endif
 
 	if( internal_container == NULL )
@@ -1047,6 +1064,17 @@ int libfsapfs_internal_container_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid container - superblock map value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_container->fusion_middle_tree != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid container - Fusion middle tree value already set.",
 		 function );
 
 		return( -1 );
@@ -1135,11 +1163,24 @@ int libfsapfs_internal_container_open_read(
 	internal_container->io_handle->block_size     = internal_container->superblock->block_size;
 	internal_container->io_handle->container_size = (size64_t) internal_container->superblock->number_of_blocks * (size64_t) internal_container->io_handle->block_size;
 
+#if !defined( HAVE_DEBUG_OUTPUT )
+	if( ( internal_container->superblock->incompatible_features_flags & 0x0000000000000100UL ) != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: Fusion drive not supported.",
+		 function );
+
+		return( -1 );
+	}
+#endif
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "Scanning metadata area:\n" );
+		 "Scanning checkpoint descriptor area:\n" );
 	}
 #endif
 	if( libfsapfs_object_initialize(
@@ -1155,10 +1196,10 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	file_offset = internal_container->superblock->metadata_area_block_number * internal_container->io_handle->block_size;
+	file_offset = internal_container->superblock->checkpoint_descriptor_area_block_number * internal_container->io_handle->block_size;
 
 	for( metadata_block_index = 0;
-	     metadata_block_index <= internal_container->superblock->metadata_area_number_of_blocks;
+	     metadata_block_index <= internal_container->superblock->checkpoint_descriptor_area_number_of_blocks;
 	     metadata_block_index++ )
 	{
 		if( libfsapfs_object_read_file_io_handle(
@@ -1234,7 +1275,7 @@ int libfsapfs_internal_container_open_read(
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 				if( object->transaction_identifier > checkpoint_map_transaction_identifier )
 				{
-					checkpoint_map_block_number           = internal_container->superblock->metadata_area_block_number + metadata_block_index;
+					checkpoint_map_block_number           = internal_container->superblock->checkpoint_descriptor_area_block_number + metadata_block_index;
 					checkpoint_map_transaction_identifier = object->transaction_identifier;
 				}
 				break;
@@ -1316,6 +1357,17 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
+	if( checkpoint_map_block_number == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing checkpoint map block number.",
+		 function );
+
+		goto on_error;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -1358,6 +1410,44 @@ int libfsapfs_internal_container_open_read(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
+		if( internal_container->superblock->fusion_middle_tree_block_number != 0 )
+		{
+			libcnotify_printf(
+			 "Reading Fusion middle tree:\n" );
+
+			file_offset = internal_container->superblock->fusion_middle_tree_block_number * internal_container->io_handle->block_size;
+
+			if( libfsapfs_fusion_middle_tree_initialize(
+			     &( internal_container->fusion_middle_tree ),
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create Fusion middle tree.",
+				 function );
+
+				goto on_error;
+			}
+			if( libfsapfs_fusion_middle_tree_read_file_io_handle(
+			     internal_container->fusion_middle_tree,
+			     file_io_handle,
+			     file_offset,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read Fusion middle tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+				 function,
+				 file_offset,
+				 file_offset );
+
+				goto on_error;
+			}
+		}
 		if( internal_container->superblock->space_manager_object_identifier > 0 )
 		{
 			libcnotify_printf(
@@ -1748,6 +1838,12 @@ on_error:
 		 NULL );
 	}
 #endif
+	if( internal_container->fusion_middle_tree != NULL )
+	{
+		libfsapfs_fusion_middle_tree_free(
+		 &( internal_container->fusion_middle_tree ),
+		 NULL );
+	}
 	if( object != NULL )
 	{
 		libfsapfs_object_free(

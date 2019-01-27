@@ -129,10 +129,10 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t file_system_root_tree_object_type[ 4 ];
 
-	/* Unknown
-	 * Consists of 4 bytes
+	/* The extent-reference tree object type
+	 * Consists of 8 bytes
 	 */
-	uint8_t unknown14[ 4 ];
+	uint8_t extent_reference_tree_object_type[ 4 ];
 
 	/* The snapshot metadata tree object type
 	 * Consists of 4 bytes
@@ -149,15 +149,15 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t file_system_root_object_identifier[ 8 ];
 
-	/* Unknown
+	/* The extent-reference tree block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown18[ 8 ];
+	uint8_t extent_reference_tree_block_number[ 8 ];
 
-	/* Unknown
+	/* The snapshot metadata tree block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown19[ 8 ];
+	uint8_t snapshot_metadata_tree_block_number[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes

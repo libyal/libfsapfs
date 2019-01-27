@@ -30,6 +30,7 @@
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_container_superblock.h"
 #include "libfsapfs_extern.h"
+#include "libfsapfs_fusion_middle_tree.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
@@ -50,6 +51,10 @@ struct libfsapfs_internal_container
 	 */
 	libfsapfs_container_superblock_t *superblock;
 
+	/* The Fusion middle tree
+	 */
+	libfsapfs_fusion_middle_tree_t *fusion_middle_tree;
+
 	/* The checkpoint map
 	 */
 	libfsapfs_checkpoint_map_t *checkpoint_map;
@@ -62,7 +67,7 @@ struct libfsapfs_internal_container
 	 */
 	libfdata_vector_t *data_block_vector;
 
-	/* The container object map B-tree
+	/* The object map B-tree
 	 */
 	libfsapfs_object_map_btree_t *object_map_btree;
 

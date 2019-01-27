@@ -30,6 +30,7 @@
 #include "libfsapfs_debug.h"
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_encryption_context.h"
+#include "libfsapfs_extent_reference_tree.h"
 #include "libfsapfs_file_entry.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_file_system_data_handle.h"
@@ -44,6 +45,7 @@
 #include "libfsapfs_object_map.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
+#include "libfsapfs_snapshot_metadata_tree.h"
 #include "libfsapfs_volume.h"
 #include "libfsapfs_volume_key_bag.h"
 #include "libfsapfs_volume_superblock.h"
@@ -979,6 +981,22 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
+	if( internal_volume->snapshot_metadata_tree != NULL )
+	{
+		if( libfsapfs_snapshot_metadata_tree_free(
+		     &( internal_volume->snapshot_metadata_tree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free snapshot metadata tree.",
+			 function );
+
+			result = -1;
+		}
+	}
 	if( internal_volume->key_bag != NULL )
 	{
 		if( libfsapfs_volume_key_bag_free(
@@ -1076,6 +1094,10 @@ int libfsapfs_internal_volume_open_read(
 	int element_index                                            = 0;
 	int result                                                   = 0;
 
+#if defined( HAVE_DEBUG_OUTPUT )
+	libfsapfs_extent_reference_tree_t *extent_reference_tree     = NULL;
+#endif
+
 	if( internal_volume == NULL )
 	{
 		libcerror_error_set(
@@ -1127,6 +1149,17 @@ int libfsapfs_internal_volume_open_read(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
 		 "%s: invalid volume - object map B-tree value already set.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->snapshot_metadata_tree != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid volume - snapshot metadata tree value already set.",
 		 function );
 
 		return( -1 );
@@ -1443,6 +1476,92 @@ int libfsapfs_internal_volume_open_read(
 			internal_volume->is_locked = 1;
 		}
 	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( internal_volume->superblock->extent_reference_tree_block_number != 0 )
+	{
+		if( libfsapfs_extent_reference_tree_initialize(
+		     &extent_reference_tree,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create extent reference tree.",
+			 function );
+
+			goto on_error;
+		}
+		file_offset = internal_volume->superblock->extent_reference_tree_block_number * internal_volume->io_handle->block_size;
+
+		if( libfsapfs_extent_reference_tree_read_file_io_handle(
+		     extent_reference_tree,
+		     file_io_handle,
+		     file_offset,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read extent reference tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 function,
+			 file_offset,
+			 file_offset );
+
+			goto on_error;
+		}
+		if( libfsapfs_extent_reference_tree_free(
+		     &extent_reference_tree,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free extent reference tree.",
+			 function );
+
+			goto on_error;
+		}
+	}
+	if( internal_volume->superblock->snapshot_metadata_tree_block_number != 0 )
+	{
+		if( libfsapfs_snapshot_metadata_tree_initialize(
+		     &( internal_volume->snapshot_metadata_tree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create snapshot metadata tree.",
+			 function );
+
+			goto on_error;
+		}
+		file_offset = internal_volume->superblock->snapshot_metadata_tree_block_number * internal_volume->io_handle->block_size;
+
+		if( libfsapfs_snapshot_metadata_tree_read_file_io_handle(
+		     internal_volume->snapshot_metadata_tree,
+		     file_io_handle,
+		     file_offset,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_IO,
+			 LIBCERROR_IO_ERROR_READ_FAILED,
+			 "%s: unable to read snapshot metadata tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 function,
+			 file_offset,
+			 file_offset );
+
+			goto on_error;
+		}
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( internal_volume->superblock->file_system_root_object_identifier == 0 )
 	{
 		libcerror_error_set(
@@ -1538,6 +1657,20 @@ on_error:
 		 &( internal_volume->key_bag ),
 		 NULL );
 	}
+	if( internal_volume->snapshot_metadata_tree != NULL )
+	{
+		libfsapfs_snapshot_metadata_tree_free(
+		 &( internal_volume->snapshot_metadata_tree ),
+		 NULL );
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( extent_reference_tree != NULL )
+	{
+		libfsapfs_extent_reference_tree_free(
+		 &extent_reference_tree,
+		 NULL );
+	}
+#endif
 	if( internal_volume->object_map_btree != NULL )
 	{
 		libfsapfs_object_map_btree_free(

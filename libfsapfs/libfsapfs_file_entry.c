@@ -1718,8 +1718,9 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_internal_file_entry_get_symbolic_link_data";
-	ssize_t read_count    = 0;
+	static char *function            = "libfsapfs_internal_file_entry_get_symbolic_link_data";
+	size64_t extended_attribute_size = 0;
+	ssize_t read_count               = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -1763,7 +1764,7 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 	{
 		if( libfsapfs_extended_attribute_get_size(
 		     internal_file_entry->symbolic_link_extended_attribute,
-		     &( internal_file_entry->symbolic_link_data_size ),
+		     &extended_attribute_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1775,7 +1776,7 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 
 			goto on_error;
 		}
-		if( internal_file_entry->symbolic_link_data_size > (size_t) SSIZE_MAX )
+		if( extended_attribute_size > (size64_t) SSIZE_MAX )
 		{
 			libcerror_error_set(
 			 error,
@@ -1787,7 +1788,7 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 			goto on_error;
 		}
 		internal_file_entry->symbolic_link_data = (uint8_t *) memory_allocate(
-		                                                       sizeof( uint8_t ) * internal_file_entry->symbolic_link_data_size );
+		                                                       sizeof( uint8_t ) * extended_attribute_size );
 
 		if( internal_file_entry->symbolic_link_data == NULL )
 		{
@@ -1800,6 +1801,8 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 
 			goto on_error;
 		}
+		internal_file_entry->symbolic_link_data_size = (size_t) extended_attribute_size;
+
 		read_count = libfsapfs_extended_attribute_read_buffer_at_offset(
 		              internal_file_entry->symbolic_link_extended_attribute,
 		              internal_file_entry->symbolic_link_data,

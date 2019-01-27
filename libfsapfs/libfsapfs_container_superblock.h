@@ -48,17 +48,21 @@ struct libfsapfs_container_superblock
 	 */
 	uint64_t number_of_blocks;
 
+	/* The incompatible features flags
+	 */
+	uint64_t incompatible_features_flags;
+
 	/* The container identifier
 	 */
 	uint8_t container_identifier[ 16 ];
 
-	/* The number of blocks of the metadata area
+	/* The number of blocks of the checkpoint descriptor area
 	 */
-	uint32_t metadata_area_number_of_blocks;
+	uint32_t checkpoint_descriptor_area_number_of_blocks;
 
-	/* The block number of the metadata area
+	/* The block number of the checkpoint descriptor area
 	 */
-	uint32_t metadata_area_block_number;
+	uint32_t checkpoint_descriptor_area_block_number;
 
 	/* The space manager object identifier
 	 */
@@ -71,6 +75,10 @@ struct libfsapfs_container_superblock
 	/* The reaper object identifier
 	 */
 	uint64_t reaper_object_identifier;
+
+	/* The Fusion set identifier
+	 */
+	uint8_t fusion_set_identifier[ 16 ];
 
 	/* The key bag block number
 	 */
@@ -87,6 +95,10 @@ struct libfsapfs_container_superblock
 	/* The volume object identifier
 	 */
 	uint64_t volume_object_identifiers[ 100 ];
+
+	/* The Fusion middle tree block number
+	 */
+	uint64_t fusion_middle_tree_block_number;
 };
 
 int libfsapfs_container_superblock_initialize(

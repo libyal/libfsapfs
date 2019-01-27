@@ -234,20 +234,20 @@ int libfsapfs_container_superblock_read_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function                = "libfsapfs_container_superblock_read_data";
-	size_t data_offset                   = 0;
-	uint64_t calculated_checksum         = 0;
-	uint64_t incompatible_features_flags = 0;
-	uint64_t stored_checksum             = 0;
-	uint64_t volume_object_identifier    = 0;
-	uint32_t maximum_number_of_volumes   = 0;
-	uint32_t object_subtype              = 0;
-	uint32_t object_type                 = 0;
-	int object_identifier_index          = 0;
+	static char *function              = "libfsapfs_container_superblock_read_data";
+	size_t data_offset                 = 0;
+	uint64_t calculated_checksum       = 0;
+	uint64_t stored_checksum           = 0;
+	uint64_t volume_object_identifier  = 0;
+	uint32_t maximum_number_of_volumes = 0;
+	uint32_t object_subtype            = 0;
+	uint32_t object_type               = 0;
+	int object_identifier_index        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit                 = 0;
-	uint32_t value_32bit                 = 0;
+	uint64_t value_64bit               = 0;
+	uint32_t value_32bit               = 0;
+	int counter_index                  = 0;
 #endif
 
 	if( container_superblock == NULL )
@@ -360,7 +360,7 @@ int libfsapfs_container_superblock_read_data(
 
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_container_superblock_t *) data )->incompatible_features_flags,
-	 incompatible_features_flags );
+	 container_superblock->incompatible_features_flags );
 
 	if( memory_copy(
 	     container_superblock->container_identifier,
@@ -412,6 +412,20 @@ int libfsapfs_container_superblock_read_data(
 			container_superblock->number_of_volumes += 1;
 		}
 	}
+	if( memory_copy(
+	     container_superblock->fusion_set_identifier,
+	     ( (fsapfs_container_superblock_t *) data )->fusion_set_identifier,
+	     16 ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy Fusion set identifier.",
+		 function );
+
+		return( -1 );
+	}
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_container_superblock_t *) data )->key_bag_block_number,
 	 container_superblock->key_bag_block_number );
@@ -421,18 +435,22 @@ int libfsapfs_container_superblock_read_data(
 	 container_superblock->key_bag_number_of_blocks );
 
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_container_superblock_t *) data )->metadata_area_number_of_blocks,
-	 container_superblock->metadata_area_number_of_blocks );
+	 ( (fsapfs_container_superblock_t *) data )->checkpoint_descriptor_area_number_of_blocks,
+	 container_superblock->checkpoint_descriptor_area_number_of_blocks );
 
 	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsapfs_container_superblock_t *) data )->metadata_area_block_number,
-	 container_superblock->metadata_area_block_number );
+	 ( (fsapfs_container_superblock_t *) data )->checkpoint_descriptor_area_block_number,
+	 container_superblock->checkpoint_descriptor_area_block_number );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_container_superblock_t *) data )->fusion_middle_tree_block_number,
+	 container_superblock->fusion_middle_tree_block_number );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: object checksum\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: object checksum\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 stored_checksum );
 
@@ -440,27 +458,27 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 container_superblock->object_transaction_identifier );
 
 		libcnotify_printf(
-		 "%s: object type\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object type\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_type );
 
 		libcnotify_printf(
-		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object subtype\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_subtype );
 
 		libcnotify_printf(
-		 "%s: signature\t\t\t\t: %c%c%c%c\n",
+		 "%s: signature\t\t\t\t\t: %c%c%c%c\n",
 		 function,
 		 ( (fsapfs_container_superblock_t *) data )->signature[ 0 ],
 		 ( (fsapfs_container_superblock_t *) data )->signature[ 1 ],
@@ -468,12 +486,12 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->signature[ 3 ] );
 
 		libcnotify_printf(
-		 "%s: block size\t\t\t\t: %" PRIu32 "\n",
+		 "%s: block size\t\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 container_superblock->block_size );
 
 		libcnotify_printf(
-		 "%s: number of blocks\t\t\t: %" PRIu64 "\n",
+		 "%s: number of blocks\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 container_superblock->number_of_blocks );
 
@@ -481,7 +499,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->compatible_features_flags,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: compatible features flags\t\t: 0x%08" PRIx64 "\n",
+		 "%s: compatible features flags\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 		libfsapfs_debug_print_container_compatible_features_flags(
@@ -493,7 +511,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->read_only_compatible_features_flags,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: read-only compatible features flags\t: 0x%08" PRIx64 "\n",
+		 "%s: read-only compatible features flags\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 		libfsapfs_debug_print_container_read_only_compatible_features_flags(
@@ -502,17 +520,17 @@ int libfsapfs_container_superblock_read_data(
 		 "\n" );
 
 		libcnotify_printf(
-		 "%s: incompatible features flags\t\t: 0x%08" PRIx64 "\n",
+		 "%s: incompatible features flags\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 incompatible_features_flags );
+		 container_superblock->incompatible_features_flags );
 		libfsapfs_debug_print_container_incompatible_features_flags(
-		 incompatible_features_flags );
+		 container_superblock->incompatible_features_flags );
 		libcnotify_printf(
 		 "\n" );
 
 		if( libfsapfs_debug_print_guid_value(
 		     function,
-		     "container identifier\t\t\t",
+		     "container identifier\t\t\t\t",
 		     ( (fsapfs_container_superblock_t *) data )->container_identifier,
 		     16,
 		     LIBFGUID_ENDIAN_BIG,
@@ -532,7 +550,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->next_object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: next object identifier\t\t: %" PRIu64 "\n",
+		 "%s: next object identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -540,33 +558,33 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->next_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: next transaction identifier\t\t: %" PRIu64 "\n",
+		 "%s: next transaction identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: metadata area number of blocks\t: %" PRIu32 "\n",
+		 "%s: checkpoint descriptor area number of blocks\t: %" PRIu32 "\n",
 		 function,
-		 container_superblock->metadata_area_number_of_blocks );
+		 container_superblock->checkpoint_descriptor_area_number_of_blocks );
 
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->unknown5,
+		 ( (fsapfs_container_superblock_t *) data )->checkpoint_data_area_number_of_blocks,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown5 number of blocks\t\t: %" PRIu32 "\n",
+		 "%s: checkpoint data area number of blocks\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
 		libcnotify_printf(
-		 "%s: metadata area block number\t\t: %" PRIu64 "\n",
+		 "%s: checkpoint descriptor area block number\t: %" PRIu64 "\n",
 		 function,
-		 container_superblock->metadata_area_block_number );
+		 container_superblock->checkpoint_descriptor_area_block_number );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->unknown7,
+		 ( (fsapfs_container_superblock_t *) data )->checkpoint_data_area_block_number,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown7 block number\t\t\t: %" PRIu64 "\n",
+		 "%s: checkpoint data area block number\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -574,7 +592,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown8,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown8\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown8\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -582,7 +600,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown9,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown9\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown9\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -590,7 +608,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown10,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown10\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown10\t\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
@@ -598,7 +616,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown11,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown11\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown11\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -606,7 +624,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown12,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown12\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown12\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -614,22 +632,22 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown13,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown13\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown13\t\t\t\t\t: %" PRIu32 "\n",
 		 function,
 		 value_32bit );
 
 		libcnotify_printf(
-		 "%s: space manager object identifier\t: %" PRIu64 "\n",
+		 "%s: space manager object identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 container_superblock->space_manager_object_identifier );
 
 		libcnotify_printf(
-		 "%s: object map block number\t\t: %" PRIu64 "\n",
+		 "%s: object map block number\t\t\t: %" PRIu64 "\n",
 		 function,
 		 container_superblock->object_map_block_number );
 
 		libcnotify_printf(
-		 "%s: reaper object identifier\t\t: %" PRIu64 "\n",
+		 "%s: reaper object identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 container_superblock->reaper_object_identifier );
 
@@ -637,12 +655,12 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown17,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown17\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown17\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
 		libcnotify_printf(
-		 "%s: maximum number of volumes\t\t: %" PRIu32 "\n",
+		 "%s: maximum number of volumes\t\t\t: %" PRIu32 "\n",
 		 function,
 		 maximum_number_of_volumes );
 
@@ -653,25 +671,34 @@ int libfsapfs_container_superblock_read_data(
 			if( container_superblock->volume_object_identifiers[ object_identifier_index ] != 0 )
 			{
 				libcnotify_printf(
-				 "%s: volume object identifier: %d\t\t: %" PRIu64 "\n",
+				 "%s: volume object identifier: %d\t\t\t: %" PRIu64 "\n",
 				 function,
 				 object_identifier_index,
 				 container_superblock->volume_object_identifiers[ object_identifier_index ] );
 			}
 		}
-		libcnotify_printf(
-		 "%s: unknown19:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_container_superblock_t *) data )->unknown19,
-		 256,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		for( counter_index = 0;
+		     counter_index < 32;
+		     counter_index++ )
+		{
+			byte_stream_copy_to_uint64_little_endian(
+			 &( ( (fsapfs_container_superblock_t *) data )->counters[ counter_index * 8 ] ),
+			 value_64bit );
 
+			if( value_64bit != 0 )
+			{
+				libcnotify_printf(
+				 "%s: counter: %02d\t\t\t\t\t: 0x%08" PRIx64 "\n",
+				 function,
+				 counter_index,
+				 value_64bit );
+			}
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_container_superblock_t *) data )->unknown20,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown20\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown20\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -679,7 +706,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown21,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown21\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown21\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -687,7 +714,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown22,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown22\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown22\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -695,7 +722,7 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown23,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown23\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown23\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -703,33 +730,35 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown24,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown24\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown24\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->unknown25,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown25\t\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
+		if( libfsapfs_debug_print_guid_value(
+		     function,
+		     "Fusion set identifier\t\t\t\t",
+		     ( (fsapfs_container_superblock_t *) data )->fusion_set_identifier,
+		     16,
+		     LIBFGUID_ENDIAN_BIG,
+		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print UUID value.",
+			 function );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->unknown26,
-		 value_64bit );
+			return( -1 );
+		}
 		libcnotify_printf(
-		 "%s: unknown26\t\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: key bag block number\t\t\t: %" PRIu64 "\n",
+		 "%s: key bag block number\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 container_superblock->key_bag_block_number );
 
 		libcnotify_printf(
-		 "%s: key bag number of blocks\t\t: %" PRIu64 "\n",
+		 "%s: key bag number of blocks\t\t\t: %" PRIu64 "\n",
 		 function,
 		 container_superblock->key_bag_number_of_blocks );
 
@@ -745,23 +774,20 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown30,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown30\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown30\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->unknown31,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown31\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: Fusion middle tree block number\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 container_superblock->fusion_middle_tree_block_number );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_container_superblock_t *) data )->unknown32,
+		 ( (fsapfs_container_superblock_t *) data )->fusion_write_back_cache_object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown32\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: Fusion write-back cache object identifier\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -769,7 +795,15 @@ int libfsapfs_container_superblock_read_data(
 		 ( (fsapfs_container_superblock_t *) data )->unknown33,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown33\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: unknown33\t\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_container_superblock_t *) data )->unknown34,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown34\t\t\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -807,7 +841,7 @@ int libfsapfs_container_superblock_read_data(
 
 		return( -1 );
 	}
-	if( ( incompatible_features_flags & 0x0000000000000001 ) != 0 )
+	if( ( container_superblock->incompatible_features_flags & 0x0000000000000001 ) != 0 )
 	{
 		libcerror_error_set(
 		 error,
@@ -830,15 +864,26 @@ int libfsapfs_container_superblock_read_data(
 
 		return( -1 );
 	}
-	if( container_superblock->metadata_area_block_number == 0 )
+	if( ( container_superblock->checkpoint_descriptor_area_number_of_blocks & 0x80000000UL ) != 0 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported metadata area block number: %" PRIu32 ".",
+		 "%s: unsupported checkpoint descriptor area number of blocks - MSB is set.",
+		 function );
+
+		return( -1 );
+	}
+	if( container_superblock->checkpoint_descriptor_area_block_number == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+		 "%s: unsupported checkpoint descriptor area block number: %" PRIu32 ".",
 		 function,
-		 container_superblock->metadata_area_block_number );
+		 container_superblock->checkpoint_descriptor_area_block_number );
 
 		return( -1 );
 	}

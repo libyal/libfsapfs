@@ -216,16 +216,23 @@ See section: <<object_map,Object map>>
 See section: <<volume_superblock,Volume superblock>>
 | 0x0000000e | OBJECT_TYPE_FS | File system tree +
 See section: <<file_system,File system>>
-| 0x0000000f | OBJECT_TYPE_BLOCKREFTREE | [yellow-background]*Unknown (Block reference tree)*
-| 0x00000010 | OBJECT_TYPE_SNAPMETATREE | [yellow-background]*Unknown (Snapshot metadata tree)*
-| 0x00000011 | OBJECT_TYPE_NX_REAPER | Reaper
-| 0x00000012 | OBJECT_TYPE_NX_REAP_LIST | Reaper list
+| 0x0000000f | OBJECT_TYPE_BLOCKREFTREE | Extent-reference tree +
+See section: <<extent_reference_tree,Extent reference tree>>
+| 0x00000010 | OBJECT_TYPE_SNAPMETATREE | Snapshot metadata tree +
+See section: <<snapshot_metadata_tree,Snapshot metadata tree>>
+| 0x00000011 | OBJECT_TYPE_NX_REAPER | Reaper +
+See section: <<reaper,Reaper>>
+| 0x00000012 | OBJECT_TYPE_NX_REAP_LIST | Reaper list +
+See section: <<reaper_list,Reaper list>>
 | 0x00000013 | OBJECT_TYPE_OMAP_SNAPSHOT | Object map snapshot
 | 0x00000014 | OBJECT_TYPE_EFI_JUMPSTART | EFI jumpstart +
 See section: <<efi_jumpstart,EFI jumpstart>>
-| 0x00000015 | OBJECT_TYPE_FUSION_MIDDLE_TREE | [yellow-background]*Unknown (Fusion middle tree?)*
-| 0x00000016 | OBJECT_TYPE_NX_FUSION_WBC | [yellow-background]*Unknown (Fusion WBC?)*
-| 0x00000017 | OBJECT_TYPE_NX_FUSION_WBC_LIST | [yellow-background]*Unknown (Fusion WBC list?)*
+| 0x00000015 | OBJECT_TYPE_FUSION_MIDDLE_TREE | Fusion middle tree +
+See section: <<fusion_middle_tree,Fusion middle tree>>
+| 0x00000016 | OBJECT_TYPE_NX_FUSION_WBC | Fusion write-back cache +
+See section: <<fusion_write_back_cache,Fusion write-back cache>>
+| 0x00000017 | OBJECT_TYPE_NX_FUSION_WBC_LIST | Fusion write-back cache list +
+See section: <<fusion_write_back_cache,Fusion write-back cache>>
 | 0x00000018 | OBJECT_TYPE_ER_STATE | [yellow-background]*Unknown (ER state?)*
 | 0x00000019 | OBJECT_TYPE_GBITMAP | [yellow-background]*Unknown (G Bitmap?)*
 | 0x0000001a | OBJECT_TYPE_GBITMAP_TREE | [yellow-background]*Unknown (G Bitmap tree?)*
@@ -453,7 +460,7 @@ dependent on the size of the container. `[HANSEN17]` indicates:
 The container consists of:
 
 * current container superblock
-* stored in the container metadata area:
+* stored in the container checkpoint descriptor area:
 ** current checkpoint map
 ** previous checkpoint map(s)
 ** previous container superblock(s)
@@ -494,63 +501,64 @@ See section: <<container_incompatible_feature_flags,Container incompatible featu
 Contains a UUID stored in big-endian
 | 88 | 8 | | Next (available) object identifier (nx_next_oid)
 | 96 | 8 | | Next (available) transaction identifier (nx_next_xid)
-| 104 | 4 | | Metadata area number of blocks (nx_xp_desc_blocks) +
-Contains size, in the number of blocks, of the metadata area
-| 108 | 4 | | [yellow-background]*Number of ??? blocks (nx_xp_data_blocks)* +
-Contains size, in the number of blocks, of the ??? B-tree
-| 112 | 8 | | Metadata area block number (nx_xp_desc_base) +
-Contains the block number relative to the start of the container of the metadata area
-| 120 | 8 | | [yellow-background]*??? block number (nx_xp_data_base)* +
-Contains the block number relative to the start of the container of the ??? B-tree
-| 128 | 4 | | [yellow-background]*Unknown (nx_xp_desc_next)*
-| 132 | 4 | | [yellow-background]*Unknown (nx_xp_data_next)*
-| 136 | 4 | | [yellow-background]*Unknown (nx_xp_desc_index)*
-| 140 | 4 | | [yellow-background]*Unknown (nx_xp_desc_len)*
-| 144 | 4 | | [yellow-background]*Unknown (nx_xp_data_index)*
-| 148 | 4 | | [yellow-background]*Unknown (nx_xp_data_len)*
+| 104 | 4 | | Checkpoint descriptor area number of blocks (nx_xp_desc_blocks) +
+Contains size, in the number of blocks, of the checkpoint descriptor area and the MSB is a flag
+| 108 | 4 | | Checkpoint data area number of blocks (nx_xp_data_blocks) +
+Contains size, in the number of blocks, of the checkpoint data area and the MSB is a flag
+| 112 | 8 | | Checkpoint descriptor area block number (nx_xp_desc_base) +
+Contains the block number relative to the start of the container of the checkpoint descriptor area if the MSB of nx_xp_desc_blocks is not set otherwise the value contains the physical object identifier of a checkpoint descriptor area B-tree
+| 120 | 8 | | Checkpoint data area block number (nx_xp_data_base) +
+Contains the block number relative to the start of the container of the checkpoint data area if the MSB of nx_xp_data_blocks is not set
+| 128 | 4 | | Next available index in the checkpoint descriptor area (nx_xp_desc_next)
+| 132 | 4 | | Next available index in the checkpoint data area (nx_xp_data_next)
+| 136 | 4 | | Start index in the checkpoint descriptor area used by the superblock (nx_xp_desc_index)
+| 140 | 4 | | Number of blocks in the checkpoint descriptor area used by the superblock (nx_xp_desc_len)
+| 144 | 4 | | Start index in the checkpoint data area used by the superblock (nx_xp_data_index)
+| 148 | 4 | | Number of blocks in the checkpoint data area used by the superblock (nx_xp_data_len)
 | 152 | 8 | | Space manager object identifier (nx_spaceman_oid) +
-Contains a object identifier that can be resolved in the checkpoint map
+Contains a object identifier that can be resolved in the <<checkpoint_map,checkpoint map>>
 | 160 | 8 | | Object map block number (nx_omap_oid) +
 Contains a block number relative to the start of the container of the <<object_map,object map>>
 | 168 | 8 | | Reaper object identifier (nx_reaper_oid) +
-Contains a object identifier that can be resolved in the checkpoint map
+Contains a object identifier that can be resolved in the <<checkpoint_map,checkpoint map>>
 | 176 | 4 | | [yellow-background]*Unknown (nx_test_type)*
 | 180 | 4 | | Maxmum number of volumes (nx_max_file_systems) +
 Contains the maximum number of volumes supported by the container
 | 184 | 100 x 8 = 800 | | Array of volume object identifiers (nx_fs_oid) +
 The object identifiers can be resolved in the <<object_map,object map>> to a "physical" location
-| 984 | 32 x 8 = 256 | | [yellow-background]*Unknown (nx_counters)*
+| 984 | 32 x 8 = 256 | | Counters (nx_counters) +
+See section: <<container_counters,Container counters>>
 4+| _Unknown (nx_blocked_out_prange)_
 | 1240 | 8 | | [yellow-background]*Unknown (nx_blocked_out_base)*
 | 1248 | 8 | | [yellow-background]*Unknown (nx_blocked_out_blocks)*
 4+|
 | 1254 | 8 | | [yellow-background]*Unknown (nx_evict_mapping_tree_oid)*
-| 1262 | 8 | | [yellow-background]*Unknown (nx_flags)* +
+| 1262 | 8 | | Container flags (nx_flags) +
 See section: <<container_flags,Container flags>>
-| 1270 | 8 | | [yellow-background]*Unknown (nx_efi_jumpstart)* +
+| 1270 | 8 | | EFI jumpstart (physical) object identifier (nx_efi_jumpstart) +
 Contains a block number relative to the start of the container of the <<efi_jumpstart,EFI jumpstart>>
-| 1278 | 16 | | [yellow-background]*Unknown (nx_fusion_uuid)*
+| 1278 | 16 | | Fusion set identifier (nx_fusion_uuid) +
+Contains a UUID stored in big-endian
 4+| _Unknown (nx_keylocker)_
 | 1294 | 8 | | Container key bag data block number (nx_keybag_base) +
 Contains a block number relative to the start of the container of the <<key_bag,Key bag>>
 | 1302 | 8 | | Contaner key bag data number of blocks (nx_keybag_blocks)
 4+|
-| 1310 | 4 x 8 = 40 | | [yellow-background]*Unknown (nx_ephemeral_info)*
-| 1342 | 8 | | [yellow-background]*Unknown (nx_test_oid)*
-| 1350 | 8 | | [yellow-background]*Unknown (nx_fusion_mt_oid)*
-| 1358 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_oid)*
+| 1310 | 4 x 8 = 32 | | [yellow-background]*Unknown (nx_ephemeral_info)*
+| 1342 | 8 | | [yellow-background]*Unknown (Test object identifier) (nx_test_oid)*
+| 1350 | 8 | | Fusion middle tree block number  (nx_fusion_mt_oid) +
+Contains a block number relative to the start of the container of the <<fusion_middle_tree,Fusion middle tree>>
+| 1358 | 8 | | Fusion write-back cache state object identifier (nx_fusion_wbc_oid) +
+Contains a object identifier that can be resolved in the <<checkpoint_map,checkpoint map>>
 4+| _Unknown (nx_fusion_wbc)_
-| 1366 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_base)*
-| 1374 | 8 | | [yellow-background]*Unknown (nx_fusion_wbc_blocks)*
+| 1366 | 8 | | Start block of the Fusion write-back cache area (nx_fusion_wbc_base)
+| 1374 | 8 | | Number of blocks of the Fusion write-back cache area (nx_fusion_wbc_blocks)
 4+|
 |===
 
 [NOTE]
 Presumably NXSB is an abbreviation of NX superblock. At this point it is
 unclear what NX stands for.
-
-[NOTE]
-`[APPLE18]` refers to the metadata area as checkpoint description area.
 
 ==== [[container_flags]]Container flags
 
@@ -590,15 +598,33 @@ Current no read-only feature flags are defined
 According to `[APPLE18]` the pre-release version 1 and release version 2 are
 incompatble.
 
+==== [[container_counters]]Container counters
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0 | NX_CNTR_OBJ_CKSUM_SET| Number of times a checksum has been calculated when wrting to disk
+| 1 | NX_CNTR_OBJ_CKSUM_FAIL| Number of checksum errors when reading from disk
+|===
+
+[NOTE]
+The other 30 counters are presumed to be unused at this point.
+
 ==== Notes
 
 ....
-Counter indexes
-NX_CNTR_OBJ_CKSUM_SET = 0,
-NX_CNTR_OBJ_CKSUM_FAIL = 1,
+checkpoint descriptor area B-tree
+The treeʼs keys are block offsets into the checkpoint descriptor area, and its
+values are instances of prange_t that contain the fragmentʼs size and location.
 ....
 
-=== Checkpoint map
+....
+checkpoint data area B-tree
+The treeʼs keys are block offsets into the checkpoint data area, and its values are instances of
+prange_t that contain the fragmentʼs size and location.
+....
+
+=== [[checkpoint_map]]Checkpoint map
 
 The checkpoint map contains a mapping between container metadata object
 identifiers and their location in the volume.
@@ -979,7 +1005,7 @@ The chunk information entry (chunk_info_t) is 32 bytes of size and consists of:
 | 24 | 8 | | [yellow-background]*Unknown (ci_bitmap_addr)*
 |===
 
-=== Reaper
+=== [[reaper]]Reaper
 
 The reaper is [yellow-background]*unknown* of size and consists of:
 
@@ -1010,7 +1036,7 @@ See section: <<object_types,Object types>>
 | | 4 | | [yellow-background]*Unknown*
 |===
 
-==== Reaper list
+==== [[reaper_list]]Reaper list
 
 The reaper list entry is [yellow-background]*unknown* of size and consists of:
 
@@ -1314,15 +1340,17 @@ Signed integer that contains the number of nanoseconds since January 1, 1970 00:
 See section: <<encryption_state,Encryption state>>
 | 116 | 4 | | File system root tree object type (apfs_root_tree_type) +
 See section: <<object_types,Object types>>
-| 120 | 4 | | [yellow-background]*Unknown (apfs_extentref_tree_type)* +
+| 120 | 4 | | Extent-reference tree object type (apfs_extentref_tree_type) +
 See section: <<object_types,Object types>>
 | 124 | 4 | | Snapshot metadata tree object type (apfs_snap_meta_tree_type) +
 See section: <<object_types,Object types>>
 | 132 | 8 | | Object map block number (apfs_omap_oid) +
 Contains a block number relative to the start of the container of the <<object_map,object map>>
 | 140 | 8 | | File system root tree object identifier (apfs_root_tree_oid)
-| 148 | 8 | | [yellow-background]*Unknown (apfs_extentref_tree_oid)*
-| 156 | 8 | | [yellow-background]*Unknown (apfs_snap_meta_tree_oid)*
+| 148 | 8 | | Extent-reference tree block number (apfs_extentref_tree_oid) +
+See section: <<extent_reference_tree,Extent reference tree>>
+| 156 | 8 | | Snapshot metadata tree block number (apfs_snap_meta_tree_oid) +
+See section: <<snapshot_metadata_tree,Snapshot metadata tree>>
 | 164 | 8 | | [yellow-background]*Unknown (apfs_revert_to_xid)*
 | 172 | 8 | | [yellow-background]*Unknown (apfs_revert_to_sblock_oid)*
 | 180 | 8 | | Next (available) file system object identifier (apfs_next_obj_id)
@@ -1338,7 +1366,7 @@ Contains a UUID stored in big-endian
 | 260 | 8 | | Modification date and time (apfs_last_mod_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 268 | 8 | | Volume flags (apfs_fs_flags) +
-<<volume_superblock_flags,Volume superblock flags>>
+See section: <<volume_superblock_flags,Volume superblock flags>>
 | 276 | 40 | | Creation change information (apfs_formatted_by) +
 See section: <<change_information,Change information>>
 | 316 | 8 x 40 | | Modification change information (apfs_modified_by) +
@@ -2425,6 +2453,57 @@ The EFI jumpstart extent (prange_t) is 16 bytes of size and consists of:
 | Offset | Size | Value | Description
 | 0 | 8 | | Block number
 | 8 | 8 | | Number of blocks
+|===
+
+== [[extent_reference_tree]]Extent-reference tree
+
+[yellow-background]*TODO: complete this section.*
+
+== Snapshots
+
+[yellow-background]*TODO: complete this section.*
+
+=== [[snapshot_metadata_tree]]Snapshot metadata tree
+
+[yellow-background]*TODO: complete this section.*
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object header_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object transaction identifier (xid)
+| 24 | 4 | 0x40000002 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000010 | Object subtype
+4+| _Object values_
+| ... | ... | | [yellow-background]*Unknown*
+|===
+
+== Fusion drives
+
+A Fusion drive consists of a main SSD and a tier2 magnetic disk that together
+form one logical APFS container.
+
+=== [[fusion_middle_tree]]Fusion middle tree
+
+[yellow-background]*TODO: complete this section.*
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+4+| _Object header_
+| 0 | 8 | | Object checksum +
+See section: <<object_checksum,Object checkum>>
+| 8 | 8 | | Object identifier
+| 16 | 8 | | Object transaction identifier (xid)
+| 24 | 4 | 0x40000002 | Object type +
+See section: <<object_types,Object types>>
+| 28 | 4 | 0x00000015 | Object subtype
+4+| _Object values_
+| ... | ... | | [yellow-background]*Unknown*
 |===
 
 == Notes

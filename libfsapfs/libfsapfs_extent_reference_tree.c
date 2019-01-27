@@ -1,5 +1,5 @@
 /*
- * The object map functions
+ * The extent reference tree functions
  *
  * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -27,66 +27,66 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
-#include "libfsapfs_object_map.h"
+#include "libfsapfs_extent_reference_tree.h"
 
-#include "fsapfs_object_map.h"
+#include "fsapfs_extent_reference_tree.h"
 
-/* Creates a object map
- * Make sure the value object_map is referencing, is set to NULL
+/* Creates a extent reference tree
+ * Make sure the value extent_reference_tree is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_object_map_initialize(
-     libfsapfs_object_map_t **object_map,
+int libfsapfs_extent_reference_tree_initialize(
+     libfsapfs_extent_reference_tree_t **extent_reference_tree,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_object_map_initialize";
+	static char *function = "libfsapfs_extent_reference_tree_initialize";
 
-	if( object_map == NULL )
+	if( extent_reference_tree == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid object map.",
+		 "%s: invalid extent reference tree.",
 		 function );
 
 		return( -1 );
 	}
-	if( *object_map != NULL )
+	if( *extent_reference_tree != NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid object map value already set.",
+		 "%s: invalid extent reference tree value already set.",
 		 function );
 
 		return( -1 );
 	}
-	*object_map = memory_allocate_structure(
-	               libfsapfs_object_map_t );
+	*extent_reference_tree = memory_allocate_structure(
+	                          libfsapfs_extent_reference_tree_t );
 
-	if( *object_map == NULL )
+	if( *extent_reference_tree == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create object map.",
+		 "%s: unable to create extent reference tree.",
 		 function );
 
 		goto on_error;
 	}
 	if( memory_set(
-	     *object_map,
+	     *extent_reference_tree,
 	     0,
-	     sizeof( libfsapfs_object_map_t ) ) == NULL )
+	     sizeof( libfsapfs_extent_reference_tree_t ) ) == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_MEMORY,
 		 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-		 "%s: unable to clear object map.",
+		 "%s: unable to clear extent reference tree.",
 		 function );
 
 		goto on_error;
@@ -94,67 +94,67 @@ int libfsapfs_object_map_initialize(
 	return( 1 );
 
 on_error:
-	if( *object_map != NULL )
+	if( *extent_reference_tree != NULL )
 	{
 		memory_free(
-		 *object_map );
+		 *extent_reference_tree );
 
-		*object_map = NULL;
+		*extent_reference_tree = NULL;
 	}
 	return( -1 );
 }
 
-/* Frees a object map
+/* Frees a extent reference tree
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_object_map_free(
-     libfsapfs_object_map_t **object_map,
+int libfsapfs_extent_reference_tree_free(
+     libfsapfs_extent_reference_tree_t **extent_reference_tree,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_object_map_free";
+	static char *function = "libfsapfs_extent_reference_tree_free";
 
-	if( object_map == NULL )
+	if( extent_reference_tree == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid object map.",
+		 "%s: invalid extent reference tree.",
 		 function );
 
 		return( -1 );
 	}
-	if( *object_map != NULL )
+	if( *extent_reference_tree != NULL )
 	{
 		memory_free(
-		 *object_map );
+		 *extent_reference_tree );
 
-		*object_map = NULL;
+		*extent_reference_tree = NULL;
 	}
 	return( 1 );
 }
 
-/* Reads the object map
+/* Reads the extent reference tree
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_object_map_read_file_io_handle(
-     libfsapfs_object_map_t *object_map,
+int libfsapfs_extent_reference_tree_read_file_io_handle(
+     libfsapfs_extent_reference_tree_t *extent_reference_tree,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
      libcerror_error_t **error )
 {
-	fsapfs_object_map_t object_map_data;
+	uint8_t extent_reference_tree_data[ 4096 ];
 
-	static char *function = "libfsapfs_object_map_read_file_io_handle";
+	static char *function = "libfsapfs_extent_reference_tree_read_file_io_handle";
 	ssize_t read_count    = 0;
 
-	if( object_map == NULL )
+	if( extent_reference_tree == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid object map.",
+		 "%s: invalid extent reference tree.",
 		 function );
 
 		return( -1 );
@@ -163,7 +163,7 @@ int libfsapfs_object_map_read_file_io_handle(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: reading object map at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
+		 "%s: reading extent reference tree at offset: %" PRIi64 " (0x%08" PRIx64 ")\n",
 		 function,
 		 file_offset,
 		 file_offset );
@@ -179,7 +179,7 @@ int libfsapfs_object_map_read_file_io_handle(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_SEEK_FAILED,
-		 "%s: unable to seek object map offset: %" PRIi64 " (0x%08" PRIx64 ").",
+		 "%s: unable to seek extent reference tree offset: %" PRIi64 " (0x%08" PRIx64 ").",
 		 function,
 		 file_offset,
 		 file_offset );
@@ -188,32 +188,32 @@ int libfsapfs_object_map_read_file_io_handle(
 	}
 	read_count = libbfio_handle_read_buffer(
 	              file_io_handle,
-	              (uint8_t *) &object_map_data,
-	              sizeof( fsapfs_object_map_t ),
+	              extent_reference_tree_data,
+	              4096,
 	              error );
 
-	if( read_count != (ssize_t) sizeof( fsapfs_object_map_t ) )
+	if( read_count != (ssize_t) 4096 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read object map data.",
+		 "%s: unable to read extent reference tree data.",
 		 function );
 
 		return( -1 );
 	}
-	if( libfsapfs_object_map_read_data(
-	     object_map,
-	     (uint8_t *) &object_map_data,
-	     sizeof( fsapfs_object_map_t ),
+	if( libfsapfs_extent_reference_tree_read_data(
+	     extent_reference_tree,
+	     extent_reference_tree_data,
+	     4096,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_IO,
 		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read object map data.",
+		 "%s: unable to read extent reference tree data.",
 		 function );
 
 		return( -1 );
@@ -221,16 +221,16 @@ int libfsapfs_object_map_read_file_io_handle(
 	return( 1 );
 }
 
-/* Reads the object map
+/* Reads the extent reference tree
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_object_map_read_data(
-     libfsapfs_object_map_t *object_map,
+int libfsapfs_extent_reference_tree_read_data(
+     libfsapfs_extent_reference_tree_t *extent_reference_tree,
      const uint8_t *data,
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function   = "libfsapfs_object_map_read_data";
+	static char *function   = "libfsapfs_extent_reference_tree_read_data";
 	uint32_t object_subtype = 0;
 	uint32_t object_type    = 0;
 
@@ -239,13 +239,13 @@ int libfsapfs_object_map_read_data(
 	uint32_t value_32bit    = 0;
 #endif
 
-	if( object_map == NULL )
+	if( extent_reference_tree == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid object map.",
+		 "%s: invalid extent reference tree.",
 		 function );
 
 		return( -1 );
@@ -261,7 +261,7 @@ int libfsapfs_object_map_read_data(
 
 		return( -1 );
 	}
-	if( ( data_size < sizeof( fsapfs_object_map_t ) )
+	if( ( data_size < sizeof( fsapfs_extent_reference_tree_t ) )
 	 || ( data_size > (size_t) SSIZE_MAX ) )
 	{
 		libcerror_error_set(
@@ -277,19 +277,19 @@ int libfsapfs_object_map_read_data(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: object map data:\n",
+		 "%s: extent reference tree data:\n",
 		 function );
 		libcnotify_print_data(
 		 data,
-		 sizeof( fsapfs_object_map_t ),
+		 data_size,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_object_map_t *) data )->object_type,
+	 ( (fsapfs_extent_reference_tree_t *) data )->object_type,
 	 object_type );
 
-	if( object_type != 0x4000000bUL )
+	if( object_type != 0x40000002UL )
 	{
 		libcerror_error_set(
 		 error,
@@ -302,10 +302,10 @@ int libfsapfs_object_map_read_data(
 		return( -1 );
 	}
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_object_map_t *) data )->object_subtype,
+	 ( (fsapfs_extent_reference_tree_t *) data )->object_subtype,
 	 object_subtype );
 
-	if( object_subtype != 0x00000000UL )
+	if( object_subtype != 0x0000000fUL )
 	{
 		libcerror_error_set(
 		 error,
@@ -317,117 +317,50 @@ int libfsapfs_object_map_read_data(
 
 		return( -1 );
 	}
-	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_object_map_t *) data )->number_of_snapshots,
-	 object_map->number_of_snapshots );
-
-	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsapfs_object_map_t *) data )->btree_block_number,
-	 object_map->btree_block_number );
-
-	byte_stream_copy_to_uint64_little_endian(
-	 ( (fsapfs_object_map_t *) data )->snapshots_btree_block_number,
-	 object_map->snapshots_btree_block_number );
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_map_t *) data )->object_checksum,
+		 ( (fsapfs_extent_reference_tree_t *) data )->object_checksum,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object checksum\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: object checksum\t\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_map_t *) data )->object_identifier,
+		 ( (fsapfs_extent_reference_tree_t *) data )->object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_map_t *) data )->object_transaction_identifier,
+		 ( (fsapfs_extent_reference_tree_t *) data )->object_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
+		 "%s: object transaction identifier\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: object type\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object type\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_type );
 
 		libcnotify_printf(
-		 "%s: object subtype\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object subtype\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_subtype );
 
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_object_map_t *) data )->flags,
+		 ( (fsapfs_extent_reference_tree_t *) data )->unknown1,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: flags\t\t\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown1\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
-
-		libcnotify_printf(
-		 "%s: number of snapshots\t\t\t: %" PRIu32 "\n",
-		 function,
-		 object_map->number_of_snapshots );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_object_map_t *) data )->btree_type,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: B-tree type\t\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_object_map_t *) data )->snaphots_btree_type,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: snapshots B-tree type\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
-
-		libcnotify_printf(
-		 "%s: B-tree block number\t\t\t: %" PRIu64 "\n",
-		 function,
-		 object_map->btree_block_number );
-
-		libcnotify_printf(
-		 "%s: snapshots B-tree block number\t\t: %" PRIu64 "\n",
-		 function,
-		 object_map->snapshots_btree_block_number );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_map_t *) data )->unknown1,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown1\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_map_t *) data )->unknown2,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown2\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_map_t *) data )->unknown3,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown3\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
 
 		libcnotify_printf(
 		 "\n" );
