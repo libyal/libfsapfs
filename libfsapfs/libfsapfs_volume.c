@@ -45,6 +45,7 @@
 #include "libfsapfs_object_map.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
+#include "libfsapfs_snapshot_metadata.h"
 #include "libfsapfs_snapshot_metadata_tree.h"
 #include "libfsapfs_volume.h"
 #include "libfsapfs_volume_key_bag.h"
@@ -1529,6 +1530,9 @@ int libfsapfs_internal_volume_open_read(
 	{
 		if( libfsapfs_snapshot_metadata_tree_initialize(
 		     &( internal_volume->snapshot_metadata_tree ),
+		     internal_volume->io_handle,
+		     internal_volume->container_data_block_vector,
+		     internal_volume->superblock->snapshot_metadata_tree_block_number,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1540,22 +1544,23 @@ int libfsapfs_internal_volume_open_read(
 
 			goto on_error;
 		}
-		file_offset = internal_volume->superblock->snapshot_metadata_tree_block_number * internal_volume->io_handle->block_size;
+/* TODO free snapshot metadata */
+		libfsapfs_snapshot_metadata_t *snapshot_metadata = NULL;
 
-		if( libfsapfs_snapshot_metadata_tree_read_file_io_handle(
+		if( libfsapfs_snapshot_metadata_tree_get_metadata_by_object_identifier(
 		     internal_volume->snapshot_metadata_tree,
-		     file_io_handle,
-		     file_offset,
-		     error ) != 1 )
+		     internal_volume->file_io_handle,
+		     10000,
+		     &snapshot_metadata,
+		     error ) == -1 )
 		{
 			libcerror_error_set(
 			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read snapshot metadata tree at offset: %" PRIi64 " (0x%08" PRIx64 ").",
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve snapshot metadata for object identifier: %" PRIu64 ".",
 			 function,
-			 file_offset,
-			 file_offset );
+			 10000 );
 
 			goto on_error;
 		}

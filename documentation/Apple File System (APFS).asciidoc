@@ -2465,7 +2465,14 @@ The EFI jumpstart extent (prange_t) is 16 bytes of size and consists of:
 
 === [[snapshot_metadata_tree]]Snapshot metadata tree
 
-[yellow-background]*TODO: complete this section.*
+The snapshot metadata tree consists of:
+
+* snapshot metadata tree (object)
+* snapshot metadata B-tree
+
+=== Snapshot metadata tree object
+
+The snapshot metadata tree object is 32 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2475,11 +2482,76 @@ The EFI jumpstart extent (prange_t) is 16 bytes of size and consists of:
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
-| 24 | 4 | 0x40000002 | Object type +
+| 24 | 4 | 0x40000002 +
+0x40000003 | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000010 | Object subtype
-4+| _Object values_
-| ... | ... | | [yellow-background]*Unknown*
+|===
+
+=== Snapshot metadata B-tree
+
+The object map values are stored in <<btree,B-tree>>.
+
+==== Snapshot metadata B-tree key
+
+The snapshot metadata B-tree key (j_snap_metadata_key_t) is 8 bytes of size
+and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Key object identifier (hdr)
+|===
+
+==== Snapshot metadata B-tree branch node value
+
+An snapshot metadata B-tree node contains branch node values if BTNODE_LEAF is
+not set. The corresponding inapshot metadata B-tree key represents the first
+key in the branch.
+
+An napshot metadata B-tree branch node value is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Sub node block number +
+Contains a block number relative to the start of the container
+|===
+
+==== Snapshot metadata value
+
+A snapshot metadata B-tree node contains snapshot metadata values if
+BTNODE_LEAF is set.
+
+The snapshot metadata value (j_snap_metadata_val_t) is variable of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Extent-reference tree object identifier
+| 8 | 8 | | Volume superblock object identifier
+| 16 | 8 | | Creation time +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
+| 24 | 8 | | Change (or last modification) time +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
+| 32 | 8 | | [yellow-background]*Unknown (inum)*
+| 40 | 4 | | Extent-reference tree object type (extentref_tree_type) +
+See section: <<object_types,Object types>>
+| 44 | 4 | | Flags +
+See section: <<snapshot_metadata_flags,Snapshot metadata flags>>
+| 48 | 2 | | Name string size (name_len) +
+Includes the size of the end-of-string character
+| 50 | ... | | Name string (name) +
+Contains an UTF-8 encoded string with an end-of-string character
+|===
+
+==== [[snapshot_metadata_flags]]Snapshot metadata flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | SNAP_META_PENDING_DATALESS | [yellow-background]*Unknown*
 |===
 
 == Fusion drives

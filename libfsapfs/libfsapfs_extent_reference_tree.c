@@ -332,7 +332,7 @@ int libfsapfs_extent_reference_tree_read_data(
 		 ( (fsapfs_extent_reference_tree_t *) data )->object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object identifier\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -345,7 +345,7 @@ int libfsapfs_extent_reference_tree_read_data(
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: object type\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: object type\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 object_type );
 
@@ -358,7 +358,7 @@ int libfsapfs_extent_reference_tree_read_data(
 		 ( (fsapfs_extent_reference_tree_t *) data )->unknown1,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: unknown1\t\t\t: 0x%08" PRIx32 "\n",
+		 "%s: unknown1\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 

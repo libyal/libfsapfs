@@ -36,7 +36,7 @@ libfsapfs_la_SOURCES = \
 	fsapfs_key_bag.h \
 	fsapfs_object.h \
 	fsapfs_object_map.h \
-	fsapfs_snapshot_metadata_tree.h \
+	fsapfs_snapshot_metadata.h \
 	fsapfs_space_manager.h \
 	fsapfs_volume_superblock.h \
 	libfsapfs.c \
@@ -101,6 +101,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_object_map_descriptor.c libfsapfs_object_map_descriptor.h \
 	libfsapfs_password.c libfsapfs_password.h \
 	libfsapfs_profiler.c libfsapfs_profiler.h \
+	libfsapfs_snapshot_metadata.c libfsapfs_snapshot_metadata.h \
 	libfsapfs_snapshot_metadata_tree.c libfsapfs_snapshot_metadata_tree.h \
 	libfsapfs_space_manager.c libfsapfs_space_manager.h \
 	libfsapfs_support.c libfsapfs_support.h \

@@ -25,8 +25,14 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_btree_entry.h"
+#include "libfsapfs_btree_node.h"
+#include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libfcache.h"
+#include "libfsapfs_libfdata.h"
+#include "libfsapfs_snapshot_metadata.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -36,29 +42,72 @@ typedef struct libfsapfs_snapshot_metadata_tree libfsapfs_snapshot_metadata_tree
 
 struct libfsapfs_snapshot_metadata_tree
 {
-	/* Dummy
+	/* The IO handle
 	 */
-	int dummy;
+	libfsapfs_io_handle_t *io_handle;
+
+	/* Data block vector
+	 */
+	libfdata_vector_t *data_block_vector;
+
+	/* Data block cache
+	 */
+	libfcache_cache_t *data_block_cache;
+
+	/* The node cache
+	 */
+	libfcache_cache_t *node_cache;
+
+	/* Block number of B-tree root node
+	 */
+	uint64_t root_node_block_number;
 };
 
 int libfsapfs_snapshot_metadata_tree_initialize(
      libfsapfs_snapshot_metadata_tree_t **snapshot_metadata_tree,
+     libfsapfs_io_handle_t *io_handle,
+     libfdata_vector_t *data_block_vector,
+     uint64_t root_node_block_number,
      libcerror_error_t **error );
 
 int libfsapfs_snapshot_metadata_tree_free(
      libfsapfs_snapshot_metadata_tree_t **snapshot_metadata_tree,
      libcerror_error_t **error );
 
-int libfsapfs_snapshot_metadata_tree_read_file_io_handle(
+int libfsapfs_snapshot_metadata_tree_get_root_node(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
      libbfio_handle_t *file_io_handle,
-     off64_t file_offset,
+     uint64_t root_node_block_number,
+     libfsapfs_btree_node_t **root_node,
      libcerror_error_t **error );
 
-int libfsapfs_snapshot_metadata_tree_read_data(
+int libfsapfs_snapshot_metadata_tree_get_sub_node(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
-     const uint8_t *data,
-     size_t data_size,
+     libbfio_handle_t *file_io_handle,
+     uint64_t sub_node_block_number,
+     libfsapfs_btree_node_t **sub_node,
+     libcerror_error_t **error );
+
+int libfsapfs_snapshot_metadata_tree_get_entry_from_node_by_identifier(
+     libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
+     libfsapfs_btree_node_t *node,
+     uint64_t object_identifier,
+     libfsapfs_btree_entry_t **btree_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_snapshot_metadata_tree_get_entry_by_identifier(
+     libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t object_identifier,
+     libfsapfs_btree_node_t **btree_node,
+     libfsapfs_btree_entry_t **btree_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_snapshot_metadata_tree_get_metadata_by_object_identifier(
+     libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
+     libbfio_handle_t *file_io_handle,
+     uint64_t object_identifier,
+     libfsapfs_snapshot_metadata_t **metadata,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
