@@ -29,6 +29,8 @@
 
 #include "pyfsapfs_datetime.h"
 #include "pyfsapfs_error.h"
+#include "pyfsapfs_extended_attribute.h"
+#include "pyfsapfs_extended_attributes.h"
 #include "pyfsapfs_file_entries.h"
 #include "pyfsapfs_file_entry.h"
 #include "pyfsapfs_integer.h"
@@ -143,6 +145,20 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  "get_symbolic_link_target() -> Unicode string or None\n"
 	  "\n"
 	  "Returns the symbolic link target." },
+
+	{ "get_number_of_extended_attributes",
+	  (PyCFunction) pyfsapfs_file_entry_get_number_of_extended_attributes,
+	  METH_NOARGS,
+	  "get_number_of_extended_attributes() -> Integer\n"
+	  "\n"
+	  "Retrieves the number of extended attributes." },
+
+	{ "get_extended_attribute",
+	  (PyCFunction) pyfsapfs_file_entry_get_extended_attribute,
+	  METH_VARARGS | METH_KEYWORDS,
+	  "get_extended_attribute(extended_attribute_index) -> Object\n"
+	  "\n"
+	  "Retrieves the extended attribute specified by the index." },
 
 	{ "get_number_of_sub_file_entries",
 	  (PyCFunction) pyfsapfs_file_entry_get_number_of_sub_file_entries,
@@ -305,6 +321,18 @@ PyGetSetDef pyfsapfs_file_entry_object_get_set_definitions[] = {
 	  (getter) pyfsapfs_file_entry_get_symbolic_link_target,
 	  (setter) 0,
 	  "The symbolic link target.",
+	  NULL },
+
+	{ "number_of_extended_attributes",
+	  (getter) pyfsapfs_file_entry_get_number_of_extended_attributes,
+	  (setter) 0,
+	  "The number of extended attributes.",
+	  NULL },
+
+	{ "extended_attributes",
+	  (getter) pyfsapfs_file_entry_get_extended_attributes,
+	  (setter) 0,
+	  "The extended attributes.",
 	  NULL },
 
 	{ "number_of_sub_file_entries",
@@ -1553,6 +1581,225 @@ on_error:
 		 target );
 	}
 	return( NULL );
+}
+
+/* Retrieves the number of extended attributes
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_number_of_extended_attributes(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object          = NULL;
+	libcerror_error_t *error          = NULL;
+	static char *function             = "pyfsapfs_file_entry_get_number_of_extended_attributes";
+	int number_of_extended_attributes = 0;
+	int result                        = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_number_of_extended_attributes(
+	          pyfsapfs_file_entry->file_entry,
+	          &number_of_extended_attributes,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve .",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+#if PY_MAJOR_VERSION >= 3
+	integer_object = PyLong_FromLong(
+	                  (long) number_of_extended_attributes );
+#else
+	integer_object = PyInt_FromLong(
+	                  (long) number_of_extended_attributes );
+#endif
+	return( integer_object );
+}
+
+/* Retrieves a specific extended attribute by index
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_extended_attribute_by_index(
+           PyObject *pyfsapfs_file_entry,
+           int extended_attribute_index )
+{
+	PyObject *extended_attribute_object                = NULL;
+	libcerror_error_t *error                           = NULL;
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	static char *function                              = "pyfsapfs_file_entry_get_extended_attribute_by_index";
+	int result                                         = 0;
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_extended_attribute_by_index(
+	          ( (pyfsapfs_file_entry_t *) pyfsapfs_file_entry )->file_entry,
+	          extended_attribute_index,
+	          &extended_attribute,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve : %d.",
+		 function,
+		 extended_attribute_index );
+
+		libcerror_error_free(
+		 &error );
+
+		goto on_error;
+	}
+	extended_attribute_object = pyfsapfs_extended_attribute_new(
+	                             extended_attribute,
+	                             pyfsapfs_file_entry );
+
+	if( extended_attribute_object == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create extended attribute object.",
+		 function );
+
+		goto on_error;
+	}
+	return( extended_attribute_object );
+
+on_error:
+	if( extended_attribute != NULL )
+	{
+		libfsapfs_extended_attribute_free(
+		 &extended_attribute,
+		 NULL );
+	}
+	return( NULL );
+}
+
+/* Retrieves a specific extended attribute
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_extended_attribute(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments,
+           PyObject *keywords )
+{
+	PyObject *extended_attribute_object = NULL;
+	static char *keyword_list[]         = { "extended_attribute_index", NULL };
+	int extended_attribute_index        = 0;
+
+	if( PyArg_ParseTupleAndKeywords(
+	     arguments,
+	     keywords,
+	     "i",
+	     keyword_list,
+	     &extended_attribute_index ) == 0 )
+	{
+		return( NULL );
+	}
+	extended_attribute_object = pyfsapfs_file_entry_get_extended_attribute_by_index(
+	                             (PyObject *) pyfsapfs_file_entry,
+	                             extended_attribute_index );
+
+	return( extended_attribute_object );
+}
+
+/* Retrieves a sequence and iterator object for the extended attributes
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_extended_attributes(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	PyObject *sequence_object         = NULL;
+	libcerror_error_t *error          = NULL;
+	static char *function             = "pyfsapfs_file_entry_get_extended_attributes";
+	int number_of_extended_attributes = 0;
+	int result                        = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_number_of_extended_attributes(
+	          pyfsapfs_file_entry->file_entry,
+	          &number_of_extended_attributes,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve number of extended attributes.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	sequence_object = pyfsapfs_extended_attributes_new(
+	                   (PyObject *) pyfsapfs_file_entry,
+	                   &pyfsapfs_file_entry_get_extended_attribute_by_index,
+	                   number_of_extended_attributes );
+
+	if( sequence_object == NULL )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_MemoryError,
+		 "%s: unable to create sequence object.",
+		 function );
+
+		return( NULL );
+	}
+	return( sequence_object );
 }
 
 /* Retrieves the number of sub file entries

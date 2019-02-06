@@ -20,6 +20,8 @@ pyfsapfs_la_SOURCES = \
 	pyfsapfs_container.c pyfsapfs_container.h \
 	pyfsapfs_datetime.c pyfsapfs_datetime.h \
 	pyfsapfs_error.c pyfsapfs_error.h \
+	pyfsapfs_extended_attribute.c pyfsapfs_extended_attribute.h \
+	pyfsapfs_extended_attributes.c pyfsapfs_extended_attributes.h \
 	pyfsapfs_file_entries.c pyfsapfs_file_entries.h \
 	pyfsapfs_file_entry.c pyfsapfs_file_entry.h \
 	pyfsapfs_file_object_io_handle.c pyfsapfs_file_object_io_handle.h \

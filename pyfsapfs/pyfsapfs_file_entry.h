@@ -122,6 +122,23 @@ PyObject *pyfsapfs_file_entry_get_symbolic_link_target(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
+PyObject *pyfsapfs_file_entry_get_number_of_extended_attributes(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
+PyObject *pyfsapfs_file_entry_get_extended_attribute_by_index(
+           PyObject *pyfsapfs_file_entry,
+           int extended_attribute_index );
+
+PyObject *pyfsapfs_file_entry_get_extended_attribute(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments,
+           PyObject *keywords );
+
+PyObject *pyfsapfs_file_entry_get_extended_attributes(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_file_entry_get_number_of_sub_file_entries(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );

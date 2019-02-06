@@ -30,6 +30,8 @@
 #include "pyfsapfs.h"
 #include "pyfsapfs_container.h"
 #include "pyfsapfs_error.h"
+#include "pyfsapfs_extended_attribute.h"
+#include "pyfsapfs_extended_attributes.h"
 #include "pyfsapfs_file_entries.h"
 #include "pyfsapfs_file_entry.h"
 #include "pyfsapfs_file_object_io_handle.h"
@@ -555,6 +557,41 @@ PyMODINIT_FUNC initpyfsapfs(
 	 module,
 	 "container",
 	 (PyObject *) &pyfsapfs_container_type_object );
+
+	/* Setup the extended_attribute type object
+	 */
+	pyfsapfs_extended_attribute_type_object.tp_new = PyType_GenericNew;
+
+	if( PyType_Ready(
+	     &pyfsapfs_extended_attribute_type_object ) < 0 )
+	{
+		goto on_error;
+	}
+	Py_IncRef(
+	 (PyObject *) &pyfsapfs_extended_attribute_type_object );
+
+	PyModule_AddObject(
+	 module,
+	 "extended_attribute",
+	 (PyObject *) &pyfsapfs_extended_attribute_type_object );
+
+	/* Setup the extended_attributes type object
+	 */
+	pyfsapfs_extended_attributes_type_object.tp_new = PyType_GenericNew;
+
+	if( PyType_Ready(
+	     &pyfsapfs_extended_attributes_type_object ) < 0 )
+	{
+		goto on_error;
+	}
+	Py_IncRef(
+	 (PyObject *) &pyfsapfs_extended_attributes_type_object );
+
+	PyModule_AddObject(
+	 module,
+	 "extended_attributes",
+	 (PyObject *) &pyfsapfs_extended_attributes_type_object );
+
 
 	/* Setup the file_entries type object
 	 */

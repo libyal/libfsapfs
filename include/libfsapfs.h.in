@@ -910,6 +910,15 @@ int libfsapfs_extended_attribute_free(
      libfsapfs_extended_attribute_t **extended_attribute,
      libfsapfs_error_t **error );
 
+/* Retrieves the identifier
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_identifier(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     uint64_t *identifier,
+     libfsapfs_error_t **error );
+
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error
@@ -950,6 +959,55 @@ int libfsapfs_extended_attribute_get_utf16_name(
      libfsapfs_extended_attribute_t *extended_attribute,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libfsapfs_error_t **error );
+
+/* Reads data at the current offset into a buffer
+ * Returns the number of bytes read or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_extended_attribute_read_buffer(
+         libfsapfs_extended_attribute_t *extended_attribute,
+         void *buffer,
+         size_t buffer_size,
+         libfsapfs_error_t **error );
+
+/* Reads data at a specific offset
+ * Returns the number of bytes read or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+ssize_t libfsapfs_extended_attribute_read_buffer_at_offset(
+         libfsapfs_extended_attribute_t *extended_attribute,
+         void *buffer,
+         size_t buffer_size,
+         off64_t offset,
+         libfsapfs_error_t **error );
+
+/* Seeks a certain offset
+ * Returns the offset if seek is successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+off64_t libfsapfs_extended_attribute_seek_offset(
+         libfsapfs_extended_attribute_t *extended_attribute,
+         off64_t offset,
+         int whence,
+         libfsapfs_error_t **error );
+
+/* Retrieves the current offset
+ * Returns the offset if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_offset(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     off64_t *offset,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the data stream object
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_size(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     size64_t *size,
      libfsapfs_error_t **error );
 
 #if defined( __cplusplus )

@@ -689,7 +689,7 @@ int libfsapfs_extended_attribute_get_data_stream(
      libcerror_error_t **error )
 {
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
-	static char *function                                                = "libfsapfs_extended_attribute_get_identifier";
+	static char *function                                                = "libfsapfs_extended_attribute_get_data_stream";
 
 	if( extended_attribute == NULL )
 	{
