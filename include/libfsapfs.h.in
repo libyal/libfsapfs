@@ -787,6 +787,48 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
      libfsapfs_extended_attribute_t **extended_attribute,
      libfsapfs_error_t **error );
 
+/* Determines if there is an extended attribute for an UTF-8 encoded name
+ * Returns 1 if available, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_has_extended_attribute_by_utf8_name(
+     libfsapfs_file_entry_t *file_entry,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_error_t **error );
+
+/* Determines if there is an extended attribute for an UTF-16 encoded name
+ * Returns 1 if available, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_has_extended_attribute_by_utf16_name(
+     libfsapfs_file_entry_t *file_entry,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_error_t **error );
+
+/* Retrieves the extended attribute for an UTF-8 encoded name
+ * Returns 1 if successful, 0 if the file entry does not contain such value or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_extended_attribute_by_utf8_name(
+     libfsapfs_file_entry_t *file_entry,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_error_t **error );
+
+/* Retrieves the extended attribute for an UTF-16 encoded name
+ * Returns 1 if successful, 0 if the file entry does not contain such value or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_extended_attribute_by_utf16_name(
+     libfsapfs_file_entry_t *file_entry,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_error_t **error );
+
 /* Retrieves the number of sub file entries
  * Returns 1 if successful or -1 on error
  */
