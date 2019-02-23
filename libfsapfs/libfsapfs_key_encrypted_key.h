@@ -41,7 +41,7 @@ struct libfsapfs_key_encrypted_key
 
 	/* The HMAC
 	 */
-	uint8_t hmac[ 23 ];
+	uint8_t hmac[ 32 ];
 
 	/* The number of iterations
 	 */
