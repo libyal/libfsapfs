@@ -29,6 +29,7 @@ endif
 
 TESTS = \
 	test_library.sh \
+	test_manpage.sh \
 	test_fsapfsinfo.sh \
 	$(TESTS_PYFSAPFS)
 
@@ -36,6 +37,7 @@ check_SCRIPTS = \
 	pyfsapfs_test_support.py \
 	test_fsapfsinfo.sh \
 	test_library.sh \
+	test_manpage.sh \
 	test_python_module.sh \
 	test_runner.sh
 

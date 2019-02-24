@@ -1,11 +1,9 @@
-.Dd December  3, 2018
+.Dd February 24, 2019
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
 .Nm libfsapfs.h
 .Nd Library to access the Apple File System (APFS) format
-.Sh LIBRARY
-.Lb libfsapfs
 .Sh SYNOPSIS
 .In libfsapfs.h
 .Pp
@@ -15,33 +13,33 @@ Support functions
 .Ft int
 .Fn libfsapfs_get_access_flags_read "void"
 .Ft int
-.Fn libfsapfs_get_codepage "int *codepage, libfsapfs_error_t **error"
+.Fn libfsapfs_get_codepage "int *codepage" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_set_codepage "int codepage, libfsapfs_error_t **error"
+.Fn libfsapfs_set_codepage "int codepage" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_check_container_signature "const char *filename, libfsapfs_error_t **error"
+.Fn libfsapfs_check_container_signature "const char *filename" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_check_volume_signature "const char *filename, libfsapfs_error_t **error"
+.Fn libfsapfs_check_volume_signature "const char *filename" "libfsapfs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
-.Fn libfsapfs_check_container_signature_wide "const wchar_t *filename, libfsapfs_error_t **error"
+.Fn libfsapfs_check_container_signature_wide "const wchar_t *filename" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_check_volume_signature_wide "const wchar_t *filename, libfsapfs_error_t **error"
+.Fn libfsapfs_check_volume_signature_wide "const wchar_t *filename" "libfsapfs_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libfsapfs_check_container_signature_file_io_handle "libbfio_handle_t *file_io_handle, libfsapfs_error_t **error"
+.Fn libfsapfs_check_container_signature_file_io_handle "libbfio_handle_t *file_io_handle" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_check_volume_signature_file_io_handle "libbfio_handle_t *file_io_handle, libfsapfs_error_t **error"
+.Fn libfsapfs_check_volume_signature_file_io_handle "libbfio_handle_t *file_io_handle" "libfsapfs_error_t **error"
 .Pp
 Notify functions
 .Ft void
 .Fn libfsapfs_notify_set_verbose "int verbose"
 .Ft int
-.Fn libfsapfs_notify_set_stream "FILE *stream, libfsapfs_error_t **error"
+.Fn libfsapfs_notify_set_stream "FILE *stream" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_notify_stream_open "const char *filename, libfsapfs_error_t **error"
+.Fn libfsapfs_notify_stream_open "const char *filename" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_notify_stream_close "libfsapfs_error_t **error"
 .Pp
@@ -49,171 +47,191 @@ Error functions
 .Ft void
 .Fn libfsapfs_error_free "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_error_fprint "libfsapfs_error_t *error, FILE *stream"
+.Fn libfsapfs_error_fprint "libfsapfs_error_t *error" "FILE *stream"
 .Ft int
-.Fn libfsapfs_error_sprint "libfsapfs_error_t *error, char *string, size_t size"
+.Fn libfsapfs_error_sprint "libfsapfs_error_t *error" "char *string" "size_t size"
 .Ft int
-.Fn libfsapfs_error_backtrace_fprint "libfsapfs_error_t *error, FILE *stream"
+.Fn libfsapfs_error_backtrace_fprint "libfsapfs_error_t *error" "FILE *stream"
 .Ft int
-.Fn libfsapfs_error_backtrace_sprint "libfsapfs_error_t *error, char *string, size_t size"
+.Fn libfsapfs_error_backtrace_sprint "libfsapfs_error_t *error" "char *string" "size_t size"
 .Pp
 Container functions
 .Ft int
-.Fn libfsapfs_container_initialize "libfsapfs_container_t **container, libfsapfs_error_t **error"
+.Fn libfsapfs_container_initialize "libfsapfs_container_t **container" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_free "libfsapfs_container_t **container, libfsapfs_error_t **error"
+.Fn libfsapfs_container_free "libfsapfs_container_t **container" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_signal_abort "libfsapfs_container_t *container, libfsapfs_error_t **error"
+.Fn libfsapfs_container_signal_abort "libfsapfs_container_t *container" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_open "libfsapfs_container_t *container, const char *filename, int access_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_container_open "libfsapfs_container_t *container" "const char *filename" "int access_flags" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_close "libfsapfs_container_t *container, libfsapfs_error_t **error"
+.Fn libfsapfs_container_close "libfsapfs_container_t *container" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_get_size "libfsapfs_container_t *container, size64_t *size, libfsapfs_error_t **error"
+.Fn libfsapfs_container_get_size "libfsapfs_container_t *container" "size64_t *size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_get_identifier "libfsapfs_container_t *container, uint8_t *uuid_data, size_t uuid_data_size, libfsapfs_error_t **error"
+.Fn libfsapfs_container_get_identifier "libfsapfs_container_t *container" "uint8_t *uuid_data" "size_t uuid_data_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_get_number_of_volumes "libfsapfs_container_t *container, int *number_of_volumes, libfsapfs_error_t **error"
+.Fn libfsapfs_container_get_number_of_volumes "libfsapfs_container_t *container" "int *number_of_volumes" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_container_get_volume_by_index "libfsapfs_container_t *container, int volume_index, libfsapfs_volume_t **volume, libfsapfs_error_t **error"
+.Fn libfsapfs_container_get_volume_by_index "libfsapfs_container_t *container" "int volume_index" "libfsapfs_volume_t **volume" "libfsapfs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
-.Fn libfsapfs_container_open_wide "libfsapfs_container_t *container, const wchar_t *filename, int access_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_container_open_wide "libfsapfs_container_t *container" "const wchar_t *filename" "int access_flags" "libfsapfs_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libfsapfs_container_open_file_io_handle "libfsapfs_container_t *container, libbfio_handle_t *file_io_handle, int access_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_container_open_file_io_handle "libfsapfs_container_t *container" "libbfio_handle_t *file_io_handle" "int access_flags" "libfsapfs_error_t **error"
 .Pp
 Volume functions
 .Ft int
-.Fn libfsapfs_volume_free "libfsapfs_volume_t **volume, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_free "libfsapfs_volume_t **volume" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_signal_abort "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_signal_abort "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_open "libfsapfs_volume_t *volume, const char *filename, int access_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_open "libfsapfs_volume_t *volume" "const char *filename" "int access_flags" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_close "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_close "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_unlock "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_unlock "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_size "libfsapfs_volume_t *volume, size64_t *size, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_size "libfsapfs_volume_t *volume" "size64_t *size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_identifier "libfsapfs_volume_t *volume, uint8_t *uuid_data, size_t uuid_data_size, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_identifier "libfsapfs_volume_t *volume" "uint8_t *uuid_data" "size_t uuid_data_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_utf8_name_size "libfsapfs_volume_t *volume, size_t *utf8_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_utf8_name_size "libfsapfs_volume_t *volume" "size_t *utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_utf8_name "libfsapfs_volume_t *volume, uint8_t *utf8_string, size_t utf8_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_utf8_name "libfsapfs_volume_t *volume" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_utf16_name_size "libfsapfs_volume_t *volume, size_t *utf16_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_utf16_name_size "libfsapfs_volume_t *volume" "size_t *utf16_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_utf16_name "libfsapfs_volume_t *volume, uint16_t *utf16_string, size_t utf16_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_utf16_name "libfsapfs_volume_t *volume" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_is_locked "libfsapfs_volume_t *volume, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_is_locked "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_set_utf8_password "libfsapfs_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_set_utf8_password "libfsapfs_volume_t *volume" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_set_utf16_password "libfsapfs_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_set_utf16_password "libfsapfs_volume_t *volume" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_set_utf8_recovery_password "libfsapfs_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_set_utf8_recovery_password "libfsapfs_volume_t *volume" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_set_utf16_recovery_password "libfsapfs_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_set_utf16_recovery_password "libfsapfs_volume_t *volume" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_next_file_entry_identifier "libfsapfs_volume_t *volume, uint64_t *identifier, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_next_file_entry_identifier "libfsapfs_volume_t *volume" "uint64_t *identifier" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_file_entry_by_identifier "libfsapfs_volume_t *volume, uint64_t identifier, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_file_entry_by_identifier "libfsapfs_volume_t *volume" "uint64_t identifier" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_root_directory "libfsapfs_volume_t *volume, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_root_directory "libfsapfs_volume_t *volume" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_file_entry_by_utf8_path "libfsapfs_volume_t *volume, const uint8_t *utf8_string, size_t utf8_string_length, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_file_entry_by_utf8_path "libfsapfs_volume_t *volume" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_get_file_entry_by_utf16_path "libfsapfs_volume_t *volume, const uint16_t *utf16_string, size_t utf16_string_length, libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_get_file_entry_by_utf16_path "libfsapfs_volume_t *volume" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
-.Fn libfsapfs_volume_open_wide "libfsapfs_volume_t *volume, const wchar_t *filename, int access_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_open_wide "libfsapfs_volume_t *volume" "const wchar_t *filename" "int access_flags" "libfsapfs_error_t **error"
 .Pp
 Available when compiled with libbfio support:
 .Ft int
-.Fn libfsapfs_volume_open_file_io_handle "libfsapfs_volume_t *volume, libbfio_handle_t *file_io_handle, int access_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_volume_open_file_io_handle "libfsapfs_volume_t *volume" "libbfio_handle_t *file_io_handle" "int access_flags" "libfsapfs_error_t **error"
 .Pp
 File entry functions
 .Ft int
-.Fn libfsapfs_file_entry_free "libfsapfs_file_entry_t **file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_free "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_identifier "libfsapfs_file_entry_t *file_entry, uint64_t *identifier, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_identifier "libfsapfs_file_entry_t *file_entry" "uint64_t *identifier" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_parent_identifier "libfsapfs_file_entry_t *file_entry, uint64_t *parent_identifier, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_parent_identifier "libfsapfs_file_entry_t *file_entry" "uint64_t *parent_identifier" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_parent_file_entry "libfsapfs_file_entry_t *file_entry, libfsapfs_file_entry_t **parent_file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_parent_file_entry "libfsapfs_file_entry_t *file_entry" "libfsapfs_file_entry_t **parent_file_entry" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_creation_time "libfsapfs_file_entry_t *file_entry, int64_t *posix_time, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_creation_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_modification_time "libfsapfs_file_entry_t *file_entry, int64_t *posix_time, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_modification_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_inode_change_time "libfsapfs_file_entry_t *file_entry, int64_t *posix_time, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_inode_change_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_access_time "libfsapfs_file_entry_t *file_entry, int64_t *posix_time, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_access_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_owner_identifier "libfsapfs_file_entry_t *file_entry, uint32_t *owner_identifier, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_owner_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *owner_identifier" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_group_identifier "libfsapfs_file_entry_t *file_entry, uint32_t *group_identifier, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_group_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *group_identifier" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_file_mode "libfsapfs_file_entry_t *file_entry, uint16_t *file_mode, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_file_mode "libfsapfs_file_entry_t *file_entry" "uint16_t *file_mode" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf8_name_size "libfsapfs_file_entry_t *file_entry, size_t *utf8_name_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf8_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf8_name_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf8_name "libfsapfs_file_entry_t *file_entry, uint8_t *utf8_name, size_t utf8_name_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf8_name "libfsapfs_file_entry_t *file_entry" "uint8_t *utf8_name" "size_t utf8_name_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf16_name_size "libfsapfs_file_entry_t *file_entry, size_t *utf16_name_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf16_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf16_name_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf16_name "libfsapfs_file_entry_t *file_entry, uint16_t *utf16_name, size_t utf16_name_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf16_name "libfsapfs_file_entry_t *file_entry" "uint16_t *utf16_name" "size_t utf16_name_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf8_symbolic_link_target_size "libfsapfs_file_entry_t *file_entry, size_t *utf8_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf8_symbolic_link_target_size "libfsapfs_file_entry_t *file_entry" "size_t *utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf8_symbolic_link_target "libfsapfs_file_entry_t *file_entry, uint8_t *utf8_string, size_t utf8_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf8_symbolic_link_target "libfsapfs_file_entry_t *file_entry" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf16_symbolic_link_target_size "libfsapfs_file_entry_t *file_entry, size_t *utf16_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf16_symbolic_link_target_size "libfsapfs_file_entry_t *file_entry" "size_t *utf16_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf16_symbolic_link_target "libfsapfs_file_entry_t *file_entry, uint16_t *utf16_string, size_t utf16_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf16_symbolic_link_target "libfsapfs_file_entry_t *file_entry" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_number_of_extended_attributes "libfsapfs_file_entry_t *file_entry, int *number_of_extended_attributes, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_number_of_extended_attributes "libfsapfs_file_entry_t *file_entry" "int *number_of_extended_attributes" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_extended_attribute_by_index "libfsapfs_file_entry_t *file_entry, int extended_attribute_index, libfsapfs_extended_attribute_t **extended_attribute, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_extended_attribute_by_index "libfsapfs_file_entry_t *file_entry" "int extended_attribute_index" "libfsapfs_extended_attribute_t **extended_attribute" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_number_of_sub_file_entries "libfsapfs_file_entry_t *file_entry, int *number_of_sub_file_entries, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_has_extended_attribute_by_utf8_name "libfsapfs_file_entry_t *file_entry" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_sub_file_entry_by_index "libfsapfs_file_entry_t *file_entry, int sub_file_entry_index, libfsapfs_file_entry_t **sub_file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_has_extended_attribute_by_utf16_name "libfsapfs_file_entry_t *file_entry" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_sub_file_entry_by_utf8_name "libfsapfs_file_entry_t *file_entry, const uint8_t *utf8_string, size_t utf8_string_length, libfsapfs_file_entry_t **sub_file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_extended_attribute_by_utf8_name "libfsapfs_file_entry_t *file_entry" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_extended_attribute_t **extended_attribute" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_sub_file_entry_by_utf16_name "libfsapfs_file_entry_t *file_entry, const uint16_t *utf16_string, size_t utf16_string_length, libfsapfs_file_entry_t **sub_file_entry, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_extended_attribute_by_utf16_name "libfsapfs_file_entry_t *file_entry" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_extended_attribute_t **extended_attribute" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_number_of_sub_file_entries "libfsapfs_file_entry_t *file_entry" "int *number_of_sub_file_entries" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_sub_file_entry_by_index "libfsapfs_file_entry_t *file_entry" "int sub_file_entry_index" "libfsapfs_file_entry_t **sub_file_entry" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_sub_file_entry_by_utf8_name "libfsapfs_file_entry_t *file_entry" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_file_entry_t **sub_file_entry" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_sub_file_entry_by_utf16_name "libfsapfs_file_entry_t *file_entry" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_file_entry_t **sub_file_entry" "libfsapfs_error_t **error"
 .Ft ssize_t
-.Fn libfsapfs_file_entry_read_buffer "libfsapfs_file_entry_t *file_entry, void *buffer, size_t buffer_size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_read_buffer "libfsapfs_file_entry_t *file_entry" "void *buffer" "size_t buffer_size" "libfsapfs_error_t **error"
 .Ft ssize_t
-.Fn libfsapfs_file_entry_read_buffer_at_offset "libfsapfs_file_entry_t *file_entry, void *buffer, size_t buffer_size, off64_t offset, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_read_buffer_at_offset "libfsapfs_file_entry_t *file_entry" "void *buffer" "size_t buffer_size" "off64_t offset" "libfsapfs_error_t **error"
 .Ft off64_t
-.Fn libfsapfs_file_entry_seek_offset "libfsapfs_file_entry_t *file_entry, off64_t offset, int whence, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_seek_offset "libfsapfs_file_entry_t *file_entry" "off64_t offset" "int whence" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_offset "libfsapfs_file_entry_t *file_entry, off64_t *offset, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_offset "libfsapfs_file_entry_t *file_entry" "off64_t *offset" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_size "libfsapfs_file_entry_t *file_entry, size64_t *size, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_size "libfsapfs_file_entry_t *file_entry" "size64_t *size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_number_of_extents "libfsapfs_file_entry_t *file_entry, int *number_of_extents, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_number_of_extents "libfsapfs_file_entry_t *file_entry" "int *number_of_extents" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_extent_by_index "libfsapfs_file_entry_t *file_entry, int extent_index, off64_t *extent_offset, size64_t *extent_size, uint32_t *extent_flags, libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_extent_by_index "libfsapfs_file_entry_t *file_entry" "int extent_index" "off64_t *extent_offset" "size64_t *extent_size" "uint32_t *extent_flags" "libfsapfs_error_t **error"
 .Pp
 Extended attribute functions
 .Ft int
-.Fn libfsapfs_extended_attribute_free "libfsapfs_extended_attribute_t **extended_attribute, libfsapfs_error_t **error"
+.Fn libfsapfs_extended_attribute_free "libfsapfs_extended_attribute_t **extended_attribute" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_extended_attribute_get_utf8_name_size "libfsapfs_extended_attribute_t *extended_attribute, size_t *utf8_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_extended_attribute_get_identifier "libfsapfs_extended_attribute_t *extended_attribute" "uint64_t *identifier" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_extended_attribute_get_utf8_name "libfsapfs_extended_attribute_t *extended_attribute, uint8_t *utf8_string, size_t utf8_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_extended_attribute_get_utf8_name_size "libfsapfs_extended_attribute_t *extended_attribute" "size_t *utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_extended_attribute_get_utf16_name_size "libfsapfs_extended_attribute_t *extended_attribute, size_t *utf16_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_extended_attribute_get_utf8_name "libfsapfs_extended_attribute_t *extended_attribute" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_extended_attribute_get_utf16_name "libfsapfs_extended_attribute_t *extended_attribute, uint16_t *utf16_string, size_t utf16_string_size, libfsapfs_error_t **error"
+.Fn libfsapfs_extended_attribute_get_utf16_name_size "libfsapfs_extended_attribute_t *extended_attribute" "size_t *utf16_string_size" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_extended_attribute_get_utf16_name "libfsapfs_extended_attribute_t *extended_attribute" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsapfs_error_t **error"
+.Ft ssize_t
+.Fn libfsapfs_extended_attribute_read_buffer "libfsapfs_extended_attribute_t *extended_attribute" "void *buffer" "size_t buffer_size" "libfsapfs_error_t **error"
+.Ft ssize_t
+.Fn libfsapfs_extended_attribute_read_buffer_at_offset "libfsapfs_extended_attribute_t *extended_attribute" "void *buffer" "size_t buffer_size" "off64_t offset" "libfsapfs_error_t **error"
+.Ft off64_t
+.Fn libfsapfs_extended_attribute_seek_offset "libfsapfs_extended_attribute_t *extended_attribute" "off64_t offset" "int whence" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_extended_attribute_get_offset "libfsapfs_extended_attribute_t *extended_attribute" "off64_t *offset" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_extended_attribute_get_size "libfsapfs_extended_attribute_t *extended_attribute" "size64_t *size" "libfsapfs_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libfsapfs_get_version
@@ -226,8 +244,8 @@ None
 .Sh FILES
 None
 .Sh NOTES
-libfsapfs allows to be compiled with wide character support (wchar_t).
-
+libfsapfs can be compiled with wide character support (wchar_t).
+.sp
 To compile libfsapfs with wide character support use:
 .Ar ./configure --enable-wide-character-type=yes
  or define:
@@ -235,7 +253,7 @@ To compile libfsapfs with wide character support use:
  or
 .Ar UNICODE
  during compilation.
-
+.sp
 .Ar LIBFSAPFS_WIDE_CHARACTER_TYPE
  in libfsapfs/features.h can be used to determine if libfsapfs was compiled with wide character support.
 .Sh BUGS
@@ -244,7 +262,7 @@ Please report bugs of any kind on the project issue tracker: https://github.com/
 These man pages are generated from "libfsapfs.h".
 .Sh COPYRIGHT
 Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>.
-
+.sp
 This is free software; see the source for copying conditions.
 There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 .Sh SEE ALSO
