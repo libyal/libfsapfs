@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests man pages.
 #
-# Version: 20190224
+# Version: 20190302
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -18,11 +18,24 @@ run_test()
 	LC_ALL=en_US.UTF-8 MANROFFSEQ='' MANWIDTH=80 man --warnings -E UTF-8 -l -Tutf8 -Z ${INPUT_FILE} > /dev/null 2> ${TMPDIR}/${TEST_NAME}.warnings;
 	RESULT=$?;
 
-	if test ${RESULT} -ne ${EXIT_SUCCESS} || test -s ${TMPDIR}/${TEST_NAME}.warnings;
+	# For now line break warnings are ignored.
+	if test -f ${TMPDIR}/${TEST_NAME}.warnings;
+	then
+		sed "/can't break line/ d" -i ${TMPDIR}/${TEST_NAME}.warnings;
+	fi
+	if test -s ${TMPDIR}/${TEST_NAME}.warnings;
+	then
+		RESULT=${EXIT_FAILURE};
+	fi
+	if test ${RESULT} -ne ${EXIT_SUCCESS};
 	then
 		echo " (FAIL)";
 	else
 		echo " (PASS)";
+	fi
+	if test -s ${TMPDIR}/${TEST_NAME}.warnings;
+	then
+		cat ${TMPDIR}/${TEST_NAME}.warnings;
 	fi
 	return ${RESULT};
 }

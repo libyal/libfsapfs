@@ -217,6 +217,11 @@ int libfsapfs_compressed_data_handle_free(
 			memory_free(
 			 ( *data_handle )->compressed_segment_data );
 		}
+		if( ( *data_handle )->compressed_block_offsets != NULL )
+		{
+			memory_free(
+			 ( *data_handle )->compressed_block_offsets );
+		}
 		memory_free(
 		 *data_handle );
 

@@ -1125,7 +1125,7 @@ int libfsapfs_volume_superblock_get_volume_identifier(
      size_t uuid_data_size,
      libcerror_error_t **error )
 {
-	static char *function = "libfsapfs_volume_superblokc_get_volume_identifier";
+	static char *function = "libfsapfs_volume_superblock_get_volume_identifier";
 
 	if( volume_superblock == NULL )
 	{

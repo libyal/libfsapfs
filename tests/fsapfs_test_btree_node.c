@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <file_stream.h>
 #include <types.h>
 
@@ -960,6 +961,34 @@ int fsapfs_test_btree_node_read_object_data(
 	libcerror_error_free(
 	 &error );
 
+	/* Test invalid object type
+	 */
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_btree_node_data1[ 24 ] ),
+	 0xffffffffUL );
+
+	result = libfsapfs_btree_node_read_object_data(
+	          btree_node,
+	          fsapfs_test_btree_node_data1,
+	          32,
+	          &error );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_btree_node_data1[ 24 ] ),
+	 0x00000002UL );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 	/* Clean up
 	 */
 	result = libfsapfs_btree_node_free(
@@ -1357,7 +1386,6 @@ on_error:
 		 NULL );
 	}
 #endif
-
 	return( EXIT_FAILURE );
 }
 

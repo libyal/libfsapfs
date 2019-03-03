@@ -20,6 +20,7 @@
  */
 
 #include <common.h>
+#include <byte_stream.h>
 #include <file_stream.h>
 #include <types.h>
 
@@ -307,7 +308,7 @@ int fsapfs_test_checkpoint_map_initialize(
 	int result                                 = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests            = 1;
+	int number_of_malloc_fail_tests            = 2;
 	int number_of_memset_fail_tests            = 1;
 	int test_number                            = 0;
 #endif
@@ -884,6 +885,118 @@ int fsapfs_test_checkpoint_map_read_data(
 	libcerror_error_free(
 	 &error );
 
+	/* Test invalid object type
+	 */
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 24 ] ),
+	 0xffffffffUL );
+
+	result = libfsapfs_checkpoint_map_read_data(
+	          checkpoint_map,
+	          fsapfs_test_checkpoint_map_data1,
+	          4096,
+	          &error );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 24 ] ),
+	 0x4000000cUL );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Test invalid object sub type
+	 */
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 28 ] ),
+	 0xffffffffUL );
+
+	result = libfsapfs_checkpoint_map_read_data(
+	          checkpoint_map,
+	          fsapfs_test_checkpoint_map_data1,
+	          4096,
+	          &error );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 28 ] ),
+	 0x00000000UL );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Test invalid checksum
+	 */
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 0 ] ),
+	 0xffffffffUL );
+
+	result = libfsapfs_checkpoint_map_read_data(
+	          checkpoint_map,
+	          fsapfs_test_checkpoint_map_data1,
+	          4096,
+	          &error );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 0 ] ),
+	 0x3f61b296UL );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Test invalid number of entries
+	 */
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 36 ] ),
+	 0xffffffffUL );
+
+	result = libfsapfs_checkpoint_map_read_data(
+	          checkpoint_map,
+	          fsapfs_test_checkpoint_map_data1,
+	          4096,
+	          &error );
+
+	byte_stream_copy_from_uint32_little_endian(
+	 &( fsapfs_test_checkpoint_map_data1[ 36 ] ),
+	 0x00000002UL );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 	/* Clean up
 	 */
 	result = libfsapfs_checkpoint_map_free(
@@ -920,6 +1033,102 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the libfsapfs_checkpoint_map_get_physical_address_by_object_identifier function
+ * Returns 1 if successful or 0 if not
+ */
+int fsapfs_checkpoint_map_get_physical_address_by_object_identifier(
+     libfsapfs_checkpoint_map_t *checkpoint_map )
+{
+	libcerror_error_t *error  = NULL;
+	uint64_t physical_address = 0;
+	int result                = 0;
+
+	/* Test regular cases
+	 */
+	result = libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
+	          checkpoint_map,
+	          0,
+	          &physical_address,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
+	          checkpoint_map,
+	          1024,
+	          &physical_address,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_EQUAL_UINT64(
+	 "physical_address",
+	 physical_address,
+	 (uint64_t) 9 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
+	          NULL,
+	          0,
+	          &physical_address,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_checkpoint_map_get_physical_address_by_object_identifier(
+	          checkpoint_map,
+	          0,
+	          NULL,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	return( 1 );
+
+on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 /* The main program
@@ -934,6 +1143,13 @@ int main(
      char * const argv[] FSAPFS_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
+	libcerror_error_t *error                   = NULL;
+	int result                                 = 0;
+
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+	libfsapfs_checkpoint_map_t *checkpoint_map = NULL;
+#endif
+
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argc )
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argv )
 
@@ -955,13 +1171,86 @@ int main(
 	 "libfsapfs_checkpoint_map_read_data",
 	 fsapfs_test_checkpoint_map_read_data );
 
-/* TODO add tests for libfsapfs_checkpoint_map_get_physical_address_by_object_identifier */
+#if !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 )
+
+	/* Initialize test
+	 */
+	result = libfsapfs_checkpoint_map_initialize(
+	          &checkpoint_map,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "checkpoint_map",
+	 checkpoint_map );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_checkpoint_map_read_data(
+	          checkpoint_map,
+	          fsapfs_test_checkpoint_map_data1,
+	          4096,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	FSAPFS_TEST_RUN_WITH_ARGS(
+	 "libfsapfs_checkpoint_map_get_physical_address_by_object_identifier",
+	 fsapfs_checkpoint_map_get_physical_address_by_object_identifier,
+	 checkpoint_map );
+
+	/* Clean up
+	 */
+	result = libfsapfs_checkpoint_map_free(
+		  &checkpoint_map,
+		  &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "checkpoint_map",
+	 checkpoint_map );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+#endif /* !defined( __BORLANDC__ ) || ( __BORLANDC__ >= 0x0560 ) */
 
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
 on_error:
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+	if( checkpoint_map != NULL )
+	{
+		libfsapfs_checkpoint_map_free(
+		 &checkpoint_map,
+		 NULL );
+	}
+#endif
 	return( EXIT_FAILURE );
 }
 
