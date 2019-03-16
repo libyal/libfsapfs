@@ -1,6 +1,6 @@
 dnl Functions for Python bindings
 dnl
-dnl Version: 20170830
+dnl Version: 20190316
 
 dnl Function to check if the python binary is available
 dnl "python${PYTHON_VERSION} python python# python#.#"
@@ -8,17 +8,13 @@ AC_DEFUN([AX_PROG_PYTHON],
   [AS_IF(
     [test "x${PYTHON_VERSION}" != x],
     [ax_python_progs="python${PYTHON_VERSION}"],
-    [ax_python_progs="python python2 python2.7 python2.6 python2.5 python3 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0"])
+    [ax_python_progs="python python2 python2.7 python2.6 python2.5 python3 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0"])
   AC_CHECK_PROGS(
     [PYTHON],
     [$ax_python_progs])
   AS_IF(
     [test "x${PYTHON}" != x],
     [ax_prog_python_version=`${PYTHON} -c "import sys; sys.stdout.write(sys.version[[:3]])" 2>/dev/null`;
-    AC_SUBST(
-      [PYTHON_VERSION],
-      [$ax_prog_python_version])
-
     ax_prog_python_platform=`${PYTHON} -c "import sys; sys.stdout.write(sys.platform)" 2>/dev/null`;
     AC_SUBST(
       [PYTHON_PLATFORM],
@@ -62,7 +58,7 @@ AC_DEFUN([AX_PROG_PYTHON2],
 dnl Function to check if the python3 binary is available
 dnl "python3 python3.#"
 AC_DEFUN([AX_PROG_PYTHON3],
-  [ax_python3_progs="python3 python3.4 python3.3 python3.2 python3.1 python3.0"
+  [ax_python3_progs="python3 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0"
   AC_CHECK_PROGS(
     [PYTHON3],
     [$ax_python3_progs])
@@ -90,10 +86,16 @@ dnl Function to check if the python-config binary is available
 dnl "python${PYTHON_VERSION}-config python-config"
 AC_DEFUN([AX_PROG_PYTHON_CONFIG],
   [AS_IF(
-    [test "x${PYTHON}" != x],
+    [test "x${PYTHON_CONFIG}" = x && test "x${PYTHON_VERSION}" != x],
     [AC_CHECK_PROGS(
       [PYTHON_CONFIG],
-      [python${PYTHON_VERSION}-config python-config])
+      [python${PYTHON_VERSION}-config])
+    ])
+  AS_IF(
+    [test "x${PYTHON_CONFIG}" = x],
+    [AC_CHECK_PROGS(
+      [PYTHON_CONFIG],
+      [python-config])
     ])
   AS_IF(
     [test "x${PYTHON_CONFIG}" = x],
@@ -108,7 +110,7 @@ AC_DEFUN([AX_PROG_PYTHON_CONFIG],
 dnl Function to check if the python2-config binary is available
 AC_DEFUN([AX_PROG_PYTHON2_CONFIG],
   [AS_IF(
-    [test "x${PYTHON2}" != x],
+    [test "x${PYTHON2_CONFIG}" = x],
     [AC_CHECK_PROGS(
       [PYTHON2_CONFIG],
       [python2-config])
@@ -126,7 +128,7 @@ AC_DEFUN([AX_PROG_PYTHON2_CONFIG],
 dnl Function to check if the python3-config binary is available
 AC_DEFUN([AX_PROG_PYTHON3_CONFIG],
   [AS_IF(
-    [test "x${PYTHON3}" != x],
+    [test "x${PYTHON3_CONFIG}" = x],
     [AC_CHECK_PROGS(
       [PYTHON3_CONFIG],
       [python3-config])
@@ -185,7 +187,7 @@ AC_DEFUN([AX_PYTHON_CHECK],
   AS_IF(
     [test "x${ac_cv_header_python_h}" != xyes],
     [ac_cv_enable_python=no],
-    [ac_cv_enable_python=$PYTHON_VERSION
+    [ac_cv_enable_python=${ax_prog_python_version}
     AC_SUBST(
       [PYTHON_CPPFLAGS],
       [$PYTHON_INCLUDES])

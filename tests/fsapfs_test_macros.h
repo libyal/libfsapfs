@@ -99,6 +99,13 @@
 		goto on_error; \
 	}
 
+#define FSAPFS_TEST_ASSERT_NOT_EQUAL_SSIZE( name, value, expected_value ) \
+	if( value == expected_value ) \
+	{ \
+		fprintf( stdout, "%s:%d %s (%" PRIzd ") == %" PRIzd "\n", __FILE__, __LINE__, name, value, expected_value ); \
+		goto on_error; \
+	}
+
 #define FSAPFS_TEST_ASSERT_EQUAL_INT8( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \

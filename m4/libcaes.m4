@@ -1,6 +1,6 @@
 dnl Checks for libcaes required headers and functions
 dnl
-dnl Version: 20190102
+dnl Version: 20190308
 
 dnl Function to detect if libcaes is available
 dnl ac_libcaes_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -8,7 +8,8 @@ AC_DEFUN([AX_LIBCAES_CHECK_LIB],
   [AS_IF(
     [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_libcaes" = xno],
     [ac_cv_libcaes=no],
-    [dnl Check if the directory provided as parameter exists
+    [ac_cv_libcaes=check
+    dnl Check if the directory provided as parameter exists
     AS_IF(
       [test "x$ac_cv_with_libcaes" != x && test "x$ac_cv_with_libcaes" != xauto-detect],
       [AS_IF(
@@ -19,7 +20,7 @@ AC_DEFUN([AX_LIBCAES_CHECK_LIB],
           [no such directory: $ac_cv_with_libcaes],
           [1])
         ])
-        ac_cv_libcaes=check],
+      ],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],

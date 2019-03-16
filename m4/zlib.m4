@@ -1,13 +1,14 @@
 dnl Checks for zlib required headers and functions
 dnl
-dnl Version: 20181117
+dnl Version: 20190308
 
 dnl Function to detect if zlib is available
 AC_DEFUN([AX_ZLIB_CHECK_LIB],
   [AS_IF(
     [test "x$ac_cv_enable_shared_libs" = xno || test "x$ac_cv_with_zlib" = xno],
     [ac_cv_zlib=no],
-    [dnl Check if the directory provided as parameter exists
+    [ac_cv_zlib=check
+    dnl Check if the directory provided as parameter exists
     AS_IF(
       [test "x$ac_cv_with_zlib" != x && test "x$ac_cv_with_zlib" != xauto-detect],
       [AS_IF(
@@ -17,7 +18,8 @@ AC_DEFUN([AX_ZLIB_CHECK_LIB],
         [AC_MSG_FAILURE(
           [no such directory: $ac_cv_with_zlib],
           [1])
-        ])],
+        ])
+      ],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -25,7 +27,7 @@ AC_DEFUN([AX_ZLIB_CHECK_LIB],
           [zlib],
           [zlib >= 1.2.5],
           [ac_cv_zlib=zlib],
-          [ac_cv_zlib=no])
+          [ac_cv_zlib=check])
         ])
       AS_IF(
         [test "x$ac_cv_zlib" = xzlib],
@@ -34,7 +36,7 @@ AC_DEFUN([AX_ZLIB_CHECK_LIB],
       ])
 
     AS_IF(
-      [test "x$ac_cv_zlib" = xno],
+      [test "x$ac_cv_zlib" = xcheck],
       [dnl Check for headers
       AC_CHECK_HEADERS([zlib.h])
 
