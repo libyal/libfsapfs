@@ -222,6 +222,9 @@ fsapfs_test_compressed_data_handle_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_compressed_data_handle_LDADD = \
+	@LIBFDATA_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
