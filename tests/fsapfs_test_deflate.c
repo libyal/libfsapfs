@@ -1265,6 +1265,14 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	int test_number                 = 0;
 #endif
 
+	/* Initialize test
+	 */
+        bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
+        bit_stream.byte_stream_size   = 2627;
+        bit_stream.byte_stream_offset = 0;
+        bit_stream.bit_buffer         = 0;
+        bit_stream.bit_buffer_size    = 0;
+
 	/* Test regular cases
 	 */
 
@@ -1493,6 +1501,14 @@ int fsapfs_test_deflate_decode_huffman(
 	libcerror_error_t *error        = NULL;
 	size_t uncompressed_data_offset = 0;
 	int result                      = 0;
+
+	/* Initialize test
+	 */
+        bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
+        bit_stream.byte_stream_size   = 2627;
+        bit_stream.byte_stream_offset = 0;
+        bit_stream.bit_buffer         = 0;
+        bit_stream.bit_buffer_size    = 0;
 
 	/* Test regular cases
 	 */

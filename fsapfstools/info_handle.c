@@ -908,6 +908,7 @@ int info_handle_get_volume_by_index(
      libcerror_error_t **error )
 {
 	static char *function = "info_handle_get_volume_by_index";
+	int result            = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1010,7 +1011,37 @@ int info_handle_get_volume_by_index(
 			goto on_error;
 		}
 	}
-/* TODO call unlock volume */
+	result = libfsapfs_volume_is_locked(
+	          *volume,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if volume is locked.",
+		 function );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		if( libfsapfs_volume_unlock(
+		     *volume,
+		     error ) != 0 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to unlock volume.",
+			 function );
+
+			goto on_error;
+		}
+	}
 	return( 1 );
 
 on_error:
