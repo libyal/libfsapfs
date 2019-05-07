@@ -1030,7 +1030,7 @@ int info_handle_get_volume_by_index(
 	{
 		if( libfsapfs_volume_unlock(
 		     *volume,
-		     error ) != 0 )
+		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
