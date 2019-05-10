@@ -1030,7 +1030,7 @@ int info_handle_get_volume_by_index(
 	{
 		if( libfsapfs_volume_unlock(
 		     *volume,
-		     error ) != 1 )
+		     error ) == -1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -3276,6 +3276,27 @@ int info_handle_volume_fprint(
 
 /* TODO print additional volume information such as size */
 
+	result = libfsapfs_volume_is_locked(
+	          volume,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if volume is locked.",
+		 function );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tIs locked\n" );
+	}
 	fprintf(
 	 info_handle->notify_stream,
 	 "\n" );

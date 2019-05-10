@@ -1013,7 +1013,7 @@ int mount_handle_get_volume_by_index(
 	{
 		if( libfsapfs_volume_unlock(
 		     *fsapfs_volume,
-		     error ) != 1 )
+		     error ) == -1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -1024,6 +1024,7 @@ int mount_handle_get_volume_by_index(
 
 			goto on_error;
 		}
+		mount_handle->is_locked = result;
 	}
 	return( 1 );
 
