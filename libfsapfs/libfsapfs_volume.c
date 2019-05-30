@@ -998,6 +998,23 @@ int libfsapfs_volume_close(
 			result = -1;
 		}
 	}
+	if( internal_volume->snapshots != NULL )
+	{
+		if( libcdata_array_free(
+		     &( internal_volume->snapshots ),
+		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_snapshot_metadata_free,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free snapshots array.",
+			 function );
+
+			result = -1;
+		}
+	}
 	if( internal_volume->key_bag != NULL )
 	{
 		if( libfsapfs_volume_key_bag_free(
@@ -1526,12 +1543,27 @@ int libfsapfs_internal_volume_open_read(
 			goto on_error;
 		}
 	}
+	if( libcdata_array_initialize(
+	     &( internal_volume->snapshots ),
+	     0,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create snapshots array.",
+		 function );
+
+		goto on_error;
+	}
 	if( internal_volume->superblock->snapshot_metadata_tree_block_number != 0 )
 	{
 		if( libfsapfs_snapshot_metadata_tree_initialize(
 		     &( internal_volume->snapshot_metadata_tree ),
 		     internal_volume->io_handle,
 		     internal_volume->container_data_block_vector,
+		     internal_volume->object_map_btree,
 		     internal_volume->superblock->snapshot_metadata_tree_block_number,
 		     error ) != 1 )
 		{
@@ -1544,23 +1576,18 @@ int libfsapfs_internal_volume_open_read(
 
 			goto on_error;
 		}
-/* TODO free snapshot metadata */
-		libfsapfs_snapshot_metadata_t *snapshot_metadata = NULL;
-
-		if( libfsapfs_snapshot_metadata_tree_get_metadata_by_object_identifier(
+		if( libfsapfs_snapshot_metadata_tree_get_snapshots(
 		     internal_volume->snapshot_metadata_tree,
 		     internal_volume->file_io_handle,
-		     10000,
-		     &snapshot_metadata,
+		     internal_volume->snapshots,
 		     error ) == -1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve snapshot metadata for object identifier: %" PRIu64 ".",
-			 function,
-			 10000 );
+			 "%s: unable to retrieve snapshots.",
+			 function );
 
 			goto on_error;
 		}
@@ -1660,6 +1687,13 @@ on_error:
 	{
 		libfsapfs_volume_key_bag_free(
 		 &( internal_volume->key_bag ),
+		 NULL );
+	}
+	if( internal_volume->snapshot_metadata_tree != NULL )
+	{
+		libcdata_array_free(
+		 &( internal_volume->snapshots ),
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_snapshot_metadata_free,
 		 NULL );
 	}
 	if( internal_volume->snapshot_metadata_tree != NULL )

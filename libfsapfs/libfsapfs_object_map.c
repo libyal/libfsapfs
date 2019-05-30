@@ -329,6 +329,10 @@ int libfsapfs_object_map_read_data(
 	 ( (fsapfs_object_map_t *) data )->snapshots_btree_block_number,
 	 object_map->snapshots_btree_block_number );
 
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_object_map_t *) data )->most_recent_snapshot_identifier,
+	 object_map->most_recent_snapshot_identifier );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -405,13 +409,10 @@ int libfsapfs_object_map_read_data(
 		 function,
 		 object_map->snapshots_btree_block_number );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_object_map_t *) data )->unknown1,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown1\t\t\t\t: %" PRIu64 "\n",
+		 "%s: most recent snapshot identifier\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 object_map->most_recent_snapshot_identifier );
 
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_object_map_t *) data )->unknown2,

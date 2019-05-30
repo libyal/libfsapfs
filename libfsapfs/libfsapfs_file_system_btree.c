@@ -1051,7 +1051,7 @@ int libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving B-tree entry identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+		 "%s: retrieving B-tree entry identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 		 function,
 		 identifier,
 		 data_type,
@@ -1143,7 +1143,7 @@ int libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 btree_entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -1512,7 +1512,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name
 			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
 
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -1794,7 +1794,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -2141,7 +2141,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_nam
 			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
 
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -2423,7 +2423,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -2768,7 +2768,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
 
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 btree_entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -3025,7 +3025,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -3548,7 +3548,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
 
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 btree_entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -3809,7 +3809,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -4323,7 +4323,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_leaf_node(
 			file_system_data_type = (uint8_t) ( file_system_identifier >> 60 );
 
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 btree_entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,
@@ -4581,7 +4581,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx64 " %s\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
 			 entry_index,
 			 file_system_identifier & 0x0fffffffffffffffUL,

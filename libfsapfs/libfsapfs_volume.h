@@ -33,6 +33,7 @@
 #include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_io_handle.h"
 #include "libfsapfs_libbfio.h"
+#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfdata.h"
@@ -73,6 +74,10 @@ struct libfsapfs_internal_volume
 	/* The snapshot metadata tree
 	 */
 	libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree;
+
+	/* The snapshot
+	 */
+	libcdata_array_t *snapshots;
 
 	/* The volume key bag
 	 */

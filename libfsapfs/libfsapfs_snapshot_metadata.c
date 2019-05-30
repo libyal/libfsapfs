@@ -127,6 +127,11 @@ int libfsapfs_snapshot_metadata_free(
 	}
 	if( *snapshot_metadata != NULL )
 	{
+		if( ( *snapshot_metadata )->name != NULL )
+		{
+			memory_free(
+			 ( *snapshot_metadata )->name );
+		}
 		memory_free(
 		 *snapshot_metadata );
 
@@ -204,7 +209,7 @@ int libfsapfs_snapshot_metadata_read_key_data(
 		 ( (fsapfs_snapshot_metadata_btree_key_t *) data )->object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: object identifier\t\t: %" PRIu64 "\n",
+		 "%s: object identifier\t\t: 0x%08" PRIx64 "\n",
 		 function,
 		 value_64bit );
 
@@ -226,11 +231,12 @@ int libfsapfs_snapshot_metadata_read_value_data(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_snapshot_metadata_read_value_data";
+	size_t data_offset    = 0;
+	uint16_t name_size    = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit  = 0;
 	uint32_t value_32bit  = 0;
-	uint16_t value_16bit  = 0;
 #endif
 
 	if( snapshot_metadata == NULL )
@@ -279,6 +285,10 @@ int libfsapfs_snapshot_metadata_read_value_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+	byte_stream_copy_to_uint16_little_endian(
+	 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->name_size,
+	 name_size );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -294,7 +304,7 @@ int libfsapfs_snapshot_metadata_read_value_data(
 		 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->volume_superblock_object_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: volume superblock object identifier\t\t\t: %" PRIu32 "\n",
+		 "%s: volume superblock object identifier\t: %" PRIu32 "\n",
 		 function,
 		 value_64bit );
 
@@ -315,7 +325,7 @@ int libfsapfs_snapshot_metadata_read_value_data(
 			 "%s: unable to print POSIX time value.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
@@ -334,13 +344,13 @@ int libfsapfs_snapshot_metadata_read_value_data(
 			 "%s: unable to print POSIX time value.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->extent_reference_tree_object_type,
 		 value_32bit );
 		libcnotify_printf(
-		 "%s: extent-reference tree object type\t: 0x%08" PRIx32 "\n",
+		 "%s: extent-reference tree object type\t\t: 0x%08" PRIx32 "\n",
 		 function,
 		 value_32bit );
 
@@ -352,21 +362,93 @@ int libfsapfs_snapshot_metadata_read_value_data(
 		 function,
 		 value_32bit );
 
-		byte_stream_copy_to_uint16_little_endian(
-		 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->name_size,
-		 value_16bit );
 		libcnotify_printf(
-		 "%s: name size\t\t\t\t\t: size: %" PRIu16 "\n",
+		 "%s: name size\t\t\t\t\t: %" PRIu16 "\n",
 		 function,
-		 value_16bit );
+		 name_size );
+	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-/* TODO debug print name */
+	data_offset = sizeof( fsapfs_snapshot_metadata_btree_value_t );
+
+	if( (size_t) name_size > ( data_size - data_offset ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid name size value out of bounds.",
+		 function );
+
+		goto on_error;
+	}
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: name data:\n",
+		 function );
+		libcnotify_print_data(
+		 &( data[ data_offset ] ),
+		 (size_t) name_size,
+		 0 );
+	}
+#endif
+	snapshot_metadata->name = (uint8_t *) memory_allocate(
+	                                       sizeof( uint8_t ) * name_size );
+
+	if( snapshot_metadata->name == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+		 "%s: unable to create name.",
+		 function );
+
+		goto on_error;
+	}
+	snapshot_metadata->name_size = name_size;
+
+	if( memory_copy(
+	     snapshot_metadata->name,
+	     &( data[ data_offset ] ),
+	     name_size ) == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_MEMORY,
+		 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+		 "%s: unable to copy name.",
+		 function );
+
+		goto on_error;
+	}
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: name\t\t\t\t\t: %s\n",
+		 function,
+		 snapshot_metadata->name );
 
 		libcnotify_printf(
 		 "\n" );
 	}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
+#endif
 	return( 1 );
+
+on_error:
+	if( snapshot_metadata->name != NULL )
+	{
+		memory_free(
+		 snapshot_metadata->name );
+
+		snapshot_metadata->name = NULL;
+	}
+	snapshot_metadata->name_size = 0;
+
+	return( -1 );
 }
 

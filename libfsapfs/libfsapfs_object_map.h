@@ -47,6 +47,10 @@ struct libfsapfs_object_map
 	/* The snapshots B-tree block number
 	 */
 	uint64_t snapshots_btree_block_number;
+
+	/* The most recent snapshot object identifier
+	 */
+	uint64_t most_recent_snapshot_identifier;
 };
 
 int libfsapfs_object_map_initialize(

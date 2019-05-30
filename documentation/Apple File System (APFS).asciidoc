@@ -49,6 +49,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.3 | J.B. Metz | November 2018 | Additional format information.
 | 0.0.4 | J.B. Metz | December 2018 | Additional format information.
 | 0.0.5 | J.B. Metz | January 2019 | Additional format information.
+| 0.0.6 | J.B. Metz | May 2019 | Additional format information.
 |===
 
 :numbered:
@@ -715,7 +716,7 @@ See section: <<object_map_flags,Object map flags>>
 | 44 | 4 | | Object map snapshots B-tree type (om_snapshot_tree_type)
 | 48 | 8 | | Object map B-tree object identifier (om_tree_oid)
 | 56 | 8 | | Object map snapshots B-tree object identifier (om_snapshot_tree_oid)
-| 64 | 8 | | [yellow-background]*Unknown transaction identifier (om_most_recent_snap)*
+| 64 | 8 | | Most recent snapshot object identifier (om_most_recent_snap)
 | 72 | 8 | | [yellow-background]*Unknown transaction identifier (om_pending_revert_min)*
 | 80 | 8 | | [yellow-background]*Unknown transaction identifier (om_pending_revert_max)*
 |===
@@ -2494,13 +2495,27 @@ The object map values are stored in <<btree,B-tree>>.
 
 ==== Snapshot metadata B-tree key
 
-The snapshot metadata B-tree key (j_snap_metadata_key_t) is 8 bytes of size
+The snapshot metadata B-tree key (j_snap_metadata_key_t) is variable of size
 and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Key object identifier (hdr)
+4+| _If key object identifier data type is APFS_TYPE_SNAP_NAME_
+| 8 | ... | | Snapshot name string +
+Contains an UTF-8 encoded string with an end-of-string character
+|===
+
+The key object identifier consists of:
+
+[cols="1,5",options="header"]
+|===
+| <<file_system_data_types,File system data type>> | Description
+| APFS_TYPE_SNAP_METADATA | Snapshot object identifier +
+The value contains <<snapshot_metadata_value,Snapshot metadata value>>
+| APFS_TYPE_SNAP_NAME | Snapshot name +
+The value contains a 64-bit snapshot object identifier.
 |===
 
 ==== Snapshot metadata B-tree branch node value
@@ -2518,7 +2533,7 @@ An napshot metadata B-tree branch node value is 8 bytes of size and consists of:
 Contains a block number relative to the start of the container
 |===
 
-==== Snapshot metadata value
+==== [[snapshot_metadata_value]]Snapshot metadata value
 
 A snapshot metadata B-tree node contains snapshot metadata values if
 BTNODE_LEAF is set.

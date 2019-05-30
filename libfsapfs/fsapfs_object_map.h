@@ -88,10 +88,10 @@ struct fsapfs_object_map
 	 */
 	uint8_t snapshots_btree_block_number[ 8 ];
 
-	/* Unknown
+	/* The most recent snapshot object identifier
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown1[ 8 ];
+	uint8_t most_recent_snapshot_identifier[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes

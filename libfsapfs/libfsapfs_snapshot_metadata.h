@@ -35,9 +35,13 @@ typedef struct libfsapfs_snapshot_metadata libfsapfs_snapshot_metadata_t;
 
 struct libfsapfs_snapshot_metadata
 {
-	/* Dummy
+	/* Name size
 	 */
-	int dummy;
+	uint16_t name_size;
+
+	/* Name
+	 */
+	uint8_t *name;
 };
 
 int libfsapfs_snapshot_metadata_initialize(
