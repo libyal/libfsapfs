@@ -562,6 +562,38 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_error_t **error );
 
+/* Retrieves the number of snapshots
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_number_of_snapshots(
+     libfsapfs_volume_t *volume,
+     int *number_of_snapshots,
+     libfsapfs_error_t **error );
+
+/* Retrieves a specific of snapshot
+ * The snapshot reference must be freed after use with libfsapfs_snapshot_free
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_snapshot_by_index(
+     libfsapfs_volume_t *volume,
+     int snapshot_index,
+     libfsapfs_snapshot_t **snapshot,
+     libfsapfs_error_t **error );
+
+/* -------------------------------------------------------------------------
+ * Snapshot functions
+ * ------------------------------------------------------------------------- */
+
+/* Frees a snapshot
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_free(
+     libfsapfs_snapshot_t **snapshot,
+     libfsapfs_error_t **error );
+
 /* -------------------------------------------------------------------------
  * File entry functions
  * ------------------------------------------------------------------------- */

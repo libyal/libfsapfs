@@ -410,7 +410,7 @@ int libfsapfs_object_map_read_data(
 		 object_map->snapshots_btree_block_number );
 
 		libcnotify_printf(
-		 "%s: most recent snapshot identifier\t: %" PRIu64 "\n",
+		 "%s: most recent snapshot identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 object_map->most_recent_snapshot_identifier );
 

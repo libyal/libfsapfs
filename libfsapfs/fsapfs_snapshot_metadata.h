@@ -48,7 +48,7 @@ struct fsapfs_snapshot_metadata_btree_value
 	 */
 	uint8_t extent_reference_tree_object_identifier[ 8 ];
 
-	/* The volume superblock tree object identifier
+	/* The volume superblock object identifier
 	 * Consists of 8 bytes
 	 */
 	uint8_t volume_superblock_object_identifier[ 8 ];

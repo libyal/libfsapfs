@@ -1,4 +1,4 @@
-.Dd February 24, 2019
+.Dd May 30, 2019
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -126,6 +126,10 @@ Volume functions
 .Fn libfsapfs_volume_get_file_entry_by_utf8_path "libfsapfs_volume_t *volume" "const uint8_t *utf8_string" "size_t utf8_string_length" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_get_file_entry_by_utf16_path "libfsapfs_volume_t *volume" "const uint16_t *utf16_string" "size_t utf16_string_length" "libfsapfs_file_entry_t **file_entry" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_number_of_snapshots "libfsapfs_volume_t *volume" "int *number_of_snapshots" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_volume_get_snapshot_by_index "libfsapfs_volume_t *volume" "int snapshot_index" "libfsapfs_snapshot_t **snapshot" "libfsapfs_error_t **error"
 .Pp
 Available when compiled with wide character string support:
 .Ft int
@@ -134,6 +138,10 @@ Available when compiled with wide character string support:
 Available when compiled with libbfio support:
 .Ft int
 .Fn libfsapfs_volume_open_file_io_handle "libfsapfs_volume_t *volume" "libbfio_handle_t *file_io_handle" "int access_flags" "libfsapfs_error_t **error"
+.Pp
+Snapshot functions
+.Ft int
+.Fn libfsapfs_snapshot_free "libfsapfs_snapshot_t **snapshot" "libfsapfs_error_t **error"
 .Pp
 File entry functions
 .Ft int

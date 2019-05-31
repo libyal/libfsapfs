@@ -37,12 +37,14 @@
 typedef struct libfsapfs_container {}		libfsapfs_container_t;
 typedef struct libfsapfs_extended_attribute {}	libfsapfs_extended_attribute_t;
 typedef struct libfsapfs_file_entry {}		libfsapfs_file_entry_t;
+typedef struct libfsapfs_snapshot {}		libfsapfs_snapshot_t;
 typedef struct libfsapfs_volume {}		libfsapfs_volume_t;
 
 #else
 typedef intptr_t libfsapfs_container_t;
 typedef intptr_t libfsapfs_extended_attribute_t;
 typedef intptr_t libfsapfs_file_entry_t;
+typedef intptr_t libfsapfs_snapshot_t;
 typedef intptr_t libfsapfs_volume_t;
 
 #endif /* defined( HAVE_DEBUG_OUTPUT ) && !defined( WINAPI ) */

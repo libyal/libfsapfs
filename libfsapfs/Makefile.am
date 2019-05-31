@@ -101,6 +101,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_object_map_descriptor.c libfsapfs_object_map_descriptor.h \
 	libfsapfs_password.c libfsapfs_password.h \
 	libfsapfs_profiler.c libfsapfs_profiler.h \
+	libfsapfs_snapshot.c libfsapfs_snapshot.h \
 	libfsapfs_snapshot_metadata.c libfsapfs_snapshot_metadata.h \
 	libfsapfs_snapshot_metadata_tree.c libfsapfs_snapshot_metadata_tree.h \
 	libfsapfs_space_manager.c libfsapfs_space_manager.h \

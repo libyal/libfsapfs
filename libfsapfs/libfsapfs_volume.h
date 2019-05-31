@@ -323,6 +323,19 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_number_of_snapshots(
+     libfsapfs_volume_t *volume,
+     int *number_of_snapshots,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_snapshot_by_index(
+     libfsapfs_volume_t *volume,
+     int snapshot_index,
+     libfsapfs_snapshot_t **snapshot,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

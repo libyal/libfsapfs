@@ -358,6 +358,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_snapshot.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_snapshot_metadata.c"
 				>
 			</File>
@@ -689,6 +693,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_profiler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_snapshot.h"
 				>
 			</File>
 			<File

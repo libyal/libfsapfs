@@ -45,6 +45,7 @@
 #include "libfsapfs_object_map.h"
 #include "libfsapfs_object_map_btree.h"
 #include "libfsapfs_object_map_descriptor.h"
+#include "libfsapfs_snapshot.h"
 #include "libfsapfs_snapshot_metadata.h"
 #include "libfsapfs_snapshot_metadata_tree.h"
 #include "libfsapfs_volume.h"
@@ -1543,6 +1544,8 @@ int libfsapfs_internal_volume_open_read(
 			goto on_error;
 		}
 	}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 	if( libcdata_array_initialize(
 	     &( internal_volume->snapshots ),
 	     0,
@@ -1592,8 +1595,6 @@ int libfsapfs_internal_volume_open_read(
 			goto on_error;
 		}
 	}
-#endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
 	if( internal_volume->superblock->file_system_root_object_identifier == 0 )
 	{
 		libcerror_error_set(
@@ -3925,6 +3926,284 @@ on_error:
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	libcthreads_read_write_lock_release_for_write(
+	 internal_volume->read_write_lock,
+	 NULL );
+#endif
+	return( -1 );
+}
+
+/* Retrieves the number of snapshots
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_get_number_of_snapshots(
+     libfsapfs_volume_t *volume,
+     int *number_of_snapshots,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_number_of_snapshots";
+	int result                                   = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libcdata_array_get_number_of_entries(
+	     internal_volume->snapshots,
+	     number_of_snapshots,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of entries from snapshots array.",
+		 function );
+
+		result = -1;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
+/* Retrieves a specific of snapshot
+ * The snapshot reference must be freed after use with libfsapfs_snapshot_free
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_get_snapshot_by_index(
+     libfsapfs_volume_t *volume,
+     int snapshot_index,
+     libfsapfs_snapshot_t **snapshot,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume             = NULL;
+	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
+	libfsapfs_snapshot_metadata_t *snapshot_metadata         = NULL;
+	static char *function                                    = "libfsapfs_volume_get_snapshot_by_index";
+	off64_t file_offset                                      = 0;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+	if( snapshot == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid snapshot.",
+		 function );
+
+		return( -1 );
+	}
+	if( *snapshot != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid snapshot value already set.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( libcdata_array_get_entry_by_index(
+	     internal_volume->snapshots,
+	     snapshot_index,
+	     (intptr_t **) &snapshot_metadata,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve snapshot metadata: %d.",
+		 function,
+		 snapshot_index );
+
+		return( -1 );
+	}
+	if( snapshot_metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid snapshot metadata: %d.",
+		 function,
+		 snapshot_index );
+
+		goto on_error;
+	}
+	if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
+	     internal_volume->object_map_btree,
+	     internal_volume->file_io_handle,
+	     snapshot_metadata->volume_superblock_object_identifier,
+	     &object_map_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve object map descriptor for volume superblock object identifier: %" PRIu64 ".",
+		 function,
+		 snapshot_metadata->volume_superblock_object_identifier );
+
+		goto on_error;
+	}
+	if( object_map_descriptor == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid object map descriptor.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_snapshot_initialize(
+	     snapshot,
+	     internal_volume->io_handle,
+	     internal_volume->file_io_handle,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create snapshot.",
+		 function );
+
+		goto on_error;
+	}
+	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_volume->io_handle->block_size );
+
+	if( libfsapfs_object_map_descriptor_free(
+	     &object_map_descriptor,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free object map descriptor.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_internal_snapshot_open_read(
+	     (libfsapfs_internal_snapshot_t *) *snapshot,
+	     internal_volume->file_io_handle,
+	     file_offset,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_IO,
+		 LIBCERROR_IO_ERROR_OPEN_FAILED,
+		 "%s: unable to open snapshot: %d.",
+		 function,
+		 snapshot_index );
+
+		goto on_error;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+
+on_error:
+	if( object_map_descriptor != NULL )
+	{
+		libfsapfs_object_map_descriptor_free(
+		 &object_map_descriptor,
+		 NULL );
+	}
+	if( *snapshot != NULL )
+	{
+		libfsapfs_snapshot_free(
+		 snapshot,
+		 NULL );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	libcthreads_read_write_lock_release_for_read(
 	 internal_volume->read_write_lock,
 	 NULL );
 #endif

@@ -1,5 +1,5 @@
 /*
- * The snapshot metadata functions
+ * Snapshot functions
  *
  * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,58 +19,62 @@
  * along with this software.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_SNAPSHOT_METADATA_H )
-#define _LIBFSAPFS_SNAPSHOT_METADATA_H
+#if !defined( _LIBFSAPFS_SNAPSHOT_H )
+#define _LIBFSAPFS_SNAPSHOT_H
 
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_extern.h"
+#include "libfsapfs_io_handle.h"
+#include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcthreads.h"
+#include "libfsapfs_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-typedef struct libfsapfs_snapshot_metadata libfsapfs_snapshot_metadata_t;
+typedef struct libfsapfs_internal_snapshot libfsapfs_internal_snapshot_t;
 
-struct libfsapfs_snapshot_metadata
+struct libfsapfs_internal_snapshot
 {
-	/* Volume superblock object identifier
+	/* The IO handle
 	 */
-	uint64_t volume_superblock_object_identifier;
+	libfsapfs_io_handle_t *io_handle;
 
-	/* Name size
+	/* The file IO handle
 	 */
-	uint16_t name_size;
+	libbfio_handle_t *file_io_handle;
 
-	/* Name
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	/* The read/write lock
 	 */
-	uint8_t *name;
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
 };
 
-int libfsapfs_snapshot_metadata_initialize(
-     libfsapfs_snapshot_metadata_t **snapshot_metadata,
+int libfsapfs_snapshot_initialize(
+     libfsapfs_snapshot_t **snapshot,
+     libfsapfs_io_handle_t *io_handle,
+     libbfio_handle_t *file_io_handle,
      libcerror_error_t **error );
 
-int libfsapfs_snapshot_metadata_free(
-     libfsapfs_snapshot_metadata_t **snapshot_metadata,
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_free(
+     libfsapfs_snapshot_t **snapshot,
      libcerror_error_t **error );
 
-int libfsapfs_snapshot_metadata_read_key_data(
-     libfsapfs_snapshot_metadata_t *snapshot_metadata,
-     const uint8_t *data,
-     size_t data_size,
-     libcerror_error_t **error );
-
-int libfsapfs_snapshot_metadata_read_value_data(
-     libfsapfs_snapshot_metadata_t *snapshot_metadata,
-     const uint8_t *data,
-     size_t data_size,
+int libfsapfs_internal_snapshot_open_read(
+     libfsapfs_internal_snapshot_t *internal_snapshot,
+     libbfio_handle_t *file_io_handle,
+     off64_t file_offset,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_SNAPSHOT_METADATA_H ) */
+#endif /* !defined( _LIBFSAPFS_SNAPSHOT_H ) */
 

@@ -1,4 +1,7 @@
 TODO
+* add snapshot support
+* clean up volume interface
+
 * B-tree
 ** Validate (expected) btree level to detect loops - added maximum recursion depth for now
 * Validate checksum
@@ -15,7 +18,6 @@ TODO
 ** Container key bag?
 * Handle file size of 0, mapped file size does not support 0 ?
 * Container data handle add decryption support and use it to read container key bag?
-* add snapshot support
 
 library:
 * check if data block vector allocated size matches size of file extents

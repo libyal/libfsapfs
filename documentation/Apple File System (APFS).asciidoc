@@ -1538,7 +1538,36 @@ The object identifiers can be resolved in the <<object_map,object map>> to a "ph
 
 === [[snapshot_metadata]]Snapshot metadata
 
-[yellow-background]*TODO: complete this section.*
+The snapshot metadata value (j_snap_metadata_val_t) is variable of size and
+consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 8 | | Extent-reference tree object identifier
+| 8 | 8 | | Volume superblock object identifier
+| 16 | 8 | | Creation time +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
+| 24 | 8 | | Change (or last modification) time +
+Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
+| 32 | 8 | | [yellow-background]*Unknown (inum)*
+| 40 | 4 | | Extent-reference tree object type (extentref_tree_type) +
+See section: <<object_types,Object types>>
+| 44 | 4 | | Flags +
+See section: <<snapshot_metadata_flags,Snapshot metadata flags>>
+| 48 | 2 | | Name string size (name_len) +
+Includes the size of the end-of-string character
+| 50 | ... | | Name string (name) +
+Contains an UTF-8 encoded string with an end-of-string character
+|===
+
+==== [[snapshot_metadata_flags]]Snapshot metadata flags
+
+[cols="1,1,5",options="header"]
+|===
+| Value | Identifier | Description
+| 0x00000001 | SNAP_META_PENDING_DATALESS | [yellow-background]*Unknown*
+|===
 
 === [[extent]]Extent
 
@@ -2507,17 +2536,6 @@ and consists of:
 Contains an UTF-8 encoded string with an end-of-string character
 |===
 
-The key object identifier consists of:
-
-[cols="1,5",options="header"]
-|===
-| <<file_system_data_types,File system data type>> | Description
-| APFS_TYPE_SNAP_METADATA | Snapshot object identifier +
-The value contains <<snapshot_metadata_value,Snapshot metadata value>>
-| APFS_TYPE_SNAP_NAME | Snapshot name +
-The value contains a 64-bit snapshot object identifier.
-|===
-
 ==== Snapshot metadata B-tree branch node value
 
 An snapshot metadata B-tree node contains branch node values if BTNODE_LEAF is
@@ -2533,40 +2551,18 @@ An napshot metadata B-tree branch node value is 8 bytes of size and consists of:
 Contains a block number relative to the start of the container
 |===
 
-==== [[snapshot_metadata_value]]Snapshot metadata value
+==== Snapshot metadata B-tree leaf node value
 
-A snapshot metadata B-tree node contains snapshot metadata values if
-BTNODE_LEAF is set.
+The contents of a snapshot metadata B-tree leaf node depends on the
+<<file_system_data_types,File system data type>> of the key object identifier.
 
-The snapshot metadata value (j_snap_metadata_val_t) is variable of size and
-consists of:
-
-[cols="1,1,1,5",options="header"]
+[cols="1,5",options="header"]
 |===
-| Offset | Size | Value | Description
-| 0 | 8 | | Extent-reference tree object identifier
-| 8 | 8 | | Volume superblock object identifier
-| 16 | 8 | | Creation time +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
-| 24 | 8 | | Change (or last modification) time +
-Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
-| 32 | 8 | | [yellow-background]*Unknown (inum)*
-| 40 | 4 | | Extent-reference tree object type (extentref_tree_type) +
-See section: <<object_types,Object types>>
-| 44 | 4 | | Flags +
-See section: <<snapshot_metadata_flags,Snapshot metadata flags>>
-| 48 | 2 | | Name string size (name_len) +
-Includes the size of the end-of-string character
-| 50 | ... | | Name string (name) +
-Contains an UTF-8 encoded string with an end-of-string character
-|===
-
-==== [[snapshot_metadata_flags]]Snapshot metadata flags
-
-[cols="1,1,5",options="header"]
-|===
-| Value | Identifier | Description
-| 0x00000001 | SNAP_META_PENDING_DATALESS | [yellow-background]*Unknown*
+| Value | Description
+| APFS_TYPE_SNAP_METADATA | Snapshot object identifier +
+The value contains <<snapshot_metadata,Snapshot metadata>>
+| APFS_TYPE_SNAP_NAME | Snapshot name +
+The value contains a 64-bit snapshot object identifier.
 |===
 
 == Fusion drives

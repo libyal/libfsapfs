@@ -1623,9 +1623,9 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_leaf_node(
 			  snapshot_metadata_data_type ) );
 		}
 #endif
-		if( snapshot_metadata_data_type != LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_SNAPSHOT_METADATA )
+		if( snapshot_metadata_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_SNAPSHOT_METADATA )
 		{
-			continue;
+			break;
 		}
 		if( libfsapfs_snapshot_metadata_initialize(
 		     &snapshot_metadata,
@@ -1720,17 +1720,14 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
 	libfsapfs_btree_entry_t *entry        = NULL;
 	libfsapfs_btree_node_t *sub_node      = NULL;
 	static char *function                 = "libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node";
+	uint64_t snapshot_metadata_identifier = 0;
 	uint64_t sub_node_block_number        = 0;
+	uint8_t snapshot_metadata_data_type   = 0;
 	int entry_index                       = 0;
 	int found_snapshot_metadata           = 0;
 	int is_leaf_node                      = 0;
 	int number_of_entries                 = 0;
 	int result                            = 0;
-
-#if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t snapshot_metadata_identifier = 0;
-	uint8_t snapshot_metadata_data_type   = 0;
-#endif
 
 	if( snapshot_metadata_tree == NULL )
 	{
@@ -1849,15 +1846,15 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
 
 			goto on_error;
 		}
+		byte_stream_copy_to_uint64_little_endian(
+		 entry->key_data,
+		 snapshot_metadata_identifier );
+
+		snapshot_metadata_data_type = (uint8_t) ( snapshot_metadata_identifier >> 60 );
+
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
-			byte_stream_copy_to_uint64_little_endian(
-			 entry->key_data,
-			 snapshot_metadata_identifier );
-
-			snapshot_metadata_data_type = (uint8_t) ( snapshot_metadata_identifier >> 60 );
-
 			libcnotify_printf(
 			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,
@@ -1868,6 +1865,10 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
 			  snapshot_metadata_data_type ) );
 		}
 #endif
+		if( snapshot_metadata_data_type > LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_SNAPSHOT_METADATA )
+		{
+			break;
+		}
 		if( libfsapfs_snapshot_metadata_tree_get_sub_node_block_number_from_entry(
 		     snapshot_metadata_tree,
 		     file_io_handle,

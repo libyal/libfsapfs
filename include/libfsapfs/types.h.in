@@ -204,6 +204,7 @@ typedef int64_t off64_t;
 typedef intptr_t libfsapfs_container_t;
 typedef intptr_t libfsapfs_extended_attribute_t;
 typedef intptr_t libfsapfs_file_entry_t;
+typedef intptr_t libfsapfs_snapshot_t;
 typedef intptr_t libfsapfs_volume_t;
 
 #ifdef __cplusplus

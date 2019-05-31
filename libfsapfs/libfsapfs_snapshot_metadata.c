@@ -285,6 +285,10 @@ int libfsapfs_snapshot_metadata_read_value_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
+	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->volume_superblock_object_identifier,
+	 snapshot_metadata->volume_superblock_object_identifier );
+
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->name_size,
 	 name_size );
@@ -300,13 +304,10 @@ int libfsapfs_snapshot_metadata_read_value_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->volume_superblock_object_identifier,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: volume superblock object identifier\t: %" PRIu32 "\n",
 		 function,
-		 value_64bit );
+		 snapshot_metadata->volume_superblock_object_identifier );
 
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
