@@ -3143,10 +3143,15 @@ int info_handle_volume_fprint(
 {
 	uint8_t uuid_data[ 16 ];
 
-	system_character_t *volume_name = NULL;
-	static char *function           = "info_handle_volume_fprint";
-	size_t volume_name_size         = 0;
-	int result                      = 0;
+	libfsapfs_snapshot_t *snapshot    = NULL;
+	system_character_t *snapshot_name = NULL;
+	system_character_t *volume_name   = NULL;
+	static char *function             = "info_handle_volume_fprint";
+	size_t snapshot_name_size         = 0;
+	size_t volume_name_size           = 0;
+	int number_of_snapshots           = 0;
+	int snapshot_index                = 0;
+	int result                        = 0;
 
 	if( info_handle == NULL )
 	{
@@ -3297,6 +3302,138 @@ int info_handle_volume_fprint(
 		 info_handle->notify_stream,
 		 "\tIs locked\n" );
 	}
+	else
+	{
+		if( libfsapfs_volume_get_number_of_snapshots(
+		     volume,
+		     &number_of_snapshots,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of snapshots.",
+			 function );
+
+			goto on_error;
+		}
+		for( snapshot_index = 0;
+		     snapshot_index < number_of_snapshots;
+		     snapshot_index++ )
+		{
+			if( libfsapfs_volume_get_snapshot_by_index(
+			     volume,
+			     snapshot_index,
+			     &snapshot,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve snapshot: %d.",
+				 function,
+				 snapshot_index );
+
+				goto on_error;
+			}
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tSnapshot: %d\t\t\t: ",
+			 snapshot_index + 1 );
+
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+			result = libfsapfs_snapshot_get_utf16_name_size(
+			          snapshot,
+			          &snapshot_name_size,
+			          error );
+#else
+			result = libfsapfs_snapshot_get_utf8_name_size(
+			          snapshot,
+			          &snapshot_name_size,
+			          error );
+#endif
+			if( result != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve snapshot name size.",
+				 function );
+
+				goto on_error;
+			}
+			if( snapshot_name_size > 0 )
+			{
+				snapshot_name = system_string_allocate(
+				                 snapshot_name_size );
+
+				if( snapshot_name == NULL )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_MEMORY,
+					 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+					 "%s: unable to create snapshot name string.",
+					 function );
+
+					goto on_error;
+				}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+				result = libfsapfs_snapshot_get_utf16_name(
+				          snapshot,
+				          (uint16_t *) snapshot_name,
+				          snapshot_name_size,
+				          error );
+#else
+				result = libfsapfs_snapshot_get_utf8_name(
+				          snapshot,
+				          (uint8_t *) snapshot_name,
+				          snapshot_name_size,
+				          error );
+#endif
+				if( result != 1 )
+				{
+					libcerror_error_set(
+					 error,
+					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+					 "%s: unable to retrieve snapshot name.",
+					 function );
+
+					goto on_error;
+				}
+				fprintf(
+				 info_handle->notify_stream,
+				 "%" PRIs_SYSTEM "",
+				 snapshot_name );
+
+				memory_free(
+				 snapshot_name );
+
+				snapshot_name = NULL;
+			}
+			fprintf(
+			 info_handle->notify_stream,
+			 "\n" );
+
+			if( libfsapfs_snapshot_free(
+			     &snapshot,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free snapshot.",
+				 function );
+
+				goto on_error;
+			}
+		}
+	}
 	fprintf(
 	 info_handle->notify_stream,
 	 "\n" );
@@ -3304,6 +3441,12 @@ int info_handle_volume_fprint(
 	return( 1 );
 
 on_error:
+	if( snapshot != NULL )
+	{
+		libfsapfs_snapshot_free(
+		 &snapshot,
+		 NULL );
+	}
 	if( volume_name != NULL )
 	{
 		memory_free(

@@ -1,6 +1,5 @@
 TODO
 * add snapshot support
-* clean up volume interface
 
 * B-tree
 ** Validate (expected) btree level to detect loops - added maximum recursion depth for now

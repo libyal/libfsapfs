@@ -28,6 +28,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
 #include "libfsapfs_libfdatetime.h"
+#include "libfsapfs_libuna.h"
 #include "libfsapfs_snapshot_metadata.h"
 
 #include "fsapfs_snapshot_metadata.h"
@@ -451,5 +452,169 @@ on_error:
 	snapshot_metadata->name_size = 0;
 
 	return( -1 );
+}
+
+/* Retrieves the size of the UTF-8 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_snapshot_metadata_get_utf8_name_size(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     size_t *utf8_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_snapshot_metadata_get_utf8_name_size";
+
+	if( snapshot_metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid snapshot metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf8_string_size_from_utf8_stream(
+	     snapshot_metadata->name,
+	     256,
+	     utf8_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 string size.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-8 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_snapshot_metadata_get_utf8_name(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_snapshot_metadata_get_utf8_name";
+
+	if( snapshot_metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid snapshot metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf8_string_copy_from_utf8_stream(
+	     utf8_string,
+	     utf8_string_size,
+	     snapshot_metadata->name,
+	     256,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-8 string.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the size of the UTF-16 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_snapshot_metadata_get_utf16_name_size(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     size_t *utf16_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_snapshot_metadata_get_utf16_name_size";
+
+	if( snapshot_metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid snapshot metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf16_string_size_from_utf8_stream(
+	     snapshot_metadata->name,
+	     256,
+	     utf16_string_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 string size.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
+}
+
+/* Retrieves the UTF-16 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_snapshot_metadata_get_utf16_name(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_snapshot_metadata_get_utf16_name";
+
+	if( snapshot_metadata == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid snapshot metadata.",
+		 function );
+
+		return( -1 );
+	}
+	if( libuna_utf16_string_copy_from_utf8_stream(
+	     utf16_string,
+	     utf16_string_size,
+	     snapshot_metadata->name,
+	     256,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve UTF-16 string.",
+		 function );
+
+		return( -1 );
+	}
+	return( 1 );
 }
 

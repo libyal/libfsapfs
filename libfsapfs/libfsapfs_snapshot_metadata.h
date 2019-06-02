@@ -68,6 +68,28 @@ int libfsapfs_snapshot_metadata_read_value_data(
      size_t data_size,
      libcerror_error_t **error );
 
+int libfsapfs_snapshot_metadata_get_utf8_name_size(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     size_t *utf8_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_snapshot_metadata_get_utf8_name(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_snapshot_metadata_get_utf16_name_size(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     size_t *utf16_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_snapshot_metadata_get_utf16_name(
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

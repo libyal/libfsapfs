@@ -1,4 +1,4 @@
-.Dd May 30, 2019
+.Dd June  2, 2019
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -87,12 +87,6 @@ Volume functions
 .Ft int
 .Fn libfsapfs_volume_free "libfsapfs_volume_t **volume" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_volume_signal_abort "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
-.Ft int
-.Fn libfsapfs_volume_open "libfsapfs_volume_t *volume" "const char *filename" "int access_flags" "libfsapfs_error_t **error"
-.Ft int
-.Fn libfsapfs_volume_close "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
-.Ft int
 .Fn libfsapfs_volume_unlock "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_get_size "libfsapfs_volume_t *volume" "size64_t *size" "libfsapfs_error_t **error"
@@ -131,17 +125,17 @@ Volume functions
 .Ft int
 .Fn libfsapfs_volume_get_snapshot_by_index "libfsapfs_volume_t *volume" "int snapshot_index" "libfsapfs_snapshot_t **snapshot" "libfsapfs_error_t **error"
 .Pp
-Available when compiled with wide character string support:
-.Ft int
-.Fn libfsapfs_volume_open_wide "libfsapfs_volume_t *volume" "const wchar_t *filename" "int access_flags" "libfsapfs_error_t **error"
-.Pp
-Available when compiled with libbfio support:
-.Ft int
-.Fn libfsapfs_volume_open_file_io_handle "libfsapfs_volume_t *volume" "libbfio_handle_t *file_io_handle" "int access_flags" "libfsapfs_error_t **error"
-.Pp
 Snapshot functions
 .Ft int
 .Fn libfsapfs_snapshot_free "libfsapfs_snapshot_t **snapshot" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_snapshot_get_utf8_name_size "libfsapfs_snapshot_t *snapshot" "size_t *utf8_string_size" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_snapshot_get_utf8_name "libfsapfs_snapshot_t *snapshot" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_snapshot_get_utf16_name_size "libfsapfs_snapshot_t *snapshot" "size_t *utf16_string_size" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_snapshot_get_utf16_name "libfsapfs_snapshot_t *snapshot" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsapfs_error_t **error"
 .Pp
 File entry functions
 .Ft int

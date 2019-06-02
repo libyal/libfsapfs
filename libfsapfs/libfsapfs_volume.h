@@ -107,14 +107,6 @@ struct libfsapfs_internal_volume
 	 */
 	libbfio_handle_t *file_io_handle;
 
-	/* Value to indicate if the file IO handle was created inside the library
-	 */
-	uint8_t file_io_handle_created_in_library;
-
-	/* Value to indicate if the file IO handle was opened inside the library
-	 */
-	uint8_t file_io_handle_opened_in_library;
-
 	/* Value to indicate if the volume is locked
 	 */
 	uint8_t is_locked;
@@ -162,45 +154,14 @@ int libfsapfs_volume_free(
      libfsapfs_volume_t **volume,
      libcerror_error_t **error );
 
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_signal_abort(
-     libfsapfs_volume_t *volume,
-     libcerror_error_t **error );
-
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_open(
-     libfsapfs_volume_t *volume,
-     const char *filename,
-     int access_flags,
-     libcerror_error_t **error );
-
-#if defined( HAVE_WIDE_CHARACTER_TYPE )
-
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_open_wide(
-     libfsapfs_volume_t *volume,
-     const wchar_t *filename,
-     int access_flags,
-     libcerror_error_t **error );
-
-#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
-
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_open_file_io_handle(
-     libfsapfs_volume_t *volume,
-     libbfio_handle_t *file_io_handle,
-     int access_flags,
-     libcerror_error_t **error );
-
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_close(
-     libfsapfs_volume_t *volume,
-     libcerror_error_t **error );
-
 int libfsapfs_internal_volume_open_read(
      libfsapfs_internal_volume_t *internal_volume,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_volume_close(
+     libfsapfs_internal_volume_t *internal_volume,
      libcerror_error_t **error );
 
 int libfsapfs_internal_volume_unlock(

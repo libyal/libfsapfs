@@ -30,7 +30,9 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcthreads.h"
+#include "libfsapfs_snapshot_metadata.h"
 #include "libfsapfs_types.h"
+#include "libfsapfs_volume_superblock.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -40,6 +42,10 @@ typedef struct libfsapfs_internal_snapshot libfsapfs_internal_snapshot_t;
 
 struct libfsapfs_internal_snapshot
 {
+	/* The volume superblock
+	 */
+	libfsapfs_volume_superblock_t *volume_superblock;
+
 	/* The IO handle
 	 */
 	libfsapfs_io_handle_t *io_handle;
@@ -47,6 +53,10 @@ struct libfsapfs_internal_snapshot
 	/* The file IO handle
 	 */
 	libbfio_handle_t *file_io_handle;
+
+	/* The snapshot metdata
+	 */
+	libfsapfs_snapshot_metadata_t *snapshot_metadata;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -59,6 +69,7 @@ int libfsapfs_snapshot_initialize(
      libfsapfs_snapshot_t **snapshot,
      libfsapfs_io_handle_t *io_handle,
      libbfio_handle_t *file_io_handle,
+     libfsapfs_snapshot_metadata_t *snapshot_metadata,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
@@ -70,6 +81,36 @@ int libfsapfs_internal_snapshot_open_read(
      libfsapfs_internal_snapshot_t *internal_snapshot,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_snapshot_close(
+     libfsapfs_internal_snapshot_t *internal_snapshot,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf8_name_size(
+     libfsapfs_snapshot_t *snapshot,
+     size_t *utf8_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf8_name(
+     libfsapfs_snapshot_t *snapshot,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf16_name_size(
+     libfsapfs_snapshot_t *snapshot,
+     size_t *utf16_string_size,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf16_name(
+     libfsapfs_snapshot_t *snapshot,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

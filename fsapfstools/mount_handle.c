@@ -793,19 +793,6 @@ int mount_handle_close(
 
 		goto on_error;
 	}
-	if( libfsapfs_volume_close(
-	     fsapfs_volume,
-	     error ) != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_CLOSE_FAILED,
-		 "%s: unable to close volume.",
-		 function );
-
-		goto on_error;
-	}
 	if( libfsapfs_volume_free(
 	     &fsapfs_volume,
 	     error ) != 1 )

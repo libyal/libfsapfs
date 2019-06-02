@@ -197,11 +197,12 @@ int libfsapfs_volume_free(
 	if( *volume != NULL )
 	{
 		internal_volume = (libfsapfs_internal_volume_t *) *volume;
+		*volume         = NULL;
 
 		if( internal_volume->file_io_handle != NULL )
 		{
-			if( libfsapfs_volume_close(
-			     *volume,
+			if( libfsapfs_internal_volume_close(
+			     internal_volume,
 			     error ) != 0 )
 			{
 				libcerror_error_set(
@@ -214,8 +215,6 @@ int libfsapfs_volume_free(
 				result = -1;
 			}
 		}
-		*volume = NULL;
-
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 		if( libcthreads_read_write_lock_free(
 		     &( internal_volume->read_write_lock ),
@@ -234,864 +233,6 @@ int libfsapfs_volume_free(
 		memory_free(
 		 internal_volume );
 	}
-	return( result );
-}
-
-/* Signals the volume to abort its current activity
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_volume_signal_abort(
-     libfsapfs_volume_t *volume,
-     libcerror_error_t **error )
-{
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_signal_abort";
-
-	if( volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume = (libfsapfs_internal_volume_t *) volume;
-
-	if( internal_volume->io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume->io_handle->abort = 1;
-
-	return( 1 );
-}
-
-/* Opens a volume
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_volume_open(
-     libfsapfs_volume_t *volume,
-     const char *filename,
-     int access_flags,
-     libcerror_error_t **error )
-{
-	libbfio_handle_t *file_io_handle             = NULL;
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_open";
-	size_t filename_length                       = 0;
-
-	if( volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume = (libfsapfs_internal_volume_t *) volume;
-
-	if( filename == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid filename.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( ( access_flags & LIBFSAPFS_ACCESS_FLAG_READ ) == 0 )
-	 && ( ( access_flags & LIBFSAPFS_ACCESS_FLAG_WRITE ) == 0 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported access flags.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( access_flags & LIBFSAPFS_ACCESS_FLAG_WRITE ) != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: write access currently not supported.",
-		 function );
-
-		return( -1 );
-	}
-	if( libbfio_file_initialize(
-	     &file_io_handle,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create file IO handle.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libbfio_handle_set_track_offsets_read(
-	     file_io_handle,
-	     1,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set track offsets read in file IO handle.",
-		 function );
-
-		goto on_error;
-	}
-#endif
-	filename_length = narrow_string_length(
-	                   filename );
-
-	if( libbfio_file_set_name(
-	     file_io_handle,
-	     filename,
-	     filename_length + 1,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set filename in file IO handle.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_volume_open_file_io_handle(
-	     volume,
-	     file_io_handle,
-	     access_flags,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open volume: %s.",
-		 function,
-		 filename );
-
-		goto on_error;
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	internal_volume->file_io_handle_created_in_library = 1;
-
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	return( 1 );
-
-on_error:
-	if( file_io_handle != NULL )
-	{
-		libbfio_handle_free(
-		 &file_io_handle,
-		 NULL );
-	}
-	return( -1 );
-}
-
-#if defined( HAVE_WIDE_CHARACTER_TYPE )
-
-/* Opens a volume
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_volume_open_wide(
-     libfsapfs_volume_t *volume,
-     const wchar_t *filename,
-     int access_flags,
-     libcerror_error_t **error )
-{
-	libbfio_handle_t *file_io_handle             = NULL;
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_open_wide";
-	size_t filename_length                       = 0;
-
-	if( volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume = (libfsapfs_internal_volume_t *) volume;
-
-	if( filename == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid filename.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( ( access_flags & LIBFSAPFS_ACCESS_FLAG_READ ) == 0 )
-	 && ( ( access_flags & LIBFSAPFS_ACCESS_FLAG_WRITE ) == 0 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported access flags.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( access_flags & LIBFSAPFS_ACCESS_FLAG_WRITE ) != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: write access currently not supported.",
-		 function );
-
-		return( -1 );
-	}
-	if( libbfio_file_initialize(
-	     &file_io_handle,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create file IO handle.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libbfio_handle_set_track_offsets_read(
-	     file_io_handle,
-	     1,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set track offsets read in file IO handle.",
-		 function );
-
-		goto on_error;
-	}
-#endif
-	filename_length = wide_string_length(
-	                   filename );
-
-	if( libbfio_file_set_name_wide(
-	     file_io_handle,
-	     filename,
-	     filename_length + 1,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set filename in file IO handle.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_volume_open_file_io_handle(
-	     volume,
-	     file_io_handle,
-	     access_flags,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open volume: %ls.",
-		 function,
-		 filename );
-
-		goto on_error;
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	internal_volume->file_io_handle_created_in_library = 1;
-
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	return( 1 );
-
-on_error:
-	if( file_io_handle != NULL )
-	{
-		libbfio_handle_free(
-		 &file_io_handle,
-		 NULL );
-	}
-	return( -1 );
-}
-
-#endif /* defined( HAVE_WIDE_CHARACTER_TYPE ) */
-
-/* Opens a volume using a Basic File IO (bfio) handle
- * Returns 1 if successful or -1 on error
- */
-int libfsapfs_volume_open_file_io_handle(
-     libfsapfs_volume_t *volume,
-     libbfio_handle_t *file_io_handle,
-     int access_flags,
-     libcerror_error_t **error )
-{
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_open_file_io_handle";
-	int bfio_access_flags                        = 0;
-	int file_io_handle_is_open                   = 0;
-	int file_io_handle_opened_in_library         = 0;
-
-	if( volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume = (libfsapfs_internal_volume_t *) volume;
-
-	if( internal_volume->file_io_handle != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid volume - file IO handle value already set.",
-		 function );
-
-		return( -1 );
-	}
-	if( file_io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file IO handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( ( access_flags & LIBFSAPFS_ACCESS_FLAG_READ ) == 0 )
-	 && ( ( access_flags & LIBFSAPFS_ACCESS_FLAG_WRITE ) == 0 ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: unsupported access flags.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( access_flags & LIBFSAPFS_ACCESS_FLAG_WRITE ) != 0 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_UNSUPPORTED_VALUE,
-		 "%s: write access currently not supported.",
-		 function );
-
-		return( -1 );
-	}
-	if( ( access_flags & LIBFSAPFS_ACCESS_FLAG_READ ) != 0 )
-	{
-		bfio_access_flags = LIBBFIO_ACCESS_FLAG_READ;
-	}
-	file_io_handle_is_open = libbfio_handle_is_open(
-	                          file_io_handle,
-	                          error );
-
-	if( file_io_handle_is_open == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_OPEN_FAILED,
-		 "%s: unable to open volume.",
-		 function );
-
-		goto on_error;
-	}
-	else if( file_io_handle_is_open == 0 )
-	{
-		if( libbfio_handle_open(
-		     file_io_handle,
-		     bfio_access_flags,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_OPEN_FAILED,
-			 "%s: unable to open file IO handle.",
-			 function );
-
-			goto on_error;
-		}
-		file_io_handle_opened_in_library = 1;
-	}
-	if( libfsapfs_internal_volume_open_read(
-	     internal_volume,
-	     file_io_handle,
-	     0,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_IO,
-		 LIBCERROR_IO_ERROR_READ_FAILED,
-		 "%s: unable to read from file IO handle.",
-		 function );
-
-		goto on_error;
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	internal_volume->file_io_handle                   = file_io_handle;
-	internal_volume->file_io_handle_opened_in_library = file_io_handle_opened_in_library;
-
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	return( 1 );
-
-on_error:
-	if( file_io_handle_opened_in_library != 0 )
-	{
-		libbfio_handle_close(
-		 file_io_handle,
-		 error );
-	}
-	return( -1 );
-}
-
-/* Closes a volume
- * Returns 0 if successful or -1 on error
- */
-int libfsapfs_volume_close(
-     libfsapfs_volume_t *volume,
-     libcerror_error_t **error )
-{
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_close";
-	int result                                   = 0;
-
-	if( volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume = (libfsapfs_internal_volume_t *) volume;
-
-	if( internal_volume->io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing IO handle.",
-		 function );
-
-		return( -1 );
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-#if defined( HAVE_DEBUG_OUTPUT )
-	if( libcnotify_verbose != 0 )
-	{
-		if( internal_volume->file_io_handle_created_in_library != 0 )
-		{
-			if( libfsapfs_debug_print_read_offsets(
-			     internal_volume->file_io_handle,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print the read offsets.",
-				 function );
-
-				result = -1;
-			}
-		}
-	}
-#endif
-	if( internal_volume->file_io_handle_opened_in_library != 0 )
-	{
-		if( libbfio_handle_close(
-		     internal_volume->file_io_handle,
-		     error ) != 0 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_IO,
-			 LIBCERROR_IO_ERROR_CLOSE_FAILED,
-			 "%s: unable to close file IO handle.",
-			 function );
-
-			result = -1;
-		}
-		internal_volume->file_io_handle_opened_in_library = 0;
-	}
-	if( internal_volume->file_io_handle_created_in_library != 0 )
-	{
-		if( libbfio_handle_free(
-		     &( internal_volume->file_io_handle ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file IO handle.",
-			 function );
-
-			result = -1;
-		}
-		internal_volume->file_io_handle_created_in_library = 0;
-	}
-	internal_volume->file_io_handle = NULL;
-	internal_volume->is_locked      = 1;
-
-	if( internal_volume->user_password != NULL )
-	{
-		if( memory_set(
-		     internal_volume->user_password,
-		     0,
-		     internal_volume->user_password_size ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear user password.",
-			 function );
-
-			result = -1;
-		}
-		memory_free(
-		 internal_volume->user_password );
-
-		internal_volume->user_password      = NULL;
-		internal_volume->user_password_size = 0;
-	}
-	if( internal_volume->recovery_password != NULL )
-	{
-		if( memory_set(
-		     internal_volume->recovery_password,
-		     0,
-		     internal_volume->recovery_password_size ) == NULL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_MEMORY,
-			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
-			 "%s: unable to clear recovery password.",
-			 function );
-
-			result = -1;
-		}
-		memory_free(
-		 internal_volume->recovery_password );
-
-		internal_volume->recovery_password      = NULL;
-		internal_volume->recovery_password_size = 0;
-	}
-	if( internal_volume->superblock != NULL )
-	{
-		if( libfsapfs_volume_superblock_free(
-		     &( internal_volume->superblock ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free superblock.",
-			 function );
-
-			result = -1;
-		}
-	}
-	if( libfdata_vector_free(
-	     &( internal_volume->container_data_block_vector ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free container data block vector.",
-		 function );
-
-		result = -1;
-	}
-	if( internal_volume->object_map_btree != NULL )
-	{
-		if( libfsapfs_object_map_btree_free(
-		     &( internal_volume->object_map_btree ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free object map B-tree.",
-			 function );
-
-			result = -1;
-		}
-	}
-	if( internal_volume->snapshot_metadata_tree != NULL )
-	{
-		if( libfsapfs_snapshot_metadata_tree_free(
-		     &( internal_volume->snapshot_metadata_tree ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free snapshot metadata tree.",
-			 function );
-
-			result = -1;
-		}
-	}
-	if( internal_volume->snapshots != NULL )
-	{
-		if( libcdata_array_free(
-		     &( internal_volume->snapshots ),
-		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_snapshot_metadata_free,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free snapshots array.",
-			 function );
-
-			result = -1;
-		}
-	}
-	if( internal_volume->key_bag != NULL )
-	{
-		if( libfsapfs_volume_key_bag_free(
-		     &( internal_volume->key_bag ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free key bag.",
-			 function );
-
-			result = -1;
-		}
-	}
-	if( internal_volume->encryption_context != NULL )
-	{
-		if( libfsapfs_encryption_context_free(
-		     &( internal_volume->encryption_context ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free encryption context.",
-			 function );
-
-			result = -1;
-		}
-	}
-	if( libfdata_vector_free(
-	     &( internal_volume->file_system_data_block_vector ),
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free file system data block vector.",
-		 function );
-
-		result = -1;
-	}
-	if( internal_volume->file_system_btree != NULL )
-	{
-		if( libfsapfs_file_system_btree_free(
-		     &( internal_volume->file_system_btree ),
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file system B-tree.",
-			 function );
-
-			result = -1;
-		}
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
 	return( result );
 }
 
@@ -1742,6 +883,227 @@ on_error:
 		 NULL );
 	}
 	return( -1 );
+}
+
+/* Closes a volume
+ * Returns 0 if successful or -1 on error
+ */
+int libfsapfs_internal_volume_close(
+     libfsapfs_internal_volume_t *internal_volume,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_internal_volume_close";
+	int result            = 0;
+
+	if( internal_volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->io_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing IO handle.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume->file_io_handle = NULL;
+	internal_volume->is_locked      = 1;
+
+	if( internal_volume->user_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->user_password,
+		     0,
+		     internal_volume->user_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear user password.",
+			 function );
+
+			result = -1;
+		}
+		memory_free(
+		 internal_volume->user_password );
+
+		internal_volume->user_password      = NULL;
+		internal_volume->user_password_size = 0;
+	}
+	if( internal_volume->recovery_password != NULL )
+	{
+		if( memory_set(
+		     internal_volume->recovery_password,
+		     0,
+		     internal_volume->recovery_password_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_SET_FAILED,
+			 "%s: unable to clear recovery password.",
+			 function );
+
+			result = -1;
+		}
+		memory_free(
+		 internal_volume->recovery_password );
+
+		internal_volume->recovery_password      = NULL;
+		internal_volume->recovery_password_size = 0;
+	}
+	if( internal_volume->superblock != NULL )
+	{
+		if( libfsapfs_volume_superblock_free(
+		     &( internal_volume->superblock ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free superblock.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( libfdata_vector_free(
+	     &( internal_volume->container_data_block_vector ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free container data block vector.",
+		 function );
+
+		result = -1;
+	}
+	if( internal_volume->object_map_btree != NULL )
+	{
+		if( libfsapfs_object_map_btree_free(
+		     &( internal_volume->object_map_btree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free object map B-tree.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->snapshot_metadata_tree != NULL )
+	{
+		if( libfsapfs_snapshot_metadata_tree_free(
+		     &( internal_volume->snapshot_metadata_tree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free snapshot metadata tree.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->snapshots != NULL )
+	{
+		if( libcdata_array_free(
+		     &( internal_volume->snapshots ),
+		     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_snapshot_metadata_free,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free snapshots array.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->key_bag != NULL )
+	{
+		if( libfsapfs_volume_key_bag_free(
+		     &( internal_volume->key_bag ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free key bag.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( internal_volume->encryption_context != NULL )
+	{
+		if( libfsapfs_encryption_context_free(
+		     &( internal_volume->encryption_context ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free encryption context.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( libfdata_vector_free(
+	     &( internal_volume->file_system_data_block_vector ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file system data block vector.",
+		 function );
+
+		result = -1;
+	}
+	if( internal_volume->file_system_btree != NULL )
+	{
+		if( libfsapfs_file_system_btree_free(
+		     &( internal_volume->file_system_btree ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free file system B-tree.",
+			 function );
+
+			result = -1;
+		}
+	}
+	return( result );
 }
 
 /* Unlocks an encrypted volume
@@ -4130,6 +3492,7 @@ int libfsapfs_volume_get_snapshot_by_index(
 	     snapshot,
 	     internal_volume->io_handle,
 	     internal_volume->file_io_handle,
+	     snapshot_metadata,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

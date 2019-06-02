@@ -50,6 +50,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.4 | J.B. Metz | December 2018 | Additional format information.
 | 0.0.5 | J.B. Metz | January 2019 | Additional format information.
 | 0.0.6 | J.B. Metz | May 2019 | Additional format information.
+| 0.0.7 | J.B. Metz | June 2019 | Additional format information.
 |===
 
 :numbered:
@@ -1307,6 +1308,10 @@ The volume consists of:
 * volume superblock
 * volume object map
 * ...
+
+[NOTE]
+Individual APFS volume have a corresponding "synthesized" device file though
+this cannot be directly read.
 
 === [[volume_superblock]]Volume superblock
 

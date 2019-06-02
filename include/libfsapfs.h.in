@@ -336,60 +336,6 @@ int libfsapfs_volume_free(
      libfsapfs_volume_t **volume,
      libfsapfs_error_t **error );
 
-/* Signals the volume to abort its current activity
- * Returns 1 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_signal_abort(
-     libfsapfs_volume_t *volume,
-     libfsapfs_error_t **error );
-
-/* Opens a volume
- * Returns 1 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_open(
-     libfsapfs_volume_t *volume,
-     const char *filename,
-     int access_flags,
-     libfsapfs_error_t **error );
-
-#if defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE )
-
-/* Opens a volume
- * Returns 1 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_open_wide(
-     libfsapfs_volume_t *volume,
-     const wchar_t *filename,
-     int access_flags,
-     libfsapfs_error_t **error );
-
-#endif /* defined( LIBFSAPFS_HAVE_WIDE_CHARACTER_TYPE ) */
-
-#if defined( LIBFSAPFS_HAVE_BFIO )
-
-/* Opens a volume using a Basic File IO (bfio) handle
- * Returns 1 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_open_file_io_handle(
-     libfsapfs_volume_t *volume,
-     libbfio_handle_t *file_io_handle,
-     int access_flags,
-     libfsapfs_error_t **error );
-
-#endif /* defined( LIBFSAPFS_HAVE_BFIO ) */
-
-/* Closes a volume
- * Returns 0 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_close(
-     libfsapfs_volume_t *volume,
-     libfsapfs_error_t **error );
-
 /* Unlocks the volume
  * Returns 1 if the volume is unlocked, 0 if not or -1 on error
  */
@@ -592,6 +538,48 @@ int libfsapfs_volume_get_snapshot_by_index(
 LIBFSAPFS_EXTERN \
 int libfsapfs_snapshot_free(
      libfsapfs_snapshot_t **snapshot,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-8 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf8_name_size(
+     libfsapfs_snapshot_t *snapshot,
+     size_t *utf8_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-8 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf8_name(
+     libfsapfs_snapshot_t *snapshot,
+     uint8_t *utf8_string,
+     size_t utf8_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the size of the UTF-16 encoded name
+ * The returned size includes the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf16_name_size(
+     libfsapfs_snapshot_t *snapshot,
+     size_t *utf16_string_size,
+     libfsapfs_error_t **error );
+
+/* Retrieves the UTF-16 encoded name
+ * The size should include the end of string character
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_snapshot_get_utf16_name(
+     libfsapfs_snapshot_t *snapshot,
+     uint16_t *utf16_string,
+     size_t utf16_string_size,
      libfsapfs_error_t **error );
 
 /* -------------------------------------------------------------------------
