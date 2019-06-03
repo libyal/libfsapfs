@@ -1,5 +1,8 @@
 TODO
 * add snapshot support
+** add API function to retrieve creation time
+** add API function to retrieve change time
+** get volume from snapshot?
 
 * B-tree
 ** Validate (expected) btree level to detect loops - added maximum recursion depth for now

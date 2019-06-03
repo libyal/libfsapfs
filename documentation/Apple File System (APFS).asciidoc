@@ -1325,7 +1325,8 @@ The volume superblock (apfs_superblock_t) is 940 bytes of size and consists of:
 See section: <<object_checksum,Object checkum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
-| 24 | 4 | 0x0000000d | Object type +
+| 24 | 4 | 0x0000000d +
+0x4000000d (for snapshots) | Object type +
 See section: <<object_types,Object types>>
 | 28 | 4 | 0x00000000 | Object subtype
 4+| _Object values_
@@ -1549,8 +1550,10 @@ consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 8 | | Extent-reference tree object identifier
-| 8 | 8 | | Volume superblock object identifier
+| 0 | 8 | | Extent-reference tree block number +
+Contains a block number relative to the start of the container
+| 8 | 8 | | Volume superblock block number +
+Contains a block number relative to the start of the container
 | 16 | 8 | | Creation time +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 24 | 8 | | Change (or last modification) time +
@@ -2158,7 +2161,15 @@ consists of:
 
 === [[snapshot_name]]Snapshot name
 
-[yellow-background]*TODO: complete this section.*
+The snapshot name (j_snap_name_val_t) is 8 bytes of size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 60 bits | | Snapshot metdata object identifier
+| 7.4 | 4 bits | 0x1 | File system data type +
+See section: <<file_system_data_types,File system data types>>
+|===
 
 === [[sibling_map]]Sibling map
 
@@ -2529,8 +2540,8 @@ The object map values are stored in <<btree,B-tree>>.
 
 ==== Snapshot metadata B-tree key
 
-The snapshot metadata B-tree key (j_snap_metadata_key_t) is variable of size
-and consists of:
+The snapshot metadata B-tree key (j_snap_metadata_key_t or j_snap_name_key_t)
+is variable of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2567,7 +2578,7 @@ The contents of a snapshot metadata B-tree leaf node depends on the
 | APFS_TYPE_SNAP_METADATA | Snapshot object identifier +
 The value contains <<snapshot_metadata,Snapshot metadata>>
 | APFS_TYPE_SNAP_NAME | Snapshot name +
-The value contains a 64-bit snapshot object identifier.
+The value contains <<snapshot_name,Snapshot name>>
 |===
 
 == Fusion drives

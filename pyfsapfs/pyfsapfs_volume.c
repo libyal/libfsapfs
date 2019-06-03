@@ -52,13 +52,6 @@ int libfsapfs_volume_open_file_io_handle(
 
 PyMethodDef pyfsapfs_volume_object_methods[] = {
 
-	{ "signal_abort",
-	  (PyCFunction) pyfsapfs_volume_signal_abort,
-	  METH_NOARGS,
-	  "signal_abort() -> None\n"
-	  "\n"
-	  "Signals the volume to abort the current activity." },
-
 	{ "unlock",
 	  (PyCFunction) pyfsapfs_volume_unlock,
 	  METH_NOARGS,
@@ -422,55 +415,6 @@ void pyfsapfs_volume_free(
 	}
 	ob_type->tp_free(
 	 (PyObject*) pyfsapfs_volume );
-}
-
-/* Signals the volume to abort the current activity
- * Returns a Python object if successful or NULL on error
- */
-PyObject *pyfsapfs_volume_signal_abort(
-           pyfsapfs_volume_t *pyfsapfs_volume,
-           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
-{
-	libcerror_error_t *error = NULL;
-	static char *function    = "pyfsapfs_volume_signal_abort";
-	int result               = 0;
-
-	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
-
-	if( pyfsapfs_volume == NULL )
-	{
-		PyErr_Format(
-		 PyExc_ValueError,
-		 "%s: invalid volume.",
-		 function );
-
-		return( NULL );
-	}
-	Py_BEGIN_ALLOW_THREADS
-
-	result = libfsapfs_volume_signal_abort(
-	          pyfsapfs_volume->volume,
-	          &error );
-
-	Py_END_ALLOW_THREADS
-
-	if( result != 1 )
-	{
-		pyfsapfs_error_raise(
-		 error,
-		 PyExc_IOError,
-		 "%s: unable to signal abort.",
-		 function );
-
-		libcerror_error_free(
-		 &error );
-
-		return( NULL );
-	}
-	Py_IncRef(
-	 Py_None );
-
-	return( Py_None );
 }
 
 /* Unlocks a volume

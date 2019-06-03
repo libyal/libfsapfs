@@ -287,8 +287,8 @@ int libfsapfs_snapshot_metadata_read_value_data(
 	}
 #endif
 	byte_stream_copy_to_uint32_little_endian(
-	 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->volume_superblock_object_identifier,
-	 snapshot_metadata->volume_superblock_object_identifier );
+	 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->volume_superblock_block_number,
+	 snapshot_metadata->volume_superblock_block_number );
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->name_size,
@@ -298,17 +298,17 @@ int libfsapfs_snapshot_metadata_read_value_data(
 	if( libcnotify_verbose != 0 )
 	{
 		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->extent_reference_tree_object_identifier,
+		 ( (fsapfs_snapshot_metadata_btree_value_t *) data )->extent_reference_tree_block_number,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: extent-reference tree object identifier\t: %" PRIu32 "\n",
+		 "%s: extent-reference tree block number\t\t: %" PRIu32 "\n",
 		 function,
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: volume superblock object identifier\t: %" PRIu32 "\n",
+		 "%s: volume superblock block number\t\t\t: %" PRIu32 "\n",
 		 function,
-		 snapshot_metadata->volume_superblock_object_identifier );
+		 snapshot_metadata->volume_superblock_block_number );
 
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,

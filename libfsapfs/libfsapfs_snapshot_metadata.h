@@ -35,9 +35,9 @@ typedef struct libfsapfs_snapshot_metadata libfsapfs_snapshot_metadata_t;
 
 struct libfsapfs_snapshot_metadata
 {
-	/* Volume superblock object identifier
+	/* Volume superblock block number
 	 */
-	uint64_t volume_superblock_object_identifier;
+	uint64_t volume_superblock_block_number;
 
 	/* Name size
 	 */

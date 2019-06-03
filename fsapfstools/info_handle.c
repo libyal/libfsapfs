@@ -3302,22 +3302,26 @@ int info_handle_volume_fprint(
 		 info_handle->notify_stream,
 		 "\tIs locked\n" );
 	}
-	else
-	{
-		if( libfsapfs_volume_get_number_of_snapshots(
-		     volume,
-		     &number_of_snapshots,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve number of snapshots.",
-			 function );
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
 
-			goto on_error;
-		}
+	if( libfsapfs_volume_get_number_of_snapshots(
+	     volume,
+	     &number_of_snapshots,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of snapshots.",
+		 function );
+
+		goto on_error;
+	}
+	if( number_of_snapshots > 0 )
+	{
 		for( snapshot_index = 0;
 		     snapshot_index < number_of_snapshots;
 		     snapshot_index++ )
@@ -3338,21 +3342,27 @@ int info_handle_volume_fprint(
 
 				goto on_error;
 			}
+/* TODO move into separate print function */
 			fprintf(
 			 info_handle->notify_stream,
-			 "\tSnapshot: %d\t\t\t: ",
+			 "Volume: %d snapshot: %d information:\n",
+			 volume_index + 1,
 			 snapshot_index + 1 );
+
+			fprintf(
+			 info_handle->notify_stream,
+			 "\tName\t\t\t: " );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libfsapfs_snapshot_get_utf16_name_size(
-			          snapshot,
-			          &snapshot_name_size,
-			          error );
+				  snapshot,
+				  &snapshot_name_size,
+				  error );
 #else
 			result = libfsapfs_snapshot_get_utf8_name_size(
-			          snapshot,
-			          &snapshot_name_size,
-			          error );
+				  snapshot,
+				  &snapshot_name_size,
+				  error );
 #endif
 			if( result != 1 )
 			{
@@ -3383,16 +3393,16 @@ int info_handle_volume_fprint(
 				}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 				result = libfsapfs_snapshot_get_utf16_name(
-				          snapshot,
-				          (uint16_t *) snapshot_name,
-				          snapshot_name_size,
-				          error );
+					  snapshot,
+					  (uint16_t *) snapshot_name,
+					  snapshot_name_size,
+					  error );
 #else
 				result = libfsapfs_snapshot_get_utf8_name(
-				          snapshot,
-				          (uint8_t *) snapshot_name,
-				          snapshot_name_size,
-				          error );
+					  snapshot,
+					  (uint8_t *) snapshot_name,
+					  snapshot_name_size,
+					  error );
 #endif
 				if( result != 1 )
 				{
@@ -3433,11 +3443,10 @@ int info_handle_volume_fprint(
 				goto on_error;
 			}
 		}
+		fprintf(
+		 info_handle->notify_stream,
+		 "\n" );
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
-
 	return( 1 );
 
 on_error:

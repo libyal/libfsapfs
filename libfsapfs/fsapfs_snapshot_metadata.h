@@ -43,15 +43,15 @@ typedef struct fsapfs_snapshot_metadata_btree_value fsapfs_snapshot_metadata_btr
 
 struct fsapfs_snapshot_metadata_btree_value
 {
-	/* The extent-reference tree object identifier
+	/* The extent-reference tree block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t extent_reference_tree_object_identifier[ 8 ];
+	uint8_t extent_reference_tree_block_number[ 8 ];
 
-	/* The volume superblock object identifier
+	/* The volume superblock block number
 	 * Consists of 8 bytes
 	 */
-	uint8_t volume_superblock_object_identifier[ 8 ];
+	uint8_t volume_superblock_block_number[ 8 ];
 
 	/* The creation date and time
 	 * Consists of 8 bytes

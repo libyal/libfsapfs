@@ -3376,11 +3376,10 @@ int libfsapfs_volume_get_snapshot_by_index(
      libfsapfs_snapshot_t **snapshot,
      libcerror_error_t **error )
 {
-	libfsapfs_internal_volume_t *internal_volume             = NULL;
-	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	libfsapfs_snapshot_metadata_t *snapshot_metadata         = NULL;
-	static char *function                                    = "libfsapfs_volume_get_snapshot_by_index";
-	off64_t file_offset                                      = 0;
+	libfsapfs_internal_volume_t *internal_volume     = NULL;
+	libfsapfs_snapshot_metadata_t *snapshot_metadata = NULL;
+	static char *function                            = "libfsapfs_volume_get_snapshot_by_index";
+	off64_t file_offset                              = 0;
 
 	if( volume == NULL )
 	{
@@ -3460,34 +3459,6 @@ int libfsapfs_volume_get_snapshot_by_index(
 
 		goto on_error;
 	}
-	if( libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
-	     internal_volume->object_map_btree,
-	     internal_volume->file_io_handle,
-	     snapshot_metadata->volume_superblock_object_identifier,
-	     &object_map_descriptor,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for volume superblock object identifier: %" PRIu64 ".",
-		 function,
-		 snapshot_metadata->volume_superblock_object_identifier );
-
-		goto on_error;
-	}
-	if( object_map_descriptor == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid object map descriptor.",
-		 function );
-
-		goto on_error;
-	}
 	if( libfsapfs_snapshot_initialize(
 	     snapshot,
 	     internal_volume->io_handle,
@@ -3504,21 +3475,8 @@ int libfsapfs_volume_get_snapshot_by_index(
 
 		goto on_error;
 	}
-	file_offset = (off64_t) ( object_map_descriptor->physical_address * internal_volume->io_handle->block_size );
+	file_offset = (off64_t) ( snapshot_metadata->volume_superblock_block_number * internal_volume->io_handle->block_size );
 
-	if( libfsapfs_object_map_descriptor_free(
-	     &object_map_descriptor,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free object map descriptor.",
-		 function );
-
-		goto on_error;
-	}
 	if( libfsapfs_internal_snapshot_open_read(
 	     (libfsapfs_internal_snapshot_t *) *snapshot,
 	     internal_volume->file_io_handle,
@@ -3553,12 +3511,6 @@ int libfsapfs_volume_get_snapshot_by_index(
 	return( 1 );
 
 on_error:
-	if( object_map_descriptor != NULL )
-	{
-		libfsapfs_object_map_descriptor_free(
-		 &object_map_descriptor,
-		 NULL );
-	}
 	if( *snapshot != NULL )
 	{
 		libfsapfs_snapshot_free(
