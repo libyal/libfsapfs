@@ -62,7 +62,7 @@ Several tools for reading Apple File System (APFS) volumes
 %setup -q
 
 %build
-%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir} --enable-python2 --enable-python3
+%configure --prefix=/usr --libdir=%{_libdir} --mandir=%{_mandir} --enable-python2 --enable-python3 --with-openssl=no
 make %{?_smp_mflags}
 
 %install
