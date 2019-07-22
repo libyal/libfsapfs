@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20190304
+dnl Version: 20190722
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -15,6 +15,30 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
         [[ ]] )],
       [ac_cv_openssl_evp_zlib_compatible=yes],
       [ac_cv_openssl_evp_zlib_compatible=no])
+    AC_LANG_POP(C)])
+  ])
+
+dnl Function to detect whether EVP_CipherInit_ex can be used with duplicate keys.
+AC_DEFUN([AX_LIBCRYPTO_CHECK_XTS_DUPLICATE_KEYS_SUPPORT],
+  [AC_CACHE_CHECK(
+    [if `EVP_CipherInit_ex' can be used with duplicate keys],
+    [ac_cv_openssl_xts_duplicate_keys],
+    [AC_LANG_PUSH(C)
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+        [[#include <openssl/err.h>
+#include <openssl/evp.h>]],
+        [[unsigned char key[ 16 ] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+EVP_CIPHER_CTX ctx;
+int result;
+
+EVP_CIPHER_CTX_init( &ctx );
+result = EVP_CipherInit_ex(ctx, EVP_aes_128_xts(), NULL, key, key, 0);
+EVP_CIPHER_CTX_cleanup( &ctx );
+
+return( result == 1 ); ]] )],
+      [ac_cv_openssl_xts_duplicate_keys=yes],
+      [ac_cv_openssl_xts_duplicate_keys=no])
     AC_LANG_POP(C)])
   ])
 
@@ -808,12 +832,18 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_AES_XTS],
       [ac_cv_libcrypto_dummy=yes],
       [ac_cv_libcrypto_aes_xts=no])
 
+    dnl OpenSSL 1.1.1c will error with "xts duplicated keys".
+    AX_LIBCRYPTO_CHECK_XTS_DUPLICATE_KEYS_SUPPORT
     AS_IF(
-      [test "x$ac_cv_lib_crypto_EVP_aes_128_xts" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_256_xts" = xyes],
-      [AC_DEFINE(
-        [HAVE_EVP_CRYPTO_AES_XTS],
-        [1],
-        [Define to 1 if you have the `EVP_aes_128_xts' and `EVP_aes_256_xts' functions".])
+      [test "x$ac_cv_openssl_xts_duplicate_keys" = xno],
+      [ac_cv_libcrypto_aes_xts=no],
+      [AS_IF(
+        [test "x$ac_cv_lib_crypto_EVP_aes_128_xts" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_256_xts" = xyes],
+        [AC_DEFINE(
+          [HAVE_EVP_CRYPTO_AES_XTS],
+          [1],
+          [Define to 1 if you have the `EVP_aes_128_xts' and `EVP_aes_256_xts' functions".])
+        ])
       ])
     ])
   ])

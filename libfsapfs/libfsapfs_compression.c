@@ -253,7 +253,7 @@ int libfsapfs_decompress_data(
 				result = -1;
 			}
 #else
-			result = libfsapfs_deflate_decompress(
+			result = libfsapfs_deflate_decompress_zlib(
 			          compressed_data,
 			          compressed_data_size,
 			          uncompressed_data,

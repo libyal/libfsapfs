@@ -402,7 +402,7 @@ int libfsapfs_container_open(
 		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 #endif
 	internal_container->file_io_handle_created_in_library = 1;
@@ -419,7 +419,9 @@ int libfsapfs_container_open(
 		 "%s: unable to release read/write lock for writing.",
 		 function );
 
-		return( -1 );
+		internal_container->file_io_handle_created_in_library = 0;
+
+		goto on_error;
 	}
 #endif
 	return( 1 );
@@ -572,7 +574,7 @@ int libfsapfs_container_open_wide(
 		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 #endif
 	internal_container->file_io_handle_created_in_library = 1;
@@ -589,7 +591,9 @@ int libfsapfs_container_open_wide(
 		 "%s: unable to release read/write lock for writing.",
 		 function );
 
-		return( -1 );
+		internal_container->file_io_handle_created_in_library = 0;
+
+		goto on_error;
 	}
 #endif
 	return( 1 );
@@ -743,7 +747,7 @@ int libfsapfs_container_open_file_io_handle(
 		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 #endif
 	internal_container->file_io_handle                   = file_io_handle;
@@ -761,7 +765,10 @@ int libfsapfs_container_open_file_io_handle(
 		 "%s: unable to release read/write lock for writing.",
 		 function );
 
-		return( -1 );
+		internal_container->file_io_handle                   = NULL;
+		internal_container->file_io_handle_opened_in_library = 0;
+
+		goto on_error;
 	}
 #endif
 	return( 1 );
