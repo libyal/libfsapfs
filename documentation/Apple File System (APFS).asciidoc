@@ -1785,7 +1785,7 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 
 ==== [[extended_attribute_names]]Extended attribute names
 
-[cols="1,1,5",options="header"]
+[cols="1,5",options="header"]
 |===
 | Name | Description
 | com.apple.assetsd.dbRebuildInProgress |
