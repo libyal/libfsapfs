@@ -1,4 +1,4 @@
-.Dd June  2, 2019
+.Dd September  2, 2019
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -161,13 +161,13 @@ File entry functions
 .Ft int
 .Fn libfsapfs_file_entry_get_file_mode "libfsapfs_file_entry_t *file_entry" "uint16_t *file_mode" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf8_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf8_name_size" "libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf8_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf8_name "libfsapfs_file_entry_t *file_entry" "uint8_t *utf8_name" "size_t utf8_name_size" "libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf8_name "libfsapfs_file_entry_t *file_entry" "uint8_t *utf8_string" "size_t utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf16_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf16_name_size" "libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf16_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf16_string_size" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_utf16_name "libfsapfs_file_entry_t *file_entry" "uint16_t *utf16_name" "size_t utf16_name_size" "libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_utf16_name "libfsapfs_file_entry_t *file_entry" "uint16_t *utf16_string" "size_t utf16_string_size" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_utf8_symbolic_link_target_size "libfsapfs_file_entry_t *file_entry" "size_t *utf8_string_size" "libfsapfs_error_t **error"
 .Ft int

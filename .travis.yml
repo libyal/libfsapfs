@@ -23,6 +23,32 @@ matrix:
     dist: xenial
     sudo: required
     group: edge
+  - name: "Linux with gcc on PowerPC 64-bit"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc"
+    compiler: gcc
+    os: linux-ppc64le
+    dist: xenial
+    sudo: required
+    group: edge
+  - name: "Linux with gcc on s390x (Docker)"
+    env:
+    - DOCKERHUB_REPO="s390x/ubuntu"
+    - DOCKERHUB_TAG="bionic"
+    - CONFIGURE_OPTIONS=""
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="docker"
+    compiler: gcc
+    os: linux
+    dist: xenial
+    sudo: required
+    group: edge
+    services:
+    - docker
   - name: "Linux with gcc and wide character type (wchar_t) support"
     env:
     - CONFIGURE_OPTIONS="--enable-wide-character-type"
@@ -208,55 +234,12 @@ matrix:
     os: osx
     osx_image: xcode8.3
 before_install:
-  - if test ${TRAVIS_OS_NAME} = "linux"; then
-      sudo apt-get update && sudo apt-mark hold mysql-server-5.7 && sudo apt-get --fix-missing -o Dpkg::Options::="--force-confold" upgrade -y --allow-unauthenticated && sudo apt-get install -y autopoint zlib1g-dev libssl-dev libfuse-dev;
-    elif test ${TRAVIS_OS_NAME} = "osx"; then
-      brew update && brew install gettext gnu-sed && brew link --force gettext;
-      brew tap homebrew/cask && brew cask install osxfuse;
-    fi
-  - if test ${TARGET} = "coverity"; then
-      echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-;
-    fi
+- .travis/before_install.sh
 install:
-  - if test ${TRAVIS_OS_NAME} = "osx"; then
-      export SED="/usr/local/bin/gsed";
-    fi
-  - ./synclibs.sh --use-head && ./autogen.sh
-  - if test ${TARGET} = "linux-gcc-shared" || test ${TARGET} = "linux-gcc-shared-wide-character-type"; then
-      ./configure > /dev/null && make > /dev/null && ./syncsharedlibs.sh --use-head;
-    fi
-  - if test -x "synctestdata.sh"; then
-      ./synctestdata.sh;
-    fi
+- .travis/install.sh
 script:
-  - if test ${TRAVIS_OS_NAME} = "linux"; then
-      export PATH=$(echo $PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g");
-    fi
-  - if test ${TARGET} = "linux-gcc-python-setup-py" || test ${TARGET} = "macos-gcc-python-setup-py"; then
-      ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && python ./setup.py build;
-    elif test ${TARGET} != "coverity"; then
-      ./configure ${CONFIGURE_OPTIONS} && make > /dev/null; RESULT=$?;
-      if test ${RESULT} -eq 0; then
-        if test ${TARGET} = "macos-gcc-python" || test ${TARGET} = "macos-gcc-pkgbuild"; then
-          install_name_tool -change /usr/local/lib/libfsapfs.1.dylib ${PWD}/libfsapfs/.libs/libfsapfs.1.dylib ./pyfsapfs/.libs/pyfsapfs.so;
-        fi;
-        make check CHECK_WITH_STDERR=1; RESULT=$?;
-      fi;
-      if test ${RESULT} -ne 0; then
-        if test -f tests/test-suite.log; then
-          cat tests/test-suite.log;
-        fi;
-        return ${RESULT};
-      fi;
-      if test ${TARGET} = "macos-gcc-pkgbuild"; then
-        VERSION=`sed '5!d; s/^ \[//;s/\],$//' configure.ac` &&
-        make install DESTDIR=${PWD}/osx-pkg &&
-        mkdir -p ${PWD}/osx-pkg/usr/share/doc/libfsapfs &&
-        cp AUTHORS COPYING NEWS README ${PWD}/osx-pkg/usr/share/doc/libfsapfs &&
-        pkgbuild --root osx-pkg --identifier com.github.libyal.libfsapfs --version ${VERSION} --ownership recommended ../libfsapfs-${VERSION}.pkg;
-      fi
-    fi
+- .travis/script.sh
 after_success:
-  - if test ${TARGET} = "linux-gcc-no-optimization"; then
-      curl -o codecov.sh -s https://codecov.io/bash && sed 's/ -execdir / -exec /' -i ./codecov.sh && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
-    fi
+- if test ${TARGET} = "linux-gcc-no-optimization"; then
+    curl -o codecov.sh -s https://codecov.io/bash && sed 's/ -execdir / -exec /' -i ./codecov.sh && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
+  fi

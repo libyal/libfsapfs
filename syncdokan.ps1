@@ -1,6 +1,6 @@
 # Script that synchronizes dokan
 #
-# Version: 20180320
+# Version: 20190810
 
 Param (
 	[switch]$UseHead = $false,
@@ -42,6 +42,11 @@ Try
 	Else
 	{
 		Write-Host "Synchronizing: dokan from ${GitUrl} HEAD"
+	}
+	If (-Not ${UseLegacyVersion})
+	{
+		# AppVeyor does not come with platform toolset version 142
+		((Get-Content -Path "..\dokany\dokan\dokan.vcxproj" -Raw) -Replace '<PlatformToolset>v142</PlatformToolset>','<PlatformToolset>v141</PlatformToolset>') | Set-Content -Path "..\dokany\dokan\dokan.vcxproj"
 	}
 }
 Finally
