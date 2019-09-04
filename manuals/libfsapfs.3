@@ -1,4 +1,4 @@
-.Dd September  2, 2019
+.Dd September  4, 2019
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -70,6 +70,8 @@ Container functions
 .Fn libfsapfs_container_get_size "libfsapfs_container_t *container" "size64_t *size" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_container_get_identifier "libfsapfs_container_t *container" "uint8_t *uuid_data" "size_t uuid_data_size" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_container_is_locked "libfsapfs_container_t *container" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_container_get_number_of_volumes "libfsapfs_container_t *container" "int *number_of_volumes" "libfsapfs_error_t **error"
 .Ft int

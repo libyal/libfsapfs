@@ -51,6 +51,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.5 | J.B. Metz | January 2019 | Additional format information.
 | 0.0.6 | J.B. Metz | May 2019 | Additional format information.
 | 0.0.7 | J.B. Metz | June 2019 | Additional format information.
+| 0.0.8 | J.B. Metz | September 2019 | Additional format information regarding container key bag.
 |===
 
 :numbered:
@@ -128,6 +129,10 @@ See `[IEEE 1619-2007]` for more information.
 The container key bag is encrypted using the "container identifier" of the
 container as both the primary and tweak key. The sector number, relative to
 the start of the container, is used as the tweak value.
+
+[NOTE]
+When a T2 chip is present, it is currently assumed that the T2 is used to
+encrypte the container key bag instead of the "container identifier".
 
 The unit size is the sector size, which is assumed to be 512 bytes also for 4k
 sector media.
@@ -1785,7 +1790,7 @@ See section: <<extended_attribute_flags,Extended attribute flags>>
 
 ==== [[extended_attribute_names]]Extended attribute names
 
-[cols="1,1,5",options="header"]
+[cols="1,5",options="header"]
 |===
 | Name | Description
 | com.apple.assetsd.dbRebuildInProgress |

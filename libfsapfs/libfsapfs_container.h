@@ -163,6 +163,11 @@ int libfsapfs_container_get_identifier(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_container_is_locked(
+     libfsapfs_container_t *container,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_container_get_number_of_volumes(
      libfsapfs_container_t *container,
      int *number_of_volumes,

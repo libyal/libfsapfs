@@ -552,6 +552,8 @@ int libfsapfs_internal_volume_open_read(
 	if( ( internal_volume->container_key_bag != NULL )
 	 && ( ( internal_volume->superblock->volume_flags & 0x00000001UL ) == 0 ) )
 	{
+		internal_volume->is_locked = internal_volume->container_key_bag->is_locked;
+
 		result = libfsapfs_container_key_bag_get_volume_key_bag_extent_by_identifier(
 		          internal_volume->container_key_bag,
 		          internal_volume->superblock->volume_identifier,

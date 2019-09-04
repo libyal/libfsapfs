@@ -304,6 +304,14 @@ int libfsapfs_container_get_identifier(
      size_t uuid_data_size,
      libfsapfs_error_t **error );
 
+/* Determines if the container is locked
+ * Returns 1 if locked, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_container_is_locked(
+     libfsapfs_container_t *container,
+     libfsapfs_error_t **error );
+
 /* Retrieves the number of volumes
  * Returns 1 if successful or -1 on error
  */

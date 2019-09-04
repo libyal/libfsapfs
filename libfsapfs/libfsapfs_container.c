@@ -1033,6 +1033,7 @@ int libfsapfs_internal_container_open_read(
 	uint64_t checkpoint_map_transaction_identifier              = 0;
 	uint64_t metadata_block_index                               = 0;
 	int element_index                                           = 0;
+	int result                                                  = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	libfsapfs_checkpoint_map_t *checkpoint_map                  = NULL;
@@ -1763,14 +1764,16 @@ int libfsapfs_internal_container_open_read(
 		}
 		file_offset = internal_container->superblock->key_bag_block_number * internal_container->io_handle->block_size;
 
-		if( libfsapfs_container_key_bag_read_file_io_handle(
-		     internal_container->key_bag,
-		     internal_container->io_handle,
-		     file_io_handle,
-		     file_offset,
-		     (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->io_handle->block_size,
-		     internal_container->superblock->container_identifier,
-		     error ) != 1 )
+		result = libfsapfs_container_key_bag_read_file_io_handle(
+		          internal_container->key_bag,
+		          internal_container->io_handle,
+		          file_io_handle,
+		          file_offset,
+		          (size64_t) internal_container->superblock->key_bag_number_of_blocks * internal_container->io_handle->block_size,
+		          internal_container->superblock->container_identifier,
+		          error );
+
+		if( result == -1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -1782,6 +1785,10 @@ int libfsapfs_internal_container_open_read(
 			 file_offset );
 
 			goto on_error;
+		}
+		else if( result == 0 )
+		{
+			internal_container->key_bag->is_locked = 1;
 		}
 	}
 	return( 1 );
@@ -2031,6 +2038,67 @@ int libfsapfs_container_get_identifier(
 	}
 #endif
 	return( result );
+}
+
+/* Determines if the container is locked
+ * Returns 1 if locked, 0 if not or -1 on error
+ */
+int libfsapfs_container_is_locked(
+     libfsapfs_container_t *container,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_container_t *internal_container = NULL;
+	static char *function                              = "libfsapfs_container_is_locked";
+	uint8_t is_locked                                  = 0;
+
+	if( container == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid container.",
+		 function );
+
+		return( -1 );
+	}
+	internal_container = (libfsapfs_internal_container_t *) container;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_container->key_bag != NULL )
+	{
+		is_locked = internal_container->key_bag->is_locked;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_container->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( is_locked );
 }
 
 /* Retrieves the number of volumes

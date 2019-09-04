@@ -41,6 +41,10 @@ struct libfsapfs_container_key_bag
 	/* The entries array
 	 */
 	libcdata_array_t *entries_array;
+
+	/* Value to indicate if the container key bag is locked
+	 */
+	uint8_t is_locked;
 };
 
 int libfsapfs_container_key_bag_initialize(

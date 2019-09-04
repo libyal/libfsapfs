@@ -3476,6 +3476,7 @@ int info_handle_container_fprint(
 	libfsapfs_volume_t *volume = NULL;
 	static char *function      = "info_handle_container_fprint";
 	int number_of_volumes      = 0;
+	int result                 = 0;
 	int volume_index           = 0;
 
 	if( info_handle == NULL )
@@ -3529,6 +3530,27 @@ int info_handle_container_fprint(
 	}
 /* TODO print additional container information such as size */
 
+	result = libfsapfs_container_is_locked(
+	          info_handle->input_container,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if container is locked.",
+		 function );
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		fprintf(
+		 info_handle->notify_stream,
+		 "\tIs locked (requires T2)\n" );
+	}
 	if( libfsapfs_container_get_number_of_volumes(
 	     info_handle->input_container,
 	     &number_of_volumes,

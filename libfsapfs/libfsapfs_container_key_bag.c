@@ -178,7 +178,7 @@ int libfsapfs_container_key_bag_free(
 }
 
 /* Reads the container key bag
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the object type does not match or -1 on error
  */
 int libfsapfs_container_key_bag_read_file_io_handle(
      libfsapfs_container_key_bag_t *container_key_bag,
@@ -194,6 +194,7 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 	uint8_t *encrypted_data                            = NULL;
 	static char *function                              = "libfsapfs_container_key_bag_read_file_io_handle";
 	ssize_t read_count                                 = 0;
+	int result                                         = 0;
 
 	if( container_key_bag == NULL )
 	{
@@ -392,11 +393,13 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
-	if( libfsapfs_container_key_bag_read_data(
-	     container_key_bag,
-	     data,
-	     (size_t) data_size,
-	     error ) != 1 )
+	result = libfsapfs_container_key_bag_read_data(
+	          container_key_bag,
+	          data,
+	          (size_t) data_size,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -410,7 +413,7 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 	memory_free(
 	 data );
 
-	return( 1 );
+	return( result );
 
 on_error:
 	if( encryption_context != NULL )
@@ -433,7 +436,7 @@ on_error:
 }
 
 /* Reads the container key bag
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if the object type does not match or -1 on error
  */
 int libfsapfs_container_key_bag_read_data(
      libfsapfs_container_key_bag_t *container_key_bag,
@@ -513,15 +516,16 @@ int libfsapfs_container_key_bag_read_data(
 
 	if( object_type != 0x6b657973UL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-		 "%s: invalid object type: 0x%08" PRIx32 ".",
-		 function,
-		 object_type );
-
-		goto on_error;
+#if defined( HAVE_DEBUG_OUTPUT )
+		if( libcnotify_verbose != 0 )
+		{
+			libcnotify_printf(
+			 "%s: invalid object type: 0x%08" PRIx32 "\n.",
+			 function,
+			 object_type );
+		}
+#endif
+		return( 0 );
 	}
 	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_object_t *) data )->subtype,
