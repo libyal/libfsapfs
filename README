@@ -22,6 +22,7 @@ Unsupported APFS format features:
 * snapshots
 * LZFSE compression, compression methods 11 and 12
 * "uncompressed", compression methods 1, 9 and 10
+* T2 encryption
 
 For more information see:
 

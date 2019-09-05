@@ -70,6 +70,10 @@ struct info_handle
 	 */
 	libfsapfs_container_t *input_container;
 
+	/* Value to indicate the container is locked
+	 */
+	uint8_t container_is_locked;
+
 	/* The bodyfile output stream
 	 */
 	FILE *bodyfile_stream;

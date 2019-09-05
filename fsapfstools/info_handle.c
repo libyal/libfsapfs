@@ -1028,18 +1028,21 @@ int info_handle_get_volume_by_index(
 	}
 	else if( result != 0 )
 	{
-		if( libfsapfs_volume_unlock(
-		     *volume,
-		     error ) == -1 )
+		if( info_handle->container_is_locked == 0 )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to unlock volume.",
-			 function );
+			if( libfsapfs_volume_unlock(
+			     *volume,
+			     error ) == -1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+				 "%s: unable to unlock volume.",
+				 function );
 
-			goto on_error;
+				goto on_error;
+			}
 		}
 	}
 	return( 1 );
@@ -3530,6 +3533,25 @@ int info_handle_container_fprint(
 	}
 /* TODO print additional container information such as size */
 
+	if( libfsapfs_container_get_number_of_volumes(
+	     info_handle->input_container,
+	     &number_of_volumes,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of volumes.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tNumber of volumes\t: %d\n",
+	 number_of_volumes );
+
 	result = libfsapfs_container_is_locked(
 	          info_handle->input_container,
 	          error );
@@ -3551,24 +3573,7 @@ int info_handle_container_fprint(
 		 info_handle->notify_stream,
 		 "\tIs locked (requires T2)\n" );
 	}
-	if( libfsapfs_container_get_number_of_volumes(
-	     info_handle->input_container,
-	     &number_of_volumes,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of volumes.",
-		 function );
-
-		goto on_error;
-	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\tNumber of volumes\t: %d\n",
-	 number_of_volumes );
+	info_handle->container_is_locked = (uint8_t) result;
 
 	for( volume_index = 0;
 	     volume_index < number_of_volumes;
