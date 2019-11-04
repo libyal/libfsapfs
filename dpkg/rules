@@ -7,7 +7,7 @@
 export SKIP_PYTHON_TESTS=1
 
 %:
-	dh $@ --with autoreconf
+	dh $@ --with=autoreconf
 
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:

@@ -1,4 +1,6 @@
 environment:
+  pypi_token:
+    secure: VHuZiUWgTqTciKE2nsv/LuBOWTuFm7lT+/HRK0pL5yBrVXNacqwjZtAMWHq5uEPHtz2YRcuHDGzmF12YrGktwtTpUPSq7k/ntZ72h8xhvVea33s/l905e0k3pOa51K1ko/V76yqkyAklF93sAF20spco21LT9uwB9VVTO8IrSPZWzPxRtybPp0XAg3bluTbrmIEI+AaBT8UJxvONjSrcpUlHPH2l25zMnh4Sd8IL0l+HfZ8XdueNCZILBgCB2u+KKHthWZdnzI+jvB2d3IAfEPu88OsjZjAUDIlSWffesB0=
   matrix:
   - TARGET: vs2008
     BUILD_ENVIRONMENT: msbuild
@@ -41,12 +43,12 @@ environment:
   - TARGET: python27-x64
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python27-x64"
-  - TARGET: python36
+  - TARGET: python37
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python36"
-  - TARGET: python36-x64
+    PYTHON: "C:\\Python37"
+  - TARGET: python37-x64
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python36-x64"
+    PYTHON: "C:\\Python37-x64"
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: ""
@@ -146,10 +148,6 @@ environment:
     CFLAGS: "--coverage"
     LDFLAGS: "--coverage"
 
-matrix:
-  allow_failures:
-  - TARGET: python27-x64
-
 install:
 - cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
 - cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
@@ -200,6 +198,8 @@ install:
     Else {
       .\builddokan.ps1 -UseLegacyVersion }
     }
+- cmd: if [%BUILD_ENVIRONMENT%]==[python] (
+    "%PYTHON%\\python.exe" -m pip install -U pip setuptools twine wheel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     C:\cygwin\setup-x86.exe -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s http://cygwin.mirror.constant.com -P zlib-devel -P openssl-devel -P python2-devel -P python3-devel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
@@ -237,7 +237,7 @@ build_script:
     msbuild /verbosity:quiet vs2017\libfsapfs.sln /property:Platform=Win32 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" &&
     msbuild /verbosity:quiet vs2017\libfsapfs.sln /property:Platform=x64 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
-    "%PYTHON%\\python.exe" setup.py bdist_msi )
+    "%PYTHON%\\python.exe" setup.py bdist_msi bdist_wheel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin\home\appveyor\libfsapfs &&
     C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )
@@ -268,4 +268,11 @@ after_test:
 - cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
     copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\libfsapfs\codecov.sh &&
     C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n ${TARGET} -y .codecov.yml" )
+
+artifacts:
+- path: dist\*.whl
+
+deploy_script:
+- ps: If ($env:APPVEYOR_REPO_TAG -eq "true") {
+    Invoke-Expression "${env:PYTHON}\\python.exe -m twine upload dist/*.whl --username __token__ --password ${env:PYPI_TOKEN} --skip-existing" }
 

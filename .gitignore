@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20180318
+# Version: 20191005
 
 # Generic auto-generated build files
 *~
@@ -25,6 +25,7 @@
 *.swp
 *.Tpo
 *.trs
+/*.egg-info/
 .deps
 .libs
 INSTALL

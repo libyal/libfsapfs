@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20181117
+# Version: 20191025
 
 from __future__ import print_function
 
+import copy
 import glob
 import gzip
 import platform
@@ -15,13 +16,14 @@ import subprocess
 import sys
 import tarfile
 
-from distutils import dist
 from distutils import sysconfig
 from distutils.ccompiler import new_compiler
-from distutils.command.build_ext import build_ext
 from distutils.command.bdist import bdist
-from distutils.command.sdist import sdist
-from distutils.core import Extension, setup
+from setuptools import dist
+from setuptools import Extension
+from setuptools import setup
+from setuptools.command.build_ext import build_ext
+from setuptools.command.sdist import sdist
 
 try:
   from distutils.command.bdist_msi import bdist_msi
@@ -37,6 +39,10 @@ else:
 
     def run(self):
       """Builds an MSI."""
+      # Make a deepcopy of distribution so the following version changes
+      # only apply to bdist_msi.
+      self.distribution = copy.deepcopy(self.distribution)
+
       # bdist_msi does not support the library version so we add ".1"
       # as a work around.
       self.distribution.metadata.version = "{0:s}.1".format(
@@ -264,20 +270,7 @@ class ProjectInformation(object):
           "Makefile.am")
 
 
-def GetPythonLibraryDirectoryPath():
-  """Retrieves the Python library directory path."""
-  path = sysconfig.get_python_lib(True)
-  _, _, path = path.rpartition(sysconfig.PREFIX)
-
-  if path.startswith(os.sep):
-    path = path[1:]
-
-  return path
-
-
 project_information = ProjectInformation()
-
-PYTHON_LIBRARY_DIRECTORY = GetPythonLibraryDirectoryPath()
 
 SOURCES = []
 
@@ -307,13 +300,6 @@ for library_name in project_information.library_names:
 
 source_files = glob.glob(os.path.join(project_information.module_name, "*.c"))
 SOURCES.extend(source_files)
-
-# Add the LICENSE file to the distribution.
-copying_file = os.path.join("COPYING")
-license_file = "LICENSE.{0:s}".format(project_information.module_name)
-shutil.copyfile(copying_file, license_file)
-
-LIBRARY_DATA_FILES = [license_file]
 
 # TODO: find a way to detect missing python.h
 # e.g. on Ubuntu python-dev is not installed by python-pip
@@ -345,8 +331,5 @@ setup(
             sources=SOURCES,
         ),
     ],
-    data_files=[(PYTHON_LIBRARY_DIRECTORY, LIBRARY_DATA_FILES)],
 )
-
-os.remove(license_file)
 

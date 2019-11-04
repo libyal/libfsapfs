@@ -214,7 +214,7 @@ typedef int system_integer_t;
 #define PRIx64 "llx"
 
 #endif
-#endif /*!defined( PRIx64 ) */
+#endif /* !defined( PRIx64 ) */
 
 /* Fallback for systems without printf %jd definition
  */

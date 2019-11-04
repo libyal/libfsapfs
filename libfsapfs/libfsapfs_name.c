@@ -7021,7 +7021,7 @@ libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0
 	/* 0x0002fa1f */ { 1, { 0x0002fa1f } }
 };
 
-/* Compares an UTF-8 string with a file entry name
+/* Compares an UTF-8 string with an UTF-8 encoded file entry name
  * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_name_compare_with_utf8_string(
@@ -7205,7 +7205,7 @@ int libfsapfs_name_compare_with_utf8_string(
 	return( LIBUNA_COMPARE_EQUAL );
 }
 
-/* Compares an UTF-16 string with a file entry name
+/* Compares an UTF-16 string with an UTF-8 encoded file entry name
  * Returns LIBUNA_COMPARE_LESS, LIBUNA_COMPARE_EQUAL, LIBUNA_COMPARE_GREATER if successful or -1 on error
  */
 int libfsapfs_name_compare_with_utf16_string(
