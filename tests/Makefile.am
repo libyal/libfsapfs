@@ -61,6 +61,7 @@ check_PROGRAMS = \
 	fsapfs_test_container_reaper \
 	fsapfs_test_container_superblock \
 	fsapfs_test_data_block \
+	fsapfs_test_data_stream \
 	fsapfs_test_deflate \
 	fsapfs_test_directory_record \
 	fsapfs_test_encryption_context \
@@ -356,6 +357,19 @@ fsapfs_test_data_block_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_data_block_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_data_stream_SOURCES = \
+	fsapfs_test_data_stream.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfdata.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_data_stream_LDADD = \
+	@LIBFDATA_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

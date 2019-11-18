@@ -5,18 +5,18 @@
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * This software is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This software is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -7100,11 +7100,13 @@ int libfsapfs_name_compare_with_utf8_string(
 
 		return( -1 );
 	}
-	if( name[ name_size - 1 ] == 0 )
+	if( ( name_size >= 1 )
+	 && ( name[ name_size - 1 ] == 0 ) )
 	{
 		name_size -= 1;
 	}
-	if( utf8_string[ utf8_string_length - 1 ] == 0 )
+	if( ( utf8_string_length >= 1 )
+	 && ( utf8_string[ utf8_string_length - 1 ] == 0 ) )
 	{
 		utf8_string_length -= 1;
 	}
@@ -7284,11 +7286,13 @@ int libfsapfs_name_compare_with_utf16_string(
 
 		return( -1 );
 	}
-	if( name[ name_size - 1 ] == 0 )
+	if( ( name_size >= 1 )
+	 && ( name[ name_size - 1 ] == 0 ) )
 	{
 		name_size -= 1;
 	}
-	if( utf16_string[ utf16_string_length - 1 ] == 0 )
+	if( ( utf16_string_length >= 1 )
+	 && ( utf16_string[ utf16_string_length - 1 ] == 0 ) )
 	{
 		utf16_string_length -= 1;
 	}

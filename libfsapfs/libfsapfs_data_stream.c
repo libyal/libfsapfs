@@ -5,18 +5,18 @@
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * This software is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This software is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -42,6 +42,7 @@ int libfsapfs_data_stream_initialize_from_data(
      size_t data_size,
      libcerror_error_t **error )
 {
+	libfdata_stream_t *safe_data_stream         = NULL;
 	libfsapfs_buffer_data_handle_t *data_handle = NULL;
 	static char *function                       = "libfsapfs_data_stream_initialize_from_data";
 	int segment_index                           = 0;
@@ -52,7 +53,7 @@ int libfsapfs_data_stream_initialize_from_data(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream attribute.",
+		 "%s: invalid data stream.",
 		 function );
 
 		return( -1 );
@@ -73,7 +74,7 @@ int libfsapfs_data_stream_initialize_from_data(
 		goto on_error;
 	}
 	if( libfdata_stream_initialize(
-	     data_stream,
+	     &safe_data_stream,
 	     (intptr_t *) data_handle,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_buffer_data_handle_free,
 	     NULL,
@@ -96,7 +97,7 @@ int libfsapfs_data_stream_initialize_from_data(
 	data_handle = NULL;
 
 	if( libfdata_stream_append_segment(
-	     *data_stream,
+	     safe_data_stream,
 	     &segment_index,
 	     0,
 	     0,
@@ -113,13 +114,15 @@ int libfsapfs_data_stream_initialize_from_data(
 
 		goto on_error;
 	}
+	*data_stream = safe_data_stream;
+
 	return( 1 );
 
 on_error:
-	if( *data_stream != NULL )
+	if( safe_data_stream != NULL )
 	{
 		libfdata_stream_free(
-		 data_stream,
+		 &safe_data_stream,
 		 NULL );
 	}
 	if( data_handle != NULL )
@@ -144,6 +147,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
      uint8_t is_sparse,
      libcerror_error_t **error )
 {
+	libfdata_stream_t *safe_data_stream             = NULL;
 	libfsapfs_data_block_data_handle_t *data_handle = NULL;
 	static char *function                           = "libfsapfs_data_stream_initialize_from_file_extents";
 	int segment_index                               = 0;
@@ -154,7 +158,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream attribute.",
+		 "%s: invalid data stream.",
 		 function );
 
 		return( -1 );
@@ -188,7 +192,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
 		goto on_error;
 	}
 	if( libfdata_stream_initialize(
-	     data_stream,
+	     &safe_data_stream,
 	     (intptr_t *) data_handle,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_data_block_data_handle_free,
 	     NULL,
@@ -211,7 +215,7 @@ int libfsapfs_data_stream_initialize_from_file_extents(
 	data_handle = NULL;
 
 	if( libfdata_stream_append_segment(
-	     *data_stream,
+	     safe_data_stream,
 	     &segment_index,
 	     0,
 	     0,
@@ -228,13 +232,15 @@ int libfsapfs_data_stream_initialize_from_file_extents(
 
 		goto on_error;
 	}
+	*data_stream = safe_data_stream;
+
 	return( 1 );
 
 on_error:
-	if( *data_stream != NULL )
+	if( safe_data_stream != NULL )
 	{
 		libfdata_stream_free(
-		 data_stream,
+		 &safe_data_stream,
 		 NULL );
 	}
 	if( data_handle != NULL )
@@ -257,6 +263,7 @@ int libfsapfs_data_stream_initialize_from_compressed_data_stream(
      int compression_method,
      libcerror_error_t **error )
 {
+	libfdata_stream_t *safe_data_stream             = NULL;
 	libfsapfs_compressed_data_handle_t *data_handle = NULL;
 	static char *function                           = "libfsapfs_data_stream_initialize_from_compressed_data_stream";
 	int segment_index                               = 0;
@@ -267,7 +274,7 @@ int libfsapfs_data_stream_initialize_from_compressed_data_stream(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data stream attribute.",
+		 "%s: invalid data stream.",
 		 function );
 
 		return( -1 );
@@ -289,7 +296,7 @@ int libfsapfs_data_stream_initialize_from_compressed_data_stream(
 		goto on_error;
 	}
 	if( libfdata_stream_initialize(
-	     data_stream,
+	     &safe_data_stream,
 	     (intptr_t *) data_handle,
 	     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_compressed_data_handle_free,
 	     NULL,
@@ -312,7 +319,7 @@ int libfsapfs_data_stream_initialize_from_compressed_data_stream(
 	data_handle = NULL;
 
 	if( libfdata_stream_append_segment(
-	     *data_stream,
+	     safe_data_stream,
 	     &segment_index,
 	     0,
 	     0,
@@ -329,13 +336,15 @@ int libfsapfs_data_stream_initialize_from_compressed_data_stream(
 
 		goto on_error;
 	}
+	*data_stream = safe_data_stream;
+
 	return( 1 );
 
 on_error:
-	if( *data_stream != NULL )
+	if( safe_data_stream != NULL )
 	{
 		libfdata_stream_free(
-		 data_stream,
+		 &safe_data_stream,
 		 NULL );
 	}
 	if( data_handle != NULL )

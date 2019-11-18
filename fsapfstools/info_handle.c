@@ -5,18 +5,18 @@
  *
  * Refer to AUTHORS for acknowledgements.
  *
- * This software is free software: you can redistribute it and/or modify
+ * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This software is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public License
- * along with this software.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include <common.h>
@@ -218,7 +218,12 @@ int info_handle_initialize(
 		 "%s: unable to clear info handle.",
 		 function );
 
-		goto on_error;
+		memory_free(
+		 *info_handle );
+
+		*info_handle = NULL;
+
+		return( -1 );
 	}
 	if( libbfio_file_range_initialize(
 	     &( ( *info_handle )->input_file_io_handle ),
@@ -253,13 +258,6 @@ int info_handle_initialize(
 on_error:
 	if( *info_handle != NULL )
 	{
-		if( ( *info_handle )->bodyfile_stream != NULL )
-		{
-			file_stream_close(
-			 ( *info_handle )->bodyfile_stream );
-
-			( *info_handle )->bodyfile_stream = NULL;
-		}
 		if( ( *info_handle )->input_file_io_handle != NULL )
 		{
 			libbfio_handle_free(
