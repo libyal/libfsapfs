@@ -16,6 +16,8 @@ MSVSCPP_FILES = \
 	fsapfs_test_container_reaper/fsapfs_test_container_reaper.vcproj \
 	fsapfs_test_container_superblock/fsapfs_test_container_superblock.vcproj \
 	fsapfs_test_data_block/fsapfs_test_data_block.vcproj \
+	fsapfs_test_data_block_data_handle/fsapfs_test_data_block_data_handle.vcproj \
+	fsapfs_test_data_block_vector/fsapfs_test_data_block_vector.vcproj \
 	fsapfs_test_data_stream/fsapfs_test_data_stream.vcproj \
 	fsapfs_test_deflate/fsapfs_test_deflate.vcproj \
 	fsapfs_test_directory_record/fsapfs_test_directory_record.vcproj \

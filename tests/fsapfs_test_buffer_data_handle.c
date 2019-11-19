@@ -584,7 +584,6 @@ on_error:
 	return( 0 );
 }
 
-
 /* Tests the libfsapfs_buffer_data_handle_seek_segment_offset function
  * Returns 1 if successful or 0 if not
  */

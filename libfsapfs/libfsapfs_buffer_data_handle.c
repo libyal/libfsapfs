@@ -27,7 +27,7 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_unused.h"
 
-/* Creates buffer data handle
+/* Creates a buffer data handle
  * Make sure the value data_handle is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
  */
@@ -128,7 +128,7 @@ on_error:
 	return( -1 );
 }
 
-/* Frees data handle
+/* Frees a buffer data handle
  * Returns 1 if successful or -1 on error
  */
 int libfsapfs_buffer_data_handle_free(

@@ -143,6 +143,8 @@ stamp-h[1-9]
 /tests/fsapfs_test_container_reaper
 /tests/fsapfs_test_container_superblock
 /tests/fsapfs_test_data_block
+/tests/fsapfs_test_data_block_data_handle
+/tests/fsapfs_test_data_block_vector
 /tests/fsapfs_test_data_stream
 /tests/fsapfs_test_deflate
 /tests/fsapfs_test_directory_record

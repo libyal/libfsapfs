@@ -246,6 +246,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block_vector.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_data_stream.c"
 				>
 			</File>
@@ -521,6 +525,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_data_block_data_handle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_data_block_vector.h"
 				>
 			</File>
 			<File

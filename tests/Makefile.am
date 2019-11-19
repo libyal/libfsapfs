@@ -61,6 +61,8 @@ check_PROGRAMS = \
 	fsapfs_test_container_reaper \
 	fsapfs_test_container_superblock \
 	fsapfs_test_data_block \
+	fsapfs_test_data_block_data_handle \
+	fsapfs_test_data_block_vector \
 	fsapfs_test_data_stream \
 	fsapfs_test_deflate \
 	fsapfs_test_directory_record \
@@ -357,6 +359,45 @@ fsapfs_test_data_block_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_data_block_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_data_block_data_handle_SOURCES = \
+	fsapfs_test_data_block_data_handle.c \
+	fsapfs_test_functions.c fsapfs_test_functions.h \
+	fsapfs_test_libbfio.h \
+	fsapfs_test_libcdata.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_data_block_data_handle_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_data_block_vector_SOURCES = \
+	fsapfs_test_data_block_vector.c \
+	fsapfs_test_libcdata.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfdata.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_data_block_vector_LDADD = \
+	@LIBFDATA_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

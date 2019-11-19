@@ -58,6 +58,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_container_superblock.c libfsapfs_container_superblock.h \
 	libfsapfs_data_block.c libfsapfs_data_block.h \
 	libfsapfs_data_block_data_handle.c libfsapfs_data_block_data_handle.h \
+	libfsapfs_data_block_vector.c libfsapfs_data_block_vector.h \
 	libfsapfs_data_stream.c libfsapfs_data_stream.h \
 	libfsapfs_debug.c libfsapfs_debug.h \
 	libfsapfs_definitions.h \
