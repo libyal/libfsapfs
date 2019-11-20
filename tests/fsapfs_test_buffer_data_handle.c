@@ -95,6 +95,42 @@ int fsapfs_test_buffer_data_handle_initialize(
 	 "error",
 	 error );
 
+	result = libfsapfs_buffer_data_handle_initialize(
+	          &buffer_data_handle,
+	          NULL,
+	          0,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "buffer_data_handle",
+	 buffer_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_buffer_data_handle_free(
+	          &buffer_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "buffer_data_handle",
+	 buffer_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	/* Test error cases
 	 */
 	result = libfsapfs_buffer_data_handle_initialize(
@@ -159,24 +195,6 @@ int fsapfs_test_buffer_data_handle_initialize(
 	          &buffer_data_handle,
 	          fsapfs_test_buffer_data_handle_data1,
 	          (size_t) SSIZE_MAX + 1,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_buffer_data_handle_initialize(
-	          &buffer_data_handle,
-	          fsapfs_test_buffer_data_handle_data1,
-	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(

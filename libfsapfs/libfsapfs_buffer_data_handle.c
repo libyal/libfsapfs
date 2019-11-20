@@ -61,25 +61,27 @@ int libfsapfs_buffer_data_handle_initialize(
 
 		return( -1 );
 	}
-	if( data == NULL )
+	if( data_size > 0 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid data.",
-		 function );
+		if( data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+			 "%s: invalid data.",
+			 function );
 
-		return( -1 );
+			return( -1 );
+		}
 	}
-	if( ( data_size == 0 )
-	 || ( data_size > (size_t) SSIZE_MAX ) )
+	if( data_size > (size_t) SSIZE_MAX )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid data size value out of bounds.",
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid data size value exceeds maximum.",
 		 function );
 
 		return( -1 );
@@ -192,6 +194,17 @@ ssize_t libfsapfs_buffer_data_handle_read_segment_data(
 
 		return( -1 );
 	}
+	if( data_handle->current_offset < 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid data handle - current offset value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( segment_index != 0 )
 	{
 		libcerror_error_set(
@@ -225,11 +238,11 @@ ssize_t libfsapfs_buffer_data_handle_read_segment_data(
 
 		return( -1 );
 	}
-	if( data_handle->current_segment_offset >= (off64_t) data_handle->data_size )
+	if( data_handle->current_offset >= (off64_t) data_handle->data_size )
 	{
 		return( 0 );
 	}
-	read_size = data_handle->data_size - (size_t) data_handle->current_segment_offset;
+	read_size = data_handle->data_size - (size_t) data_handle->current_offset;
 
 	if( read_size > segment_data_size )
 	{
@@ -237,7 +250,7 @@ ssize_t libfsapfs_buffer_data_handle_read_segment_data(
 	}
 	if( memory_copy(
 	     segment_data,
-	     &( data_handle->data[ data_handle->current_segment_offset ] ),
+	     &( data_handle->data[ data_handle->current_offset ] ),
 	     read_size ) == NULL )
 	{
 		libcerror_error_set(
@@ -249,7 +262,7 @@ ssize_t libfsapfs_buffer_data_handle_read_segment_data(
 
 		return( -1 );
 	}
-	data_handle->current_segment_offset += read_size;
+	data_handle->current_offset += read_size;
 
 	return( (ssize_t) read_size );
 }
@@ -304,7 +317,7 @@ off64_t libfsapfs_buffer_data_handle_seek_segment_offset(
 
 		return( -1 );
 	}
-	data_handle->current_segment_offset = segment_offset;
+	data_handle->current_offset = segment_offset;
 
 	return( segment_offset );
 }

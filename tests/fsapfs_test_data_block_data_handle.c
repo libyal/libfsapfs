@@ -137,6 +137,8 @@ int fsapfs_test_data_block_data_handle_initialize(
 	 "error",
 	 error );
 
+	file_extent = NULL;
+
 	/* Test regular cases
 	 */
 	result = libfsapfs_data_block_data_handle_initialize(
@@ -363,7 +365,7 @@ int fsapfs_test_data_block_data_handle_initialize(
 	 */
 	result = libcdata_array_free(
 	          &file_extents,
-	          NULL,
+	          (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -420,7 +422,7 @@ on_error:
 	{
 		libcdata_array_free(
 		 &file_extents,
-		 NULL,
+	         (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
 		 NULL );
 	}
 	if( io_handle != NULL )
@@ -568,6 +570,8 @@ int fsapfs_test_data_block_data_handle_read_segment_data(
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
+
+	file_extent = NULL;
 
 	result = libfsapfs_data_block_data_handle_initialize(
 	          &data_block_data_handle,
@@ -941,7 +945,7 @@ int fsapfs_test_data_block_data_handle_read_segment_data(
 
 	result = libcdata_array_free(
 	          &file_extents,
-	          NULL,
+	          (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1009,7 +1013,7 @@ on_error:
 	{
 		libcdata_array_free(
 		 &file_extents,
-		 NULL,
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
 		 NULL );
 	}
 	if( io_handle != NULL )
@@ -1109,6 +1113,8 @@ int fsapfs_test_data_block_data_handle_seek_segment_offset(
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
+
+	file_extent = NULL;
 
 	result = libfsapfs_data_block_data_handle_initialize(
 	          &data_block_data_handle,
@@ -1233,7 +1239,7 @@ int fsapfs_test_data_block_data_handle_seek_segment_offset(
 
 	result = libcdata_array_free(
 	          &file_extents,
-	          NULL,
+	          (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1290,7 +1296,7 @@ on_error:
 	{
 		libcdata_array_free(
 		 &file_extents,
-		 NULL,
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
 		 NULL );
 	}
 	if( io_handle != NULL )

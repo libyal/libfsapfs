@@ -35,9 +35,9 @@ typedef struct libfsapfs_buffer_data_handle libfsapfs_buffer_data_handle_t;
 
 struct libfsapfs_buffer_data_handle
 {
-	/* The current segment offset
+	/* The current offset
 	 */
-	off64_t current_segment_offset;
+	off64_t current_offset;
 
 	/* The data
 	 */
