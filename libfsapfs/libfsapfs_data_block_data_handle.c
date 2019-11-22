@@ -27,6 +27,7 @@
 #include "libfsapfs_data_block_data_handle.h"
 #include "libfsapfs_data_block_vector.h"
 #include "libfsapfs_definitions.h"
+#include "libfsapfs_encryption_context.h"
 #include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcdata.h"
@@ -148,6 +149,20 @@ int libfsapfs_data_block_data_handle_initialize(
 
 		goto on_error;
 	}
+	if( libfdata_vector_get_size(
+	     ( *data_handle )->data_block_vector,
+	     &( ( *data_handle )->data_size ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve size of data block vector.",
+		 function );
+
+		goto on_error;
+	}
 	if( libfcache_cache_initialize(
 	     &( ( *data_handle )->data_block_cache ),
 	     LIBFSAPFS_MAXIMUM_CACHE_ENTRIES_DATA_BLOCKS,
@@ -162,19 +177,11 @@ int libfsapfs_data_block_data_handle_initialize(
 
 		goto on_error;
 	}
-	( *data_handle )->io_handle = io_handle;
-
 	return( 1 );
 
 on_error:
 	if( *data_handle != NULL )
 	{
-		if( ( *data_handle )->data_block_cache != NULL )
-		{
-			libfcache_cache_free(
-			 &( ( *data_handle )->data_block_cache ),
-			 NULL );
-		}
 		if( ( *data_handle )->data_block_vector != NULL )
 		{
 			libfdata_vector_free(
@@ -282,11 +289,9 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 {
 	libfsapfs_data_block_t *data_block = NULL;
 	static char *function              = "libfsapfs_data_block_data_handle_read_segment_data";
-	size64_t data_size                 = 0;
-	size_t data_block_offset           = 0;
 	size_t read_size                   = 0;
 	size_t segment_data_offset         = 0;
-	uint64_t block_number              = 0;
+	off64_t data_block_offset          = 0;
 
 	LIBFSAPFS_UNREFERENCED_PARAMETER( segment_file_index )
 	LIBFSAPFS_UNREFERENCED_PARAMETER( segment_flags )
@@ -299,17 +304,6 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid data handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( data_handle->io_handle == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid data handle - missing IO handle.",
 		 function );
 
 		return( -1 );
@@ -358,34 +352,18 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 
 		return( -1 );
 	}
-	if( libfdata_vector_get_size(
-	     data_handle->data_block_vector,
-	     &data_size,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve size of data block vector.",
-		 function );
-
-		return( -1 );
-	}
-	if( (size64_t) data_handle->current_offset >= data_size )
+	if( (size64_t) data_handle->current_offset >= data_handle->data_size )
 	{
 		return( 0 );
 	}
-	block_number      = data_handle->current_offset / data_handle->io_handle->block_size;
-	data_block_offset = data_handle->current_offset % data_handle->io_handle->block_size;
-
 	while( segment_data_size > 0 )
 	{
-		if( libfdata_vector_get_element_value_by_index(
+		if( libfdata_vector_get_element_value_at_offset(
 		     data_handle->data_block_vector,
 		     (intptr_t *) file_io_handle,
 		     (libfdata_cache_t *) data_handle->data_block_cache,
-		     block_number,
+		     data_handle->current_offset,
+		     &data_block_offset,
 		     (intptr_t **) &data_block,
 		     0,
 		     error ) != 1 )
@@ -394,9 +372,10 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve data block: %" PRIu64 ".",
+			 "%s: unable to retrieve data block at offset: %" PRIi64 " (0x%08" PRIx64 ").",
 			 function,
-			 block_number );
+			 data_handle->current_offset,
+			 data_handle->current_offset );
 
 			return( -1 );
 		}
@@ -406,9 +385,8 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid data block: %" PRIu64 ".",
-			 function,
-			 block_number );
+			 "%s: invalid data block.",
+			 function );
 
 			return( -1 );
 		}
@@ -418,13 +396,13 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-			 "%s: invalid data block: %" PRIu64 " - missing data.",
-			 function,
-			 block_number );
+			 "%s: invalid data block - missing data.",
+			 function );
 
 			return( -1 );
 		}
-		if( data_block_offset >= data_block->data_size )
+		if( ( data_block_offset < 0 )
+		 || ( (size64_t) data_block_offset >= data_block->data_size ) )
 		{
 			libcerror_error_set(
 			 error,
@@ -450,21 +428,17 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_MEMORY,
 			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to copy data block: %" PRIu64 " data.",
-			 function,
-			 block_number );
+			 "%s: unable to copy data block data.",
+			 function );
 
 			return( -1 );
 		}
-		data_block_offset    = 0;
 		segment_data_offset += read_size;
 		segment_data_size   -= read_size;
 
-		block_number++;
-
 		data_handle->current_offset += read_size;
 
-		if( (size64_t) data_handle->current_offset >= data_size )
+		if( (size64_t) data_handle->current_offset >= data_handle->data_size )
 		{
 			break;
 		}

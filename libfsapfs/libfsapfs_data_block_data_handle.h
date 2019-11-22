@@ -46,9 +46,9 @@ struct libfsapfs_data_block_data_handle
 	 */
 	off64_t current_offset;
 
-	/* The IO handle
+	/* The data size
 	 */
-	libfsapfs_io_handle_t *io_handle;
+	size64_t data_size;
 
 	/* The file system data handle
 	 */

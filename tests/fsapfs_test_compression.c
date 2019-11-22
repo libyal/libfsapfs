@@ -232,6 +232,7 @@ int fsapfs_test_decompress_data(
 	libcerror_error_free(
 	 &error );
 
+/* TODO check if this test is correct */
 	result = libfsapfs_decompress_data(
 	          uncompressed_data,
 	          16,

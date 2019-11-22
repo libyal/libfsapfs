@@ -422,7 +422,7 @@ on_error:
 	{
 		libcdata_array_free(
 		 &file_extents,
-	         (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_file_extent_free,
 		 NULL );
 	}
 	if( io_handle != NULL )
@@ -759,7 +759,7 @@ int fsapfs_test_data_block_data_handle_read_segment_data(
 	 "error",
 	 error );
 
-	/* Create a new cluster block data handle to prevent the cluster block cache
+	/* Create a new data block data handle to prevent the data block cache
 	 * affecting the tests.
 	 */
 	result = libfsapfs_data_block_data_handle_initialize(
@@ -795,6 +795,33 @@ int fsapfs_test_data_block_data_handle_read_segment_data(
 	              0,
 	              0,
 	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT64(
+	 "read_count",
+	 read_count,
+	 (ssize_t) -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	data_block_data_handle->current_offset = -1;
+
+	read_count = libfsapfs_data_block_data_handle_read_segment_data(
+	              data_block_data_handle,
+	              file_io_handle,
+	              0,
+	              0,
+	              segment_data,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	data_block_data_handle->current_offset = 0;
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT64(
 	 "read_count",
@@ -899,6 +926,44 @@ int fsapfs_test_data_block_data_handle_read_segment_data(
 
 	libcerror_error_free(
 	 &error );
+
+#if defined( HAVE_FSAPFS_TEST_MEMORY )
+#if defined( OPTIMIZATION_DISABLED )
+	/* Test libfsapfs_data_block_data_handle_read_segment_data with memcpy failing
+	 */
+	fsapfs_test_memcpy_attempts_before_fail = 0;
+
+	read_count = libfsapfs_data_block_data_handle_read_segment_data(
+	              data_block_data_handle,
+	              file_io_handle,
+	              0,
+	              0,
+	              segment_data,
+	              12,
+	              0,
+	              0,
+	              &error );
+
+	if( fsapfs_test_memcpy_attempts_before_fail != -1 )
+	{
+		fsapfs_test_memcpy_attempts_before_fail = -1;
+	}
+	else
+	{
+		FSAPFS_TEST_ASSERT_EQUAL_INT64(
+		 "read_count",
+		 read_count,
+		 (ssize_t) -1 );
+
+		FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( OPTIMIZATION_DISABLED ) */
+#endif /* defined( HAVE_FSAPFS_TEST_MEMORY ) */
 
 	/* Clean up file IO handle
 	 */
