@@ -23,17 +23,6 @@ matrix:
     dist: xenial
     sudo: required
     group: edge
-  - name: "Linux with gcc on PowerPC 64-bit"
-    env:
-    - CONFIGURE_OPTIONS=""
-    - CFLAGS="--coverage"
-    - LDFLAGS="--coverage"
-    - TARGET="linux-gcc"
-    compiler: gcc
-    os: linux-ppc64le
-    dist: xenial
-    sudo: required
-    group: edge
   - name: "Linux with gcc on s390x (Docker)"
     env:
     - DOCKERHUB_REPO="s390x/ubuntu"

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to run before_install step on Travis-CI
 #
-# Version: 20190808
+# Version: 20191209
 
 # Exit on error.
 set -e;
@@ -16,7 +16,7 @@ then
 
 	docker run --rm --privileged multiarch/qemu-user-static --reset -p yes;
 
-elif test ${TRAVIS_OS_NAME} = "linux" || test ${TRAVIS_OS_NAME} = "linux-ppc64le";
+elif test ${TRAVIS_OS_NAME} = "linux";
 then
 	sudo apt-get update;
 	sudo apt-mark hold mysql-server-5.7 postgresql-9.4 postgresql-client-9.4 postgresql-9.5 postgresql-client-9.5 postgresql-9.6 postgresql-client-9.6 postgresql-10 postgresql-client-10;

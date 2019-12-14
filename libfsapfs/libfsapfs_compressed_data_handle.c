@@ -495,7 +495,7 @@ int libfsapfs_compressed_data_handle_get_compressed_block_offsets(
 	}
 #endif
 #if ( SIZEOF_SIZE_T <= 4 )
-	if( (size_t) data_handle->number_of_compressed_blocks > (size_t) ( SSIZE_MAX - 4 ) )
+	if( (size_t) data_handle->number_of_compressed_blocks > ( (size_t) ( SSIZE_MAX / 4 ) - 1 ) )
 	{
 		libcerror_error_set(
 		 error,

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20180728
+# Version: 20191204
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -105,7 +105,7 @@ endif
 
 	sed -i'~' "/AM_CPPFLAGS = /,/noinst_LTLIBRARIES = / { N; s/\\\\\\n.@${LOCAL_LIB_UPPER}_DLL_EXPORT@//; P; D; }" ${LOCAL_LIB_MAKEFILE_AM};
 	sed -i'~' "/${LOCAL_LIB}_definitions.h.in/d" ${LOCAL_LIB_MAKEFILE_AM};
-	sed -i'~' "/${LOCAL_LIB}.rc/d" ${LOCAL_LIB_MAKEFILE_AM};
+	sed -i'~' "/${LOCAL_LIB}\\.rc/d" ${LOCAL_LIB_MAKEFILE_AM};
 
 	if test ${LOCAL_LIB} = "libfplist";
 	then

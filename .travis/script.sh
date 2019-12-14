@@ -1,12 +1,12 @@
 #!/bin/sh
 # Script to run script step on Travis-CI
 #
-# Version: 20190808
+# Version: 20191209
 
 # Exit on error.
 set -e;
 
-if test ${TRAVIS_OS_NAME} = "linux" || test ${TRAVIS_OS_NAME} = "linux-ppc64le";
+if test ${TRAVIS_OS_NAME} = "linux";
 then
 	export PATH=$(echo $PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g");
 fi

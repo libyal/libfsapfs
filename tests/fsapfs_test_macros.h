@@ -179,14 +179,14 @@
 #define FSAPFS_TEST_ASSERT_EQUAL_UINT32( name, value, expected_value ) \
 	if( value != expected_value ) \
 	{ \
-		fprintf( stdout, "%s:%d %s (%" PRIi32 ") != %" PRIu32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
+		fprintf( stdout, "%s:%d %s (%" PRIu32 ") != %" PRIu32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
 #define FSAPFS_TEST_ASSERT_LESS_THAN_UINT32( name, value, expected_value ) \
 	if( value >= expected_value ) \
 	{ \
-		fprintf( stdout, "%s:%d %s (%" PRIi32 ") >= %" PRIu32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
+		fprintf( stdout, "%s:%d %s (%" PRIu32 ") >= %" PRIu32 "\n", __FILE__, __LINE__, name, value, expected_value ); \
 		goto on_error; \
 	}
 
