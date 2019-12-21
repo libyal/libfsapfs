@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20191005
+# Version: 20191220
 
 # Generic auto-generated build files
 *~
@@ -27,6 +27,7 @@
 *.trs
 /*.egg-info/
 .deps
+.dirstamp
 .libs
 INSTALL
 Makefile

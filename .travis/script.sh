@@ -25,6 +25,8 @@ elif test ${TARGET} = "macos-gcc-python-setup-py37";
 then
 	./configure ${CONFIGURE_OPTIONS};
 	make > /dev/null;
+	python3 ./setup.py build;
+
 	python3 ./setup.py bdist_wheel;
 
 elif test ${TARGET} != "coverity";

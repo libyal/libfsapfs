@@ -352,6 +352,8 @@ fsapfs_test_container_superblock_LDADD = \
 
 fsapfs_test_data_block_SOURCES = \
 	fsapfs_test_data_block.c \
+	fsapfs_test_functions.c fsapfs_test_functions.h \
+	fsapfs_test_libbfio.h \
 	fsapfs_test_libcerror.h \
 	fsapfs_test_libfsapfs.h \
 	fsapfs_test_macros.h \
@@ -359,6 +361,14 @@ fsapfs_test_data_block_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_data_block_LDADD = \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

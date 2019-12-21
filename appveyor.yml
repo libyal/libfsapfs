@@ -243,33 +243,33 @@ build_script:
     msbuild /verbosity:quiet vs2017\libfsapfs.sln /property:Platform=x64 /property:PlatformToolset=v141 /logger:"C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
     "%PYTHON%" setup.py bdist_msi bdist_wheel )
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then ./synclibs.sh && ./autogen.sh; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python"; then ./synclibs.sh && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python"; then ${PYTHON} setup.py bdist_wheel; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin\home\appveyor\libfsapfs &&
-    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     xcopy /i /q /s C:\projects\libfsapfs C:\MinGW\msys\1.0\home\appveyor\libfsapfs &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh" )
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
 
 test_script:
 - cmd: rem Run tests
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\runtests.ps1 }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\bin\bash -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\cygwin\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\bin\bash -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\cygwin64\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\MinGW\msys\1.0\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -l -c "cd libfsapfs && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\msys64\usr\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
 
 after_test:
 - cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
@@ -280,6 +280,6 @@ artifacts:
 - path: dist\*.whl
 
 deploy_script:
-- ps: If ($env:APPVEYOR_REPO_TAG -eq "true") {
+- ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -and $isWindows) {
     Invoke-Expression "${env:PYTHON} -m twine upload dist/*.whl --username __token__ --password ${env:PYPI_TOKEN} --skip-existing" }
 

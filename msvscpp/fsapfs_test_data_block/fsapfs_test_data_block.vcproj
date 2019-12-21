@@ -180,6 +180,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tests\fsapfs_test_functions.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tests\fsapfs_test_memory.c"
 				>
 			</File>
@@ -189,6 +193,14 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath="..\..\tests\fsapfs_test_functions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\tests\fsapfs_test_libbfio.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\tests\fsapfs_test_libcerror.h"
 				>
