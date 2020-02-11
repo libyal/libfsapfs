@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20191204
+# Version: 20191229
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -161,6 +161,19 @@ SED_SCRIPT="/^$/ {
 		if ! test -f "m4/libuna.m4";
 		then
 			sed -i'~' '/@LIBUNA_CPPFLAGS@/d' ${LOCAL_LIB_MAKEFILE_AM};
+		fi
+	fi
+
+	# Make the necessary changes to libsmraw/Makefile.am
+	if test ${LOCAL_LIB} = "libsmraw";
+	then
+		if test -f "m4/libfdatetime.m4";
+		then
+			sed -i'~' '/@LIBFVALUE_CPPFLAGS@/{h; s/FVALUE/FDATETIME/; p; g;}' ${LOCAL_LIB_MAKEFILE_AM};
+		fi
+		if test -f "m4/libfguid.m4";
+		then
+			sed -i'~' '/@LIBFVALUE_CPPFLAGS@/{h; s/FVALUE/FGUID/; p; g;}' ${LOCAL_LIB_MAKEFILE_AM};
 		fi
 	fi
 

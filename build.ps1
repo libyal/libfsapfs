@@ -1,12 +1,14 @@
 # Script that builds libfsapfs
 #
-# Version: 20180728
+# Version: 20200130
 
 Param (
 	[string]$Configuration = ${Env:Configuration},
-	[string]$MSVSCppConvertOptions = "--extend-with-x64",
 	[string]$Platform = ${Env:Platform},
-	[string]$PythonPath = "C:\Python27",
+	[string]$PlatformToolset = "",
+	[string]$PythonPath = "C:\Python37",
+	[string]$VisualStudioVersion = "",
+	[string]$VSToolsOptions = "--extend-with-x64",
 	[string]$VSToolsPath = "..\vstools"
 )
 
@@ -52,99 +54,133 @@ If (-Not (Test-Path ${MSVSCppConvert}))
 
 	Exit ${ExitFailure}
 }
-ElseIf (-Not ${Env:VisualStudioVersion})
+If (-Not ${VisualStudioVersion})
 {
-	Write-Host "Unknown Visual Studio version make sure to set %VisualStudioVersion%" -foreground Red
+	$VisualStudioVersion = "2019"
+
+	Write-Host "Visual Studio version not set defauting to: ${VisualStudioVersion}" -foreground Red
+}
+If ((${VisualStudioVersion} -ne "2008") -And (${VisualStudioVersion} -ne "2010") -And (${VisualStudioVersion} -ne "2012") -And (${VisualStudioVersion} -ne "2013") -And (${VisualStudioVersion} -ne "2015") -And (${VisualStudioVersion} -ne "2017") -And (${VisualStudioVersion} -ne "2019"))
+{
+	Write-Host "Unsupported Visual Studio version: ${VisualStudioVersion}" -foreground Red
 
 	Exit ${ExitFailure}
 }
-$OutputFormat = ""
+$MSBuild = ""
 
-If (${Env:VisualStudioVersion} -eq "15.0")
+If (${VisualStudioVersion} -eq "2008")
 {
-	$OutputFormat = "2017"
+	$MSBuild = "C:\Windows\Microsoft.NET\Framework\v3.5\MSBuild.exe"
 }
-ElseIf (${Env:VisualStudioVersion} -eq "14.0")
+ElseIf ((${VisualStudioVersion} -eq "2010") -Or (${VisualStudioVersion} -eq "2012"))
 {
-	$OutputFormat = "2015"
+	$MSBuild = "C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
 }
-ElseIf (${Env:VisualStudioVersion} -eq "12.0")
+ElseIf (${VisualStudioVersion} -eq "2013")
 {
-	$OutputFormat = "2013"
+	$MSBuild = "C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe"
 }
-ElseIf (${Env:VisualStudioVersion} -eq "11.0")
+ElseIf (${VisualStudioVersion} -eq "2015")
 {
-	$OutputFormat = "2012"
+	$MSBuild = "C:\Program Files (x86)\MSBuild\14.0\Bin\MSBuild.exe"
 }
-ElseIf (${Env:VisualStudioVersion} -eq "10.0")
+ElseIf (${VisualStudioVersion} -eq "2017")
 {
-	$OutputFormat = "2010"
+	$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2017\*\MSBuild\15.0\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+
+	If ($Results.Count -gt 0)
+	{
+		$MSBuild = $Results[0].FullName
+	}
 }
-ElseIf (${Env:VisualStudioVersion} -eq "9.0")
+ElseIf (${VisualStudioVersion} -eq "2019")
 {
-	$OutputFormat = "2008"
+	$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\*\MSBuild\Current\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+
+	If ($Results.Count -gt 0)
+	{
+		$MSBuild = $Results[0].FullName
+	}
 }
-Else
+If (-Not ${MSBuild})
 {
-	Write-Host "Unsupported Visual Studio version: %VisualStudioVersion% = ${Env:VisualStudioVersion}" -foreground Red
+	Write-Host "Unable to determine path to msbuild.exe" -foreground Red
 
 	Exit ${ExitFailure}
 }
-If (${OutputFormat} -eq "2017")
-{
-	$MSBuild = "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64\MSBuild.exe"
-}
-ElseIf (${OutputFormat} -eq "2008")
-{
-	$MSBuild = "C:\\Windows\Microsoft.NET\Framework\v3.5\MSBuild.exe"
-}
-Else
-{
-	$MSBuild = "C:\\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
-}
-If (-Not (Test-Path ${MSBuild}))
+ElseIf (-Not (Test-Path ${MSBuild}))
 {
 	Write-Host "Missing msbuild.exe: ${MSBuild}" -foreground Red
 
 	Exit ${ExitFailure}
 }
-If (${OutputFormat} -eq "2008")
+
+If (${VisualStudioVersion} -eq "2008")
 {
 	$VSSolutionPath = "msvscpp"
 }
 Else
 {
-	$VSSolutionPath = "vs${OutputFormat}"
+	$VSSolutionPath = "vs${VisualStudioVersion}"
 
 	If (-Not (Test-Path "${VSSolutionPath}"))
 	{
 		${Env:PYTHONPATH} = ${VSToolsPath}
 
-		Invoke-Expression -Command "& '${Python}' ${MSVSCppConvert} --output-format ${OutputFormat} ${MSVSCppConvertOptions} msvscpp\libfsapfs.sln"
+		Invoke-Expression -Command "& '${Python}' ${MSVSCppConvert} --output-format ${VisualStudioVersion} ${VSToolsOptions} msvscpp\libfsapfs.sln 2>&1 | %{ '$_' }"
 	}
 }
 $VSSolutionFile = "${VSSolutionPath}\libfsapfs.sln"
 
 If (-Not (Test-Path "${VSSolutionFile}"))
 {
-	Write-Host "Missing Visual Studio ${OutputFormat} solution file: ${VSSolutionFile}" -foreground Red
+	Write-Host "Missing Visual Studio ${VisualStudioVersion} solution file: ${VSSolutionFile}" -foreground Red
 
 	Exit ${ExitFailure}
 }
 If (-Not ${Configuration})
 {
 	$Configuration = "Release"
+
+	Write-Host "Configuration not set defauting to: ${Configuration}"
 }
 If (-Not ${Platform})
 {
 	$Platform = "Win32"
+
+	Write-Host "Platform not set defauting to: ${Platform}"
+}
+$PlatformToolset = ""
+
+If (-Not ${PlatformToolset})
+{
+	If (${VisualStudioVersion} -eq "2015")
+	{
+		$PlatformToolset = "v140"
+	}
+	ElseIf (${VisualStudioVersion} -eq "2017")
+	{
+		$PlatformToolset = "v141"
+	}
+	ElseIf (${VisualStudioVersion} -eq "2019")
+	{
+		$PlatformToolset = "v142"
+	}
+	Write-Host "PlatformToolset not set defauting to: ${PlatformToolset}"
 }
 $MSBuildOptions = "/verbosity:quiet /target:Build /property:Configuration=${Configuration},Platform=${Platform}"
 
-If (${Env:VisualStudioVersion} -eq "15.0")
+If (${PlatformToolset})
 {
-	$MSBuildOptions = "${MSBuildOptions} /property:PlatformToolset=v141"
+	$MSBuildOptions = "${MSBuildOptions} /property:PlatformToolset=${PlatformToolset}"
 }
-Invoke-Expression -Command "& '${MSBuild}' ${MSBuildOptions} ${VSSolutionFile}"
+If (${Env:APPVEYOR} -eq "True")
+{
+	Invoke-Expression -Command "& '${MSBuild}' ${MSBuildOptions} ${VSSolutionFile} /logger:'C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll'";
+}
+Else
+{
+	Invoke-Expression -Command "& '${MSBuild}' ${MSBuildOptions} ${VSSolutionFile}"
+}
 
 Exit ${ExitSuccess}

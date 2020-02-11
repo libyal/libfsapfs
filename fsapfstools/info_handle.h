@@ -1,7 +1,7 @@
 /*
  * Info handle
  *
- * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2020, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -161,6 +161,13 @@ int info_handle_file_entry_value_fprint(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,
      const system_character_t *path,
+     libcerror_error_t **error );
+
+int info_handle_file_entry_value_with_name_fprint(
+     info_handle_t *info_handle,
+     libfsapfs_file_entry_t *file_entry,
+     const system_character_t *path,
+     const system_character_t *file_entry_name,
      libcerror_error_t **error );
 
 int info_handle_file_system_hierarchy_fprint_file_entry(

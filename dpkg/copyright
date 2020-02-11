@@ -3,7 +3,7 @@ Upstream-Name: libfsapfs
 Source: https://github.com/libyal/libfsapfs
 
 Files: *
-Copyright: 2018-2019, Joachim Metz <joachim.metz@gmail.com>
+Copyright: 2018-2020, Joachim Metz <joachim.metz@gmail.com>
 License: LGPL-3.0+
 
 License: LGPL-3.0+

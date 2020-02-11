@@ -1,7 +1,7 @@
 /*
  * Info handle
  *
- * Copyright (C) 2018-2019, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2020, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -1297,28 +1297,10 @@ int info_handle_file_entry_value_fprint(
      const system_character_t *path,
      libcerror_error_t **error )
 {
-	char file_mode_string[ 11 ]                        = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
-
-	libfsapfs_extended_attribute_t *extended_attribute = NULL;
-	system_character_t *extended_attribute_name        = NULL;
-	system_character_t *file_entry_name                = NULL;
-	system_character_t *symbolic_link_target           = NULL;
-	static char *function                              = "info_handle_file_entry_value_fprint";
-	size64_t size                                      = 0;
-	size_t extended_attribute_name_size                = 0;
-	size_t file_entry_name_size                        = 0;
-	size_t symbolic_link_target_size                   = 0;
-	uint64_t identifier                                = 0;
-	int64_t access_time                                = 0;
-	int64_t creation_time                              = 0;
-	int64_t inode_change_time                          = 0;
-	int64_t modification_time                          = 0;
-	uint32_t group_identifier                          = 0;
-	uint32_t owner_identifier                          = 0;
-	uint16_t file_mode                                 = 0;
-	int extended_attribute_index                       = 0;
-	int number_of_extended_attributes                  = 0;
-	int result                                         = 0;
+	system_character_t *file_entry_name = NULL;
+	static char *function               = "info_handle_file_entry_value_fprint";
+	size_t file_entry_name_size         = 0;
+	int result                          = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1330,20 +1312,6 @@ int info_handle_file_entry_value_fprint(
 		 function );
 
 		return( -1 );
-	}
-	if( libfsapfs_file_entry_get_identifier(
-	     file_entry,
-	     &identifier,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve identifier.",
-		 function );
-
-		goto on_error;
 	}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libfsapfs_file_entry_get_utf16_name_size(
@@ -1408,6 +1376,96 @@ int info_handle_file_entry_value_fprint(
 
 			goto on_error;
 		}
+	}
+	if( info_handle_file_entry_value_with_name_fprint(
+	     info_handle,
+	     file_entry,
+	     path,
+	     file_entry_name,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+		 "%s: unable to print file entry.",
+		 function );
+
+		goto on_error;
+	}
+	if( file_entry_name != NULL )
+	{
+		memory_free(
+		 file_entry_name );
+
+		file_entry_name = NULL;
+	}
+	return( 1 );
+
+on_error:
+	if( file_entry_name != NULL )
+	{
+		memory_free(
+		 file_entry_name );
+	}
+	return( -1 );
+}
+
+/* Prints a file entry value with name
+ * Returns 1 if successful, 0 if not or -1 on error
+ */
+int info_handle_file_entry_value_with_name_fprint(
+     info_handle_t *info_handle,
+     libfsapfs_file_entry_t *file_entry,
+     const system_character_t *path,
+     const system_character_t *file_entry_name,
+     libcerror_error_t **error )
+{
+	char file_mode_string[ 11 ]                        = { '-', '-', '-', '-', '-', '-', '-', '-', '-', '-', 0 };
+
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	system_character_t *extended_attribute_name        = NULL;
+	system_character_t *symbolic_link_target           = NULL;
+	static char *function                              = "info_handle_file_entry_value_with_name_fprint";
+	size64_t size                                      = 0;
+	size_t extended_attribute_name_size                = 0;
+	size_t symbolic_link_target_size                   = 0;
+	uint64_t identifier                                = 0;
+	int64_t access_time                                = 0;
+	int64_t creation_time                              = 0;
+	int64_t inode_change_time                          = 0;
+	int64_t modification_time                          = 0;
+	uint32_t group_identifier                          = 0;
+	uint32_t owner_identifier                          = 0;
+	uint16_t file_mode                                 = 0;
+	int extended_attribute_index                       = 0;
+	int number_of_extended_attributes                  = 0;
+	int result                                         = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( libfsapfs_file_entry_get_identifier(
+	     file_entry,
+	     &identifier,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve identifier.",
+		 function );
+
+		goto on_error;
 	}
 	if( libfsapfs_file_entry_get_creation_time(
 	     file_entry,
@@ -1946,13 +2004,6 @@ int info_handle_file_entry_value_fprint(
 
 		symbolic_link_target = NULL;
 	}
-	if( file_entry_name != NULL )
-	{
-		memory_free(
-		 file_entry_name );
-
-		file_entry_name = NULL;
-	}
 	return( 1 );
 
 on_error:
@@ -1971,11 +2022,6 @@ on_error:
 	{
 		memory_free(
 		 symbolic_link_target );
-	}
-	if( file_entry_name != NULL )
-	{
-		memory_free(
-		 file_entry_name );
 	}
 	return( -1 );
 }
@@ -2120,10 +2166,11 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 	}
 	if( info_handle->bodyfile_stream != NULL )
 	{
-		if( info_handle_file_entry_value_fprint(
+		if( info_handle_file_entry_value_with_name_fprint(
 		     info_handle,
 		     file_entry,
 		     path,
+		     file_entry_name,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -2138,8 +2185,6 @@ int info_handle_file_system_hierarchy_fprint_file_entry(
 	}
 	else
 	{
-/* TODO move into info_handle_file_entry_value_fprint with print name only mode ? */
-
 		fprintf(
 		 info_handle->notify_stream,
 		 "%" PRIs_SYSTEM "",

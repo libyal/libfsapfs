@@ -1,6 +1,6 @@
 dnl Functions for Python bindings
 dnl
-dnl Version: 20190316
+dnl Version: 20200126
 
 dnl Function to check if the python binary is available
 dnl "python${PYTHON_VERSION} python python# python#.#"
@@ -224,7 +224,7 @@ AC_DEFUN([AX_PYTHON_CHECK],
       [AS_IF(
         [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],
         [ax_python_pythondir="${ax_python_prefix}/${ax_python_pythondir_suffix}"],
-        [ax_python_pythondir=`${PYTHON} -c "import distutils.sysconfig; print distutils.sysconfig.get_python_lib() " 2>/dev/null`])],
+        [ax_python_pythondir=`${PYTHON} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib()) " 2>/dev/null`])],
       [ax_python_pythondir=$ac_cv_with_pythondir])
 
     AC_SUBST(
@@ -233,7 +233,7 @@ AC_DEFUN([AX_PYTHON_CHECK],
 
     dnl Check for Python platform specific library directory
     ax_python_pyexecdir_suffix=`${PYTHON} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(1, 0, prefix=''))" 2>/dev/null`;
-    ax_python_library_dir=`${PYTHON} -c "import distutils.sysconfig; print distutils.sysconfig.get_python_lib(True) " 2>/dev/null`;
+    ax_python_library_dir=`${PYTHON} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(True)) " 2>/dev/null`;
 
     AS_IF(
       [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],
@@ -335,7 +335,7 @@ AC_DEFUN([AX_PYTHON2_CHECK],
       [AS_IF(
         [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],
         [ax_python2_pythondir="${ax_python_prefix}/${ax_python2_pythondir_suffix}"],
-        [ax_python2_pythondir=`${PYTHON2} -c "import distutils.sysconfig; print distutils.sysconfig.get_python_lib() " 2>/dev/null`])],
+        [ax_python2_pythondir=`${PYTHON2} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib()) " 2>/dev/null`])],
       [ax_python2_pythondir=$ac_cv_with_pythondir2])
 
     AC_SUBST(
@@ -344,7 +344,7 @@ AC_DEFUN([AX_PYTHON2_CHECK],
 
     dnl Check for Python 2 platform specific library directory
     ax_python2_pyexecdir_suffix=`${PYTHON2} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(1, 0, prefix=''))" 2>/dev/null`;
-    ax_python2_library_dir=`${PYTHON2} -c "import distutils.sysconfig; print distutils.sysconfig.get_python_lib(True) " 2>/dev/null`;
+    ax_python2_library_dir=`${PYTHON2} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(True)) " 2>/dev/null`;
 
     AS_IF(
       [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],
@@ -446,7 +446,7 @@ AC_DEFUN([AX_PYTHON3_CHECK],
       [AS_IF(
         [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],
         [ax_python3_pythondir="${ax_python_prefix}/${ax_python3_pythondir_suffix}"],
-        [ax_python3_pythondir=`${PYTHON3} -c "import distutils.sysconfig; print distutils.sysconfig.get_python_lib() " 2>/dev/null`])],
+        [ax_python3_pythondir=`${PYTHON3} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib()) " 2>/dev/null`])],
       [ax_python3_pythondir=$ac_cv_with_pythondir3])
 
     AC_SUBST(
@@ -455,7 +455,7 @@ AC_DEFUN([AX_PYTHON3_CHECK],
 
     dnl Check for Python 3 platform specific library directory
     ax_python3_pyexecdir_suffix=`${PYTHON3} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(1, 0, prefix=''))" 2>/dev/null`;
-    ax_python3_library_dir=`${PYTHON3} -c "import distutils.sysconfig; print distutils.sysconfig.get_python_lib(True) " 2>/dev/null`;
+    ax_python3_library_dir=`${PYTHON3} -c "import sys; import distutils.sysconfig; sys.stdout.write(distutils.sysconfig.get_python_lib(True)) " 2>/dev/null`;
 
     AS_IF(
       [test "x${ac_cv_with_pyprefix}" = x || test "x${ac_cv_with_pyprefix}" = xno],

@@ -1,6 +1,6 @@
 dnl Checks for libbfio required headers and functions
 dnl
-dnl Version: 20190308
+dnl Version: 20191230
 
 dnl Function to detect if libbfio is available
 dnl ac_libbfio_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -26,7 +26,7 @@ AC_DEFUN([AX_LIBBFIO_CHECK_LIB],
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
         [PKG_CHECK_MODULES(
           [libbfio],
-          [libbfio >= 20160108],
+          [libbfio >= 20191230],
           [ac_cv_libbfio=yes],
           [ac_cv_libbfio=check])
         ])

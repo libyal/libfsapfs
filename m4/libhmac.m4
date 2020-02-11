@@ -1,6 +1,6 @@
 dnl Checks for libhmac required headers and functions
 dnl
-dnl Version: 20190308
+dnl Version: 20200104
 
 dnl Function to detect if libhmac is available
 dnl ac_libhmac_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -26,7 +26,7 @@ AC_DEFUN([AX_LIBHMAC_CHECK_LIB],
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
         [PKG_CHECK_MODULES(
           [libhmac],
-          [libhmac >= 20160802],
+          [libhmac >= 20200104],
           [ac_cv_libhmac=yes],
           [ac_cv_libhmac=check])
         ])
