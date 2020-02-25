@@ -1,7 +1,7 @@
 #!/bin/bash
-# Tests C library functions and types.
+# Tests library functions and types.
 #
-# Version: 20190101
+# Version: 20190216
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;

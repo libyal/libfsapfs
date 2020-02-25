@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20190223
+# Version: 20200223
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -67,6 +67,31 @@ assert_availability_binaries()
 	then
 		assert_availability_binary valgrind;
 	fi
+}
+
+# Checks if the test set is in the ignore list.
+#
+# Arguments:
+#   a string containing the test set
+#   a string containing space separated ignore list
+#
+# Returns:
+#   an integer containing the exit status to indicate the input directory
+#   was found in the ignore list.
+#
+check_for_test_set_in_ignore_list()
+{
+	local TEST_SET=$1;
+	local IGNORE_LIST=$2;
+
+	for LIST_ELEMENT in `echo "${IGNORE_LIST}" | tr ' ' '\n'`;
+	do
+		if test "${LIST_ELEMENT}" = "${TEST_SET}";
+		then
+			return ${EXIT_SUCCESS};
+		fi
+	done
+	return ${EXIT_FAILURE};
 }
 
 # Checks if the input directory is in the ignore list.
@@ -224,26 +249,26 @@ find_binary_python_module_path()
 	echo "${PYTHON_MODULE_PATH}";
 }
 
-# Determines the test option file.
+# Determines the test data option file.
 #
 # Arguments:
 #   a string containing the path of the test set directory
 #   a string containing the path of the test input file
-#   a string containing the name of the option set
+#   a string containing the name of the test data option set
 #
 # Returns:
 #   a string containing the test input files
 #
-get_testion_option_file()
+get_testion_test_data_option_file()
 {
 	local TEST_SET_DIRECTORY=$1;
 	local INPUT_FILE=$2;
 	local OPTION_SET=$3;
 
 	local INPUT_NAME=`basename "${INPUT_FILE}"`;
-	local OPTION_FILE="${TEST_SET_DIRECTORY}/${INPUT_NAME}.${OPTION_SET}";
+	local TEST_DATA_OPTION_FILE="${TEST_SET_DIRECTORY}/${INPUT_NAME}.${OPTION_SET}";
 
-	echo "${OPTION_FILE}";
+	echo "${TEST_DATA_OPTION_FILE}";
 }
 
 # Determines the test profile directory.
@@ -342,26 +367,31 @@ read_ignore_list()
 	echo ${IGNORE_LIST};
 }
 
-# Reads the test set option file.
+# Reads a test data option file.
 #
 # Arguments:
 #   a string containing the path of the test set directory
 #   a string containing the path of the test input file
-#   a string containing the name of the option set
+#   a string containing the name of the test data option set
 #
 # Returns:
-#   a string containing the ignore list
+#   a string containing the test data specific options
 #
-read_option_file()
+read_test_data_option_file()
 {
 	local TEST_SET_DIRECTORY=$1;
 	local INPUT_FILE=$2;
 	local OPTION_SET=$3;
 
-	local OPTION_FILE=$(get_testion_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
+	local TEST_DATA_OPTION_FILE="${INPUT_FILE}.${OPTION_SET}";
+
+	if ! test -f "${TEST_DATA_OPTION_FILE}";
+	then
+		TEST_DATA_OPTION_FILE=$(get_testion_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
+	fi
 
 	local OPTIONS=()
-	local OPTIONS_STRING=`cat "${OPTION_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
+	local OPTIONS_STRING=`cat "${TEST_DATA_OPTION_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
 
 	echo "${OPTIONS_STRING}";
 }
@@ -1005,7 +1035,7 @@ run_test_with_input_and_arguments()
 #   a string containing the path of the test set directory
 #   a string containing the description of the test
 #   a string containing the test mode
-#   a string containing the name of the option set
+#   a string containing the name of the test data option set
 #   a string containing the path of the test executable
 #   a string containing the path of the test input file
 #   an array containing the arguments for the test executable
@@ -1030,7 +1060,7 @@ run_test_on_input_file()
 
 	if test -n "${OPTION_SET}";
 	then
-		OPTIONS_STRING=$(read_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
+		OPTIONS_STRING=$(read_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
 		IFS=" " read -a OPTIONS <<< "${OPTIONS_STRING}";
 
 		TEST_OUTPUT="${INPUT_NAME}-${OPTION_SET}";
@@ -1061,22 +1091,29 @@ run_test_on_input_file()
 		local INPUT_FILE_FULL_PATH=$( readlink_f "${INPUT_FILE}" );
 		local TEST_LOG="${TEST_OUTPUT}.log";
 
-		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} "${OPTIONS[@]}" | sed '1,2d' > "${TEST_LOG}");
+		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} "${OPTIONS[@]}" > "${TEST_LOG}");
 		RESULT=$?;
 
-		local TEST_RESULTS="${TMPDIR}/${TEST_LOG}";
-		local STORED_TEST_RESULTS="${TEST_SET_DIRECTORY}/${TEST_LOG}.gz";
-
-		if test -f "${STORED_TEST_RESULTS}";
+		# Compare output if test ran successfully.
+		if test ${RESULT} -eq ${EXIT_SUCCESS};
 		then
-			# Using zcat here since zdiff has issues on Mac OS X.
-			# Note that zcat on Mac OS X requires the input from stdin.
-			zcat < "${STORED_TEST_RESULTS}" | diff "${TEST_RESULTS}" -;
-			RESULT=$?;
-		else
-			gzip "${TEST_RESULTS}";
+			local TEST_RESULTS="${TMPDIR}/${TEST_LOG}";
+			local STORED_TEST_RESULTS="${TEST_SET_DIRECTORY}/${TEST_LOG}.gz";
 
-			mv "${TEST_RESULTS}.gz" ${TEST_SET_DIRECTORY};
+			# Strip header with version.
+			sed -i'~' '1,2d' "${TEST_RESULTS}";
+
+			if test -f "${STORED_TEST_RESULTS}";
+			then
+				# Using zcat here since zdiff has issues on Mac OS X.
+				# Note that zcat on Mac OS X requires the input from stdin.
+				zcat < "${STORED_TEST_RESULTS}" | diff "${TEST_RESULTS}" -;
+				RESULT=$?;
+			else
+				gzip "${TEST_RESULTS}";
+
+				mv "${TEST_RESULTS}.gz" ${TEST_SET_DIRECTORY};
+			fi
 		fi
 
 	else
@@ -1088,13 +1125,23 @@ run_test_on_input_file()
 
 	if test -n "${TEST_DESCRIPTION}";
 	then
+		ARGUMENTS=`echo "${ARGUMENTS[*]}" | tr '\n' ' ' | sed 's/[ ]\$//'`;
 		OPTIONS=`echo "${OPTIONS[*]}" | tr '\n' ' ' | sed 's/[ ]\$//'`;
 
-		if test -z "${OPTIONS}";
+		if test -z "${ARGUMENTS}" && test -z "${OPTIONS}";
 		then
 			echo -n "${TEST_DESCRIPTION} with input: ${INPUT_FILE}";
-		else
+
+		elif test -z "${ARGUMENTS}";
+		then
 			echo -n "${TEST_DESCRIPTION} with options: '${OPTIONS}' and input: ${INPUT_FILE}";
+
+		elif test -z "${OPTIONS}";
+		then
+			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS}' and input: ${INPUT_FILE}";
+
+		else
+			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS} ${OPTIONS}' and input: ${INPUT_FILE}";
 		fi
 
 		if test ${RESULT} -ne ${EXIT_SUCCESS};
@@ -1116,7 +1163,7 @@ run_test_on_input_file()
 #   a string containing the path of the test set directory
 #   a string containing the description of the test
 #   a string containing the test mode
-#   a string containing the name of the option sets
+#   a string containing the name of the test data option sets
 #   a string containing the path of the test executable
 #   a string containing the path of the test input file
 #   an array containing the arguments for the test executable
@@ -1140,9 +1187,9 @@ run_test_on_input_file_with_options()
 
 	for OPTION_SET in `echo ${OPTION_SETS} | tr ' ' '\n'`;
 	do
-		local OPTION_FILE=$(get_testion_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
+		local TEST_DATA_OPTION_FILE=$(get_testion_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
 
-		if ! test -f ${OPTION_FILE};
+		if ! test -f ${TEST_DATA_OPTION_FILE};
 		then
 			continue
 		fi
@@ -1162,6 +1209,67 @@ run_test_on_input_file_with_options()
 		run_test_on_input_file "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
 		RESULT=$?;
 	fi
+	return ${RESULT};
+}
+
+# Runs the test with options on the file entries in the test set directory.
+#
+# Note that this function is not intended to be directly invoked
+# from outside the test runner script.
+#
+# Arguments:
+#   a string containing the path of the test set directory
+#   a string containing the description of the test
+#   a string containing the test mode
+#   a string containing the name of the test data option sets
+#   a string containing the path of the test executable
+#   an array containing the arguments for the test executable
+#
+# Returns:
+#   an integer containg the exit status of the test executable
+#
+run_test_on_test_set_with_options()
+{
+	local TEST_SET_DIRECTORY=$1;
+	local TEST_DESCRIPTION=$2;
+	local TEST_MODE=$3;
+	local OPTION_SETS=$4;
+	local TEST_EXECUTABLE=$5;
+	shift 5;
+	local ARGUMENTS=("$@");
+
+	local RESULT=${EXIT_SUCCESS};
+
+	# IFS="\n"; is not supported by all platforms.
+	IFS="
+";
+
+	if test -f "${TEST_SET_DIRECTORY}/files";
+	then
+		for INPUT_FILE in `cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?"`;
+		do
+			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
+			RESULT=$?;
+
+			if test ${RESULT} -ne ${EXIT_SUCCESS};
+			then
+				break;
+			fi
+		done
+	else
+		for INPUT_FILE in `ls -1d ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
+		do
+			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
+			RESULT=$?;
+
+			if test ${RESULT} -ne ${EXIT_SUCCESS};
+			then
+				break;
+			fi
+		done
+	fi
+	IFS=${OLDIFS};
+
 	return ${RESULT};
 }
 

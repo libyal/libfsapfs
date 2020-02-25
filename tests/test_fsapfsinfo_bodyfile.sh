@@ -7,11 +7,47 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-PROFILES=("fsapfsinfo" "fsapfsinfo_fs");
-OPTIONS_PER_PROFILE=("" "-H");
+PROFILES=("fsapfsinfo_bodyfile_fs");
+OPTIONS_PER_PROFILE=("-Bbodyfile -H");
 OPTION_SETS="offset password";
 
 INPUT_GLOB="*";
+
+test_callback()
+{
+	local TMPDIR=$1;
+	local TEST_SET_DIRECTORY=$2;
+	local TEST_OUTPUT=$3;
+	local TEST_EXECUTABLE=$4;
+	local TEST_INPUT=$5;
+	shift 5;
+	local ARGUMENTS=("$@");
+
+	TEST_EXECUTABLE=$( readlink_f "${TEST_EXECUTABLE}" );
+	INPUT_FILE_FULL_PATH=$( readlink_f "${INPUT_FILE}" );
+
+	(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} >/dev/null);
+	local RESULT=$?;
+
+	if test ${RESULT} -eq ${EXIT_SUCCESS};
+	then
+		local TEST_RESULTS="${TMPDIR}/bodyfile";
+		local STORED_TEST_RESULTS="${TEST_SET_DIRECTORY}/${TEST_OUTPUT}-bodyfile.gz";
+
+		if test -f "${STORED_TEST_RESULTS}";
+		then
+			# Using zcat here since zdiff has issues on Mac OS X.
+			# Note that zcat on Mac OS X requires the input from stdin.
+			zcat < "${STORED_TEST_RESULTS}" | diff "${TEST_RESULTS}" -;
+			RESULT=$?;
+		else
+			gzip ${TEST_RESULTS};
+
+			mv "${TEST_RESULTS}.gz" "${TEST_SET_DIRECTORY}/${TEST_OUTPUT}-bodyfile.gz";
+		fi
+	fi
+	return ${RESULT};
+}
 
 if ! test -z ${SKIP_TOOLS_TESTS};
 then
@@ -89,7 +125,7 @@ do
 		fi
 		TEST_SET_DIRECTORY=$(get_test_set_directory "${TEST_PROFILE_DIRECTORY}" "${TEST_SET_INPUT_DIRECTORY}");
 
-		run_test_on_test_set_with_options "${TEST_SET_DIRECTORY}" "fsapfsinfo" "with_stdout_reference" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${OPTIONS[@]}";
+		run_test_on_test_set_with_options "${TEST_SET_DIRECTORY}" "fsapfsinfo" "with_callback" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${OPTIONS[@]}";
 		RESULT=$?;
 
 		# Ignore failures due to corrupted data.
