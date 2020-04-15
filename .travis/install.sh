@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to run install step on Travis-CI
 #
-# Version: 20190802
+# Version: 20200414
 
 # Exit on error.
 set -e;
@@ -10,6 +10,7 @@ if test ${TARGET} != "docker";
 then
 	if test ${TRAVIS_OS_NAME} = "osx";
 	then
+	        export PATH="/usr/local/opt/gettext/bin:$PATH";
 		export SED="/usr/local/bin/gsed";
 	fi
 

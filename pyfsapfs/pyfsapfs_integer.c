@@ -188,6 +188,7 @@ int pyfsapfs_integer_signed_copy_to_64bit(
 		}
 	}
 #endif /* PY_MAJOR_VERSION < 3 */
+
 	if( result == 0 )
 	{
 		libcerror_error_set(
@@ -333,6 +334,7 @@ int pyfsapfs_integer_unsigned_copy_to_64bit(
 		}
 	}
 #endif /* PY_MAJOR_VERSION < 3 */
+
 	if( result == 0 )
 	{
 		libcerror_error_set(

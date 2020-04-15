@@ -23,8 +23,11 @@ MSVSCPP_FILES = \
 	fsapfs_test_directory_record/fsapfs_test_directory_record.vcproj \
 	fsapfs_test_encryption_context/fsapfs_test_encryption_context.vcproj \
 	fsapfs_test_error/fsapfs_test_error.vcproj \
+	fsapfs_test_extended_attribute/fsapfs_test_extended_attribute.vcproj \
+	fsapfs_test_extent_reference_tree/fsapfs_test_extent_reference_tree.vcproj \
 	fsapfs_test_file_extent/fsapfs_test_file_extent.vcproj \
 	fsapfs_test_file_system_btree/fsapfs_test_file_system_btree.vcproj \
+	fsapfs_test_file_system_data_handle/fsapfs_test_file_system_data_handle.vcproj \
 	fsapfs_test_inode/fsapfs_test_inode.vcproj \
 	fsapfs_test_io_handle/fsapfs_test_io_handle.vcproj \
 	fsapfs_test_key_bag_entry/fsapfs_test_key_bag_entry.vcproj \
@@ -37,6 +40,10 @@ MSVSCPP_FILES = \
 	fsapfs_test_object_map/fsapfs_test_object_map.vcproj \
 	fsapfs_test_object_map_btree/fsapfs_test_object_map_btree.vcproj \
 	fsapfs_test_object_map_descriptor/fsapfs_test_object_map_descriptor.vcproj \
+	fsapfs_test_profiler/fsapfs_test_profiler.vcproj \
+	fsapfs_test_snapshot/fsapfs_test_snapshot.vcproj \
+	fsapfs_test_snapshot_metadata/fsapfs_test_snapshot_metadata.vcproj \
+	fsapfs_test_snapshot_metadata_tree/fsapfs_test_snapshot_metadata_tree.vcproj \
 	fsapfs_test_space_manager/fsapfs_test_space_manager.vcproj \
 	fsapfs_test_support/fsapfs_test_support.vcproj \
 	fsapfs_test_volume/fsapfs_test_volume.vcproj \

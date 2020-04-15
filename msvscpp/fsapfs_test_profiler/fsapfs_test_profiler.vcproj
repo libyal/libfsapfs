@@ -2,9 +2,10 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="libcfile"
-	ProjectGUID="{ABF4D2D6-8EFB-4A8E-815C-C831C9CA3EF2}"
-	RootNamespace="libcfile"
+	Name="fsapfs_test_profiler"
+	ProjectGUID="{465C2538-34DF-4167-9B6A-3715451864BA}"
+	RootNamespace="fsapfs_test_profiler"
+	Keyword="Win32Proj"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -19,8 +20,9 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="1"
+			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -39,8 +41,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libclocale;..\..\libcnotify;..\..\libuna"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libhmac;..\..\libcaes;..\..\..\zlib"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;ZLIB_DLL;LIBFSAPFS_DLL_IMPORT"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				CompileAs="1"
@@ -55,13 +57,21 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\$(ProjectName).lib"
-				ModuleDefinitionFile=""
-				IgnoreAllDefaultLibraries="false"
+				Name="VCLinkerTool"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="2"
+				DataExecutionPrevention="2"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -73,6 +83,9 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -80,7 +93,7 @@
 			Name="VSDebug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="1"
 			CharacterSet="1"
 			>
 			<Tool
@@ -101,8 +114,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libclocale;..\..\libcnotify;..\..\libuna"
-				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libhmac;..\..\libcaes;..\..\..\zlib"
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;ZLIB_DLL;LIBFSAPFS_DLL_IMPORT"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
@@ -120,13 +133,22 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\$(ProjectName).lib"
-				ModuleDefinitionFile=""
-				IgnoreAllDefaultLibraries="false"
+				Name="VCLinkerTool"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
+				GenerateDebugInformation="true"
+				SubSystem="1"
+				OptimizeReferences="2"
+				EnableCOMDATFolding="2"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="1"
+				TargetMachine="1"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -136,6 +158,9 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -151,27 +176,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\libcfile\libcfile_error.c"
+				RelativePath="..\..\tests\fsapfs_test_memory.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcfile\libcfile_file.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_notify.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_support.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_system_string.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_winapi.c"
+				RelativePath="..\..\tests\fsapfs_test_profiler.c"
 				>
 			</File>
 		</Filter>
@@ -181,59 +190,23 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\libcfile\libcfile_definitions.h"
+				RelativePath="..\..\tests\fsapfs_test_libcerror.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcfile\libcfile_error.h"
+				RelativePath="..\..\tests\fsapfs_test_libfsapfs.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcfile\libcfile_extern.h"
+				RelativePath="..\..\tests\fsapfs_test_macros.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcfile\libcfile_file.h"
+				RelativePath="..\..\tests\fsapfs_test_memory.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\libcfile\libcfile_libcerror.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_libclocale.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_libcnotify.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_libuna.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_notify.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_support.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_system_string.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_types.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_unused.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libcfile\libcfile_winapi.h"
+				RelativePath="..\..\tests\fsapfs_test_unused.h"
 				>
 			</File>
 		</Filter>

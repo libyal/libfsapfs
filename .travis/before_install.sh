@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to run before_install step on Travis-CI
 #
-# Version: 20191209
+# Version: 20200414
 
 # Exit on error.
 set -e;
@@ -26,10 +26,12 @@ then
 
 elif test ${TRAVIS_OS_NAME} = "osx";
 then
-	brew update
+	# Prevent from the 30 days autoclean being triggered on install.
+	export HOMEBREW_NO_INSTALL_CLEANUP=1;
+
+	brew update;
 
 	brew install gettext gnu-sed;
-	brew link --force gettext;
 
 	brew tap homebrew/cask;
 	brew cask install osxfuse;

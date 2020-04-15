@@ -70,8 +70,11 @@ check_PROGRAMS = \
 	fsapfs_test_directory_record \
 	fsapfs_test_encryption_context \
 	fsapfs_test_error \
+	fsapfs_test_extended_attribute \
+	fsapfs_test_extent_reference_tree \
 	fsapfs_test_file_extent \
 	fsapfs_test_file_system_btree \
+	fsapfs_test_file_system_data_handle \
 	fsapfs_test_inode \
 	fsapfs_test_io_handle \
 	fsapfs_test_key_bag_entry \
@@ -84,6 +87,10 @@ check_PROGRAMS = \
 	fsapfs_test_object_map \
 	fsapfs_test_object_map_btree \
 	fsapfs_test_object_map_descriptor \
+	fsapfs_test_profiler \
+	fsapfs_test_snapshot \
+	fsapfs_test_snapshot_metadata \
+	fsapfs_test_snapshot_metadata_tree \
 	fsapfs_test_space_manager \
 	fsapfs_test_support \
 	fsapfs_test_volume \
@@ -472,6 +479,30 @@ fsapfs_test_error_SOURCES = \
 fsapfs_test_error_LDADD = \
 	../libfsapfs/libfsapfs.la
 
+fsapfs_test_extended_attribute_SOURCES = \
+	fsapfs_test_extended_attribute.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_extended_attribute_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_extent_reference_tree_SOURCES = \
+	fsapfs_test_extent_reference_tree.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_extent_reference_tree_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
 fsapfs_test_file_extent_SOURCES = \
 	fsapfs_test_file_extent.c \
 	fsapfs_test_libcerror.h \
@@ -503,6 +534,18 @@ fsapfs_test_file_system_btree_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_file_system_data_handle_SOURCES = \
+	fsapfs_test_file_system_data_handle.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_file_system_data_handle_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
@@ -678,6 +721,54 @@ fsapfs_test_object_map_descriptor_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_object_map_descriptor_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_profiler_SOURCES = \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_profiler.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_profiler_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_snapshot_SOURCES = \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_snapshot.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_snapshot_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_snapshot_metadata_SOURCES = \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_snapshot_metadata.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_snapshot_metadata_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_snapshot_metadata_tree_SOURCES = \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_snapshot_metadata_tree.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_snapshot_metadata_tree_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

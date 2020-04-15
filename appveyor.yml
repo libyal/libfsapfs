@@ -61,8 +61,6 @@ environment:
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin-gcc-no-optimization
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -72,30 +70,20 @@ environment:
   - TARGET: cygwin-gcc-python
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: "--enable-python"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin-gcc-python2
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: "--enable-python2"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
     PYTHON_VERSION: 2
   - TARGET: cygwin-gcc-python3
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: "--enable-python3"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
     PYTHON_VERSION: 3
   - TARGET: cygwin-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin64-gcc
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin64-gcc-no-optimization
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -105,30 +93,20 @@ environment:
   - TARGET: cygwin64-gcc-python
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: "--enable-python"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: cygwin64-gcc-python2
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: "--enable-python2"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
     PYTHON_VERSION: 2
   - TARGET: cygwin64-gcc-python3
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: "--enable-python3"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
     PYTHON_VERSION: 3
   - TARGET: cygwin64-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin64
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-gcc
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -138,13 +116,9 @@ environment:
   - TARGET: mingw-gcc-static-executables
     BUILD_ENVIRONMENT: mingw
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-w64-gcc
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: ""
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
   - TARGET: mingw-w64-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: "--enable-shared=no"
@@ -154,8 +128,6 @@ environment:
   - TARGET: mingw-w64-gcc-static-executables
     BUILD_ENVIRONMENT: mingw-w64
     CONFIGURE_OPTIONS: "--enable-static-executables"
-    CFLAGS: "--coverage"
-    LDFLAGS: "--coverage"
 
 install:
 - cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash

@@ -1,41 +1,16 @@
 # Tests library functions and types.
 #
-# Version: 20200216
+# Version: 20200413
 
 $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$LibraryTests = "btree_entry btree_footer btree_node btree_node_header buffer_data_handle checkpoint_map checkpoint_map_entry checksum chunk_information_block container_data_handle container_key_bag container_reaper container_superblock compressed_data_handle compression data_block data_block_data_handle data_stream deflate directory_record encryption_context error file_extent file_system_btree inode io_handle key_bag_entry key_bag_header key_encrypted_key name name_hash notify object object_map object_map_btree object_map_descriptor space_manager volume volume_key_bag"
+$LibraryTests = "btree_entry btree_footer btree_node btree_node_header buffer_data_handle checkpoint_map checkpoint_map_entry checksum chunk_information_block container_data_handle container_key_bag container_reaper container_superblock compressed_data_handle compression data_block data_block_data_handle data_stream deflate directory_record encryption_context error extended_attribute extent_reference_tree file_extent file_system_btree file_system_data_handle inode io_handle key_bag_entry key_bag_header key_encrypted_key name name_hash notify object object_map object_map_btree object_map_descriptor profiler snapshot snapshot_metadata snapshot_metadata_tree space_manager volume volume_key_bag"
 $LibraryTestsWithInput = "container support"
+$OptionSets = "offset password";
 
 $InputGlob = "*"
-
-Function GetTestProfileDirectory
-{
-	param( [string]$TestInputDirectory, [string]$TestProfile )
-
-	$TestProfileDirectory = "${TestInputDirectory}\.${TestProfile}"
-
-	If (-Not (Test-Path -Path ${TestProfileDirectory} -PathType "Container"))
-	{
-		New-Item -ItemType "directory" -Path ${TestProfileDirectory}
-	}
-	Return ${TestProfileDirectory}
-}
-
-Function GetTestSetDirectory
-{
-	param( [string]$TestProfileDirectory, [string]$TestSetInputDirectory )
-
-	$TestSetDirectory = "${TestProfileDirectory}\${TestSetInputDirectory.Basename}"
-
-	If (-Not (Test-Path -Path ${TestSetDirectory} -PathType "Container"))
-	{
-		New-Item -ItemType "directory" -Path ${TestSetDirectory}
-	}
-	Return ${TestSetDirectory}
-}
 
 Function GetTestExecutablesDirectory
 {
@@ -86,6 +61,14 @@ Function RunTest
 	$TestDescription = "Testing: ${TestName}"
 	$TestExecutable = "${TestExecutablesDirectory}\fsapfs_test_${TestName}.exe"
 
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType "Leaf"))
+	{
+		Write-Host "${TestDescription} (" -nonewline
+		Write-Host "SKIP" -foreground Cyan -nonewline
+		Write-Host ")"
+
+		Return ${ExitIgnore}
+	}
 	$Output = Invoke-Expression ${TestExecutable}
 	$Result = ${LastExitCode}
 
@@ -93,16 +76,18 @@ Function RunTest
 	{
 		Write-Host ${Output} -foreground Red
 	}
-	Write-Host "${TestDescription} " -nonewline
+	Write-Host "${TestDescription} (" -nonewline
 
 	If (${Result} -ne ${ExitSuccess})
 	{
-		Write-Host " (FAIL)"
+		Write-Host "FAIL" -foreground Red -nonewline
 	}
 	Else
 	{
-		Write-Host " (PASS)"
+		Write-Host "PASS" -foreground Green -nonewline
 	}
+	Write-Host ")"
+
 	Return ${Result}
 }
 
@@ -113,8 +98,20 @@ Function RunTestWithInput
 	$TestDescription = "Testing: ${TestName}"
 	$TestExecutable = "${TestExecutablesDirectory}\fsapfs_test_${TestName}.exe"
 
-	$TestProfileDirectory = GetTestProfileDirectory "input" "libfsapfs"
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType "Leaf"))
+	{
+		Write-Host "${TestDescription} (" -nonewline
+		Write-Host "SKIP" -foreground Cyan -nonewline
+		Write-Host ")"
 
+		Return ${ExitIgnore}
+	}
+	$TestProfileDirectory = "input\.libfsapfs"
+
+	If (-Not (Test-Path -Path ${TestProfileDirectory} -PathType "Container"))
+	{
+		New-Item -ItemType "directory" -Path ${TestProfileDirectory}
+	}
 	$IgnoreList = ReadIgnoreList ${TestProfileDirectory}
 
 	$Result = ${ExitSuccess}
@@ -129,11 +126,11 @@ Function RunTestWithInput
 		{
 			Continue
 		}
-		$TestSetDirectory = GetTestSetDirectory ${TestProfileDirectory} ${TestSetInputDirectory}
+		$TestSetName = ${TestSetInputDirectory}.Name
 
-		If (Test-Path -Path "${TestSetDirectory}\files" -PathType "Leaf")
+		If (Test-Path -Path "${TestProfileDirectory}\${TestSetName}\files" -PathType "Leaf")
 		{
-			$InputFiles = Get-Content -Path "${TestSetDirectory}\files" | Where {$_ -ne ""}
+			$InputFiles = Get-Content -Path "${TestProfileDirectory}\${TestSetName}\files" | Where {$_ -ne ""}
 		}
 		Else
 		{
@@ -141,10 +138,33 @@ Function RunTestWithInput
 		}
 		ForEach ($InputFile in ${InputFiles})
 		{
-			# TODO: add test option support
-			$Output = Invoke-Expression ${TestExecutable}
-			$Result = ${LastExitCode}
+			$TestedWithOptions = $False
 
+			ForEach ($OptionSet in ${OptionSets} -split " ")
+			{
+				$InputFileName = ${InputFile}.Name
+				$TestDataOptionFile = "${TestProfileDirectory}\${TestSetName}\${InputFileName}.${OptionSet}"
+
+				If (-Not (Test-Path -Path "${TestDataOptionFile}" -PathType "Leaf"))
+				{
+					Continue
+				}
+				$InputOptions = Get-content -Path "${TestDataOptionFile}" -First 1
+
+				$Output = Invoke-Expression "${TestExecutable} ${InputOptions} ${InputFile}"
+				$Result = $LastExitCode
+
+				If (${Result} -ne ${ExitSuccess})
+				{
+					Break
+				}
+				$TestedWithOptions = $True
+			}
+			If ((${Result} -eq ${ExitSuccess}) -And (-Not (${TestedWithOptions})))
+			{
+				$Output = Invoke-Expression "${TestExecutable} ${InputFile}"
+				$Result = ${LastExitCode}
+			}
 			If (${Result} -ne ${ExitSuccess})
 			{
 				Break
@@ -159,16 +179,18 @@ Function RunTestWithInput
 	{
 		Write-Host ${Output} -foreground Red
 	}
-	Write-Host "${TestDescription} " -nonewline
+	Write-Host "${TestDescription} (" -nonewline
 
 	If (${Result} -ne ${ExitSuccess})
 	{
-		Write-Host " (FAIL)"
+		Write-Host "FAIL" -foreground Red -nonewline
 	}
 	Else
 	{
-		Write-Host " (PASS)"
+		Write-Host "PASS" -foreground Green -nonewline
 	}
+	Write-Host ")"
+
 	Return ${Result}
 }
 
@@ -192,7 +214,7 @@ Foreach (${TestName} in ${LibraryTests} -split " ")
 	}
 	$Result = RunTest ${TestName}
 
-	If (${Result} -ne ${ExitSuccess})
+	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 	{
 		Break
 	}
@@ -213,7 +235,7 @@ Foreach (${TestName} in ${LibraryTestsWithInput} -split " ")
 	{
 		$Result = RunTest ${TestName}
 	}
-	If (${Result} -ne ${ExitSuccess})
+	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 	{
 		Break
 	}

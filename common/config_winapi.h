@@ -38,6 +38,12 @@
  */
 #define PACKAGE_BUGREPORT		"joachim.metz@gmail.com"
 
+/* Define the size of the integer for WINAPI
+ */
+#if !defined( SIZEOF_INT )
+#define SIZEOF_INT			4
+#endif
+
 /* Define the size of the wide character for WINAPI
  */
 #if !defined( SIZEOF_WCHAR_T )

@@ -151,9 +151,11 @@ stamp-h[1-9]
 /tests/fsapfs_test_directory_record
 /tests/fsapfs_test_encryption_context
 /tests/fsapfs_test_error
-/tests/fsapfs_test_file_entry
+/tests/fsapfs_test_extended_attribute
+/tests/fsapfs_test_extent_reference_tree
 /tests/fsapfs_test_file_extent
 /tests/fsapfs_test_file_system_btree
+/tests/fsapfs_test_file_system_data_handle
 /tests/fsapfs_test_inode
 /tests/fsapfs_test_io_handle
 /tests/fsapfs_test_key_bag_entry
@@ -166,6 +168,10 @@ stamp-h[1-9]
 /tests/fsapfs_test_object_map
 /tests/fsapfs_test_object_map_btree
 /tests/fsapfs_test_object_map_descriptor
+/tests/fsapfs_test_profiler
+/tests/fsapfs_test_snapshot
+/tests/fsapfs_test_snapshot_metadata
+/tests/fsapfs_test_snapshot_metadata_tree
 /tests/fsapfs_test_space_manager
 /tests/fsapfs_test_support
 /tests/fsapfs_test_volume
