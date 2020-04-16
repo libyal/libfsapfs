@@ -44,6 +44,16 @@
 #define SIZEOF_INT			4
 #endif
 
+/* Define the size of size_t for WINAPI
+ */
+#if !defined( SIZEOF_SIZE_T )
+#if __WORDSIZE == 64
+#define SIZEOF_SIZE_T			8
+#else
+#define SIZEOF_SIZE_T			4
+#endif
+#endif
+
 /* Define the size of the wide character for WINAPI
  */
 #if !defined( SIZEOF_WCHAR_T )
