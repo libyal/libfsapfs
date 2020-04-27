@@ -1204,7 +1204,7 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	file_offset = internal_container->superblock->checkpoint_descriptor_area_block_number * internal_container->io_handle->block_size;
+	file_offset = (uint64_t)internal_container->superblock->checkpoint_descriptor_area_block_number * internal_container->io_handle->block_size;
 
 	for( metadata_block_index = 0;
 	     metadata_block_index <= internal_container->superblock->checkpoint_descriptor_area_number_of_blocks;
