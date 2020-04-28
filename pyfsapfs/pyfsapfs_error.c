@@ -388,7 +388,8 @@ void VARARGS(
 				{
 					break;
 				}
-				if( error_string[ error_string_index ] == '\n' )
+				if( ( error_string[ error_string_index ] == '\n' )
+				 || ( error_string[ error_string_index ] == '\r' ) )
 				{
 					error_string[ error_string_index ] = ' ';
 				}

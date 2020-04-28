@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20200413
+# Version: 20200417
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -84,7 +84,9 @@ check_for_test_set_in_ignore_list()
 	local TEST_SET=$1;
 	local IGNORE_LIST=$2;
 
-	for LIST_ELEMENT in `echo "${IGNORE_LIST}" | tr ' ' '\n'`;
+	local IFS=" ";
+
+	for LIST_ELEMENT in ${IGNORE_LIST};
 	do
 		if test "${LIST_ELEMENT}" = "${TEST_SET}";
 		then
@@ -111,7 +113,9 @@ check_for_directory_in_ignore_list()
 
 	local INPUT_BASENAME=`basename ${INPUT_DIRECTORY}`;
 
-	for LIST_ELEMENT in `echo "${IGNORE_LIST}" | tr ' ' '\n'`;
+	local IFS=" ";
+
+	for LIST_ELEMENT in ${IGNORE_LIST};
 	do
 		if test "${LIST_ELEMENT}" = "${INPUT_BASENAME}";
 		then

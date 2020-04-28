@@ -75,6 +75,7 @@ check_PROGRAMS = \
 	fsapfs_test_file_extent \
 	fsapfs_test_file_system_btree \
 	fsapfs_test_file_system_data_handle \
+	fsapfs_test_fusion_middle_tree \
 	fsapfs_test_inode \
 	fsapfs_test_io_handle \
 	fsapfs_test_key_bag_entry \
@@ -546,6 +547,18 @@ fsapfs_test_file_system_data_handle_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_file_system_data_handle_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_fusion_middle_tree_SOURCES = \
+	fsapfs_test_fusion_middle_tree.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_fusion_middle_tree_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

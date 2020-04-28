@@ -40,6 +40,11 @@
 extern "C" {
 #endif
 
+/* Note that 128 MiB is an arbitrary selected upper limit here
+ */
+#define MEMORY_MAXIMUM_ALLOCATION_SIZE \
+	( 128 * 1024 * 1024 )
+
 /* Memory allocation
  */
 #if defined( HAVE_GLIB_H )

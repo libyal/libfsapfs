@@ -129,7 +129,7 @@ jobs:
     group: edge
   - name: "Linux with gcc and static executables support"
     env:
-    - CONFIGURE_OPTIONS="--enable-static-executables"
+    - CONFIGURE_OPTIONS="--enable-static-executables=yes --enable-multi-threading-support=no"
     - CFLAGS="--coverage"
     - LDFLAGS="--coverage"
     - TARGET="linux-gcc-static-executables"

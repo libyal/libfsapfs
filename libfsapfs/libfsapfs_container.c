@@ -807,13 +807,13 @@ int libfsapfs_container_close(
 	}
 	internal_container = (libfsapfs_internal_container_t *) container;
 
-	if( internal_container->io_handle == NULL )
+	if( internal_container->file_io_handle == NULL )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid container - missing IO handle.",
+		 "%s: invalid container - missing file IO handle.",
 		 function );
 
 		return( -1 );
@@ -1204,7 +1204,7 @@ int libfsapfs_internal_container_open_read(
 
 		goto on_error;
 	}
-	file_offset = internal_container->superblock->checkpoint_descriptor_area_block_number * internal_container->io_handle->block_size;
+	file_offset = (off64_t) internal_container->superblock->checkpoint_descriptor_area_block_number * internal_container->io_handle->block_size;
 
 	for( metadata_block_index = 0;
 	     metadata_block_index <= internal_container->superblock->checkpoint_descriptor_area_number_of_blocks;
