@@ -244,7 +244,7 @@ int pyfsapfs_file_entries_init(
 	 "%s: initialize of file entries not supported.",
 	 function );
 
-	return( 0 );
+	return( -1 );
 }
 
 /* Frees a file entries sequence object

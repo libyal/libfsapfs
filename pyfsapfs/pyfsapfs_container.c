@@ -80,6 +80,13 @@ PyMethodDef pyfsapfs_container_object_methods[] = {
 	  "\n"
 	  "Closes a container." },
 
+	{ "is_locked",
+	  (PyCFunction) pyfsapfs_container_is_locked,
+	  METH_NOARGS,
+	  "is_locked() -> Boolean or None\n"
+	  "\n"
+	  "Determines if the container is locked." },
+
 	{ "get_size",
 	  (PyCFunction) pyfsapfs_container_get_size,
 	  METH_NOARGS,
@@ -644,6 +651,36 @@ PyObject *pyfsapfs_container_open_file_object(
 
 		return( NULL );
 	}
+	PyErr_Clear();
+
+	result = PyObject_HasAttrString(
+	          file_object,
+	          "read" );
+
+	if( result != 1 )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: unsupported file object - missing read attribute.",
+		 function );
+
+		return( NULL );
+	}
+	PyErr_Clear();
+
+	result = PyObject_HasAttrString(
+	          file_object,
+	          "seek" );
+
+	if( result != 1 )
+	{
+		PyErr_Format(
+		 PyExc_TypeError,
+		 "%s: unsupported file object - missing seek attribute.",
+		 function );
+
+		return( NULL );
+	}
 	if( pyfsapfs_container->file_io_handle != NULL )
 	{
 		pyfsapfs_error_raise(
@@ -779,6 +816,62 @@ PyObject *pyfsapfs_container_close(
 	 Py_None );
 
 	return( Py_None );
+}
+
+/* Determines if the container is locked
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_container_is_locked(
+           pyfsapfs_container_t *pyfsapfs_container,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	libcerror_error_t *error = NULL;
+	static char *function    = "pyfsapfs_container_is_locked";
+	int result               = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_container == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid container.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_container_is_locked(
+	          pyfsapfs_container->container,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result == -1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to determine if container is locked.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	if( result != 0 )
+	{
+		Py_IncRef(
+		 (PyObject *) Py_True );
+
+		return( Py_True );
+	}
+	Py_IncRef(
+	 (PyObject *) Py_False );
+
+	return( Py_False );
 }
 
 /* Retrieves the size

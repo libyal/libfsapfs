@@ -48,16 +48,16 @@ environment:
   - TARGET: python27-x64
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python27-x64\\python.exe"
-  - TARGET: python37
+  - TARGET: python38
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python37\\python.exe"
-  - TARGET: python37-x64
+    PYTHON: "C:\\Python38\\python.exe"
+  - TARGET: python38-x64
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python37-x64\\python.exe"
-  - TARGET: python37-x64
+    PYTHON: "C:\\Python38-x64\\python.exe"
+  - TARGET: python38-x64
     BUILD_ENVIRONMENT: python
-    APPVEYOR_BUILD_WORKER_IMAGE: macOS-Mojave
-    PYTHON: "/usr/local/bin/python3.7"
+    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    PYTHON: "/usr/local/bin/python3.8"
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: ""
@@ -244,7 +244,7 @@ test_script:
 after_test:
 - cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
     copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\libfsapfs\codecov.sh &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && sed -i 's/-execdir /-exec /' ./codecov.sh && ./codecov.sh -n ${TARGET} -y .codecov.yml" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && ./codecov.sh -n ${TARGET}" )
 
 artifacts:
 - path: dist\*.whl

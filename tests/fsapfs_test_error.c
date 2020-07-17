@@ -27,7 +27,6 @@
 #include <stdlib.h>
 #endif
 
-#include "fsapfs_test_libcerror.h"
 #include "fsapfs_test_libfsapfs.h"
 #include "fsapfs_test_macros.h"
 #include "fsapfs_test_unused.h"

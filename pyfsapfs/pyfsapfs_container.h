@@ -77,6 +77,10 @@ PyObject *pyfsapfs_container_close(
            pyfsapfs_container_t *pyfsapfs_container,
            PyObject *arguments );
 
+PyObject *pyfsapfs_container_is_locked(
+           pyfsapfs_container_t *pyfsapfs_container,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_container_get_size(
            pyfsapfs_container_t *pyfsapfs_container,
            PyObject *arguments );

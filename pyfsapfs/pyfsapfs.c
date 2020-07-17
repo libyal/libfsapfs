@@ -35,6 +35,7 @@
 #include "pyfsapfs_file_entries.h"
 #include "pyfsapfs_file_entry.h"
 #include "pyfsapfs_file_object_io_handle.h"
+#include "pyfsapfs_libbfio.h"
 #include "pyfsapfs_libcerror.h"
 #include "pyfsapfs_libfsapfs.h"
 #include "pyfsapfs_python.h"
@@ -134,12 +135,12 @@ PyObject *pyfsapfs_check_container_signature(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *string_object      = NULL;
-	libcerror_error_t *error     = NULL;
-	static char *function        = "pyfsapfs_check_container_signature";
-	static char *keyword_list[]  = { "filename", NULL };
-	const char *filename_narrow  = NULL;
-	int result                   = 0;
+	PyObject *string_object     = NULL;
+	libcerror_error_t *error    = NULL;
+	const char *filename_narrow = NULL;
+	static char *function       = "pyfsapfs_check_container_signature";
+	static char *keyword_list[] = { "filename", NULL };
+	int result                  = 0;
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	const wchar_t *filename_wide = NULL;
@@ -157,7 +158,7 @@ PyObject *pyfsapfs_check_container_signature(
 	if( PyArg_ParseTupleAndKeywords(
 	     arguments,
 	     keywords,
-	     "|O",
+	     "O|",
 	     keyword_list,
 	     &string_object ) == 0 )
 	{
@@ -172,7 +173,7 @@ PyObject *pyfsapfs_check_container_signature(
 	if( result == -1 )
 	{
 		pyfsapfs_error_fetch_and_raise(
-	         PyExc_RuntimeError,
+		 PyExc_RuntimeError,
 		 "%s: unable to determine if string object is of type Unicode.",
 		 function );
 
@@ -207,10 +208,10 @@ PyObject *pyfsapfs_check_container_signature(
 		}
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   utf8_string_object );
+		                   utf8_string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
@@ -254,17 +255,17 @@ PyObject *pyfsapfs_check_container_signature(
 
 #if PY_MAJOR_VERSION >= 3
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyBytes_Type );
+	          string_object,
+	          (PyObject *) &PyBytes_Type );
 #else
 	result = PyObject_IsInstance(
-		  string_object,
-		  (PyObject *) &PyString_Type );
+	          string_object,
+	          (PyObject *) &PyString_Type );
 #endif
 	if( result == -1 )
 	{
 		pyfsapfs_error_fetch_and_raise(
-	         PyExc_RuntimeError,
+		 PyExc_RuntimeError,
 		 "%s: unable to determine if string object is of type string.",
 		 function );
 
@@ -276,10 +277,10 @@ PyObject *pyfsapfs_check_container_signature(
 
 #if PY_MAJOR_VERSION >= 3
 		filename_narrow = PyBytes_AsString(
-				   string_object );
+		                   string_object );
 #else
 		filename_narrow = PyString_AsString(
-				   string_object );
+		                   string_object );
 #endif
 		Py_BEGIN_ALLOW_THREADS
 
@@ -330,9 +331,9 @@ PyObject *pyfsapfs_check_container_signature_file_object(
            PyObject *arguments,
            PyObject *keywords )
 {
-	libcerror_error_t *error         = NULL;
-	libbfio_handle_t *file_io_handle = NULL;
 	PyObject *file_object            = NULL;
+	libbfio_handle_t *file_io_handle = NULL;
+	libcerror_error_t *error         = NULL;
 	static char *function            = "pyfsapfs_check_container_signature_file_object";
 	static char *keyword_list[]      = { "file_object", NULL };
 	int result                       = 0;
@@ -430,19 +431,47 @@ PyObject *pyfsapfs_open_new_container(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *pyfsapfs_container = NULL;
+	pyfsapfs_container_t *pyfsapfs_container = NULL;
+	static char *function                    = "pyfsapfs_open_new_container";
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( self )
 
-	pyfsapfs_container_init(
-	 (pyfsapfs_container_t *) pyfsapfs_container );
+	/* PyObject_New does not invoke tp_init
+	 */
+	pyfsapfs_container = PyObject_New(
+	                      struct pyfsapfs_container,
+	                      &pyfsapfs_container_type_object );
 
-	pyfsapfs_container_open(
-	 (pyfsapfs_container_t *) pyfsapfs_container,
-	 arguments,
-	 keywords );
+	if( pyfsapfs_container == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create container.",
+		 function );
 
-	return( pyfsapfs_container );
+		goto on_error;
+	}
+	if( pyfsapfs_container_init(
+	     pyfsapfs_container ) != 0 )
+	{
+		goto on_error;
+	}
+	if( pyfsapfs_container_open(
+	     pyfsapfs_container,
+	     arguments,
+	     keywords ) == NULL )
+	{
+		goto on_error;
+	}
+	return( (PyObject *) pyfsapfs_container );
+
+on_error:
+	if( pyfsapfs_container != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) pyfsapfs_container );
+	}
+	return( NULL );
 }
 
 /* Creates a new container object and opens it using a file-like object
@@ -453,19 +482,47 @@ PyObject *pyfsapfs_open_new_container_with_file_object(
            PyObject *arguments,
            PyObject *keywords )
 {
-	PyObject *pyfsapfs_container = NULL;
+	pyfsapfs_container_t *pyfsapfs_container = NULL;
+	static char *function                    = "pyfsapfs_open_new_container_with_file_object";
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( self )
 
-	pyfsapfs_container_init(
-	 (pyfsapfs_container_t *) pyfsapfs_container );
+	/* PyObject_New does not invoke tp_init
+	 */
+	pyfsapfs_container = PyObject_New(
+	                      struct pyfsapfs_container,
+	                      &pyfsapfs_container_type_object );
 
-	pyfsapfs_container_open_file_object(
-	 (pyfsapfs_container_t *) pyfsapfs_container,
-	 arguments,
-	 keywords );
+	if( pyfsapfs_container == NULL )
+	{
+		PyErr_Format(
+		 PyExc_MemoryError,
+		 "%s: unable to create container.",
+		 function );
 
-	return( pyfsapfs_container );
+		goto on_error;
+	}
+	if( pyfsapfs_container_init(
+	     pyfsapfs_container ) != 0 )
+	{
+		goto on_error;
+	}
+	if( pyfsapfs_container_open_file_object(
+	     pyfsapfs_container,
+	     arguments,
+	     keywords ) == NULL )
+	{
+		goto on_error;
+	}
+	return( (PyObject *) pyfsapfs_container );
+
+on_error:
+	if( pyfsapfs_container != NULL )
+	{
+		Py_DecRef(
+		 (PyObject *) pyfsapfs_container );
+	}
+	return( NULL );
 }
 
 #if PY_MAJOR_VERSION >= 3
@@ -591,7 +648,6 @@ PyMODINIT_FUNC initpyfsapfs(
 	 module,
 	 "extended_attributes",
 	 (PyObject *) &pyfsapfs_extended_attributes_type_object );
-
 
 	/* Setup the file_entries type object
 	 */

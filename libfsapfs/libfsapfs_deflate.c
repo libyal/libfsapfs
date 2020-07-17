@@ -830,11 +830,11 @@ int libfsapfs_deflate_decode_huffman(
 	uint16_t distance_codes_base[ 30 ] = {
 		1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193,
 		257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193,
-		12289, 16385, 24577};
+		12289, 16385, 24577 };
 
 	uint16_t distance_codes_number_of_extra_bits[ 30 ] = {
 		0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6,
-		7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13};
+		7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13 };
 
 	static char *function         = "libfsapfs_deflate_decode_huffman";
 	size_t data_offset            = 0;
@@ -891,7 +891,7 @@ int libfsapfs_deflate_decode_huffman(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve listeral value from bit stream.",
+			 "%s: unable to retrieve literal value from bit stream.",
 			 function );
 
 			return( -1 );
@@ -1406,12 +1406,13 @@ int libfsapfs_deflate_read_block(
 	libfsapfs_deflate_huffman_table_t dynamic_huffman_distances_table;
 	libfsapfs_deflate_huffman_table_t dynamic_huffman_literals_table;
 
-	static char *function    = "libfsapfs_deflate_read_block";
-	uint32_t block_size      = 0;
-	uint32_t block_size_copy = 0;
-	uint32_t value_32bit     = 0;
-	uint8_t block_type       = 0;
-	uint8_t skip_bits        = 0;
+	static char *function                = "libfsapfs_deflate_read_block";
+	size_t safe_uncompressed_data_offset = 0;
+	uint32_t block_size                  = 0;
+	uint32_t block_size_copy             = 0;
+	uint32_t value_32bit                 = 0;
+	uint8_t block_type                   = 0;
+	uint8_t skip_bits                    = 0;
 
 	if( bit_stream == NULL )
 	{
@@ -1468,6 +1469,8 @@ int libfsapfs_deflate_read_block(
 
 		return( -1 );
 	}
+	safe_uncompressed_data_offset = *uncompressed_data_offset;
+
 	if( libfsapfs_deflate_fixed_huffman_tables_initialized == 0 )
 	{
 		if( libfsapfs_deflate_initialize_fixed_huffman_tables(
@@ -1578,7 +1581,7 @@ int libfsapfs_deflate_read_block(
 
 				return( -1 );
 			}
-			if( (size_t) block_size > ( uncompressed_data_size - *uncompressed_data_offset ) )
+			if( (size_t) block_size > ( uncompressed_data_size - safe_uncompressed_data_offset ) )
 			{
 				libcerror_error_set(
 				 error,
@@ -1590,7 +1593,7 @@ int libfsapfs_deflate_read_block(
 				return( -1 );
 			}
 			if( memory_copy(
-			     &( uncompressed_data[ *uncompressed_data_offset ] ),
+			     &( uncompressed_data[ safe_uncompressed_data_offset ] ),
 			     &( bit_stream->byte_stream[ bit_stream->byte_stream_offset ] ),
 			     (size_t) block_size ) == NULL )
 			{
@@ -1604,7 +1607,7 @@ int libfsapfs_deflate_read_block(
 				return( -1 );
 			}
 			bit_stream->byte_stream_offset += block_size;
-			*uncompressed_data_offset      += block_size;
+			safe_uncompressed_data_offset  += block_size;
 
 			/* Flush the bit-stream buffer
 			 */
@@ -1620,7 +1623,7 @@ int libfsapfs_deflate_read_block(
 			     &libfsapfs_deflate_fixed_huffman_distances_table,
 			     uncompressed_data,
 			     uncompressed_data_size,
-			     uncompressed_data_offset,
+			     &safe_uncompressed_data_offset,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -1656,7 +1659,7 @@ int libfsapfs_deflate_read_block(
 			     &dynamic_huffman_distances_table,
 			     uncompressed_data,
 			     uncompressed_data_size,
-			     uncompressed_data_offset,
+			     &safe_uncompressed_data_offset,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -1681,6 +1684,8 @@ int libfsapfs_deflate_read_block(
 
 			return( -1 );
 	}
+	*uncompressed_data_offset = safe_uncompressed_data_offset;
+
 	return( 1 );
 }
 

@@ -287,6 +287,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libuna\libuna_scsu.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libuna\libuna_support.c"
 				>
 			</File>
@@ -478,6 +482,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libuna\libuna_libcerror.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libuna\libuna_scsu.h"
 				>
 			</File>
 			<File

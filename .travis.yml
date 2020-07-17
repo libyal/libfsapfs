@@ -135,55 +135,55 @@ jobs:
     - TARGET="linux-gcc-static-executables"
     compiler: gcc
     group: edge
-  - name: "Mac OS with clang"
+  - name: "Mac OS 10.14 with clang"
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-clang"
     compiler: clang
     os: osx
-    osx_image: xcode9.2
-  - name: "Mac OS with gcc"
+    osx_image: xcode11
+  - name: "Mac OS 10.14 with gcc"
     env:
     - CONFIGURE_OPTIONS=""
     - TARGET="macos-gcc"
     compiler: gcc
     os: osx
-    osx_image: xcode9.2
-  - name: "Mac OS with gcc and Python module"
+    osx_image: xcode11
+  - name: "Mac OS 10.14 with gcc and Python module"
     env:
     - CONFIGURE_OPTIONS="--enable-python"
     - TARGET="macos-gcc-python"
     compiler: gcc
     os: osx
-    osx_image: xcode9.2
-  - name: "Mac OS with gcc and Python 2 module"
+    osx_image: xcode11
+  - name: "Mac OS 10.14 with gcc and Python 2 module"
     env:
     - CONFIGURE_OPTIONS="--enable-python2"
     - PYTHON_VERSION=2
     - TARGET="macos-gcc-python2"
     compiler: gcc
     os: osx
-    osx_image: xcode9.2
-  - name: "Mac OS 10.12 with gcc and Python 2 module (setup.py)"
+    osx_image: xcode11
+  - name: "Mac OS 10.14 with gcc and Python 2 module (setup.py)"
     env:
     - TARGET="macos-gcc-python-setup-py"
     compiler: gcc
     os: osx
-    osx_image: xcode9.2
-  - name: "Mac OS 10.14 with gcc and Python 3.7 module (setup.py)"
+    osx_image: xcode11
+  - name: "Mac OS 10.14 with gcc and Python 3.8 module (setup.py)"
     env:
-    - TARGET="macos-gcc-python-setup-py37"
+    - TARGET="macos-gcc-python-setup-py38"
     compiler: gcc
     os: osx
     osx_image: xcode11
     language: shell
-  - name: "Mac OS gcc and Python module and pkgbuild"
+  - name: "Mac OS 10.14 with gcc and Python module and pkgbuild"
     env:
     - CONFIGURE_OPTIONS="--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
     - TARGET="macos-gcc-pkgbuild"
     compiler: gcc
     os: osx
-    osx_image: xcode9.2
+    osx_image: xcode11
 before_install:
 - .travis/before_install.sh
 install:
@@ -192,8 +192,9 @@ script:
 - .travis/script.sh
 after_success:
 - if test ${TARGET} = "linux-gcc-no-optimization"; then
-    curl -o codecov.sh -s https://codecov.io/bash && sed 's/ -execdir / -exec /' -i ./codecov.sh && /bin/bash ./codecov.sh -n ${TARGET} -y .codecov.yml;
+    for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done;
+    curl -o codecov.sh -s https://codecov.io/bash && /bin/bash ./codecov.sh -n ${TARGET} -X gcov;
   fi
-- if test ${TARGET} = "macos-gcc-python-setup-py37" && test -n "${TRAVIS_TAG}"; then
+- if test ${TARGET} = "macos-gcc-python-setup-py38" && test -n "${TRAVIS_TAG}"; then
     python3 -m twine upload dist/*.whl --username __token__ --password ${PYPI_TOKEN} --skip-existing;
   fi

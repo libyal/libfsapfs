@@ -1,7 +1,7 @@
 #!/bin/bash
 # Tests library functions and types.
 #
-# Version: 20190216
+# Version: 20200705
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -129,7 +129,7 @@ run_test_with_input()
 	return ${RESULT};
 }
 
-if ! test -z ${SKIP_LIBRARY_TESTS};
+if test -n "${SKIP_LIBRARY_TESTS}";
 then
 	exit ${EXIT_IGNORE};
 fi

@@ -1,6 +1,6 @@
 dnl Functions for testing
 dnl
-dnl Version: 20200128
+dnl Version: 20200712
 
 dnl Function to detect if tests dependencies are available
 AC_DEFUN([AX_TESTS_CHECK_LOCAL],
@@ -19,5 +19,15 @@ AC_DEFUN([AX_TESTS_CHECK_LOCAL],
       [1],
       [Define to 1 if dlsym function is available in GNU dl.])
   ])
+])
+
+dnl Function to detect if OSS-Fuzz build environment is available
+AC_DEFUN([AX_TESTS_CHECK_OSSFUZZ],
+  [AM_CONDITIONAL(
+    HAVE_LIB_FUZZING_ENGINE,
+    [test "x${LIB_FUZZING_ENGINE}" != x])
+  AC_SUBST(
+    [LIB_FUZZING_ENGINE],
+    ["${LIB_FUZZING_ENGINE}"])
 ])
 

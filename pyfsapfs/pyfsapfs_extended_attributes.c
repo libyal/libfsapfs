@@ -244,7 +244,7 @@ int pyfsapfs_extended_attributes_init(
 	 "%s: initialize of extended attributes not supported.",
 	 function );
 
-	return( 0 );
+	return( -1 );
 }
 
 /* Frees an extended attributes sequence object

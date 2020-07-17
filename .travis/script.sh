@@ -21,7 +21,7 @@ then
 	make > /dev/null;
 	python ./setup.py build;
 
-elif test ${TARGET} = "macos-gcc-python-setup-py37";
+elif test ${TARGET} = "macos-gcc-python-setup-py38";
 then
 	./configure ${CONFIGURE_OPTIONS};
 	make > /dev/null;
