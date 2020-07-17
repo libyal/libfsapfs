@@ -358,7 +358,8 @@ int libfsapfs_extended_attribute_read_key_data(
 
 	data_offset = sizeof( fsapfs_file_system_btree_key_extended_attribute_t );
 
-	if( (size_t) name_size > ( data_size - data_offset ) )
+	if( ( name_size == 0 )
+	 || ( (size_t) name_size > ( data_size - data_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -537,7 +538,8 @@ int libfsapfs_extended_attribute_read_value_data(
 
 	data_offset = sizeof( fsapfs_file_system_btree_value_extended_attribute_t );
 
-	if( (size_t) extended_attribute_data_size > ( data_size - data_offset ) )
+	if( ( extended_attribute_data_size == 0 )
+	 || ( (size_t) extended_attribute_data_size > ( data_size - data_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,

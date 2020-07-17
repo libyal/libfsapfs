@@ -229,14 +229,14 @@ int libfsapfs_inode_read_value_data(
      size_t data_size,
      libcerror_error_t **error )
 {
-	static char *function              = "libfsapfs_inode_read_value_data";
 	const uint8_t *value_data          = NULL;
+	static char *function              = "libfsapfs_inode_read_value_data";
 	size_t data_offset                 = 0;
 	size_t trailing_data_size          = 0;
 	size_t value_data_offset           = 0;
-	size_t value_data_size             = 0;
 	uint16_t extended_field_index      = 0;
 	uint16_t number_of_extended_fields = 0;
+	uint16_t value_data_size           = 0;
 	uint8_t extended_field_flags       = 0;
 	uint8_t extended_field_type        = 0;
 
@@ -610,7 +610,8 @@ int libfsapfs_inode_read_value_data(
 
 				return( -1 );
 			}
-			if( value_data_size > ( data_size - value_data_offset ) )
+			if( ( value_data_size == 0 )
+			 || ( (size_t) value_data_size > ( data_size - value_data_offset ) ) )
 			{
 				libcerror_error_set(
 				 error,
@@ -650,7 +651,7 @@ int libfsapfs_inode_read_value_data(
 
 				case 4:
 					inode->name = (uint8_t *) memory_allocate(
-					                           sizeof( uint8_t ) * value_data_size );
+					                           sizeof( uint8_t ) * (size_t) value_data_size );
 
 					if( inode->name == NULL )
 					{
@@ -663,12 +664,12 @@ int libfsapfs_inode_read_value_data(
 
 						goto on_error;
 					}
-					inode->name_size = value_data_size;
+					inode->name_size = (size_t) value_data_size;
 
 					if( memory_copy(
 					     inode->name,
 					     value_data,
-					     value_data_size ) == NULL )
+					     (size_t) value_data_size ) == NULL )
 					{
 						libcerror_error_set(
 						 error,

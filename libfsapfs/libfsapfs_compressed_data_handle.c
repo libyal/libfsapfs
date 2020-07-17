@@ -494,19 +494,17 @@ int libfsapfs_compressed_data_handle_get_compressed_block_offsets(
 		 data_handle->number_of_compressed_blocks );
 	}
 #endif
-#if ( SIZEOF_SIZE_T <= 4 )
-	if( (size_t) data_handle->number_of_compressed_blocks > ( (size_t) ( SSIZE_MAX / 4 ) - 1 ) )
+	if( (size_t) data_handle->number_of_compressed_blocks > ( (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE / 4 ) - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid number of compressed blocks value exceeds maximum.",
+		 "%s: invalid number of compressed blocks value exceeds maximum allocation size.",
 		 function );
 
 		goto on_error;
 	}
-#endif
 	data_handle->compressed_block_offsets = (uint32_t *) memory_allocate(
 	                                                      sizeof( uint32_t ) * ( data_handle->number_of_compressed_blocks + 1 ) );
 

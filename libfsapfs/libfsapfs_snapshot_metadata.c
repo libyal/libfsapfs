@@ -373,7 +373,8 @@ int libfsapfs_snapshot_metadata_read_value_data(
 
 	data_offset = sizeof( fsapfs_snapshot_metadata_btree_value_t );
 
-	if( (size_t) name_size > ( data_size - data_offset ) )
+	if( ( name_size == 0 )
+	 || ( (size_t) name_size > ( data_size - data_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,

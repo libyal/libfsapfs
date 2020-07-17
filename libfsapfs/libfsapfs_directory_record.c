@@ -404,7 +404,9 @@ int libfsapfs_directory_record_read_key_data(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( (size_t) name_size > ( data_size - data_offset ) )
+	if( ( name_size == 0 )
+	 || ( name_size > (uint32_t) MEMORY_MAXIMUM_ALLOCATION_SIZE )
+	 || ( (size_t) name_size > ( data_size - data_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,

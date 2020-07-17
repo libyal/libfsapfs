@@ -154,6 +154,17 @@ int libfsapfs_password_pbkdf2(
 	remaining_data_size = output_data_size - ( number_of_blocks * hash_size );
 	data_buffer_size    = salt_size + 4;
 
+	if( data_buffer_size > (size64_t) MEMORY_MAXIMUM_ALLOCATION_SIZE )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid data buffer size value exceeds maximum allocation size.",
+		 function );
+
+		goto on_error;
+	}
 	data_buffer = (uint8_t *) memory_allocate(
 	                           sizeof( uint8_t ) * data_buffer_size );
 

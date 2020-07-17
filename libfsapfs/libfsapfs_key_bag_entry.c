@@ -278,13 +278,14 @@ int libfsapfs_key_bag_entry_read_data(
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 
-	if( key_bag_entry->data_size > ( data_size - sizeof( fsapfs_key_bag_entry_header_t ) ) )
+	if( ( key_bag_entry->data_size == 0 )
+	 || ( key_bag_entry->data_size > ( data_size - sizeof( fsapfs_key_bag_entry_header_t ) ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid entry data size value out of bounds.",
+		 "%s: invalid key bag entry - data size value out of bounds.",
 		 function );
 
 		goto on_error;

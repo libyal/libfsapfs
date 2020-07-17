@@ -229,7 +229,8 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 
 		return( -1 );
 	}
-	if( data_size > (size64_t) SSIZE_MAX )
+	if( ( data_size == 0 )
+	 || ( data_size > (size64_t) MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 	{
 		libcerror_error_set(
 		 error,

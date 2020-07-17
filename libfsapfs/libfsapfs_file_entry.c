@@ -1776,13 +1776,14 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 
 			goto on_error;
 		}
-		if( extended_attribute_size > (size64_t) SSIZE_MAX )
+		if( ( extended_attribute_size == 0 )
+		 || ( extended_attribute_size > (size64_t) MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-			 "%s: invalid extended attribute data size value exceeds maximum.",
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid extended attribute data size value out of bounds.",
 			 function );
 
 			goto on_error;
