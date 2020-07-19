@@ -1797,7 +1797,7 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_MEMORY,
 			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-			 "%s: unable to create extended attribute data.",
+			 "%s: unable to create symbolic link data.",
 			 function );
 
 			goto on_error;

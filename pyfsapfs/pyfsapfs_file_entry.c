@@ -736,11 +736,11 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error   = NULL;
-	PyObject *date_time_object = NULL;
-	static char *function      = "pyfsapfs_file_entry_get_creation_time";
-	int64_t posix_time         = 0;
-	int result                 = 0;
+	PyObject *datetime_object = NULL;
+	libcerror_error_t *error  = NULL;
+	static char *function     = "pyfsapfs_file_entry_get_creation_time";
+	int64_t posix_time        = 0;
+	int result                = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
 
@@ -782,10 +782,10 @@ PyObject *pyfsapfs_file_entry_get_creation_time(
 
 		return( Py_None );
 	}
-	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
-	                    posix_time / 1000 );
+	datetime_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                   posix_time / 1000 );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Retrieves the creation date and time as an integer
@@ -854,11 +854,11 @@ PyObject *pyfsapfs_file_entry_get_modification_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error   = NULL;
-	PyObject *date_time_object = NULL;
-	static char *function      = "pyfsapfs_file_entry_get_modification_time";
-	int64_t posix_time         = 0;
-	int result                 = 0;
+	PyObject *datetime_object = NULL;
+	libcerror_error_t *error  = NULL;
+	static char *function     = "pyfsapfs_file_entry_get_modification_time";
+	int64_t posix_time        = 0;
+	int result                = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
 
@@ -900,10 +900,10 @@ PyObject *pyfsapfs_file_entry_get_modification_time(
 
 		return( Py_None );
 	}
-	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
-	                    posix_time / 1000 );
+	datetime_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                   posix_time / 1000 );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Retrieves the modification date and time as an integer
@@ -972,11 +972,11 @@ PyObject *pyfsapfs_file_entry_get_access_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error   = NULL;
-	PyObject *date_time_object = NULL;
-	static char *function      = "pyfsapfs_file_entry_get_access_time";
-	int64_t posix_time         = 0;
-	int result                 = 0;
+	PyObject *datetime_object = NULL;
+	libcerror_error_t *error  = NULL;
+	static char *function     = "pyfsapfs_file_entry_get_access_time";
+	int64_t posix_time        = 0;
+	int result                = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
 
@@ -1018,10 +1018,10 @@ PyObject *pyfsapfs_file_entry_get_access_time(
 
 		return( Py_None );
 	}
-	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
-	                    posix_time / 1000 );
+	datetime_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                   posix_time / 1000 );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Retrieves the access date and time as an integer
@@ -1090,11 +1090,11 @@ PyObject *pyfsapfs_file_entry_get_inode_change_time(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
 {
-	libcerror_error_t *error   = NULL;
-	PyObject *date_time_object = NULL;
-	static char *function      = "pyfsapfs_file_entry_get_inode_change_time";
-	int64_t posix_time         = 0;
-	int result                 = 0;
+	PyObject *datetime_object = NULL;
+	libcerror_error_t *error  = NULL;
+	static char *function     = "pyfsapfs_file_entry_get_inode_change_time";
+	int64_t posix_time        = 0;
+	int result                = 0;
 
 	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
 
@@ -1136,10 +1136,10 @@ PyObject *pyfsapfs_file_entry_get_inode_change_time(
 
 		return( Py_None );
 	}
-	date_time_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
-	                    posix_time / 1000 );
+	datetime_object = pyfsapfs_datetime_new_from_posix_time_in_micro_seconds(
+	                   posix_time / 1000 );
 
-	return( date_time_object );
+	return( datetime_object );
 }
 
 /* Retrieves the inode change date and time as an integer

@@ -145,7 +145,7 @@ int info_handle_get_volume_by_index(
      libfsapfs_volume_t **volume,
      libcerror_error_t **error );
 
-int info_handle_posix_time_value_fprint(
+int info_handle_posix_time_in_nano_seconds_value_fprint(
      info_handle_t *info_handle,
      const char *value_name,
      int64_t value_64bit,
