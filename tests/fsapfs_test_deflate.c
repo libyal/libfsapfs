@@ -703,11 +703,11 @@ int fsapfs_test_deflate_bit_stream_get_value(
 
 	/* Initialize test
 	 */
-        bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-        bit_stream.byte_stream_size   = 2627;
-        bit_stream.byte_stream_offset = 0;
-        bit_stream.bit_buffer         = 0;
-        bit_stream.bit_buffer_size    = 0;
+	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
+	bit_stream.byte_stream_size   = 2627;
+	bit_stream.byte_stream_offset = 0;
+	bit_stream.bit_buffer         = 0;
+	bit_stream.bit_buffer_size    = 0;
 
 	/* Test regular cases
 	 */
@@ -908,7 +908,7 @@ int fsapfs_test_deflate_bit_stream_get_value(
 	 &error );
 
 	bit_stream.byte_stream_offset = 2627;
-        bit_stream.bit_buffer_size    = 0;
+	bit_stream.bit_buffer_size    = 0;
 
 	result = libfsapfs_deflate_bit_stream_get_value(
 	          &bit_stream,
@@ -1126,11 +1126,11 @@ int fsapfs_test_deflate_bit_stream_get_huffman_encoded_value(
 
 	/* Initialize test
 	 */
-        bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-        bit_stream.byte_stream_size   = 2627;
-        bit_stream.byte_stream_offset = 2;
-        bit_stream.bit_buffer         = 0;
-        bit_stream.bit_buffer_size    = 0;
+	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
+	bit_stream.byte_stream_size   = 2627;
+	bit_stream.byte_stream_offset = 2;
+	bit_stream.bit_buffer         = 0;
+	bit_stream.bit_buffer_size    = 0;
 
 	result = libfsapfs_deflate_initialize_fixed_huffman_tables(
 	          &literals_table,
@@ -1228,8 +1228,8 @@ int fsapfs_test_deflate_bit_stream_get_huffman_encoded_value(
 	libcerror_error_free(
 	 &error );
 
-        bit_stream.byte_stream_offset = 2627;
-        bit_stream.bit_buffer_size    = 0;
+	bit_stream.byte_stream_offset = 2627;
+	bit_stream.bit_buffer_size    = 0;
 
 	result = libfsapfs_deflate_bit_stream_get_huffman_encoded_value(
 	          &bit_stream,
@@ -1237,7 +1237,7 @@ int fsapfs_test_deflate_bit_stream_get_huffman_encoded_value(
 	          &value_32bit,
 	          &error );
 
-        bit_stream.byte_stream_offset = 2;
+	bit_stream.byte_stream_offset = 2;
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
@@ -1280,11 +1280,21 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	int test_number                 = 0;
 #endif
 
+	/* Initialize test
+	 */
+	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
+	bit_stream.byte_stream_size   = 2627;
+	bit_stream.byte_stream_offset = 2;
+	bit_stream.bit_buffer         = 0;
+	bit_stream.bit_buffer_size    = 0;
+
 	/* Test regular cases
 	 */
 
 	/* Test error cases
 	 */
+	bit_stream.byte_stream_offset = 2;
+
 	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
 	          NULL,
 	          &literals_table,
@@ -1303,6 +1313,8 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	libcerror_error_free(
 	 &error );
 
+	bit_stream.byte_stream_offset = 2;
+
 	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
 	          &bit_stream,
 	          NULL,
@@ -1320,6 +1332,8 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 
 	libcerror_error_free(
 	 &error );
+
+	bit_stream.byte_stream_offset = 2;
 
 	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
 	          &bit_stream,
@@ -1348,6 +1362,8 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 		/* Test libfsapfs_write_io_handle_initialize with memset failing
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
+
+		bit_stream.byte_stream_offset = 2;
 
 		result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
 		          &bit_stream,
@@ -1906,11 +1922,11 @@ int fsapfs_test_deflate_read_block(
 
 	/* Initialize test
 	 */
-        bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-        bit_stream.byte_stream_size   = 2627;
-        bit_stream.byte_stream_offset = 2;
-        bit_stream.bit_buffer         = 0;
-        bit_stream.bit_buffer_size    = 0;
+	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
+	bit_stream.byte_stream_size   = 2627;
+	bit_stream.byte_stream_offset = 2;
+	bit_stream.bit_buffer         = 0;
+	bit_stream.bit_buffer_size    = 0;
 
 	/* Test regular cases
 	 */
