@@ -175,9 +175,9 @@ See section: <<object_subtypes,Object subtypes>>
 The checksum algorithm:
 
 * calculate a Fletcher-64 checksum of the block data without the object checkum value and an initial value of 0
-* 'checksum_lower_32bit = (fletcher_lower_32bit + fletcher_upper_32bit) mod 0xffffffff'
-* 'checksum_upper_32bit = (fletcher_lower_32bit + checksum_lower_32bit) mod 0xffffffff'
-* 'checksum = (checksum_upper_32bit << 32) | checksum_lower_32bit'
+* `checksum_lower_32bit = (fletcher_lower_32bit + fletcher_upper_32bit) mod 0xffffffff`
+* `checksum_upper_32bit = (fletcher_lower_32bit + checksum_lower_32bit) mod 0xffffffff`
+* `checksum = (checksum_upper_32bit << 32) | checksum_lower_32bit`
 
 === Object identifiers
 
@@ -450,7 +450,7 @@ Set to 0 if value has a variable size
 APFS stores volumes inside a container. The maximum number of volumes is
 dependent on the size of the container. `[HANSEN17]` indicates:
 
-[cols="1,1,1,5",options="header"]
+[cols="1,5",options="header"]
 |===
 | Container size | Maximum number of volumes
 | 1 GiB | 2

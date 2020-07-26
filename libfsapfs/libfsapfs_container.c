@@ -1845,13 +1845,13 @@ on_error:
 		 &checkpoint_map,
 		 NULL );
 	}
+#endif
 	if( container_superblock != NULL )
 	{
 		libfsapfs_container_superblock_free(
 		 &container_superblock,
 		 NULL );
 	}
-#endif
 	if( internal_container->fusion_middle_tree != NULL )
 	{
 		libfsapfs_fusion_middle_tree_free(
