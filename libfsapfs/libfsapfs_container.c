@@ -1181,7 +1181,7 @@ int libfsapfs_internal_container_open_read(
 		 "%s: Fusion drive not supported.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 #endif
 #if defined( HAVE_DEBUG_OUTPUT )
@@ -1810,6 +1810,12 @@ on_error:
 	{
 		libfsapfs_object_map_free(
 		 &object_map,
+		 NULL );
+	}
+	if( internal_container->data_block_vector != NULL )
+	{
+		libfdata_vector_free(
+		 &( internal_container->data_block_vector ),
 		 NULL );
 	}
 	if( container_data_handle != NULL )
