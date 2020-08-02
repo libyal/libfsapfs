@@ -1078,6 +1078,18 @@ int libfsapfs_snapshot_metadata_tree_get_entry_from_node_by_identifier(
 
 			return( -1 );
 		}
+		if( entry->key_data_size < 8 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 btree_entry_index );
+
+			return( -1 );
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 entry->key_data,
 		 snapshot_metadata_identifier );
@@ -1604,6 +1616,18 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_leaf_node(
 
 			goto on_error;
 		}
+		if( entry->key_data_size < 8 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 btree_entry_index );
+
+			return( -1 );
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 entry->key_data,
 		 snapshot_metadata_identifier );
@@ -1841,6 +1865,18 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data_size < 8 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
 			 function,
 			 entry_index );
 

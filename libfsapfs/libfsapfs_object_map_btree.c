@@ -922,6 +922,18 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 
 			return( -1 );
 		}
+		if( entry->key_data_size < 8 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 btree_entry_index );
+
+			return( -1 );
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 entry->key_data,
 		 object_map_identifier );

@@ -1133,6 +1133,18 @@ int libfsapfs_file_system_btree_get_entry_from_node_by_identifier(
 
 			return( -1 );
 		}
+		if( entry->key_data_size < 8 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 btree_entry_index );
+
+			return( -1 );
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 entry->key_data,
 		 file_system_identifier );
@@ -1502,6 +1514,18 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf8_name
 
 			goto on_error;
 		}
+		if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
 		 file_system_identifier );
@@ -1779,6 +1803,18 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
 			 function,
 			 entry_index );
 
@@ -2131,6 +2167,18 @@ int libfsapfs_file_system_btree_get_directory_record_from_leaf_node_by_utf16_nam
 
 			goto on_error;
 		}
+		if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
 		 file_system_identifier );
@@ -2408,6 +2456,18 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
 			 function,
 			 entry_index );
 
@@ -2758,6 +2818,18 @@ int libfsapfs_file_system_btree_get_directory_entries_from_leaf_node(
 
 			goto on_error;
 		}
+		if( btree_entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 btree_entry_index );
+
+			goto on_error;
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
 		 file_system_identifier );
@@ -3010,6 +3082,18 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
 			 function,
 			 entry_index );
 
@@ -3538,6 +3622,18 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 
 			goto on_error;
 		}
+		if( btree_entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 btree_entry_index );
+
+			goto on_error;
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
 		 file_system_identifier );
@@ -3794,6 +3890,18 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 			 "%s: invalid B-tree entry: %d - missing key data.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
+		if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
 			 function,
 			 entry_index );
 
@@ -4313,6 +4421,18 @@ int libfsapfs_file_system_btree_get_file_extents_from_leaf_node(
 
 			goto on_error;
 		}
+		if( btree_entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 btree_entry_index );
+
+			goto on_error;
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_file_system_btree_key_common_t *) btree_entry->key_data )->file_system_identifier,
 		 file_system_identifier );
@@ -4571,6 +4691,18 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 
 			goto on_error;
 		}
+		if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_common_t ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+			 function,
+			 entry_index );
+
+			goto on_error;
+		}
 		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_file_system_btree_key_common_t *) entry->key_data )->file_system_identifier,
 		 file_system_identifier );
@@ -4601,6 +4733,18 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 		if( ( file_system_identifier == identifier )
 		 && ( file_system_data_type == LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_FILE_EXTENT ) )
 		{
+			if( entry->key_data_size < sizeof( fsapfs_file_system_btree_key_file_extent_t ) )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid B-tree entry: %d - key data size value out of bounds.",
+				 function,
+				 entry_index );
+
+				goto on_error;
+			}
 			byte_stream_copy_to_uint64_little_endian(
 			 ( (fsapfs_file_system_btree_key_file_extent_t *) entry->key_data )->logical_address,
 			 file_extent_logical_address );
