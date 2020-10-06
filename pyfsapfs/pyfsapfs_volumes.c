@@ -215,7 +215,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes a volumes sequence and iterator object
+/* Initializes a volumes sequence and iterator object
  * Returns 0 if successful or -1 on error
  */
 int pyfsapfs_volumes_init(

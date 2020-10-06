@@ -282,7 +282,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes an extended attribute object
+/* Initializes an extended attribute object
  * Returns 0 if successful or -1 on error
  */
 int pyfsapfs_extended_attribute_init(

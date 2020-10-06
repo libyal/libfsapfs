@@ -58,6 +58,7 @@ environment:
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: macos
     PYTHON: "/usr/local/bin/python3.8"
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: ""
@@ -179,8 +180,8 @@ install:
     Else {
       .\builddokan.ps1 -UseLegacyVersion }
     }
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew update && brew install gettext gnu-sed && brew link --force gettext; fi
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew install python3 || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew update; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew install gnu-sed python3 || true; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "${env:PYTHON} -m pip install -U pip setuptools twine wheel" }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
@@ -250,6 +251,6 @@ artifacts:
 - path: dist\*.whl
 
 deploy_script:
-- ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -and $isWindows) {
+- ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -and $isWindows -and $env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "${env:PYTHON} -m twine upload dist/*.whl --username __token__ --password ${env:PYPI_TOKEN} --skip-existing" }
 

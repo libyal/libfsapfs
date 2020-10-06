@@ -215,7 +215,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes an extended attributes sequence and iterator object
+/* Initializes an extended attributes sequence and iterator object
  * Returns 0 if successful or -1 on error
  */
 int pyfsapfs_extended_attributes_init(

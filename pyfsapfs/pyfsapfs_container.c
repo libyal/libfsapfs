@@ -244,7 +244,7 @@ PyTypeObject pyfsapfs_container_type_object = {
 	0
 };
 
-/* Intializes a container object
+/* Initializes a container object
  * Returns 0 if successful or -1 on error
  */
 int pyfsapfs_container_init(

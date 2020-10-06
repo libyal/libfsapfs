@@ -317,7 +317,7 @@ on_error:
 	return( NULL );
 }
 
-/* Intializes a volume object
+/* Initializes a volume object
  * Returns 0 if successful or -1 on error
  */
 int pyfsapfs_volume_init(

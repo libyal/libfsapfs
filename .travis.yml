@@ -1,5 +1,6 @@
 version: ~> 1.0
 language: c
+arch: amd64
 os: linux
 dist: bionic
 jobs:
@@ -20,18 +21,24 @@ jobs:
     - TARGET="linux-gcc"
     compiler: gcc
     group: edge
-  - name: "Linux with gcc on s390x (Docker)"
+  - name: "Linux with gcc on ppc64le"
     env:
-    - DOCKERHUB_REPO="s390x/ubuntu"
-    - DOCKERHUB_TAG="bionic"
     - CONFIGURE_OPTIONS=""
     - CFLAGS="--coverage"
     - LDFLAGS="--coverage"
-    - TARGET="docker"
+    - TARGET="linux-gcc"
+    arch: ppc64le
     compiler: gcc
     group: edge
-    services:
-    - docker
+  - name: "Linux with gcc on s390x"
+    env:
+    - CONFIGURE_OPTIONS=""
+    - CFLAGS="--coverage"
+    - LDFLAGS="--coverage"
+    - TARGET="linux-gcc"
+    arch: s390x
+    compiler: gcc
+    group: edge
   - name: "Linux with gcc and wide character type (wchar_t) support"
     env:
     - CONFIGURE_OPTIONS="--enable-wide-character-type"

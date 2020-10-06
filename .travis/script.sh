@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to run script step on Travis-CI
 #
-# Version: 20191209
+# Version: 20200926
 
 # Exit on error.
 set -e;
@@ -11,11 +11,7 @@ then
 	export PATH=$(echo $PATH | tr ":" "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s/::/:/g");
 fi
 
-if test ${TARGET} = "docker";
-then
-	docker run -t -v "${PWD}:/libfsapfs" ${DOCKERHUB_REPO}:${DOCKERHUB_TAG} sh -c "cd libfsapfs && .travis/script_docker.sh";
-
-elif test ${TARGET} = "linux-gcc-python-setup-py" || test ${TARGET} = "macos-gcc-python-setup-py";
+if test ${TARGET} = "linux-gcc-python-setup-py" || test ${TARGET} = "macos-gcc-python-setup-py";
 then
 	./configure ${CONFIGURE_OPTIONS};
 	make > /dev/null;

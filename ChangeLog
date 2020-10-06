@@ -1,4 +1,6 @@
 TODO
+* fsapfsinfo - print information about superblock feature flags
+
 * add snapshot support
 ** add API function to retrieve creation time
 ** add API function to retrieve change time
