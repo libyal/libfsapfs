@@ -538,8 +538,8 @@ int libfsapfs_extended_attribute_read_value_data(
 
 	data_offset = sizeof( fsapfs_file_system_btree_value_extended_attribute_t );
 
-	if( ( extended_attribute_data_size == 0 )
-	 || ( (size_t) extended_attribute_data_size > ( data_size - data_offset ) ) )
+	if( ( extended_attribute_data_size != 0 )
+	 && ( (size_t) extended_attribute_data_size > ( data_size - data_offset ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -635,7 +635,8 @@ int libfsapfs_extended_attribute_read_value_data(
 		}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 	}
-	else if( ( extended_attribute_flags & 0x0002 ) != 0 )
+	else if( ( ( extended_attribute_flags & 0x0002 ) != 0 )
+	      && ( extended_attribute_data_size > 0 ) )
 	{
 		internal_extended_attribute->data = (uint8_t *) memory_allocate(
 		                                                 sizeof( uint8_t ) * extended_attribute_data_size );
