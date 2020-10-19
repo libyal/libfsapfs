@@ -30,7 +30,11 @@
 
 #include <libfsapfs/extern.h>
 
+#if defined( __CYGWIN__ )
+#define LIBFSAPFS_EXTERN_VARIABLE	extern
+#else
 #define LIBFSAPFS_EXTERN_VARIABLE	LIBFSAPFS_EXTERN
+#endif
 
 #else
 #define LIBFSAPFS_EXTERN		/* extern */

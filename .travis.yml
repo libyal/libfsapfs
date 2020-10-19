@@ -2,7 +2,7 @@ version: ~> 1.0
 language: c
 arch: amd64
 os: linux
-dist: bionic
+dist: focal
 jobs:
   include:
   - name: "Linux with clang"

@@ -3121,8 +3121,9 @@ int info_handle_file_entries_fprint(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-				 "%s: unable to print file entry.",
-				 function );
+				 "%s: unable to print file entry: %" PRIu64 " information.",
+				 function,
+				 file_system_identifier );
 
 				goto on_error;
 			}
