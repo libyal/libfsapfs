@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_compressed_data_header.h"
 #include "libfsapfs_directory_record.h"
 #include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extern.h"
@@ -73,9 +74,13 @@ struct libfsapfs_internal_file_entry
 	 */
 	libcdata_array_t *extended_attributes;
 
-	/* The compressed data extended attribute
+	/* The compressed data (com.apple.decmpfs) extended attribute
 	 */
 	libfsapfs_extended_attribute_t *compressed_data_extended_attribute;
+
+	/* The compressed data (com.apple.decmpfs) header
+	 */
+	libfsapfs_compressed_data_header_t *compressed_data_header;
 
 	/* The resource fork extended attribute
 	 */
@@ -97,13 +102,9 @@ struct libfsapfs_internal_file_entry
 	 */
 	libcdata_array_t *directory_entries;
 
-	/* The file size
+	/* The data size
 	 */
-	size64_t file_size;
-
-	/* The compression method
-	 */
-	uint32_t compression_method;
+	size64_t data_size;
 
 	/* The file extents
 	 */
@@ -268,6 +269,20 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
      libfsapfs_extended_attribute_t **extended_attribute,
      libcerror_error_t **error );
 
+int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_extended_attribute_t **extended_attribute,
+     libcerror_error_t **error );
+
+int libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
+     libfsapfs_internal_file_entry_t *internal_file_entry,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_extended_attribute_t **extended_attribute,
+     libcerror_error_t **error );
+
 LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_has_extended_attribute_by_utf8_name(
      libfsapfs_file_entry_t *file_entry,
@@ -367,7 +382,7 @@ int libfsapfs_file_entry_get_offset(
      off64_t *offset,
      libcerror_error_t **error );
 
-int libfsapfs_internal_file_entry_get_file_size(
+int libfsapfs_internal_file_entry_get_data_size(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error );
 

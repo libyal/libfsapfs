@@ -34,9 +34,11 @@
 #include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
+#include "libfsapfs_libcthreads.h"
 #include "libfsapfs_libfdata.h"
 #include "libfsapfs_libfdatetime.h"
 #include "libfsapfs_libuna.h"
+#include "libfsapfs_types.h"
 
 #include "fsapfs_file_system.h"
 

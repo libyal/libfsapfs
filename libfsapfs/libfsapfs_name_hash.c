@@ -29,6 +29,98 @@
 #include "libfsapfs_libuna.h"
 #include "libfsapfs_name.h"
 
+libfsapfs_name_decomposition_mapping_t special_case_folding_000000df = { 2, { 0x00000073, 0x00000073 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00000130 = { 2, { 0x00000069, 0x00000307 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00000149 = { 2, { 0x000002bc, 0x0000006e } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00000587 = { 2, { 0x00000565, 0x00000582 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001e9a = { 2, { 0x00000061, 0x000002be } };
+
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001f80[ 48 ] = {
+	/* 00001f80 */ { 3, { 0x000003b1, 0x00000313, 0x000003b9 } },
+	/* 00001f81 */ { 3, { 0x000003b1, 0x00000314, 0x000003b9 } },
+	/* 00001f82 */ { 4, { 0x000003b1, 0x00000313, 0x00000300, 0x000003b9 } },
+	/* 00001f83 */ { 4, { 0x000003b1, 0x00000314, 0x00000300, 0x000003b9 } },
+	/* 00001f84 */ { 4, { 0x000003b1, 0x00000313, 0x00000301, 0x000003b9 } },
+	/* 00001f85 */ { 4, { 0x000003b1, 0x00000314, 0x00000301, 0x000003b9 } },
+	/* 00001f86 */ { 4, { 0x000003b1, 0x00000313, 0x00000342, 0x000003b9 } },
+	/* 00001f87 */ { 4, { 0x000003b1, 0x00000314, 0x00000342, 0x000003b9 } },
+	/* 00001f88 */ { 3, { 0x000003b1, 0x00000313, 0x000003b9 } },
+	/* 00001f89 */ { 3, { 0x000003b1, 0x00000314, 0x000003b9 } },
+	/* 00001f8a */ { 4, { 0x000003b1, 0x00000313, 0x00000300, 0x000003b9 } },
+	/* 00001f8b */ { 4, { 0x000003b1, 0x00000314, 0x00000300, 0x000003b9 } },
+	/* 00001f8c */ { 4, { 0x000003b1, 0x00000313, 0x00000301, 0x000003b9 } },
+	/* 00001f8d */ { 4, { 0x000003b1, 0x00000314, 0x00000301, 0x000003b9 } },
+	/* 00001f8e */ { 4, { 0x000003b1, 0x00000313, 0x00000342, 0x000003b9 } },
+	/* 00001f8f */ { 4, { 0x000003b1, 0x00000314, 0x00000342, 0x000003b9 } },
+	/* 00001f90 */ { 3, { 0x000003b7, 0x00000313, 0x000003b9 } },
+	/* 00001f91 */ { 3, { 0x000003b7, 0x00000314, 0x000003b9 } },
+	/* 00001f92 */ { 4, { 0x000003b7, 0x00000313, 0x00000300, 0x000003b9 } },
+	/* 00001f93 */ { 4, { 0x000003b7, 0x00000314, 0x00000300, 0x000003b9 } },
+	/* 00001f94 */ { 4, { 0x000003b7, 0x00000313, 0x00000301, 0x000003b9 } },
+	/* 00001f95 */ { 4, { 0x000003b7, 0x00000314, 0x00000301, 0x000003b9 } },
+	/* 00001f96 */ { 4, { 0x000003b7, 0x00000313, 0x00000342, 0x000003b9 } },
+	/* 00001f97 */ { 4, { 0x000003b7, 0x00000314, 0x00000342, 0x000003b9 } },
+	/* 00001f98 */ { 3, { 0x000003b7, 0x00000313, 0x000003b9 } },
+	/* 00001f99 */ { 3, { 0x000003b7, 0x00000314, 0x000003b9 } },
+	/* 00001f9a */ { 4, { 0x000003b7, 0x00000313, 0x00000300, 0x000003b9 } },
+	/* 00001f9b */ { 4, { 0x000003b7, 0x00000314, 0x00000300, 0x000003b9 } },
+	/* 00001f9c */ { 4, { 0x000003b7, 0x00000313, 0x00000301, 0x000003b9 } },
+	/* 00001f9d */ { 4, { 0x000003b7, 0x00000314, 0x00000301, 0x000003b9 } },
+	/* 00001f9e */ { 4, { 0x000003b7, 0x00000313, 0x00000342, 0x000003b9 } },
+	/* 00001f9f */ { 4, { 0x000003b7, 0x00000314, 0x00000342, 0x000003b9 } },
+	/* 00001fa0 */ { 3, { 0x000003c9, 0x00000313, 0x000003b9 } },
+	/* 00001fa1 */ { 3, { 0x000003c9, 0x00000314, 0x000003b9 } },
+	/* 00001fa2 */ { 4, { 0x000003c9, 0x00000313, 0x00000300, 0x000003b9 } },
+	/* 00001fa3 */ { 4, { 0x000003c9, 0x00000314, 0x00000300, 0x000003b9 } },
+	/* 00001fa4 */ { 4, { 0x000003c9, 0x00000313, 0x00000301, 0x000003b9 } },
+	/* 00001fa5 */ { 4, { 0x000003c9, 0x00000314, 0x00000301, 0x000003b9 } },
+	/* 00001fa6 */ { 4, { 0x000003c9, 0x00000313, 0x00000342, 0x000003b9 } },
+	/* 00001fa7 */ { 4, { 0x000003c9, 0x00000314, 0x00000342, 0x000003b9 } },
+	/* 00001fa8 */ { 3, { 0x000003c9, 0x00000313, 0x000003b9 } },
+	/* 00001fa9 */ { 3, { 0x000003c9, 0x00000314, 0x000003b9 } },
+	/* 00001faa */ { 4, { 0x000003c9, 0x00000313, 0x00000300, 0x000003b9 } },
+	/* 00001fab */ { 4, { 0x000003c9, 0x00000314, 0x00000300, 0x000003b9 } },
+	/* 00001fac */ { 4, { 0x000003c9, 0x00000313, 0x00000301, 0x000003b9 } },
+	/* 00001fad */ { 4, { 0x000003c9, 0x00000314, 0x00000301, 0x000003b9 } },
+	/* 00001fae */ { 4, { 0x000003c9, 0x00000313, 0x00000342, 0x000003b9 } },
+	/* 00001faf */ { 4, { 0x000003c9, 0x00000314, 0x00000342, 0x000003b9 } }
+};
+
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fb2 = { 3, { 0x000003b1, 0x00000300, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fb3 = { 2, { 0x000003b1, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fb4 = { 3, { 0x000003b1, 0x00000301, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fb6 = { 2, { 0x000003b1, 0x00000342 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fb7 = { 3, { 0x000003b1, 0x00000342, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fbc = { 2, { 0x000003b1, 0x000003b9 } };
+
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fc2 = { 3, { 0x000003b7, 0x00000300, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fc3 = { 2, { 0x000003b7, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fc4 = { 3, { 0x000003b7, 0x00000301, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fc6 = { 2, { 0x000003b7, 0x00000342 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fc7 = { 3, { 0x000003b7, 0x00000342, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001fcc = { 2, { 0x000003b7, 0x000003b9 } };
+
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001ff2 = { 3, { 0x000003c9, 0x00000300, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001ff3 = { 2, { 0x000003c9, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001ff4 = { 3, { 0x000003c9, 0x00000301, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001ff6 = { 2, { 0x000003c9, 0x00000342 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001ff7 = { 3, { 0x000003c9, 0x00000342, 0x000003b9 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_00001ffc = { 2, { 0x000003c9, 0x000003b9 } };
+
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb00 = { 2, { 0x00000066, 0x00000066 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb01 = { 2, { 0x00000066, 0x00000069 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb02 = { 2, { 0x00000066, 0x0000006c } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb03 = { 3, { 0x00000066, 0x00000066, 0x00000069 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb04 = { 3, { 0x00000066, 0x00000066, 0x0000006c } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb05 = { 2, { 0x00000073, 0x00000074 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb06 = { 2, { 0x00000073, 0x00000074 } };
+
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb13 = { 2, { 0x00000574, 0x00000576 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb14 = { 2, { 0x00000574, 0x00000565 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb15 = { 2, { 0x00000574, 0x0000056b } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb16 = { 2, { 0x0000057e, 0x00000576 } };
+libfsapfs_name_decomposition_mapping_t special_case_folding_0000fb17 = { 2, { 0x00000574, 0x0000056d } };
+
 /* Calculates the name hash of an UTF-8 formatted string
  * Returns 1 if successful or -1 on error
  */
@@ -100,12 +192,171 @@ int libfsapfs_name_hash_calculate_from_utf8_string(
 		{
 			libfsapfs_name_get_case_folding_mapping(
 			 unicode_character );
-		}
-		libfsapfs_name_get_decomposition_mapping(
-		 unicode_character,
-		 nfd_mapping,
-		 single_nfd_mapping );
 
+			/* Overload the NFD mapping to handle special case folding
+			 */
+			if( ( unicode_character >= 0x00001f80UL )
+			 && ( unicode_character <= 0x00001fafUL ) )
+			{
+				nfd_mapping = &( special_case_folding_00001f80[ unicode_character - 0x00001f80UL ] );
+			}
+			else switch( unicode_character )
+			{
+				case 0x000000dfUL:
+					nfd_mapping = &special_case_folding_000000df;
+					break;
+
+				case 0x00000130UL:
+					nfd_mapping = &special_case_folding_00000130;
+					break;
+
+				case 0x00000149UL:
+					nfd_mapping = &special_case_folding_00000149;
+					break;
+
+				case 0x00000587UL:
+					nfd_mapping = &special_case_folding_00000587;
+					break;
+
+				case 0x00001e9aUL:
+					nfd_mapping = &special_case_folding_00001e9a;
+					break;
+
+				case 0x00001fb2UL:
+					nfd_mapping = &special_case_folding_00001fb2;
+					break;
+
+				case 0x00001fb3UL:
+					nfd_mapping = &special_case_folding_00001fb3;
+					break;
+
+				case 0x00001fb4UL:
+					nfd_mapping = &special_case_folding_00001fb4;
+					break;
+
+				case 0x00001fb6UL:
+					nfd_mapping = &special_case_folding_00001fb6;
+					break;
+
+				case 0x00001fb7UL:
+					nfd_mapping = &special_case_folding_00001fb7;
+					break;
+
+				case 0x00001fbcUL:
+					nfd_mapping = &special_case_folding_00001fbc;
+					break;
+
+				case 0x00001fc2UL:
+					nfd_mapping = &special_case_folding_00001fc2;
+					break;
+
+				case 0x00001fc3UL:
+					nfd_mapping = &special_case_folding_00001fc3;
+					break;
+
+				case 0x00001fc4UL:
+					nfd_mapping = &special_case_folding_00001fc4;
+					break;
+
+				case 0x00001fc6UL:
+					nfd_mapping = &special_case_folding_00001fc6;
+					break;
+
+				case 0x00001fc7UL:
+					nfd_mapping = &special_case_folding_00001fc7;
+					break;
+
+				case 0x00001fccUL:
+					nfd_mapping = &special_case_folding_00001fcc;
+					break;
+
+				case 0x00001ff2UL:
+					nfd_mapping = &special_case_folding_00001ff2;
+					break;
+
+				case 0x00001ff3UL:
+					nfd_mapping = &special_case_folding_00001ff3;
+					break;
+
+				case 0x00001ff4UL:
+					nfd_mapping = &special_case_folding_00001ff4;
+					break;
+
+				case 0x00001ff6UL:
+					nfd_mapping = &special_case_folding_00001ff6;
+					break;
+
+				case 0x00001ff7UL:
+					nfd_mapping = &special_case_folding_00001ff7;
+					break;
+
+				case 0x00001ffcUL:
+					nfd_mapping = &special_case_folding_00001ffc;
+					break;
+
+				case 0x0000fb00UL:
+					nfd_mapping = &special_case_folding_0000fb00;
+					break;
+
+				case 0x0000fb01UL:
+					nfd_mapping = &special_case_folding_0000fb01;
+					break;
+
+				case 0x0000fb02UL:
+					nfd_mapping = &special_case_folding_0000fb02;
+					break;
+
+				case 0x0000fb03UL:
+					nfd_mapping = &special_case_folding_0000fb03;
+					break;
+
+				case 0x0000fb04UL:
+					nfd_mapping = &special_case_folding_0000fb04;
+					break;
+
+				case 0x0000fb05UL:
+					nfd_mapping = &special_case_folding_0000fb05;
+					break;
+
+				case 0x0000fb06UL:
+					nfd_mapping = &special_case_folding_0000fb06;
+					break;
+
+				case 0x0000fb13UL:
+					nfd_mapping = &special_case_folding_0000fb13;
+					break;
+
+				case 0x0000fb14UL:
+					nfd_mapping = &special_case_folding_0000fb14;
+					break;
+
+				case 0x0000fb15UL:
+					nfd_mapping = &special_case_folding_0000fb15;
+					break;
+
+				case 0x0000fb16UL:
+					nfd_mapping = &special_case_folding_0000fb16;
+					break;
+
+				case 0x0000fb17UL:
+					nfd_mapping = &special_case_folding_0000fb17;
+					break;
+
+				default:
+					libfsapfs_name_get_decomposition_mapping(
+					 unicode_character,
+					 nfd_mapping,
+					 single_nfd_mapping );
+					break;
+			}
+		}
+		else
+		{
+			libfsapfs_name_get_decomposition_mapping(
+			 unicode_character,
+			 nfd_mapping,
+			 single_nfd_mapping );
+		}
 		for( nfd_character_index = 0;
 		     nfd_character_index < nfd_mapping->number_of_characters;
 		     nfd_character_index++ )
@@ -262,12 +513,171 @@ int libfsapfs_name_hash_calculate_from_utf16_string(
 		{
 			libfsapfs_name_get_case_folding_mapping(
 			 unicode_character );
-		}
-		libfsapfs_name_get_decomposition_mapping(
-		 unicode_character,
-		 nfd_mapping,
-		 single_nfd_mapping );
 
+			/* Overload the NFD mapping to handle special case folding
+			 */
+			if( ( unicode_character >= 0x00001f80UL )
+			 && ( unicode_character <= 0x00001fafUL ) )
+			{
+				nfd_mapping = &( special_case_folding_00001f80[ unicode_character - 0x00001f80UL ] );
+			}
+			else switch( unicode_character )
+			{
+				case 0x000000dfUL:
+					nfd_mapping = &special_case_folding_000000df;
+					break;
+
+				case 0x00000130UL:
+					nfd_mapping = &special_case_folding_00000130;
+					break;
+
+				case 0x00000149UL:
+					nfd_mapping = &special_case_folding_00000149;
+					break;
+
+				case 0x00000587UL:
+					nfd_mapping = &special_case_folding_00000587;
+					break;
+
+				case 0x00001e9aUL:
+					nfd_mapping = &special_case_folding_00001e9a;
+					break;
+
+				case 0x00001fb2UL:
+					nfd_mapping = &special_case_folding_00001fb2;
+					break;
+
+				case 0x00001fb3UL:
+					nfd_mapping = &special_case_folding_00001fb3;
+					break;
+
+				case 0x00001fb4UL:
+					nfd_mapping = &special_case_folding_00001fb4;
+					break;
+
+				case 0x00001fb6UL:
+					nfd_mapping = &special_case_folding_00001fb6;
+					break;
+
+				case 0x00001fb7UL:
+					nfd_mapping = &special_case_folding_00001fb7;
+					break;
+
+				case 0x00001fbcUL:
+					nfd_mapping = &special_case_folding_00001fbc;
+					break;
+
+				case 0x00001fc2UL:
+					nfd_mapping = &special_case_folding_00001fc2;
+					break;
+
+				case 0x00001fc3UL:
+					nfd_mapping = &special_case_folding_00001fc3;
+					break;
+
+				case 0x00001fc4UL:
+					nfd_mapping = &special_case_folding_00001fc4;
+					break;
+
+				case 0x00001fc6UL:
+					nfd_mapping = &special_case_folding_00001fc6;
+					break;
+
+				case 0x00001fc7UL:
+					nfd_mapping = &special_case_folding_00001fc7;
+					break;
+
+				case 0x00001fccUL:
+					nfd_mapping = &special_case_folding_00001fcc;
+					break;
+
+				case 0x00001ff2UL:
+					nfd_mapping = &special_case_folding_00001ff2;
+					break;
+
+				case 0x00001ff3UL:
+					nfd_mapping = &special_case_folding_00001ff3;
+					break;
+
+				case 0x00001ff4UL:
+					nfd_mapping = &special_case_folding_00001ff4;
+					break;
+
+				case 0x00001ff6UL:
+					nfd_mapping = &special_case_folding_00001ff6;
+					break;
+
+				case 0x00001ff7UL:
+					nfd_mapping = &special_case_folding_00001ff7;
+					break;
+
+				case 0x00001ffcUL:
+					nfd_mapping = &special_case_folding_00001ffc;
+					break;
+
+				case 0x0000fb00UL:
+					nfd_mapping = &special_case_folding_0000fb00;
+					break;
+
+				case 0x0000fb01UL:
+					nfd_mapping = &special_case_folding_0000fb01;
+					break;
+
+				case 0x0000fb02UL:
+					nfd_mapping = &special_case_folding_0000fb02;
+					break;
+
+				case 0x0000fb03UL:
+					nfd_mapping = &special_case_folding_0000fb03;
+					break;
+
+				case 0x0000fb04UL:
+					nfd_mapping = &special_case_folding_0000fb04;
+					break;
+
+				case 0x0000fb05UL:
+					nfd_mapping = &special_case_folding_0000fb05;
+					break;
+
+				case 0x0000fb06UL:
+					nfd_mapping = &special_case_folding_0000fb06;
+					break;
+
+				case 0x0000fb13UL:
+					nfd_mapping = &special_case_folding_0000fb13;
+					break;
+
+				case 0x0000fb14UL:
+					nfd_mapping = &special_case_folding_0000fb14;
+					break;
+
+				case 0x0000fb15UL:
+					nfd_mapping = &special_case_folding_0000fb15;
+					break;
+
+				case 0x0000fb16UL:
+					nfd_mapping = &special_case_folding_0000fb16;
+					break;
+
+				case 0x0000fb17UL:
+					nfd_mapping = &special_case_folding_0000fb17;
+					break;
+
+				default:
+					libfsapfs_name_get_decomposition_mapping(
+					 unicode_character,
+					 nfd_mapping,
+					 single_nfd_mapping );
+					break;
+			}
+		}
+		else
+		{
+			libfsapfs_name_get_decomposition_mapping(
+			 unicode_character,
+			 nfd_mapping,
+			 single_nfd_mapping );
+		}
 		for( nfd_character_index = 0;
 		     nfd_character_index < nfd_mapping->number_of_characters;
 		     nfd_character_index++ )

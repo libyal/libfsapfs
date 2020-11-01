@@ -187,26 +187,6 @@ struct fsapfs_file_system_extended_attribute_data_stream
 	uint8_t number_of_bytes_read[ 8 ];
 };
 
-typedef struct fsapfs_file_system_extended_attribute_compression_header fsapfs_file_system_extended_attribute_compression_header_t;
-
-struct fsapfs_file_system_extended_attribute_compression_header
-{
-	/* The signature
-	 * Consists of 4 bytes
-	 */
-	uint8_t signature[ 4 ];
-
-	/* The compression method
-	 * Consists of 4 bytes
-	 */
-	uint8_t compression_method[ 4 ];
-
-	/* The uncompressed data size
-	 * Consists of 8 bytes
-	 */
-	uint8_t uncompressed_data_size[ 8 ];
-};
-
 typedef struct fsapfs_file_system_btree_value_file_extent fsapfs_file_system_btree_value_file_extent_t;
 
 struct fsapfs_file_system_btree_value_file_extent

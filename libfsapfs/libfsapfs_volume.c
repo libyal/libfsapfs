@@ -2712,7 +2712,7 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves a specific file entry
+/* Retrieves the file entry for a specific identifier
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_volume_get_file_entry_by_identifier(

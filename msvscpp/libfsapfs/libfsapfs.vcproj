@@ -214,6 +214,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_compressed_data_header.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_compression.c"
 				>
 			</File>
@@ -412,6 +416,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\fsapfs_compressed_data.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\fsapfs_container_reaper.h"
 				>
 			</File>
@@ -493,6 +501,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_compressed_data_handle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_compressed_data_header.h"
 				>
 			</File>
 			<File

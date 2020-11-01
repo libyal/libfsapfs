@@ -475,7 +475,7 @@ int libfsapfs_volume_get_next_file_entry_identifier(
      uint64_t *identifier,
      libfsapfs_error_t **error );
 
-/* Retrieves a specific file entry
+/* Retrieves the file entry for a specific identifier
  * Returns 1 if successful, 0 if not available or -1 on error
  */
 LIBFSAPFS_EXTERN \

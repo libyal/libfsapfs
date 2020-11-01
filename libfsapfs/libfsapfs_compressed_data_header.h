@@ -1,5 +1,5 @@
 /*
- * Data stream functions
+ * The compressed data header functions
  *
  * Copyright (C) 2018-2020, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,47 +19,48 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_DATA_STREAM_H )
-#define _LIBFSAPFS_DATA_STREAM_H
+#if !defined( _LIBFSAPFS_COMPRESSED_DATA_HEADER_H )
+#define _LIBFSAPFS_COMPRESSED_DATA_HEADER_H
 
 #include <common.h>
 #include <types.h>
 
-#include "libfsapfs_encryption_context.h"
-#include "libfsapfs_io_handle.h"
-#include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
-#include "libfsapfs_libfdata.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-int libfsapfs_data_stream_initialize_from_data(
-     libfdata_stream_t **data_stream,
+typedef struct libfsapfs_compressed_data_header libfsapfs_compressed_data_header_t;
+
+struct libfsapfs_compressed_data_header
+{
+	/* The compression method
+	 */
+	uint32_t compression_method;
+
+	/* The uncompressed data size
+	 */
+	uint64_t uncompressed_data_size;
+};
+
+int libfsapfs_compressed_data_header_initialize(
+     libfsapfs_compressed_data_header_t **compressed_data_header,
+     libcerror_error_t **error );
+
+int libfsapfs_compressed_data_header_free(
+     libfsapfs_compressed_data_header_t **compressed_data_header,
+     libcerror_error_t **error );
+
+int libfsapfs_compressed_data_header_read_data(
+     libfsapfs_compressed_data_header_t *compressed_data_header,
      const uint8_t *data,
      size_t data_size,
-     libcerror_error_t **error );
-
-int libfsapfs_data_stream_initialize_from_file_extents(
-     libfdata_stream_t **data_stream,
-     libfsapfs_io_handle_t *io_handle,
-     libfsapfs_encryption_context_t *encryption_context,
-     libcdata_array_t *file_extents,
-     size64_t data_stream_size,
-     uint8_t is_sparse,
-     libcerror_error_t **error );
-
-int libfsapfs_data_stream_initialize_from_compressed_data_stream(
-     libfdata_stream_t **data_stream,
-     libfdata_stream_t *compressed_data_stream,
-     size64_t uncompressed_data_size,
-     int compression_method,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_DATA_STREAM_H ) */
+#endif /* !defined( _LIBFSAPFS_COMPRESSED_DATA_HEADER_H ) */
 

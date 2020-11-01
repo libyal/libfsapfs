@@ -59,7 +59,7 @@ LIBFSAPFS_EXTERN_VARIABLE \
 uint32_t libfsapfs_name_case_folding_mappings_0x000013f8[ 8 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
-uint32_t libfsapfs_name_case_folding_mappings_0x00001c80[ 16 ];
+uint32_t libfsapfs_name_case_folding_mappings_0x00001c80[ 64 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
 uint32_t libfsapfs_name_case_folding_mappings_0x00001e00[ 512 ];
@@ -77,7 +77,7 @@ LIBFSAPFS_EXTERN_VARIABLE \
 uint32_t libfsapfs_name_case_folding_mappings_0x0000a640[ 96 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
-uint32_t libfsapfs_name_case_folding_mappings_0x0000a720[ 152 ];
+uint32_t libfsapfs_name_case_folding_mappings_0x0000a720[ 216 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
 uint32_t libfsapfs_name_case_folding_mappings_0x0000ab70[ 80 ];
@@ -96,6 +96,9 @@ uint32_t libfsapfs_name_case_folding_mappings_0x00010c80[ 56 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
 uint32_t libfsapfs_name_case_folding_mappings_0x000118a0[ 32 ];
+
+LIBFSAPFS_EXTERN_VARIABLE \
+uint32_t libfsapfs_name_case_folding_mappings_0x00016e40[ 32 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
 uint32_t libfsapfs_name_case_folding_mappings_0x0001e900[ 40 ];
@@ -152,6 +155,12 @@ LIBFSAPFS_EXTERN_VARIABLE \
 libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x00003048[ 184 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
+libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0000ac00[ 8 ];
+
+LIBFSAPFS_EXTERN_VARIABLE \
+libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0000d7a0[ 8 ];
+
+LIBFSAPFS_EXTERN_VARIABLE \
 libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0000f900[ 480 ];
 
 LIBFSAPFS_EXTERN_VARIABLE \
@@ -203,7 +212,7 @@ libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0
 		unicode_character = libfsapfs_name_case_folding_mappings_0x000013f8[ unicode_character - 0x000013f8UL ]; \
 	} \
 	else if( ( unicode_character >= 0x00001c80UL ) \
-	      && ( unicode_character <= 0x00001c8fUL ) ) \
+	      && ( unicode_character <= 0x00001cbfUL ) ) \
 	{ \
 		unicode_character = libfsapfs_name_case_folding_mappings_0x00001c80[ unicode_character - 0x00001c80UL ]; \
 	} \
@@ -233,7 +242,7 @@ libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0
 		unicode_character = libfsapfs_name_case_folding_mappings_0x0000a640[ unicode_character - 0x0000a640UL ]; \
 	} \
 	else if( ( unicode_character >= 0x0000a720UL ) \
-	      && ( unicode_character <= 0x0000a7b7UL ) ) \
+	      && ( unicode_character <= 0x0000a7f7UL ) ) \
 	{ \
 		unicode_character = libfsapfs_name_case_folding_mappings_0x0000a720[ unicode_character - 0x0000a720UL ]; \
 	} \
@@ -266,6 +275,11 @@ libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0
 	      && ( unicode_character <= 0x000118bfUL ) ) \
 	{ \
 		unicode_character = libfsapfs_name_case_folding_mappings_0x000118a0[ unicode_character - 0x000118a0UL ]; \
+	} \
+	else if( ( unicode_character >= 0x00016e40UL ) \
+	      && ( unicode_character <= 0x00016e5fUL ) ) \
+	{ \
+		unicode_character = libfsapfs_name_case_folding_mappings_0x00016e40[ unicode_character - 0x00016e40UL ]; \
 	} \
 	else if( ( unicode_character >= 0x0001e900UL ) \
 	      && ( unicode_character <= 0x0001e927UL ) ) \
@@ -363,6 +377,16 @@ libfsapfs_name_decomposition_mapping_t libfsapfs_name_decomposition_mappings_0x0
 	      && ( unicode_character <= 0x0000fadfUL ) ) \
 	{ \
 		nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0000f900[ unicode_character - 0x0000f900UL ] ); \
+	} \
+	else if( ( unicode_character >= 0x0000ac00UL ) \
+	      && ( unicode_character <= 0x0000ac07UL ) ) \
+	{ \
+		nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0000ac00[ unicode_character - 0x0000ac00UL ] ); \
+	} \
+	else if( ( unicode_character >= 0x0000d7a0UL ) \
+	      && ( unicode_character <= 0x0000d7a7UL ) ) \
+	{ \
+		nfd_mapping = &( libfsapfs_name_decomposition_mappings_0x0000d7a0[ unicode_character - 0x0000d7a0UL ] ); \
 	} \
 	else if( ( unicode_character >= 0x0000fb18UL ) \
 	      && ( unicode_character <= 0x0000fb4fUL ) ) \

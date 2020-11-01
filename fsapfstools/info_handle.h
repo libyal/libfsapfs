@@ -74,6 +74,10 @@ struct info_handle
 	 */
 	uint8_t container_is_locked;
 
+	/* Value to indicate if the MD5 hash should be calculated
+	 */
+	uint8_t calculate_md5;
+
 	/* The bodyfile output stream
 	 */
 	FILE *bodyfile_stream;
@@ -95,6 +99,7 @@ int fsapfstools_system_string_copy_from_64_bit_in_decimal(
 
 int info_handle_initialize(
      info_handle_t **info_handle,
+     uint8_t calculate_md5,
      libcerror_error_t **error );
 
 int info_handle_free(
@@ -145,6 +150,19 @@ int info_handle_get_volume_by_index(
      libfsapfs_volume_t **volume,
      libcerror_error_t **error );
 
+int info_handle_file_entry_calculate_md5(
+     info_handle_t *info_handle,
+     libfsapfs_file_entry_t *file_entry,
+     char *md5_string,
+     size_t md5_string_size,
+     libcerror_error_t **error );
+
+int info_handle_name_value_fprint(
+     info_handle_t *info_handle,
+     const system_character_t *value_string,
+     size_t value_string_length,
+     libcerror_error_t **error );
+
 int info_handle_posix_time_in_nano_seconds_value_fprint(
      info_handle_t *info_handle,
      const char *value_name,
@@ -161,13 +179,16 @@ int info_handle_file_entry_value_fprint(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,
      const system_character_t *path,
+     size_t path_length,
      libcerror_error_t **error );
 
 int info_handle_file_entry_value_with_name_fprint(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,
      const system_character_t *path,
+     size_t path_length,
      const system_character_t *file_entry_name,
+     size_t file_entry_name_length,
      libcerror_error_t **error );
 
 int info_handle_file_system_hierarchy_fprint_file_entry(

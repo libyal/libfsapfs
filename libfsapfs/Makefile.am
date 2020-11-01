@@ -28,6 +28,7 @@ libfsapfs_la_SOURCES = \
 	fsapfs_btree.h \
 	fsapfs_checkpoint_map.h \
 	fsapfs_chunk_information_block.h \
+	fsapfs_compressed_data.h \
 	fsapfs_container_reaper.h \
 	fsapfs_container_superblock.h \
 	fsapfs_extent_reference_tree.h \
@@ -50,6 +51,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_checksum.c libfsapfs_checksum.h \
 	libfsapfs_chunk_information_block.c libfsapfs_chunk_information_block.h \
 	libfsapfs_compressed_data_handle.c libfsapfs_compressed_data_handle.h \
+	libfsapfs_compressed_data_header.c libfsapfs_compressed_data_header.h \
 	libfsapfs_compression.c libfsapfs_compression.h \
 	libfsapfs_container.c libfsapfs_container.h \
 	libfsapfs_container_data_handle.c libfsapfs_container_data_handle.h \

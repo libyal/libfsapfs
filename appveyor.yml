@@ -182,6 +182,7 @@ install:
     }
 - sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew update; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew install gnu-sed python3 || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python"; then export PATH="/usr/local/opt/python@3.8/bin:${PATH}"; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "${env:PYTHON} -m pip install -U pip setuptools twine wheel" }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (

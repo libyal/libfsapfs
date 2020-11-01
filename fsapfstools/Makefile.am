@@ -12,7 +12,10 @@ AM_CPPFLAGS = \
 	@LIBBFIO_CPPFLAGS@ \
 	@LIBFDATETIME_CPPFLAGS@ \
 	@LIBFGUID_CPPFLAGS@ \
+	@LIBHMAC_CPPFLAGS@ \
+	@LIBCRYPTO_CPPFLAGS@ \
 	@LIBFUSE_CPPFLAGS@ \
+	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
 AM_LDFLAGS = @STATIC_LDFLAGS@
@@ -22,6 +25,7 @@ bin_PROGRAMS = \
 	fsapfsmount
 
 fsapfsinfo_SOURCES = \
+	digest_hash.c digest_hash.h \
 	fsapfsinfo.c \
 	fsapfstools_getopt.c fsapfstools_getopt.h \
 	fsapfstools_i18n.h \
@@ -33,6 +37,7 @@ fsapfsinfo_SOURCES = \
 	fsapfstools_libfdatetime.h \
 	fsapfstools_libfguid.h \
 	fsapfstools_libfsapfs.h \
+	fsapfstools_libhmac.h \
 	fsapfstools_libuna.h \
 	fsapfstools_output.c fsapfstools_output.h \
 	fsapfstools_signal.c fsapfstools_signal.h \
@@ -40,6 +45,9 @@ fsapfsinfo_SOURCES = \
 	info_handle.c info_handle.h
 
 fsapfsinfo_LDADD = \
+	@LIBHMAC_LIBADD@ \
+	@LIBCRYPTO_LIBADD@ \
+	@LIBDL_LIBADD@ \
 	@LIBFGUID_LIBADD@ \
 	@LIBFDATETIME_LIBADD@ \
 	@LIBBFIO_LIBADD@ \
