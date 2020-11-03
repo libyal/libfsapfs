@@ -174,6 +174,14 @@ int libfsapfs_volume_unlock(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_features_flags(
+     libfsapfs_volume_t *volume,
+     uint64_t *compatible_features_flags,
+     uint64_t *incompatible_features_flags,
+     uint64_t *read_only_compatible_features_flags,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_size(
      libfsapfs_volume_t *volume,
      size64_t *size,

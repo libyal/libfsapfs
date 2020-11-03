@@ -344,8 +344,16 @@ int libfsapfs_volume_superblock_read_data(
 		return( -1 );
 	}
 	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->compatible_features_flags,
+	 volume_superblock->compatible_features_flags );
+
+	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->read_only_compatible_features_flags,
+	 volume_superblock->read_only_compatible_features_flags );
+
+	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_volume_superblock_t *) data )->incompatible_features_flags,
-	 volume_superblock->incompatibility_features_flags );
+	 volume_superblock->incompatible_features_flags );
 
 	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_volume_superblock_t *) data )->object_map_block_number,
@@ -451,36 +459,30 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_32bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->compatible_features_flags,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: compatible features flags\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->compatible_features_flags );
 		libfsapfs_debug_print_volume_compatible_features_flags(
-		 value_64bit );
+		 volume_superblock->compatible_features_flags );
 		libcnotify_printf(
 		 "\n" );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->read_only_compatible_features_flags,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: read-only compatible features flags\t: 0x%08" PRIx64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->read_only_compatible_features_flags );
 		libfsapfs_debug_print_volume_read_only_compatible_features_flags(
-		 value_64bit );
+		 volume_superblock->read_only_compatible_features_flags );
 		libcnotify_printf(
 		 "\n" );
 
 		libcnotify_printf(
 		 "%s: incompatible features flags\t\t: 0x%08" PRIx64 "\n",
 		 function,
-		 volume_superblock->incompatibility_features_flags );
+		 volume_superblock->incompatible_features_flags );
 		libfsapfs_debug_print_volume_incompatible_features_flags(
-		 volume_superblock->incompatibility_features_flags );
+		 volume_superblock->incompatible_features_flags );
 		libcnotify_printf(
 		 "\n" );
 

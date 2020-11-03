@@ -1,4 +1,4 @@
-.Dd September  4, 2019
+.Dd November  3, 2020
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -91,6 +91,8 @@ Volume functions
 .Ft int
 .Fn libfsapfs_volume_unlock "libfsapfs_volume_t *volume" "libfsapfs_error_t **error"
 .Ft int
+.Fn libfsapfs_volume_get_features_flags "libfsapfs_volume_t *volume" "uint64_t *compatible_features_flags" "uint64_t *incompatible_features_flags" "uint64_t *read_only_compatible_features_flags" "libfsapfs_error_t **error"
+.Ft int
 .Fn libfsapfs_volume_get_size "libfsapfs_volume_t *volume" "size64_t *size" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_volume_get_identifier "libfsapfs_volume_t *volume" "uint8_t *uuid_data" "size_t uuid_data_size" "libfsapfs_error_t **error"
@@ -153,9 +155,11 @@ File entry functions
 .Ft int
 .Fn libfsapfs_file_entry_get_modification_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
+.Fn libfsapfs_file_entry_get_access_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
+.Ft int
 .Fn libfsapfs_file_entry_get_inode_change_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
-.Fn libfsapfs_file_entry_get_access_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
+.Fn libfsapfs_file_entry_get_added_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_owner_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *owner_identifier" "libfsapfs_error_t **error"
 .Ft int

@@ -57,13 +57,13 @@ int libfsapfs_container_open_file_io_handle(
 /* Copies a string of a decimal value to a 64-bit value
  * Returns 1 if successful or -1 on error
  */
-int fsapfstools_system_string_copy_from_64_bit_in_decimal(
+int info_handle_system_string_copy_from_64_bit_in_decimal(
      const system_character_t *string,
      size_t string_size,
      uint64_t *value_64bit,
      libcerror_error_t **error )
 {
-	static char *function              = "fsapfstools_system_string_copy_from_64_bit_in_decimal";
+	static char *function              = "info_handle_system_string_copy_from_64_bit_in_decimal";
 	size_t string_index                = 0;
 	system_character_t character_value = 0;
 	uint8_t maximum_string_index       = 20;
@@ -523,7 +523,7 @@ int info_handle_set_file_system_index(
 	string_length = system_string_length(
 	                 string );
 
-	if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
+	if( info_handle_system_string_copy_from_64_bit_in_decimal(
 	     string,
 	     string_length + 1,
 	     &value_64bit,
@@ -765,7 +765,7 @@ int info_handle_set_volume_offset(
 	string_length = system_string_length(
 	                 string );
 
-	if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
+	if( info_handle_system_string_copy_from_64_bit_in_decimal(
 	     string,
 	     string_length + 1,
 	     &value_64bit,
@@ -1650,6 +1650,72 @@ on_error:
 	return( -1 );
 }
 
+/* Prints the compatible features flags to the notify stream
+ */
+void info_handle_compatible_features_flags_fprint(
+      uint64_t compatible_features_flags,
+      FILE *notify_stream )
+{
+	if( ( compatible_features_flags & 0x0000000000000001 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(NX_FEATURE_DEFRAG)\n" );
+	}
+	if( ( compatible_features_flags & 0x0000000000000002 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(NX_FEATURE_LCFD)\n" );
+	}
+	fprintf(
+	 notify_stream,
+	 "\n" );
+}
+
+/* Prints the incompatible features flags to the notify stream
+ */
+void info_handle_incompatible_features_flags_fprint(
+      uint64_t incompatible_features_flags,
+      FILE *notify_stream )
+{
+	if( ( incompatible_features_flags & 0x0000000000000001 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(NX_INCOMPAT_VERSION1)\n" );
+	}
+	if( ( incompatible_features_flags & 0x0000000000000002 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(NX_INCOMPAT_VERSION2)\n" );
+	}
+
+	if( ( incompatible_features_flags & 0x0000000000000100 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(NX_INCOMPAT_FUSION)\n" );
+	}
+	fprintf(
+	 notify_stream,
+	 "\n" );
+}
+
+/* Prints the read-only compatible features flags to the notify stream
+ */
+void info_handle_read_only_compatible_features_flags_fprint(
+      uint64_t read_only_compatible_features_flags,
+      FILE *notify_stream )
+{
+	/* Currently there are no container read-only compatible feature flags defined */
+
+	fprintf(
+	 notify_stream,
+	 "\n" );
+}
+
 /* Prints a file entry value
  * Returns 1 if successful, 0 if not or -1 on error
  */
@@ -1806,6 +1872,7 @@ int info_handle_file_entry_value_with_name_fprint(
 	size_t symbolic_link_target_size                   = 0;
 	uint64_t file_entry_identifier                     = 0;
 	int64_t access_time                                = 0;
+	int64_t added_time                                 = 0;
 	int64_t creation_time                              = 0;
 	int64_t inode_change_time                          = 0;
 	int64_t modification_time                          = 0;
@@ -2286,6 +2353,40 @@ int info_handle_file_entry_value_with_name_fprint(
 			 function );
 
 			goto on_error;
+		}
+		result = libfsapfs_file_entry_get_added_time(
+		          file_entry,
+		          &added_time,
+		          error );
+
+		if( result == - 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve added time.",
+			 function );
+
+			goto on_error;
+		}
+		else if( result != 0 )
+		{
+			if( info_handle_posix_time_in_nano_seconds_value_fprint(
+			     info_handle,
+			     "\tAdded time\t\t",
+			     added_time,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+				 "%s: unable to print POSIX time value.",
+				 function );
+
+				goto on_error;
+			}
 		}
 		fprintf(
 		 info_handle->notify_stream,
@@ -3688,15 +3789,18 @@ int info_handle_volume_fprint(
 {
 	uint8_t uuid_data[ 16 ];
 
-	libfsapfs_snapshot_t *snapshot    = NULL;
-	system_character_t *snapshot_name = NULL;
-	system_character_t *volume_name   = NULL;
-	static char *function             = "info_handle_volume_fprint";
-	size_t snapshot_name_size         = 0;
-	size_t volume_name_size           = 0;
-	int number_of_snapshots           = 0;
-	int snapshot_index                = 0;
-	int result                        = 0;
+	libfsapfs_snapshot_t *snapshot               = NULL;
+	system_character_t *snapshot_name            = NULL;
+	system_character_t *volume_name              = NULL;
+	static char *function                        = "info_handle_volume_fprint";
+	size_t snapshot_name_size                    = 0;
+	size_t volume_name_size                      = 0;
+	uint64_t compatible_features_flags           = 0;
+	uint64_t incompatible_features_flags         = 0;
+	uint64_t read_only_compatible_features_flags = 0;
+	int number_of_snapshots                      = 0;
+	int result                                   = 0;
+	int snapshot_index                           = 0;
 
 	if( info_handle == NULL )
 	{
@@ -3731,7 +3835,7 @@ int info_handle_volume_fprint(
 	}
 	if( info_handle_uuid_value_fprint(
 	     info_handle,
-	     "\tIdentifier\t\t",
+	     "\tIdentifier\t\t\t",
 	     uuid_data,
 	     error ) != 1 )
 	{
@@ -3746,7 +3850,7 @@ int info_handle_volume_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tName\t\t\t: " );
+	 "\tName\t\t\t\t: " );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libfsapfs_volume_get_utf16_name_size(
@@ -3824,6 +3928,49 @@ int info_handle_volume_fprint(
 	 info_handle->notify_stream,
 	 "\n" );
 
+	if( libfsapfs_volume_get_features_flags(
+	     volume,
+	     &compatible_features_flags,
+	     &incompatible_features_flags,
+	     &read_only_compatible_features_flags,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve feature flags.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tCompatible features\t\t: 0x%08" PRIx64 "\n",
+	 compatible_features_flags );
+
+	info_handle_compatible_features_flags_fprint(
+	 compatible_features_flags,
+	 info_handle->notify_stream );
+
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tIncompatible features\t\t: 0x%08" PRIx64 "\n",
+	 incompatible_features_flags );
+
+	info_handle_incompatible_features_flags_fprint(
+	 incompatible_features_flags,
+	 info_handle->notify_stream );
+
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tRead-only compatible features\t: 0x%08" PRIx64 "\n",
+	 read_only_compatible_features_flags );
+
+	info_handle_read_only_compatible_features_flags_fprint(
+	 read_only_compatible_features_flags,
+	 info_handle->notify_stream );
+
 /* TODO print additional volume information such as size */
 
 	result = libfsapfs_volume_is_locked(
@@ -3896,7 +4043,7 @@ int info_handle_volume_fprint(
 
 			fprintf(
 			 info_handle->notify_stream,
-			 "\tName\t\t\t: " );
+			 "\tName\t\t\t\t: " );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libfsapfs_snapshot_get_utf16_name_size(
@@ -4060,7 +4207,7 @@ int info_handle_container_fprint(
 	}
 	if( info_handle_uuid_value_fprint(
 	     info_handle,
-	     "\tIdentifier\t\t",
+	     "\tIdentifier\t\t\t",
 	     uuid_data,
 	     error ) != 1 )
 	{
@@ -4091,7 +4238,7 @@ int info_handle_container_fprint(
 	}
 	fprintf(
 	 info_handle->notify_stream,
-	 "\tNumber of volumes\t: %d\n",
+	 "\tNumber of volumes\t\t: %d\n",
 	 number_of_volumes );
 
 	result = libfsapfs_container_is_locked(

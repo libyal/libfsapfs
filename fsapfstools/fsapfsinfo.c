@@ -413,7 +413,7 @@ int main( int argc, char * const argv[] )
 		{
 			option_mode = FSAPFSINFO_MODE_FILE_ENTRIES;
 		}
-		else if( fsapfstools_system_string_copy_from_64_bit_in_decimal(
+		else if( info_handle_system_string_copy_from_64_bit_in_decimal(
 		          option_file_entry_identifier,
 		          string_length + 1,
 		          &file_entry_identifier,

@@ -57,7 +57,7 @@ environment:
   - TARGET: python38-x64
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: macos
-    PYTHON: "/usr/local/bin/python3.8"
+    PYTHON: "/usr/local/opt/python@3.8/bin/python3"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin

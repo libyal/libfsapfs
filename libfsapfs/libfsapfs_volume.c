@@ -1317,6 +1317,113 @@ int libfsapfs_volume_unlock(
 	return( result );
 }
 
+/* Retrieves the feature flags
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_get_features_flags(
+     libfsapfs_volume_t *volume,
+     uint64_t *compatible_features_flags,
+     uint64_t *incompatible_features_flags,
+     uint64_t *read_only_compatible_features_flags,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_features_flags";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+	if( internal_volume->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( compatible_features_flags == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid compatible features flags.",
+		 function );
+
+		return( -1 );
+	}
+	if( incompatible_features_flags == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid incompatible features flags.",
+		 function );
+
+		return( -1 );
+	}
+	if( read_only_compatible_features_flags == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid read-only compatible features flags.",
+		 function );
+
+		return( -1 );
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	*compatible_features_flags           = internal_volume->superblock->compatible_features_flags;
+	*incompatible_features_flags         = internal_volume->superblock->incompatible_features_flags;
+	*read_only_compatible_features_flags = internal_volume->superblock->read_only_compatible_features_flags;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_read(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for reading.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+}
+
 /* Retrieves the size
  * Returns 1 if successful or -1 on error
  */
@@ -2658,7 +2765,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 
 		goto on_error;
 	}
-	if( ( internal_volume->superblock->incompatibility_features_flags & 0x00000000000000001 ) != 0 )
+	if( ( internal_volume->superblock->incompatible_features_flags & 0x00000000000000001 ) != 0 )
 	{
 		use_case_folding = 1;
 	}

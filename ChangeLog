@@ -1,5 +1,11 @@
 TODO
-* fsapfsinfo - print information about superblock feature flags
+* split off attribute record fom extended attribute
+
+* improve format support
+** check for more compression methods
+** Add resource fork support
+** read zlib compressed resource fork data footer
+** Check deflate compressed files edge case where first byte is 0x#f
 
 * add snapshot support
 ** add API function to retrieve creation time
@@ -26,13 +32,6 @@ TODO
 library:
 * check if data block vector allocated size matches size of file extents
 * get_extent function, check inode flags and set extent is sparse flag
-* expose directory entry added time
-
-* improve format support
-** check for more compression methods
-** Add resource fork support
-** read zlib compressed resource fork data footer
-** Check deflate compressed files edge case where first byte is 0x#f
 
 * change container read bootstap as advised in documentation
 ** read backup container superblocks

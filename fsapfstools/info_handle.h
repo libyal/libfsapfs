@@ -91,7 +91,7 @@ struct info_handle
 	int abort;
 };
 
-int fsapfstools_system_string_copy_from_64_bit_in_decimal(
+int info_handle_system_string_copy_from_64_bit_in_decimal(
      const system_character_t *string,
      size_t string_size,
      uint64_t *value_64bit,
@@ -174,6 +174,18 @@ int info_handle_uuid_value_fprint(
      const char *value_name,
      const uint8_t *uuid_data,
      libcerror_error_t **error );
+
+void info_handle_compatible_features_flags_fprint(
+      uint64_t compatible_features_flags,
+      FILE *notify_stream );
+
+void info_handle_incompatible_features_flags_fprint(
+      uint64_t incompatible_features_flags,
+      FILE *notify_stream );
+
+void info_handle_read_only_compatible_features_flags_fprint(
+      uint64_t read_only_compatible_features_flags,
+      FILE *notify_stream );
 
 int info_handle_file_entry_value_fprint(
      info_handle_t *info_handle,

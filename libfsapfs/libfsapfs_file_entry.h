@@ -179,6 +179,12 @@ int libfsapfs_file_entry_get_inode_change_time(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_added_time(
+     libfsapfs_file_entry_t *file_entry,
+     int64_t *posix_time,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_owner_identifier(
      libfsapfs_file_entry_t *file_entry,
      uint32_t *owner_identifier,

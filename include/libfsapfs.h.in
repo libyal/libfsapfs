@@ -352,6 +352,17 @@ int libfsapfs_volume_unlock(
      libfsapfs_volume_t *volume,
      libfsapfs_error_t **error );
 
+/* Retrieves the feature flags
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_features_flags(
+     libfsapfs_volume_t *volume,
+     uint64_t *compatible_features_flags,
+     uint64_t *incompatible_features_flags,
+     uint64_t *read_only_compatible_features_flags,
+     libfsapfs_error_t **error );
+
 /* Retrieves the size
  * Returns 1 if successful or -1 on error
  */
@@ -653,6 +664,17 @@ int libfsapfs_file_entry_get_modification_time(
      int64_t *posix_time,
      libfsapfs_error_t **error );
 
+/* Retrieves the access date and time
+ * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_access_time(
+     libfsapfs_file_entry_t *file_entry,
+     int64_t *posix_time,
+     libfsapfs_error_t **error );
+
 /* Retrieves the inode change date and time
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
  * This value is retrieved from the inode
@@ -664,13 +686,13 @@ int libfsapfs_file_entry_get_inode_change_time(
      int64_t *posix_time,
      libfsapfs_error_t **error );
 
-/* Retrieves the access date and time
+/* Retrieves the added date and time
  * The timestamp is a signed 64-bit POSIX date and time value in number of nano seconds
- * This value is retrieved from the inode
- * Returns 1 if successful or -1 on error
+ * This value is retrieved from the directory record
+ * Returns 1 if successful, 0 if not available or -1 on error
  */
 LIBFSAPFS_EXTERN \
-int libfsapfs_file_entry_get_access_time(
+int libfsapfs_file_entry_get_added_time(
      libfsapfs_file_entry_t *file_entry,
      int64_t *posix_time,
      libfsapfs_error_t **error );
