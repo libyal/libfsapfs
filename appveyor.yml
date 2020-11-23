@@ -42,6 +42,27 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     VisualStudioVersion: 16.0
     configuration: Release
+  - TARGET: macos-x64-clang
+    BUILD_ENVIRONMENT: xcode
+    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CC: clang
+    CONFIGURE_OPTIONS: ""
+  - TARGET: macos-x64-gcc
+    BUILD_ENVIRONMENT: xcode
+    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CONFIGURE_OPTIONS: ""
+  - TARGET: macos-x64-gcc-python
+    BUILD_ENVIRONMENT: xcode
+    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CONFIGURE_OPTIONS: "--enable-python"
+  - TARGET: macos-pkgbuild
+    BUILD_ENVIRONMENT: xcode
+    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
   - TARGET: python27
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python27\\python.exe"
@@ -180,8 +201,9 @@ install:
     Else {
       .\builddokan.ps1 -UseLegacyVersion }
     }
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew update; fi
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew install gnu-sed python3 || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then brew update; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then brew install gettext gnu-sed || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew python3 || true; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "${env:PYTHON} -m pip install -U pip setuptools twine wheel" }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
@@ -212,35 +234,37 @@ build_script:
     .\build.ps1 -VisualStudioVersion 2017 -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - ps: If ($env:TARGET -eq "vs2019") {
     .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
+- sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
     "%PYTHON%" setup.py bdist_msi bdist_wheel )
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then ./synclibs.sh && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python"; then ${PYTHON} setup.py bdist_wheel; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin\home\appveyor\libfsapfs &&
-    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
+    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
+    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
     xcopy /i /q /s C:\projects\libfsapfs C:\MinGW\msys\1.0\home\appveyor\libfsapfs &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
+    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && tests/build.sh ${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && ./synclibs.sh --use-head && ./autogen.sh && ./configure ${CONFIGURE_OPTIONS} && make > /dev/null" )
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
 
 test_script:
 - cmd: rem Run tests
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\runtests.ps1 }
+- sh: if test ${BUILD_ENVIRONMENT} = "xcode" && test ${TARGET} != "macos-pkgbuild"; then tests/runtests.sh; fi
+- sh: if test ${TARGET} = "macos-pkgbuild"; then tests/pkgbuild.sh; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\cygwin\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\cygwin64\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\MinGW\msys\1.0\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -l -c "cd libfsapfs && make check CHECK_WITH_STDERR=1; RESULT=$?; if test ${RESULT} -ne 0 && test -f tests/test-suite.log; then cat tests/test-suite.log; fi; exit ${RESULT};" )
+    C:\msys64\usr\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 
 after_test:
 - cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (

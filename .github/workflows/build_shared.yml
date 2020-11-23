@@ -1,0 +1,36 @@
+# Build from source with libyal dependencies as shared libraries.
+name: build_shared
+on:
+  push:
+    branches: [main]
+jobs:
+  build_shared_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-wide-character-type'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Prepare shared libraries
+      run: |
+        tests/syncsharedlibs.sh --use-head
+    - name: Building from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        tests/build.sh ${{ matrix.configure_options }}
+    - name: Run tests
+      run: |
+        tests/runtests.sh

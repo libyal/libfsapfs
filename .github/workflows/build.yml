@@ -1,0 +1,153 @@
+# Build from source.
+name: build
+on: [push, pull_request]
+jobs:
+  build_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x86'
+          compiler: 'clang'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'clang'
+          configure_options: ''
+        - architecture: 'x86'
+          compiler: 'gcc'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-wide-character-type'
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--with-openssl=no'
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-openssl-evp-cipher=yes --enable-openssl-evp-md=yes'
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-openssl-evp-cipher=no --enable-openssl-evp-md=no'
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-static-executables=yes --enable-multi-threading-support=no'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Building from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        tests/build.sh ${{ matrix.configure_options }}
+    - name: Run tests
+      run: |
+        tests/runtests.sh
+  build_python_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-python'
+          python_version: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-python2'
+          python_version: '2'
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-python3'
+          python_version: '3'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev python-dev python3-dev
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Building from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        tests/build.sh ${{ matrix.configure_options }}
+    - name: Run tests
+      env:
+        PYTHON_VERSION: ${{ matrix.python_version }}
+      run: |
+        tests/runtests.sh
+  build_setup_py_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
+          python-version: 2.7
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
+          python-version: 3.8
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev python-dev python3-dev
+    - name: Building from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        tests/build.sh ${{ matrix.configure_options }}
+    - name: Build Python module
+      run: |
+        python setup.py build
+  coverage_ubuntu:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x86'
+          compiler: 'gcc'
+          configure_options: '--enable-wide-character-type'
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: '--enable-wide-character-type'
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install curl autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Building from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        tests/build.sh ${{ matrix.configure_options }} --enable-shared=no CFLAGS="--coverage -O0" CPPFLAGS="-DOPTIMIZATION_DISABLED" LDFLAGS="--coverage"
+    - name: Run tests
+      run: |
+        make check CHECK_WITH_STDERR=1 SKIP_TOOLS_END_TO_END_TESTS=1
+    - name: Generate coverage data
+      run: |
+        for DIRECTORY in `find . -maxdepth 1 -type d`; do \
+          (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
+        done
+    - name: Upload coverage data
+      run: |
+        curl -o codecov.sh -s https://codecov.io/bash
+        /bin/bash ./codecov.sh -n linux-${{ matrix.architecture }}-gcc-no-optimization -X gcov;
