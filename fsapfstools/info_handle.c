@@ -1276,7 +1276,7 @@ int info_handle_name_value_fprint(
 	 * it stored in a temporary variable. Note that there is a worst-case of
 	 * a 1 to 4 ratio for each escaped character.
 	 */
-	if( value_string_length > (size_t) ( ( SSIZE_MAX - 1 ) / ( sizeof( system_character_t ) * 4 ) ) )
+	if( value_string_length > (size_t) ( ( MEMORY_MAXIMUM_ALLOCATION_SIZE - 1 ) / ( sizeof( system_character_t ) * 4 ) ) )
 	{
 		libcerror_error_set(
 		 error,

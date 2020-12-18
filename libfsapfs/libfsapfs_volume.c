@@ -2021,20 +2021,23 @@ int libfsapfs_volume_set_utf8_password(
 		internal_volume->user_password      = NULL;
 		internal_volume->user_password_size = 0;
 	}
-	internal_volume->user_password_size = 1 + narrow_string_length(
-	                                           (char *) utf8_string );
+	internal_volume->user_password_size = narrow_string_length(
+	                                       (char *) utf8_string );
 
-	if( internal_volume->user_password_size > (size_t) MEMORY_MAXIMUM_ALLOCATION_SIZE )
+	if( ( internal_volume->user_password_size == 0 )
+	 || ( internal_volume->user_password_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid volume - user password size value exceeds maximum allocation size.",
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid volume - user password size value out of bounds.",
 		 function );
 
 		goto on_error;
 	}
+	internal_volume->user_password_size += 1;
+
 	internal_volume->user_password = (uint8_t *) memory_allocate(
 	                                              sizeof( uint8_t ) * internal_volume->user_password_size );
 
@@ -2193,19 +2196,20 @@ int libfsapfs_volume_set_utf16_password(
 
 		goto on_error;
 	}
-	internal_volume->user_password_size += 1;
-
-	if( internal_volume->user_password_size > (size_t) MEMORY_MAXIMUM_ALLOCATION_SIZE )
+	if( ( internal_volume->user_password_size == 0 )
+	 || ( internal_volume->user_password_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid volume - user password size value exceeds maximum allocation size.",
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid volume - user password size value out of bounds.",
 		 function );
 
 		goto on_error;
 	}
+	internal_volume->user_password_size += 1;
+
 	internal_volume->user_password = (uint8_t *) memory_allocate(
 	                                              sizeof( uint8_t ) * internal_volume->user_password_size );
 
@@ -2351,20 +2355,23 @@ int libfsapfs_volume_set_utf8_recovery_password(
 		internal_volume->recovery_password      = NULL;
 		internal_volume->recovery_password_size = 0;
 	}
-	internal_volume->recovery_password_size = 1 + narrow_string_length(
-	                                               (char *) utf8_string );
+	internal_volume->recovery_password_size = narrow_string_length(
+	                                           (char *) utf8_string );
 
-	if( internal_volume->recovery_password_size > (size_t) MEMORY_MAXIMUM_ALLOCATION_SIZE )
+	if( ( internal_volume->recovery_password_size == 0 )
+	 || ( internal_volume->recovery_password_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid volume - recovery password size value exceeds maximum allocation size.",
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid volume - user recovery password size value out of bounds.",
 		 function );
 
 		goto on_error;
 	}
+	internal_volume->recovery_password_size += 1;
+
 	internal_volume->recovery_password = (uint8_t *) memory_allocate(
 	                                                  sizeof( uint8_t ) * internal_volume->recovery_password_size );
 
@@ -2523,19 +2530,20 @@ int libfsapfs_volume_set_utf16_recovery_password(
 
 		goto on_error;
 	}
-	internal_volume->recovery_password_size += 1;
-
-	if( internal_volume->recovery_password_size > (size_t) MEMORY_MAXIMUM_ALLOCATION_SIZE )
+	if( ( internal_volume->recovery_password_size == 0 )
+	 || ( internal_volume->recovery_password_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE - 1 ) ) )
 	{
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid volume - recovery password size value exceeds maximum allocation size.",
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid volume - user recovery password size value out of bounds.",
 		 function );
 
 		goto on_error;
 	}
+	internal_volume->recovery_password_size += 1;
+
 	internal_volume->recovery_password = (uint8_t *) memory_allocate(
 	                                                  sizeof( uint8_t ) * internal_volume->recovery_password_size );
 

@@ -118,7 +118,7 @@ PyObject *pyfsapfs_datetime_new_from_time_elements(
 		{
 			days_in_month = 30;
 		}
-		/* Januari (1), March (3), May (5), July (7), August (8), October (10), December (12)
+		/* January (1), March (3), May (5), July (7), August (8), October (10), December (12)
 		 */
 		else if( ( month == 1 )
 		      || ( month == 3 )
@@ -238,7 +238,7 @@ PyObject *pyfsapfs_datetime_new_from_fat_date_time(
 	{
 		days_in_month = 30;
 	}
-	/* Januari (1), March (3), May (5), July (7), August (8), October (10), December (12)
+	/* January (1), March (3), May (5), July (7), August (8), October (10), December (12)
 	 */
 	else if( ( month == 1 )
 	      || ( month == 3 )
@@ -449,7 +449,7 @@ PyObject *pyfsapfs_datetime_new_from_floatingtime(
 		{
 			days_in_month = 30;
 		}
-		/* Januari (1), March (3), May (5), July (7), August (8), October (10), December (12)
+		/* January (1), March (3), May (5), July (7), August (8), October (10), December (12)
 		 */
 		else if( ( month == 1 )
 		      || ( month == 3 )

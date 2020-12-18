@@ -473,7 +473,7 @@ int mount_file_system_get_file_entry_path_from_path(
 
 	safe_file_entry_path_size = path_length + 1;
 
-	if( safe_file_entry_path_size > (size_t) ( SSIZE_MAX / sizeof( system_character_t ) ) )
+	if( safe_file_entry_path_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE / sizeof( system_character_t ) ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -958,7 +958,7 @@ int mount_file_system_get_filename_from_name(
 
 	safe_filename_size = ( name_length * 4 ) + 1;
 
-	if( safe_filename_size > (size_t) ( SSIZE_MAX / sizeof( system_character_t ) ) )
+	if( safe_filename_size > (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE / sizeof( system_character_t ) ) )
 	{
 		libcerror_error_set(
 		 error,

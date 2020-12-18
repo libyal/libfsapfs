@@ -3,7 +3,7 @@ Version: @VERSION@
 Release: 1
 Summary: Library to access the Apple File System (APFS) format
 Group: System Environment/Libraries
-License: LGPL
+License: LGPLv3+
 Source: %{name}-%{version}.tar.gz
 URL: https://github.com/libyal/libfsapfs
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
