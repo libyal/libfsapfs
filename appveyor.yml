@@ -69,16 +69,18 @@ environment:
   - TARGET: python27-x64
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python27-x64\\python.exe"
-  - TARGET: python38
+  - TARGET: python39
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python38\\python.exe"
-  - TARGET: python38-x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    PYTHON: "C:\\Python39\\python.exe"
+  - TARGET: python39-x64
     BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python38-x64\\python.exe"
-  - TARGET: python38-x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+    PYTHON: "C:\\Python39-x64\\python.exe"
+  - TARGET: python39-x64
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: macos
-    PYTHON: "/usr/local/opt/python@3.8/bin/python3"
+    PYTHON: "/usr/local/opt/python@3.9/bin/python3"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin

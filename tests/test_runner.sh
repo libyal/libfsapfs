@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20200417
+# Version: 20201215
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -366,7 +366,7 @@ read_ignore_list()
 
 	if test -f "${IGNORE_FILE}";
 	then
-		IGNORE_LIST=`cat ${IGNORE_FILE} | sed '/^#/d'`;
+		IGNORE_LIST=`cat ${IGNORE_FILE} | sed '/^#/d' | tr '\n' ' '`;
 	fi
 	echo ${IGNORE_LIST};
 }
