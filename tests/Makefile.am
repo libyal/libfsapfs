@@ -1,3 +1,5 @@
+AUTOMAKE_OPTIONS = subdir-objects
+
 AM_CPPFLAGS = \
 	-I$(top_srcdir)/include \
 	-I$(top_srcdir)/common \
@@ -29,12 +31,14 @@ endif
 
 TESTS = \
 	test_library.sh \
+	test_tools.sh \
 	test_fsapfsinfo.sh \
 	test_fsapfsinfo_bodyfile.sh \
 	$(TESTS_PYFSAPFS)
 
 check_SCRIPTS = \
 	pyfsapfs_test_support.py \
+	test_tools.sh \
 	test_fsapfsinfo.sh \
 	test_fsapfsinfo_bodyfile.sh \
 	test_library.sh \
@@ -94,6 +98,9 @@ check_PROGRAMS = \
 	fsapfs_test_snapshot_metadata_tree \
 	fsapfs_test_space_manager \
 	fsapfs_test_support \
+	fsapfs_test_tools_info_handle \
+	fsapfs_test_tools_output \
+	fsapfs_test_tools_signal \
 	fsapfs_test_volume \
 	fsapfs_test_volume_key_bag \
 	fsapfs_test_volume_superblock
@@ -830,6 +837,54 @@ fsapfs_test_support_LDADD = \
 	@LIBCNOTIFY_LIBADD@ \
 	@LIBCLOCALE_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_tools_info_handle_SOURCES = \
+	../fsapfstools/digest_hash.c ../fsapfstools/digest_hash.h \
+	../fsapfstools/info_handle.c ../fsapfstools/info_handle.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_tools_info_handle.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_tools_info_handle_LDADD = \
+	@LIBHMAC_LIBADD@ \
+	@LIBFGUID_LIBADD@ \
+	@LIBFDATETIME_LIBADD@ \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCSPLIT_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@ \
+	@LIBCRYPTO_LIBADD@ \
+	@LIBDL_LIBADD@
+
+fsapfs_test_tools_output_SOURCES = \
+	../fsapfstools/fsapfstools_output.c ../fsapfstools/fsapfstools_output.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_tools_output.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_tools_output_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_tools_signal_SOURCES = \
+	../fsapfstools/fsapfstools_signal.c ../fsapfstools/fsapfstools_signal.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_tools_signal.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_tools_signal_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

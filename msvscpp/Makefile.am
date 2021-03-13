@@ -47,6 +47,9 @@ MSVSCPP_FILES = \
 	fsapfs_test_snapshot_metadata_tree/fsapfs_test_snapshot_metadata_tree.vcproj \
 	fsapfs_test_space_manager/fsapfs_test_space_manager.vcproj \
 	fsapfs_test_support/fsapfs_test_support.vcproj \
+	fsapfs_test_tools_info_handle/fsapfs_test_tools_info_handle.vcproj \
+	fsapfs_test_tools_output/fsapfs_test_tools_output.vcproj \
+	fsapfs_test_tools_signal/fsapfs_test_tools_signal.vcproj \
 	fsapfs_test_volume/fsapfs_test_volume.vcproj \
 	fsapfs_test_volume_key_bag/fsapfs_test_volume_key_bag.vcproj \
 	fsapfs_test_volume_superblock/fsapfs_test_volume_superblock.vcproj \

@@ -71,7 +71,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install build dependencies
       run: |
-        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev python-dev python3-dev
+        sudo add-apt-repository universe &&
+        sudo apt-get update &&
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev python2-dev python3-dev python-dev-is-python3
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
@@ -106,7 +108,9 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install build dependencies
       run: |
-        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev python-dev python3-dev
+        sudo add-apt-repository universe &&
+        sudo apt-get update &&
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev python2-dev python3-dev python-dev-is-python3
     - name: Building from source
       env:
         CC: ${{ matrix.compiler }}

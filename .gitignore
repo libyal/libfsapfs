@@ -177,6 +177,9 @@ stamp-h[1-9]
 /tests/fsapfs_test_snapshot_metadata_tree
 /tests/fsapfs_test_space_manager
 /tests/fsapfs_test_support
+/tests/fsapfs_test_tools_info_handle
+/tests/fsapfs_test_tools_output
+/tests/fsapfs_test_tools_signal
 /tests/fsapfs_test_volume
 /tests/fsapfs_test_volume_key_bag
 /tests/fsapfs_test_volume_superblock
