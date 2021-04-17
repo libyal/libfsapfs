@@ -33,7 +33,7 @@ extern "C" {
 #endif
 
 /* Microsoft Visual Studio C++ before Visual Studio 2010 or earlier versions of the Borland C++ Builder
- * do not support the (u)int#_t type definitions but have __int# defintions instead
+ * do not support the (u)int#_t type definitions but have __int# definitions instead
  */
 #if !defined( HAVE_INT8_T )
 #define HAVE_INT8_T
