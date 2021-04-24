@@ -1,6 +1,6 @@
 dnl Checks for zlib required headers and functions
 dnl
-dnl Version: 20200712
+dnl Version: 20201230
 
 dnl Function to detect if zlib is available
 AC_DEFUN([AX_ZLIB_CHECK_LIB],
@@ -187,6 +187,21 @@ AC_DEFUN([AX_ZLIB_CHECK_INFLATE],
     AC_CHECK_LIB(
       z,
       inflateEnd,
+      [ac_zlib_dummy=yes],
+      [ac_cv_inflate=local])
+    AC_CHECK_LIB(
+      z,
+      inflateGetDictionary,
+      [ac_zlib_dummy=yes],
+      [ac_cv_inflate=local])
+    AC_CHECK_LIB(
+      z,
+      inflatePrime,
+      [ac_zlib_dummy=yes],
+      [ac_cv_inflate=local])
+    AC_CHECK_LIB(
+      z,
+      inflateSetDictionary,
       [ac_zlib_dummy=yes],
       [ac_cv_inflate=local])
 

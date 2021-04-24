@@ -37,27 +37,30 @@ class SupportFunctionsTests(unittest.TestCase):
 
   def test_check_container_signature(self):
     """Tests the check_container_signature function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
-    result = pyfsapfs.check_container_signature(unittest.source)
+    result = pyfsapfs.check_container_signature(test_source)
     self.assertTrue(result)
 
   def test_check_container_signature_file_object(self):
     """Tests the check_container_signature_file_object function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
-    with open(unittest.source, "rb") as file_object:
+    with open(test_source, "rb") as file_object:
       result = pyfsapfs.check_container_signature_file_object(file_object)
       self.assertTrue(result)
 
   def test_open(self):
     """Tests the open function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
-    fsapfs_container = pyfsapfs.open(unittest.source)
+    fsapfs_container = pyfsapfs.open(test_source)
     self.assertIsNotNone(fsapfs_container)
 
     fsapfs_container.close()
@@ -66,17 +69,18 @@ class SupportFunctionsTests(unittest.TestCase):
       pyfsapfs.open(None)
 
     with self.assertRaises(ValueError):
-      pyfsapfs.open(unittest.source, mode="w")
+      pyfsapfs.open(test_source, mode="w")
 
   def test_open_file_object(self):
     """Tests the open_file_object function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
-    if not os.path.isfile(unittest.source):
+    if not os.path.isfile(test_source):
       raise unittest.SkipTest("source not a regular file")
 
-    with open(unittest.source, "rb") as file_object:
+    with open(test_source, "rb") as file_object:
       fsapfs_container = pyfsapfs.open_file_object(file_object)
       self.assertIsNotNone(fsapfs_container)
 

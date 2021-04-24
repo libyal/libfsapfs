@@ -151,12 +151,13 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_is_locked(self):
     """Tests the is_locked function."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     fsapfs_volume = pyfsapfs.volume()
 
-    fsapfs_volume.open(unittest.source)
+    fsapfs_volume.open(test_source)
 
     result = fsapfs_volume.is_locked()
     self.assertTrue(result)
@@ -167,7 +168,7 @@ class VolumeTypeTests(unittest.TestCase):
       fsapfs_volume = pyfsapfs.volume()
       fsapfs_volume.set_password(unittest.password)
 
-      fsapfs_volume.open(unittest.source)
+      fsapfs_volume.open(test_source)
 
       result = fsapfs_volume.is_locked()
       self.assertFalse(result)
@@ -176,13 +177,14 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_size(self):
     """Tests the get_size function and size property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     fsapfs_volume = pyfsapfs.volume()
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       fsapfs_volume = pyfsapfs.volume()
       fsapfs_volume.open_file_object(file_object)
@@ -196,13 +198,14 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_name(self):
     """Tests the get_name function and name property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     fsapfs_volume = pyfsapfs.volume()
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       fsapfs_volume = pyfsapfs.volume()
       fsapfs_volume.open_file_object(file_object)
@@ -216,13 +219,14 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_next_file_entry_identifier(self):
     """Tests the get_next_file_entry_identifier function and next_file_entry_identifier property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     fsapfs_volume = pyfsapfs.volume()
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       fsapfs_volume = pyfsapfs.volume()
       fsapfs_volume.open_file_object(file_object)
@@ -236,13 +240,14 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_root_directory(self):
     """Tests the get_root_directory function and root_directory property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     fsapfs_volume = pyfsapfs.volume()
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       fsapfs_volume = pyfsapfs.volume()
       fsapfs_volume.open_file_object(file_object)
@@ -256,13 +261,14 @@ class VolumeTypeTests(unittest.TestCase):
 
   def test_get_number_of_snapshots(self):
     """Tests the get_number_of_snapshots function and number_of_snapshots property."""
-    if not unittest.source:
+    test_source = unittest.source
+    if not test_source:
       raise unittest.SkipTest("missing source")
 
     fsapfs_volume = pyfsapfs.volume()
 
     with DataRangeFileObject(
-        unittest.source, unittest.offset or 0, None) as file_object:
+        test_source, unittest.offset or 0, None) as file_object:
 
       fsapfs_volume = pyfsapfs.volume()
       fsapfs_volume.open_file_object(file_object)
