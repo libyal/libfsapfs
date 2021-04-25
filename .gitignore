@@ -164,6 +164,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_key_bag_entry
 /tests/fsapfs_test_key_bag_header
 /tests/fsapfs_test_key_encrypted_key
+/tests/fsapfs_test_lzvn
 /tests/fsapfs_test_name
 /tests/fsapfs_test_name_hash
 /tests/fsapfs_test_notify
