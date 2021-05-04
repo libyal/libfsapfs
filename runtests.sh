@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20190103
+# Version: 20210503
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -412,7 +412,7 @@ fi
 
 if test ${HAVE_ENABLE_STATIC_EXECUTABLES} -eq 0;
 then
-	run_configure_make_check "--enable-static-executables";
+	run_configure_make_check "--enable-static-executables --enable-multi-threading-support=no --with-libfuse=no";
 	RESULT=$?;
 
 	if test ${RESULT} -ne ${EXIT_SUCCESS};

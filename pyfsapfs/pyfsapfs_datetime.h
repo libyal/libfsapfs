@@ -37,7 +37,7 @@ PyObject *pyfsapfs_datetime_new_from_time_elements(
            uint8_t hours,
            uint8_t minutes,
            uint8_t seconds,
-           uint8_t micro_seconds );
+           uint32_t micro_seconds );
 
 PyObject *pyfsapfs_datetime_new_from_fat_date_time(
            uint32_t fat_date_time );

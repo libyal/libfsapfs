@@ -37,7 +37,7 @@ PyObject *pyfsapfs_datetime_new_from_time_elements(
            uint8_t hours,
            uint8_t minutes,
            uint8_t seconds,
-           uint8_t micro_seconds )
+           uint32_t micro_seconds )
 {
 	PyObject *datetime_object = NULL;
 	static char *function     = "pyfsapfs_datetime_new_from_time_elements";
@@ -163,7 +163,7 @@ PyObject *pyfsapfs_datetime_new_from_time_elements(
 	                                (int) hours,
 	                                (int) minutes,
 	                                (int) seconds,
-	                                0 );
+	                                (int) micro_seconds );
 
 	return( datetime_object );
 }
