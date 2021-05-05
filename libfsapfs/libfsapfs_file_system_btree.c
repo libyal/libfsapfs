@@ -578,7 +578,7 @@ int libfsapfs_file_system_btree_get_root_node(
 			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
 			 "%s: unsupported flags: 0x%04" PRIx16 ".",
 			 function,
-			 ( *root_node )->node_header->flags );
+			 node->node_header->flags );
 
 			goto on_error;
 		}
