@@ -305,6 +305,16 @@ typedef int system_integer_t;
 #define UINT32_MAX (0xffffffffUL)
 #endif
 
+/* The minimum signed 64-bit integer is -9223372036854775808 (0x8000000000000000)
+ */
+#if !defined( INT64_MIN )
+#if defined( __BORLANDC__ ) && ( __BORLANDC__ < 0x0560 )
+#define INT64_MIN (0x8000000000000000UL)
+#else
+#define INT64_MIN (0x8000000000000000ULL)
+#endif
+#endif /* !defined( INT64_MIN ) */
+
 /* The maximum signed 64-bit integer is 9223372036854775807 (0x7fffffffffffffff)
  */
 #if !defined( INT64_MAX )
