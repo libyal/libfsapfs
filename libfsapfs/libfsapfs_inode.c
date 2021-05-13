@@ -692,6 +692,17 @@ int libfsapfs_inode_read_value_data(
 					break;
 
 				case 8:
+					if( value_data_size < sizeof( fsapfs_file_system_data_stream_attribute_t ) )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+						 "%s: invalid value data size value out of bounds.",
+						 function );
+
+						return( -1 );
+					}
 					byte_stream_copy_to_uint64_little_endian(
 					 ( (fsapfs_file_system_data_stream_attribute_t *) value_data )->used_size,
 					 inode->data_stream_size );
