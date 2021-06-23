@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20200719
+dnl Version: 20210623
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -24,21 +24,35 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_XTS_DUPLICATE_KEYS_SUPPORT],
     [if `EVP_CipherInit_ex' can be used with duplicate keys],
     [ac_cv_openssl_xts_duplicate_keys],
     [AC_LANG_PUSH(C)
-    AC_LINK_IFELSE(
+    ac_cv_libcrypto_backup_LIBS="$LIBS"
+    LIBS="$LIBS $ac_cv_libcrypto_LIBADD"
+    AC_RUN_IFELSE(
       [AC_LANG_PROGRAM(
         [[#include <openssl/err.h>
 #include <openssl/evp.h>]],
         [[unsigned char key[ 16 ] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+int result = 0;
+
+#if defined( HAVE_EVP_CIPHER_CTX_INIT )
 EVP_CIPHER_CTX ctx;
-int result;
 
 EVP_CIPHER_CTX_init( &ctx );
+#else
+EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+#endif
+
 result = EVP_CipherInit_ex(ctx, EVP_aes_128_xts(), NULL, key, key, 0);
+
+#if defined( HAVE_EVP_CIPHER_CTX_INIT )
 EVP_CIPHER_CTX_cleanup( &ctx );
+#else
+EVP_CIPHER_CTX_free( ctx );
+#endif
 
 return( result == 1 ); ]] )],
       [ac_cv_openssl_xts_duplicate_keys=yes],
       [ac_cv_openssl_xts_duplicate_keys=no])
+    LIBS="$ac_cv_libcrypto_backup_LIBS"
     AC_LANG_POP(C)])
   ])
 
@@ -116,7 +130,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_MD],
     [ac_cv_libcrypto_evp_md=no])
 
   AS_IF(
-    [test "x$ac_cv_enable_openssl_evp_md" = xyes && "x$ac_cv_libcrypto_evp_md" = xno],
+    [test "x$ac_cv_enable_openssl_evp_md" = xyes && test "x$ac_cv_libcrypto_evp_md" = xno],
     [AC_MSG_FAILURE(
       [Missing OpenSSL EVP MD support],
       [1])
@@ -441,7 +455,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
     [ac_cv_libcrypto_evp_cipher=no])
 
   AS_IF(
-    [test "x$ac_cv_enable_openssl_evp_cipher" = xyes && "x$ac_cv_libcrypto_evp_cipher" = xno],
+    [test "x$ac_cv_enable_openssl_evp_cipher" = xyes && test "x$ac_cv_libcrypto_evp_cipher" = xno],
     [AC_MSG_FAILURE(
       [Missing OpenSSL EVP CIPHER support],
       [1])
@@ -870,7 +884,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_ENABLE],
     [auto-detect])
 
   AS_IF(
-    [test "x$ac_cv_enable_static_executables" = xno],
+    [test "x$ac_cv_enable_static_executables" != xyes],
     [dnl Check for a shared library version
     AX_LIBCRYPTO_CHECK_LIB])
 
