@@ -1,6 +1,6 @@
 dnl Checks for libcdata required headers and functions
 dnl
-dnl Version: 20191221
+dnl Version: 20210625
 
 dnl Function to detect if libcdata is available
 dnl ac_libcdata_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -355,6 +355,11 @@ AC_DEFUN([AX_LIBCDATA_CHECK_LIB],
         AC_CHECK_LIB(
           cdata,
           libcdata_range_list_range_is_present,
+          [ac_cv_libcdata_dummy=yes],
+          [ac_cv_libcdata=no])
+        AC_CHECK_LIB(
+          cdata,
+          libcdata_range_list_range_has_overlapping_range,
           [ac_cv_libcdata_dummy=yes],
           [ac_cv_libcdata=no])
         AC_CHECK_LIB(
