@@ -53,8 +53,9 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.6 | J.B. Metz | May 2019 | Additional format information.
 | 0.0.7 | J.B. Metz | June 2019 | Additional format information.
 | 0.0.8 | J.B. Metz | September 2019 | Additional format information regarding container key bag.
-| 0.0.9 | J.B. Metz | October 2020 | Additional format information regarding embedded extended attributes.
+| 0.0.9 | J.B. Metz | October 2020 | Additional format information regarding extended attributes.
 | 0.0.10 | J.B. Metz | June 2021 | Textual corrections.
+| 0.0.11 | J.B. Metz | July 2021 | Additional format information regarding extended attributes.
 |===
 
 :numbered:
@@ -1781,6 +1782,10 @@ Includes the size of the end-of-string character
 Contains an UTF-8 encoded string with an end-of-string character +
 See section: <<extended_attribute_names,Extended attribute names>>
 |===
+
+[NOTE]
+The name of an extended attribute appears to be case senstive even on
+a case insensitive file system.
 
 ==== Extended attribute value data
 
