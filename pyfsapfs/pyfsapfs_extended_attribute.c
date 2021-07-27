@@ -382,7 +382,7 @@ void pyfsapfs_extended_attribute_free(
 	 (PyObject*) pyfsapfs_extended_attribute );
 }
 
-/* Retrieves the 
+/* Retrieves the identifier
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pyfsapfs_extended_attribute_get_identifier(
@@ -434,7 +434,7 @@ PyObject *pyfsapfs_extended_attribute_get_identifier(
 	return( integer_object );
 }
 
-/* Retrieves the 
+/* Retrieves the name
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pyfsapfs_extended_attribute_get_name(

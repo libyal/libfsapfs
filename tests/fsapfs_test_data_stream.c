@@ -21,6 +21,7 @@
 
 #include <common.h>
 #include <file_stream.h>
+#include <memory.h>
 #include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
@@ -47,7 +48,19 @@ int fsapfs_test_data_stream_initialize_from_data(
 
 	libcerror_error_t *error       = NULL;
 	libfdata_stream_t *data_stream = NULL;
+	void *memset_result            = NULL;
 	int result                     = 0;
+
+	/* Initialize test
+	 */
+	memset_result = memory_set(
+	                 buffer,
+	                 0,
+	                 64 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "memset_result",
+	 memset_result );
 
 	/* Test regular cases
 	 */

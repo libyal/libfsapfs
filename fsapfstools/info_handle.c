@@ -479,10 +479,15 @@ int info_handle_set_bodyfile(
 
 		return( -1 );
 	}
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
+	info_handle->bodyfile_stream = file_stream_open_wide(
+	                                filename,
+	                                L"wb" );
+#else
 	info_handle->bodyfile_stream = file_stream_open(
 	                                filename,
 	                                "wb" );
-
+#endif
 	if( info_handle->bodyfile_stream == NULL )
 	{
 		libcerror_error_set(

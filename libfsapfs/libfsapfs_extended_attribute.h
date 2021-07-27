@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_attribute_values.h"
 #include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extern.h"
 #include "libfsapfs_file_system_btree.h"
@@ -64,29 +65,9 @@ struct libfsapfs_internal_extended_attribute
 	 */
 	uint64_t identifier;
 
-	/* The name size
+	/* The attribute values
 	 */
-	uint16_t name_size;
-
-	/* The name
-	 */
-	uint8_t *name;
-
-	/* The data
-	 */
-	uint8_t *data;
-
-	/* Data stream identifier
-	 */
-	uint64_t data_stream_identifier;
-
-	/* Data stream size
-	 */
-	uint64_t data_stream_size;
-
-	/* The file extents
-	 */
-	libcdata_array_t *file_extents;
+	libfsapfs_attribute_values_t *attribute_values;
 
 	/* The data stream
 	 */
@@ -105,27 +86,12 @@ int libfsapfs_extended_attribute_initialize(
      libbfio_handle_t *file_io_handle,
      libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
+     libfsapfs_attribute_values_t *attribute_values,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_free(
      libfsapfs_extended_attribute_t **extended_attribute,
-     libcerror_error_t **error );
-
-int libfsapfs_internal_extended_attribute_free(
-     libfsapfs_internal_extended_attribute_t **internal_extended_attribute,
-     libcerror_error_t **error );
-
-int libfsapfs_extended_attribute_read_key_data(
-     libfsapfs_extended_attribute_t *extended_attribute,
-     const uint8_t *data,
-     size_t data_size,
-     libcerror_error_t **error );
-
-int libfsapfs_extended_attribute_read_value_data(
-     libfsapfs_extended_attribute_t *extended_attribute,
-     const uint8_t *data,
-     size_t data_size,
      libcerror_error_t **error );
 
 int libfsapfs_extended_attribute_get_data_stream(
@@ -152,12 +118,6 @@ int libfsapfs_extended_attribute_get_utf8_name(
      size_t utf8_string_size,
      libcerror_error_t **error );
 
-int libfsapfs_extended_attribute_compare_name_with_utf8_string(
-     libfsapfs_extended_attribute_t *extended_attribute,
-     const uint8_t *utf8_string,
-     size_t utf8_string_length,
-     libcerror_error_t **error );
-
 LIBFSAPFS_EXTERN \
 int libfsapfs_extended_attribute_get_utf16_name_size(
      libfsapfs_extended_attribute_t *extended_attribute,
@@ -169,16 +129,6 @@ int libfsapfs_extended_attribute_get_utf16_name(
      libfsapfs_extended_attribute_t *extended_attribute,
      uint16_t *utf16_string,
      size_t utf16_string_size,
-     libcerror_error_t **error );
-
-int libfsapfs_extended_attribute_compare_name_with_utf16_string(
-     libfsapfs_extended_attribute_t *extended_attribute,
-     const uint16_t *utf16_string,
-     size_t utf16_string_length,
-     libcerror_error_t **error );
-
-int libfsapfs_internal_extended_attribute_get_file_extents(
-     libfsapfs_internal_extended_attribute_t *internal_extended_attribute,
      libcerror_error_t **error );
 
 int libfsapfs_internal_extended_attribute_get_data_stream(

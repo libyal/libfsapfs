@@ -41,6 +41,8 @@ libfsapfs_la_SOURCES = \
 	fsapfs_space_manager.h \
 	fsapfs_volume_superblock.h \
 	libfsapfs.c \
+	libfsapfs_attributes.c libfsapfs_attributes.h \
+	libfsapfs_attribute_values.c libfsapfs_attribute_values.h \
 	libfsapfs_btree_entry.c libfsapfs_btree_entry.h \
 	libfsapfs_btree_footer.c libfsapfs_btree_footer.h \
 	libfsapfs_btree_node.c libfsapfs_btree_node.h \

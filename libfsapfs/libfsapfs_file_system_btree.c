@@ -24,6 +24,7 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_attribute_values.h"
 #include "libfsapfs_btree_entry.h"
 #include "libfsapfs_btree_node.h"
 #include "libfsapfs_data_block.h"
@@ -31,7 +32,6 @@
 #include "libfsapfs_definitions.h"
 #include "libfsapfs_directory_record.h"
 #include "libfsapfs_encryption_context.h"
-#include "libfsapfs_extended_attribute.h"
 #include "libfsapfs_file_extent.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_inode.h"
@@ -3480,30 +3480,29 @@ on_error:
 	return( -1 );
 }
 
-/* Retrieves extended attributes for a specific identifier from the file system B-tree leaf node
+/* Retrieves attributes for a specific identifier from the file system B-tree leaf node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
-int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+int libfsapfs_file_system_btree_get_attributes_from_leaf_node(
      libfsapfs_file_system_btree_t *file_system_btree,
-     libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
-     libcdata_array_t *extended_attributes,
+     libcdata_array_t *extended_attributes_array,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *btree_entry               = NULL;
-	libfsapfs_extended_attribute_t *extended_attribute = NULL;
-	static char *function                              = "libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node";
-	uint64_t file_system_identifier                    = 0;
-	uint64_t lookup_identifier                         = 0;
-	int btree_entry_index                              = 0;
-	int entry_index                                    = 0;
-	int found_extended_attribute                       = 0;
-	int is_leaf_node                                   = 0;
-	int number_of_entries                              = 0;
+	libfsapfs_attribute_values_t *attribute_values = NULL;
+	libfsapfs_btree_entry_t *btree_entry           = NULL;
+	static char *function                          = "libfsapfs_file_system_btree_get_attributes_from_leaf_node";
+	uint64_t file_system_identifier                = 0;
+	uint64_t lookup_identifier                     = 0;
+	int btree_entry_index                          = 0;
+	int entry_index                                = 0;
+	int found_attribute                            = 0;
+	int is_leaf_node                               = 0;
+	int number_of_entries                          = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint8_t file_system_data_type                      = 0;
+	uint8_t file_system_data_type                  = 0;
 #endif
 
 	if( file_system_btree == NULL )
@@ -3661,25 +3660,21 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 		{
 			continue;
 		}
-		if( libfsapfs_extended_attribute_initialize(
-		     &extended_attribute,
-		     file_system_btree->io_handle,
-		     file_io_handle,
-		     file_system_btree->encryption_context,
-		     file_system_btree,
+		if( libfsapfs_attribute_values_initialize(
+		     &attribute_values,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create extended attribute.",
+			 "%s: unable to create attribute values.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsapfs_extended_attribute_read_key_data(
-		     extended_attribute,
+		if( libfsapfs_attribute_values_read_key_data(
+		     attribute_values,
 		     btree_entry->key_data,
 		     (size_t) btree_entry->key_data_size,
 		     error ) != 1 )
@@ -3688,13 +3683,13 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read extended attribute key data.",
+			 "%s: unable to read attribute values key data.",
 			 function );
 
 			goto on_error;
 		}
-		if( libfsapfs_extended_attribute_read_value_data(
-		     extended_attribute,
+		if( libfsapfs_attribute_values_read_value_data(
+		     attribute_values,
 		     btree_entry->value_data,
 		     (size_t) btree_entry->value_data_size,
 		     error ) != 1 )
@@ -3703,68 +3698,68 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read extended attribute value data.",
+			 "%s: unable to read attribute values value data.",
 			 function );
 
 			goto on_error;
 		}
 		if( libcdata_array_append_entry(
-		     extended_attributes,
+		     extended_attributes_array,
 		     &entry_index,
-		     (intptr_t *) extended_attribute,
+		     (intptr_t *) attribute_values,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
-			 "%s: unable to append extended attribute to array.",
+			 "%s: unable to append attribute values to extended attributes array.",
 			 function );
 
 			goto on_error;
 		}
-		extended_attribute = NULL;
+		attribute_values = NULL;
 
-		found_extended_attribute = 1;
+		found_attribute = 1;
 	}
-	return( found_extended_attribute );
+	return( found_attribute );
 
 on_error:
-	if( extended_attribute != NULL )
+	if( attribute_values != NULL )
 	{
-		libfsapfs_internal_extended_attribute_free(
-		 (libfsapfs_internal_extended_attribute_t **) &extended_attribute,
+		libfsapfs_attribute_values_free(
+		 &attribute_values,
 		 NULL );
 	}
 	libcdata_array_empty(
-	 extended_attributes,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+	 extended_attributes_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_attribute_values_free,
 	 NULL );
 
 	return( -1 );
 }
 
-/* Retrieves extended attributes for a specific identifier from the file system B-tree branch node
+/* Retrieves attributes for a specific identifier from the file system B-tree branch node
  * Returns 1 if successful, 0 if not found or -1 on error
  */
-int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+int libfsapfs_file_system_btree_get_attributes_from_branch_node(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
-     libcdata_array_t *extended_attributes,
+     libcdata_array_t *extended_attributes_array,
      int recursion_depth,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_entry_t *entry          = NULL;
 	libfsapfs_btree_entry_t *previous_entry = NULL;
 	libfsapfs_btree_node_t *sub_node        = NULL;
-	static char *function                   = "libfsapfs_file_system_btree_get_extended_attributes_from_branch_node";
+	static char *function                   = "libfsapfs_file_system_btree_get_attributes_from_branch_node";
 	uint64_t file_system_identifier         = 0;
 	uint64_t sub_node_block_number          = 0;
 	uint8_t file_system_data_type           = 0;
 	int entry_index                         = 0;
-	int found_extended_attribute            = 0;
+	int found_attribute                     = 0;
 	int is_leaf_node                        = 0;
 	int number_of_entries                   = 0;
 	int result                              = 0;
@@ -3833,7 +3828,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
+		 "%s: retrieving attributes of: %" PRIu64 "\n",
 		 function,
 		 identifier );
 	}
@@ -3988,22 +3983,21 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 			}
 			if( is_leaf_node != 0 )
 			{
-				result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+				result = libfsapfs_file_system_btree_get_attributes_from_leaf_node(
 				          file_system_btree,
-				          file_io_handle,
 				          sub_node,
 				          identifier,
-				          extended_attributes,
+				          extended_attributes_array,
 				          error );
 			}
 			else
 			{
-				result = libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+				result = libfsapfs_file_system_btree_get_attributes_from_branch_node(
 				          file_system_btree,
 				          file_io_handle,
 				          sub_node,
 				          identifier,
-				          extended_attributes,
+				          extended_attributes_array,
 				          recursion_depth + 1,
 				          error );
 			}
@@ -4013,7 +4007,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 				 error,
 				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree sub node.",
+				 "%s: unable to retrieve attributes: %" PRIu64 " from file system B-tree sub node.",
 				 function,
 				 identifier );
 
@@ -4021,7 +4015,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 			}
 			else if( result != 0 )
 			{
-				found_extended_attribute = 1;
+				found_attribute = 1;
 			}
 			sub_node = NULL;
 		}
@@ -4077,22 +4071,21 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 	}
 	if( is_leaf_node != 0 )
 	{
-		result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+		result = libfsapfs_file_system_btree_get_attributes_from_leaf_node(
 		          file_system_btree,
-		          file_io_handle,
 		          sub_node,
 		          identifier,
-		          extended_attributes,
+		          extended_attributes_array,
 		          error );
 	}
 	else
 	{
-		result = libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+		result = libfsapfs_file_system_btree_get_attributes_from_branch_node(
 		          file_system_btree,
 		          file_io_handle,
 		          sub_node,
 		          identifier,
-		          extended_attributes,
+		          extended_attributes_array,
 		          recursion_depth + 1,
 		          error );
 	}
@@ -4102,7 +4095,7 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree sub node.",
+		 "%s: unable to retrieve attributes: %" PRIu64 " from file system B-tree sub node.",
 		 function,
 		 identifier );
 
@@ -4110,31 +4103,31 @@ int libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
 	}
 	else if( result != 0 )
 	{
-		found_extended_attribute = 1;
+		found_attribute = 1;
 	}
-	return( found_extended_attribute );
+	return( found_attribute );
 
 on_error:
 	libcdata_array_empty(
-	 extended_attributes,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+	 extended_attributes_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_attribute_values_free,
 	 NULL );
 
 	return( -1 );
 }
 
-/* Retrieves extended attributes for a specific identifier from the file system B-tree
+/* Retrieves attributes for a specific identifier from the file system B-tree
  * Returns 1 if successful, 0 if not found or -1 on error
  */
-int libfsapfs_file_system_btree_get_extended_attributes(
+int libfsapfs_file_system_btree_get_attributes(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
-     libcdata_array_t *extended_attributes,
+     libcdata_array_t *extended_attributes_array,
      libcerror_error_t **error )
 {
 	libfsapfs_btree_node_t *root_node = NULL;
-	static char *function             = "libfsapfs_file_system_btree_get_extended_attributes";
+	static char *function             = "libfsapfs_file_system_btree_get_attributes";
 	int is_leaf_node                  = 0;
 	int result                        = 0;
 
@@ -4177,7 +4170,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving extended attributes of: %" PRIu64 "\n",
+		 "%s: retrieving attributes of: %" PRIu64 "\n",
 		 function,
 		 identifier );
 	}
@@ -4226,22 +4219,21 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 	}
 	if( is_leaf_node != 0 )
 	{
-		result = libfsapfs_file_system_btree_get_extended_attributes_from_leaf_node(
+		result = libfsapfs_file_system_btree_get_attributes_from_leaf_node(
 		          file_system_btree,
-		          file_io_handle,
 		          root_node,
 		          identifier,
-		          extended_attributes,
+		          extended_attributes_array,
 		          error );
 	}
 	else
 	{
-		result = libfsapfs_file_system_btree_get_extended_attributes_from_branch_node(
+		result = libfsapfs_file_system_btree_get_attributes_from_branch_node(
 		          file_system_btree,
 		          file_io_handle,
 		          root_node,
 		          identifier,
-		          extended_attributes,
+		          extended_attributes_array,
 		          0,
 		          error );
 	}
@@ -4251,7 +4243,7 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve extended attributes: %" PRIu64 " from file system B-tree root node.",
+		 "%s: unable to retrieve attributes: %" PRIu64 " from file system B-tree root node.",
 		 function,
 		 identifier );
 
@@ -4284,8 +4276,8 @@ int libfsapfs_file_system_btree_get_extended_attributes(
 
 on_error:
 	libcdata_array_empty(
-	 extended_attributes,
-	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+	 extended_attributes_array,
+	 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_attribute_values_free,
 	 NULL );
 
 	return( -1 );

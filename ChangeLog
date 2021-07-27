@@ -1,5 +1,8 @@
 TODO
-* split off attribute record fom extended attribute
+* move libfsapfs_internal_extended_attribute_get_data_stream to libfsapfs_attributes.[ch]
+* handle non-inline attribute symbolic link
+
+* for extended attributes by name look up use native B-tree structures
 
 * improve format support
 ** check for more compression methods
@@ -37,7 +40,6 @@ library:
 ** read backup container superblocks
 
 * API
-** separate internal external attribute descriptor and API external descriptor
 ** Add function to provide volume size
 ** Add function to provide volume date and time values
 
@@ -50,7 +52,6 @@ library:
 
 Python bindings:
 * add extents object?
-* add extended_attribute object
 
 Tools:
 * fsapfsinfo tool
@@ -60,6 +61,7 @@ Tools:
 ** handle \r in filename
 ** print hardlinks for -E option?
 ** "-E all" instead of using next_object_identifier walk leaf nodes
+
 * fsapfsmount tool
 ** prompt user for password or recovery password when needed
 ** make symbolic links an absolute path which accounts for mount point

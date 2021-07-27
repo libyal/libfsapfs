@@ -23,6 +23,8 @@
 #include <memory.h>
 #include <types.h>
 
+#include "libfsapfs_attribute_values.h"
+#include "libfsapfs_attributes.h"
 #include "libfsapfs_compressed_data_header.h"
 #include "libfsapfs_data_stream.h"
 #include "libfsapfs_definitions.h"
@@ -227,11 +229,11 @@ int libfsapfs_file_entry_free(
 				result = -1;
 			}
 		}
-		if( internal_file_entry->extended_attributes != NULL )
+		if( internal_file_entry->extended_attributes_array != NULL )
 		{
 			if( libcdata_array_free(
-			     &( internal_file_entry->extended_attributes ),
-			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+			     &( internal_file_entry->extended_attributes_array ),
+			     (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_attribute_values_free,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -1615,12 +1617,12 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_extended_attribute_t *extended_attribute = NULL;
-	static char *function                              = "libfsapfs_internal_file_entry_get_extended_attributes";
-	uint64_t file_system_identifier                    = 0;
-	int extended_attribute_index                       = 0;
-	int number_of_extended_attributes                  = 0;
-	int result                                         = 0;
+	libfsapfs_attribute_values_t *attribute_values = NULL;
+	static char *function                          = "libfsapfs_internal_file_entry_get_extended_attributes";
+	uint64_t file_system_identifier                = 0;
+	int attribute_index                            = 0;
+	int number_of_attributes                       = 0;
+	int result                                     = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -1633,7 +1635,7 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 
 		return( -1 );
 	}
-	if( internal_file_entry->extended_attributes != NULL )
+	if( internal_file_entry->extended_attributes_array != NULL )
 	{
 		libcerror_error_set(
 		 error,
@@ -1659,7 +1661,7 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 		goto on_error;
 	}
 	if( libcdata_array_initialize(
-	     &( internal_file_entry->extended_attributes ),
+	     &( internal_file_entry->extended_attributes_array ),
 	     0,
 	     error ) != 1 )
 	{
@@ -1672,11 +1674,11 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 
 		goto on_error;
 	}
-	result = libfsapfs_file_system_btree_get_extended_attributes(
+	result = libfsapfs_file_system_btree_get_attributes(
 		  internal_file_entry->file_system_btree,
 		  internal_file_entry->file_io_handle,
 		  file_system_identifier,
-		  internal_file_entry->extended_attributes,
+		  internal_file_entry->extended_attributes_array,
 		  error );
 
 	if( result == -1 )
@@ -1685,14 +1687,14 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve extended attributes from file system B-tree.",
+		 "%s: unable to retrieve attributes from file system B-tree.",
 		 function );
 
 		goto on_error;
 	}
 	if( libcdata_array_get_number_of_entries(
-	     internal_file_entry->extended_attributes,
-	     &number_of_extended_attributes,
+	     internal_file_entry->extended_attributes_array,
+	     &number_of_attributes,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -1702,30 +1704,30 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 		 "%s: unable to retrieve number of entries from extended attributes array.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
-	for( extended_attribute_index = 0;
-	     extended_attribute_index < number_of_extended_attributes;
-	     extended_attribute_index++ )
+	for( attribute_index = 0;
+	     attribute_index < number_of_attributes;
+	     attribute_index++ )
 	{
 		if( libcdata_array_get_entry_by_index(
-		     internal_file_entry->extended_attributes,
-		     extended_attribute_index,
-		     (intptr_t **) &extended_attribute,
+		     internal_file_entry->extended_attributes_array,
+		     attribute_index,
+		     (intptr_t **) &attribute_values,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve extended attribute: %d.",
+			 "%s: unable to retrieve attribute: %d values.",
 			 function,
-			 extended_attribute_index );
+			 attribute_index );
 
-			return( -1 );
+			goto on_error;
 		}
-		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
-		          extended_attribute,
+		result = libfsapfs_attribute_values_compare_name_with_utf8_string(
+		          attribute_values,
 		          (uint8_t *) "com.apple.decmpfs",
 		          17,
 		          error );
@@ -1739,16 +1741,16 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 			 "%s: unable to compare UTF-8 string with name of extended attribute.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		else if( result == LIBUNA_COMPARE_EQUAL )
 		{
-			internal_file_entry->compressed_data_extended_attribute = extended_attribute;
+			internal_file_entry->compressed_data_attribute_values = attribute_values;
 
 			continue;
 		}
-		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
-		          extended_attribute,
+		result = libfsapfs_attribute_values_compare_name_with_utf8_string(
+		          attribute_values,
 		          (uint8_t *) "com.apple.ResourceFork",
 		          22,
 		          error );
@@ -1762,16 +1764,16 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 			 "%s: unable to compare UTF-8 string with name of extended attribute.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		else if( result == LIBUNA_COMPARE_EQUAL )
 		{
-			internal_file_entry->resource_fork_extended_attribute = extended_attribute;
+			internal_file_entry->resource_fork_attribute_values = attribute_values;
 
 			continue;
 		}
-		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
-		          extended_attribute,
+		result = libfsapfs_attribute_values_compare_name_with_utf8_string(
+		          attribute_values,
 		          (uint8_t *) "com.apple.fs.symlink",
 		          20,
 		          error );
@@ -1785,11 +1787,11 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 			 "%s: unable to compare UTF-8 string with name of extended attribute.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		else if( result == LIBUNA_COMPARE_EQUAL )
 		{
-			internal_file_entry->symbolic_link_extended_attribute = extended_attribute;
+			internal_file_entry->symbolic_link_attribute_values = attribute_values;
 
 			continue;
 		}
@@ -1797,11 +1799,11 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 	return( 1 );
 
 on_error:
-	if( internal_file_entry->extended_attributes != NULL )
+	if( internal_file_entry->extended_attributes_array != NULL )
 	{
 		libcdata_array_free(
-		 &( internal_file_entry->extended_attributes ),
-		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_internal_extended_attribute_free,
+		 &( internal_file_entry->extended_attributes_array ),
+		 (int (*)(intptr_t **, libcerror_error_t **)) &libfsapfs_attribute_values_free,
 		 NULL );
 	}
 	return( -1 );
@@ -1814,9 +1816,10 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error )
 {
-	static char *function            = "libfsapfs_internal_file_entry_get_symbolic_link_data";
-	size64_t extended_attribute_size = 0;
-	ssize_t read_count               = 0;
+	libfdata_stream_t *data_stream = NULL;
+	static char *function          = "libfsapfs_internal_file_entry_get_symbolic_link_data";
+	size_t symbolic_link_data_size = 0;
+	ssize_t read_count             = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -1840,7 +1843,7 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 
 		return( -1 );
 	}
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->extended_attributes_array == NULL )
 	{
 		if( libfsapfs_internal_file_entry_get_extended_attributes(
 		     internal_file_entry,
@@ -1856,36 +1859,24 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 			goto on_error;
 		}
 	}
-	if( internal_file_entry->symbolic_link_extended_attribute != NULL )
+	if( internal_file_entry->symbolic_link_attribute_values != NULL )
 	{
-		if( libfsapfs_extended_attribute_get_size(
-		     internal_file_entry->symbolic_link_extended_attribute,
-		     &extended_attribute_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve extended attribute data size.",
-			 function );
-
-			goto on_error;
-		}
-		if( ( extended_attribute_size == 0 )
-		 || ( extended_attribute_size > (size64_t) MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
+		if( ( internal_file_entry->symbolic_link_attribute_values->value_data_size == 0 )
+		 || ( internal_file_entry->symbolic_link_attribute_values->value_data_size > (size64_t) MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-			 "%s: invalid extended attribute data size value out of bounds.",
+			 "%s: invalid internal file entry - invalid symbolic link attribute values - value data size value out of bounds.",
 			 function );
 
 			goto on_error;
 		}
+		symbolic_link_data_size = (size_t) internal_file_entry->symbolic_link_attribute_values->value_data_size;
+
 		internal_file_entry->symbolic_link_data = (uint8_t *) memory_allocate(
-		                                                       sizeof( uint8_t ) * extended_attribute_size );
+		                                                       sizeof( uint8_t ) * symbolic_link_data_size );
 
 		if( internal_file_entry->symbolic_link_data == NULL )
 		{
@@ -1898,12 +1889,32 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 
 			goto on_error;
 		}
-		internal_file_entry->symbolic_link_data_size = (size_t) extended_attribute_size;
+		internal_file_entry->symbolic_link_data_size = symbolic_link_data_size;
 
-		read_count = libfsapfs_extended_attribute_read_buffer_at_offset(
-		              internal_file_entry->symbolic_link_extended_attribute,
+		if( libfsapfs_attributes_get_data_stream(
+		     internal_file_entry->symbolic_link_attribute_values,
+		     internal_file_entry->io_handle,
+		     internal_file_entry->file_io_handle,
+		     internal_file_entry->encryption_context,
+		     internal_file_entry->file_system_btree,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream for symbolic link extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+		read_count = libfdata_stream_read_buffer_at_offset(
+		              data_stream,
+		              (intptr_t *) internal_file_entry->file_io_handle,
 		              internal_file_entry->symbolic_link_data,
 		              internal_file_entry->symbolic_link_data_size,
+		              0,
 		              0,
 		              error );
 	       
@@ -1913,7 +1924,20 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read extended attribute data.",
+			 "%s: unable to read symbolic link data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfdata_stream_free(
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free symbolic link data stream.",
 			 function );
 
 			goto on_error;
@@ -1922,6 +1946,12 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 	return( 1 );
 
 on_error:
+	if( data_stream != NULL )
+	{
+		libfdata_stream_free(
+		 &data_stream,
+		 NULL );
+	}
 	if( internal_file_entry->symbolic_link_data != NULL )
 	{
 		memory_free(
@@ -2390,7 +2420,7 @@ int libfsapfs_file_entry_get_number_of_extended_attributes(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->extended_attributes_array == NULL )
 	{
 		if( libfsapfs_internal_file_entry_get_extended_attributes(
 		     internal_file_entry,
@@ -2406,10 +2436,10 @@ int libfsapfs_file_entry_get_number_of_extended_attributes(
 			result = -1;
 		}
 	}
-	if( result != -1 )
+	if( internal_file_entry->extended_attributes_array != NULL )
 	{
 		if( libcdata_array_get_number_of_entries(
-		     internal_file_entry->extended_attributes,
+		     internal_file_entry->extended_attributes_array,
 		     number_of_extended_attributes,
 		     error ) != 1 )
 		{
@@ -2450,6 +2480,7 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
      libfsapfs_extended_attribute_t **extended_attribute,
      libcerror_error_t **error )
 {
+	libfsapfs_attribute_values_t *attribute_values       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_extended_attribute_by_index";
 	int result                                           = 1;
@@ -2504,7 +2535,7 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
 		return( -1 );
 	}
 #endif
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->extended_attributes_array == NULL )
 	{
 		if( libfsapfs_internal_file_entry_get_extended_attributes(
 		     internal_file_entry,
@@ -2520,23 +2551,44 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
 			result = -1;
 		}
 	}
-	if( result != -1 )
+	if( internal_file_entry->extended_attributes_array != NULL )
 	{
 		if( libcdata_array_get_entry_by_index(
-		     internal_file_entry->extended_attributes,
+		     internal_file_entry->extended_attributes_array,
 		     extended_attribute_index,
-		     (intptr_t **) extended_attribute,
+		     (intptr_t **) &attribute_values,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve extended attribute: %d.",
+			 "%s: unable to retrieve attribute: %d values.",
 			 function,
 			 extended_attribute_index );
 
 			result = -1;
+		}
+		else
+		{
+			if( libfsapfs_extended_attribute_initialize(
+			     extended_attribute,
+			     internal_file_entry->io_handle,
+			     internal_file_entry->file_io_handle,
+			     internal_file_entry->encryption_context,
+			     internal_file_entry->file_system_btree,
+			     attribute_values,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create extended attribute.",
+				 function );
+
+				result = -1;
+			}
 		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
@@ -2557,21 +2609,21 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
 	return( result );
 }
 
-/* Retrieves the extended attribute for an UTF-8 encoded name
+/* Retrieves the attribute values for an UTF-8 encoded name
  * Returns 1 if successful, 0 if no such file entry or -1 on error
  */
-int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
+int libfsapfs_internal_file_entry_get_attribute_values_by_utf8_name(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_attribute_values_t **attribute_values,
      libcerror_error_t **error )
 {
-	libfsapfs_extended_attribute_t *safe_extended_attribute = NULL;
-	static char *function                                   = "libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name";
-	int extended_attribute_index                            = 0;
-	int number_of_extended_attributes                       = 0;
-	int result                                              = 0;
+	libfsapfs_attribute_values_t *safe_attribute_values = NULL;
+	static char *function                               = "libfsapfs_internal_file_entry_get_attribute_values_by_utf8_name";
+	int attribute_index                                 = 0;
+	int number_of_attributes                            = 0;
+	int result                                          = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -2584,7 +2636,7 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
 
 		return( -1 );
 	}
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->extended_attributes_array == NULL )
 	{
 		if( libfsapfs_internal_file_entry_get_extended_attributes(
 		     internal_file_entry,
@@ -2601,8 +2653,8 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
 		}
 	}
 	if( libcdata_array_get_number_of_entries(
-	     internal_file_entry->extended_attributes,
-	     &number_of_extended_attributes,
+	     internal_file_entry->extended_attributes_array,
+	     &number_of_attributes,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -2614,28 +2666,28 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
 
 		return( -1 );
 	}
-	for( extended_attribute_index = 0;
-	     extended_attribute_index < number_of_extended_attributes;
-	     extended_attribute_index++ )
+	for( attribute_index = 0;
+	     attribute_index < number_of_attributes;
+	     attribute_index++ )
 	{
 		if( libcdata_array_get_entry_by_index(
-		     internal_file_entry->extended_attributes,
-		     extended_attribute_index,
-		     (intptr_t **) &safe_extended_attribute,
+		     internal_file_entry->extended_attributes_array,
+		     attribute_index,
+		     (intptr_t **) &safe_attribute_values,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve extended attribute: %d.",
+			 "%s: unable to retrieve attribute: %d values.",
 			 function,
-			 extended_attribute_index );
+			 attribute_index );
 
 			return( -1 );
 		}
-		result = libfsapfs_extended_attribute_compare_name_with_utf8_string(
-		          safe_extended_attribute,
+		result = libfsapfs_attribute_values_compare_name_with_utf8_string(
+		          safe_attribute_values,
 		          utf8_string,
 		          utf8_string_length,
 		          error );
@@ -2646,14 +2698,15 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GENERIC,
-			 "%s: unable to compare UTF-8 string with name of extended attribute.",
-			 function );
+			 "%s: unable to compare UTF-8 string with name of attribute: %d values.",
+			 function,
+			 attribute_index );
 
 			return( -1 );
 		}
 		else if( result == LIBUNA_COMPARE_EQUAL )
 		{
-			*extended_attribute = safe_extended_attribute;
+			*attribute_values = safe_attribute_values;
 
 			return( 1 );
 		}
@@ -2661,21 +2714,21 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
 	return( 0 );
 }
 
-/* Retrieves the extended attribute for an UTF-16 encoded name
+/* Retrieves the attribute values for an UTF-16 encoded name
  * Returns 1 if successful, 0 if no such file entry or -1 on error
  */
-int libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
+int libfsapfs_internal_file_entry_get_attribute_values_by_utf16_name(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_attribute_values_t **attribute_values,
      libcerror_error_t **error )
 {
-	libfsapfs_extended_attribute_t *safe_extended_attribute = NULL;
-	static char *function                                   = "libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name";
-	int extended_attribute_index                            = 0;
-	int number_of_extended_attributes                       = 0;
-	int result                                              = 0;
+	libfsapfs_attribute_values_t *safe_attribute_values = NULL;
+	static char *function                               = "libfsapfs_internal_file_entry_get_attribute_values_by_utf16_name";
+	int attribute_index                                 = 0;
+	int number_of_attributes                            = 0;
+	int result                                          = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -2688,7 +2741,7 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
 
 		return( -1 );
 	}
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->extended_attributes_array == NULL )
 	{
 		if( libfsapfs_internal_file_entry_get_extended_attributes(
 		     internal_file_entry,
@@ -2705,8 +2758,8 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
 		}
 	}
 	if( libcdata_array_get_number_of_entries(
-	     internal_file_entry->extended_attributes,
-	     &number_of_extended_attributes,
+	     internal_file_entry->extended_attributes_array,
+	     &number_of_attributes,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -2718,28 +2771,28 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
 
 		return( -1 );
 	}
-	for( extended_attribute_index = 0;
-	     extended_attribute_index < number_of_extended_attributes;
-	     extended_attribute_index++ )
+	for( attribute_index = 0;
+	     attribute_index < number_of_attributes;
+	     attribute_index++ )
 	{
 		if( libcdata_array_get_entry_by_index(
-		     internal_file_entry->extended_attributes,
-		     extended_attribute_index,
-		     (intptr_t **) &safe_extended_attribute,
+		     internal_file_entry->extended_attributes_array,
+		     attribute_index,
+		     (intptr_t **) &safe_attribute_values,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve extended attribute: %d.",
+			 "%s: unable to retrieve attribute: %d values.",
 			 function,
-			 extended_attribute_index );
+			 attribute_index );
 
 			return( -1 );
 		}
-		result = libfsapfs_extended_attribute_compare_name_with_utf16_string(
-		          safe_extended_attribute,
+		result = libfsapfs_attribute_values_compare_name_with_utf16_string(
+		          safe_attribute_values,
 		          utf16_string,
 		          utf16_string_length,
 		          error );
@@ -2750,14 +2803,15 @@ int libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GENERIC,
-			 "%s: unable to compare UTF-16 string with name of extended attribute.",
-			 function );
+			 "%s: unable to compare UTF-16 string with name of attribute: %d values.",
+			 function,
+			 attribute_index );
 
 			return( -1 );
 		}
 		else if( result == LIBUNA_COMPARE_EQUAL )
 		{
-			*extended_attribute = safe_extended_attribute;
+			*attribute_values = safe_attribute_values;
 
 			return( 1 );
 		}
@@ -2774,7 +2828,7 @@ int libfsapfs_file_entry_has_extended_attribute_by_utf8_name(
      size_t utf8_string_length,
      libcerror_error_t **error )
 {
-	libfsapfs_extended_attribute_t *extended_attribute   = NULL;
+	libfsapfs_attribute_values_t *attribute_values       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_has_extended_attribute_by_utf8_name";
 	int result                                           = 0;
@@ -2807,11 +2861,11 @@ int libfsapfs_file_entry_has_extended_attribute_by_utf8_name(
 		return( -1 );
 	}
 #endif
-	result = libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
+	result = libfsapfs_internal_file_entry_get_attribute_values_by_utf8_name(
 	          internal_file_entry,
 	          utf8_string,
 	          utf8_string_length,
-	          &extended_attribute,
+	          &attribute_values,
 	          error );
 
 	if( result == -1 )
@@ -2820,7 +2874,7 @@ int libfsapfs_file_entry_has_extended_attribute_by_utf8_name(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve extended attribute for UTF-8 name.",
+		 "%s: unable to retrieve attribute values for UTF-8 name.",
 		 function );
 
 		result = -1;
@@ -2852,7 +2906,7 @@ int libfsapfs_file_entry_has_extended_attribute_by_utf16_name(
      size_t utf16_string_length,
      libcerror_error_t **error )
 {
-	libfsapfs_extended_attribute_t *extended_attribute   = NULL;
+	libfsapfs_attribute_values_t *attribute_values       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_has_extended_attribute_by_utf16_name";
 	int result                                           = 0;
@@ -2885,11 +2939,11 @@ int libfsapfs_file_entry_has_extended_attribute_by_utf16_name(
 		return( -1 );
 	}
 #endif
-	result = libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
+	result = libfsapfs_internal_file_entry_get_attribute_values_by_utf16_name(
 	          internal_file_entry,
 	          utf16_string,
 	          utf16_string_length,
-	          &extended_attribute,
+	          &attribute_values,
 	          error );
 
 	if( result == -1 )
@@ -2898,7 +2952,7 @@ int libfsapfs_file_entry_has_extended_attribute_by_utf16_name(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve extended attribute for UTF-16 name.",
+		 "%s: unable to retrieve attribute values for UTF-16 name.",
 		 function );
 
 		result = -1;
@@ -2931,6 +2985,7 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf8_name(
      libfsapfs_extended_attribute_t **extended_attribute,
      libcerror_error_t **error )
 {
+	libfsapfs_attribute_values_t *attribute_values       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_extended_attribute_by_utf8_name";
 	int result                                           = 0;
@@ -2985,11 +3040,11 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf8_name(
 		return( -1 );
 	}
 #endif
-	result = libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
+	result = libfsapfs_internal_file_entry_get_attribute_values_by_utf8_name(
 	          internal_file_entry,
 	          utf8_string,
 	          utf8_string_length,
-	          extended_attribute,
+	          &attribute_values,
 	          error );
 
 	if( result == -1 )
@@ -3002,6 +3057,27 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf8_name(
 		 function );
 
 		result = -1;
+	}
+	else if( result != 0 )
+	{
+		if( libfsapfs_extended_attribute_initialize(
+		     extended_attribute,
+		     internal_file_entry->io_handle,
+		     internal_file_entry->file_io_handle,
+		     internal_file_entry->encryption_context,
+		     internal_file_entry->file_system_btree,
+		     attribute_values,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create extended attribute.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3031,6 +3107,7 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf16_name(
      libfsapfs_extended_attribute_t **extended_attribute,
      libcerror_error_t **error )
 {
+	libfsapfs_attribute_values_t *attribute_values       = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_extended_attribute_by_utf16_name";
 	int result                                           = 0;
@@ -3085,11 +3162,11 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf16_name(
 		return( -1 );
 	}
 #endif
-	result = libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
+	result = libfsapfs_internal_file_entry_get_attribute_values_by_utf16_name(
 	          internal_file_entry,
 	          utf16_string,
 	          utf16_string_length,
-	          extended_attribute,
+	          &attribute_values,
 	          error );
 
 	if( result == -1 )
@@ -3102,6 +3179,27 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf16_name(
 		 function );
 
 		result = -1;
+	}
+	else if( result != 0 )
+	{
+		if( libfsapfs_extended_attribute_initialize(
+		     extended_attribute,
+		     internal_file_entry->io_handle,
+		     internal_file_entry->file_io_handle,
+		     internal_file_entry->encryption_context,
+		     internal_file_entry->file_system_btree,
+		     attribute_values,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create extended attribute.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -4019,8 +4117,12 @@ int libfsapfs_internal_file_entry_get_data_stream(
 		if( ( internal_file_entry->compressed_data_header->compression_method == 4 )
 		 || ( internal_file_entry->compressed_data_header->compression_method == 8 ) )
 		{
-			if( libfsapfs_extended_attribute_get_data_stream(
-			     internal_file_entry->resource_fork_extended_attribute,
+			if( libfsapfs_attributes_get_data_stream(
+			     internal_file_entry->resource_fork_attribute_values,
+			     internal_file_entry->io_handle,
+			     internal_file_entry->file_io_handle,
+			     internal_file_entry->encryption_context,
+			     internal_file_entry->file_system_btree,
 			     &compressed_data_stream,
 			     error ) != 1 )
 			{
@@ -4036,8 +4138,12 @@ int libfsapfs_internal_file_entry_get_data_stream(
 		}
 		else
 		{
-			if( libfsapfs_extended_attribute_get_data_stream(
-			     internal_file_entry->compressed_data_extended_attribute,
+			if( libfsapfs_attributes_get_data_stream(
+			     internal_file_entry->compressed_data_attribute_values,
+			     internal_file_entry->io_handle,
+			     internal_file_entry->file_io_handle,
+			     internal_file_entry->encryption_context,
+			     internal_file_entry->file_system_btree,
 			     &compressed_data_stream,
 			     error ) != 1 )
 			{
@@ -4540,12 +4646,13 @@ int libfsapfs_internal_file_entry_get_data_size(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      libcerror_error_t **error )
 {
-	uint8_t extended_attribute_data[ 16 ];
+	uint8_t compressed_data_header_data[ 16 ];
 
-	static char *function = "libfsapfs_internal_file_entry_get_data_size";
-	size64_t data_size    = 0;
-	ssize_t read_count    = 0;
-	int result            = 0;
+	libfdata_stream_t *data_stream = NULL;
+	static char *function          = "libfsapfs_internal_file_entry_get_data_size";
+	size64_t data_size             = 0;
+	ssize_t read_count             = 0;
+	int result                     = 0;
 
 	if( internal_file_entry == NULL )
 	{
@@ -4580,7 +4687,7 @@ int libfsapfs_internal_file_entry_get_data_size(
 
 		return( -1 );
 	}
-	if( internal_file_entry->extended_attributes == NULL )
+	if( internal_file_entry->extended_attributes_array == NULL )
 	{
 		if( libfsapfs_internal_file_entry_get_extended_attributes(
 		     internal_file_entry,
@@ -4596,12 +4703,33 @@ int libfsapfs_internal_file_entry_get_data_size(
 			return( -1 );
 		}
 	}
-	if( internal_file_entry->compressed_data_extended_attribute != NULL )
+	if( internal_file_entry->compressed_data_attribute_values != NULL )
 	{
-		read_count = libfsapfs_extended_attribute_read_buffer_at_offset(
-		              internal_file_entry->compressed_data_extended_attribute,
-		              extended_attribute_data,
+		if( libfsapfs_attributes_get_data_stream(
+		     internal_file_entry->symbolic_link_attribute_values,
+		     internal_file_entry->io_handle,
+		     internal_file_entry->file_io_handle,
+		     internal_file_entry->encryption_context,
+		     internal_file_entry->file_system_btree,
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve data stream for compressed data extended attribute.",
+			 function );
+
+			goto on_error;
+		}
+/* TODO move into libfsapfs_compressed_data_header_read_data_stream */
+		read_count = libfdata_stream_read_buffer_at_offset(
+		              data_stream,
+		              (intptr_t *) internal_file_entry->file_io_handle,
+		              compressed_data_header_data,
 		              16,
+		              0,
 		              0,
 		              error );
 	       
@@ -4611,10 +4739,23 @@ int libfsapfs_internal_file_entry_get_data_size(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_IO,
 			 LIBCERROR_IO_ERROR_READ_FAILED,
-			 "%s: unable to read extended attribute data.",
+			 "%s: unable to read compressed data header data.",
 			 function );
 
 			return( -1 );
+		}
+		if( libfdata_stream_free(
+		     &data_stream,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free symbolic link data stream.",
+			 function );
+
+			goto on_error;
 		}
 		if( libfsapfs_compressed_data_header_initialize(
 		     &( internal_file_entry->compressed_data_header ),
@@ -4631,7 +4772,7 @@ int libfsapfs_internal_file_entry_get_data_size(
 		}
 		result = libfsapfs_compressed_data_header_read_data(
 		          internal_file_entry->compressed_data_header,
-		          extended_attribute_data,
+		          compressed_data_header_data,
 		          16,
 		          error );
 
@@ -4689,6 +4830,12 @@ int libfsapfs_internal_file_entry_get_data_size(
 	return( 1 );
 
 on_error:
+	if( data_stream != NULL )
+	{
+		libfdata_stream_free(
+		 &data_stream,
+		 NULL );
+	}
 	if( internal_file_entry->compressed_data_header != NULL )
 	{
 		libfsapfs_compressed_data_header_free(

@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_attribute_values.h"
 #include "libfsapfs_compressed_data_header.h"
 #include "libfsapfs_directory_record.h"
 #include "libfsapfs_encryption_context.h"
@@ -70,25 +71,25 @@ struct libfsapfs_internal_file_entry
 	 */
 	libfsapfs_directory_record_t *directory_record;
 
-	/* The extended attributes
+	/* The extended attributes array
 	 */
-	libcdata_array_t *extended_attributes;
+	libcdata_array_t *extended_attributes_array;
 
-	/* The compressed data (com.apple.decmpfs) extended attribute
+	/* The compressed data (com.apple.decmpfs) attribute values
 	 */
-	libfsapfs_extended_attribute_t *compressed_data_extended_attribute;
+	libfsapfs_attribute_values_t *compressed_data_attribute_values;
 
 	/* The compressed data (com.apple.decmpfs) header
 	 */
 	libfsapfs_compressed_data_header_t *compressed_data_header;
 
-	/* The resource fork extended attribute
+	/* The resource fork attribute values
 	 */
-	libfsapfs_extended_attribute_t *resource_fork_extended_attribute;
+	libfsapfs_attribute_values_t *resource_fork_attribute_values;
 
-	/* The symbolic link extended attribute
+	/* The symbolic link attribute values
 	 */
-	libfsapfs_extended_attribute_t *symbolic_link_extended_attribute;
+	libfsapfs_attribute_values_t *symbolic_link_attribute_values;
 
 	/* The symbolic link data
 	 */
@@ -275,18 +276,18 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
      libfsapfs_extended_attribute_t **extended_attribute,
      libcerror_error_t **error );
 
-int libfsapfs_internal_file_entry_get_extended_attribute_by_utf8_name(
+int libfsapfs_internal_file_entry_get_attribute_values_by_utf8_name(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
-     libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_attribute_values_t **attribute_values,
      libcerror_error_t **error );
 
-int libfsapfs_internal_file_entry_get_extended_attribute_by_utf16_name(
+int libfsapfs_internal_file_entry_get_attribute_values_by_utf16_name(
      libfsapfs_internal_file_entry_t *internal_file_entry,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
-     libfsapfs_extended_attribute_t **extended_attribute,
+     libfsapfs_attribute_values_t **attribute_values,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
