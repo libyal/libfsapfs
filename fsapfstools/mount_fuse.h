@@ -80,6 +80,17 @@ int mount_fuse_release(
      const char *path,
      struct fuse_file_info *file_info );
 
+int mount_fuse_getxattr(
+     const char *path,
+     const char *name,
+     char *value,
+     size_t size );
+
+int mount_fuse_listxattr(
+     const char *path,
+     char *list,
+     size_t size );
+
 int mount_fuse_opendir(
      const char *path,
      struct fuse_file_info *file_info );

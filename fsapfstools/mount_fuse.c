@@ -562,6 +562,489 @@ on_error:
 	return( result );
 }
 
+/* Retrieves the value data of an extended attribute
+ * Returns 0 if successful or a negative errno value otherwise
+ */
+int mount_fuse_getxattr(
+     const char *path,
+     const char *name,
+     char *value,
+     size_t size )
+{
+	libcerror_error_t *error                           = NULL;
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	mount_file_entry_t *file_entry                     = NULL;
+	static char *function                              = "mount_fuse_getxattr";
+	size64_t value_data_size                           = 0;
+	size_t name_length                                 = 0;
+	ssize_t read_count                                 = 0;
+	int result                                         = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: %s\n",
+		 function,
+		 path );
+	}
+#endif
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	if( name == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid name.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	if( size > (size_t) INT_MAX )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid size value exceeds maximum.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	result = mount_handle_get_file_entry_by_path(
+	          fsapfsmount_mount_handle,
+	          path,
+	          &file_entry,
+	          &error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve value for: %s.",
+		 function,
+		 path );
+
+		result = -ENOENT;
+
+		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( -ENOENT );
+	}
+	name_length = narrow_string_length(
+	               name );
+
+	result = libfsapfs_file_entry_get_extended_attribute_by_utf8_name(
+	          file_entry->fsapfs_file_entry,
+	          (uint8_t *) name,
+	          name_length,
+	          &extended_attribute,
+	          &error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve extended attribute.",
+		 function );
+
+		result = -EIO;
+
+		goto on_error;
+	}
+	else if( result != 0 )
+	{
+		if( libfsapfs_extended_attribute_get_size(
+		     extended_attribute,
+		     &value_data_size,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve extended attribute value data size.",
+			 function );
+
+			result = -EIO;
+
+			goto on_error;
+		}
+		if( value_data_size > (size64_t) INT_MAX )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid value data size value out of bounds.",
+			 function );
+
+			result = -E2BIG;
+
+			goto on_error;
+		}
+		/* When size is 0 determine and return the required value size
+		 */
+		if( size == 0 )
+		{
+			read_count = (ssize_t) value_data_size;
+		}
+		else
+		{
+			if( (size64_t) size < value_data_size )
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+				 LIBCERROR_ARGUMENT_ERROR_VALUE_TOO_SMALL,
+				 "%s: invalid size value too small.",
+				 function );
+
+				result = -ERANGE;
+
+				goto on_error;
+			}
+			read_count = libfsapfs_extended_attribute_read_buffer_at_offset(
+			              extended_attribute,
+			              (void *) value,
+			              size,
+			              0,
+			              &error );
+
+			if( read_count == -1 )
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_IO,
+				 LIBCERROR_IO_ERROR_READ_FAILED,
+				 "%s: unable to read from extended attribute.",
+				 function );
+
+				result = -EIO;
+
+				goto on_error;
+			}
+		}
+	}
+	if( libfsapfs_extended_attribute_free(
+	     &extended_attribute,
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free extended attribute.",
+		 function );
+
+		result = -EIO;
+
+		goto on_error;
+	}
+	if( mount_file_entry_free(
+	     &file_entry,
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file entry.",
+		 function );
+
+		result = -EIO;
+
+		goto on_error;
+	}
+	if( result == 0 )
+	{
+		return( -ENOENT );
+	}
+	return( (int) read_count );
+
+on_error:
+	if( error != NULL )
+	{
+		libcnotify_print_error_backtrace(
+		 error );
+		libcerror_error_free(
+		 &error );
+	}
+	if( file_entry != NULL )
+	{
+		mount_file_entry_free(
+		 &file_entry,
+		 NULL );
+	}
+	return( result );
+}
+
+/* Lists the names of extended attributes
+ * Returns 0 if successful or a negative errno value otherwise
+ */
+int mount_fuse_listxattr(
+     const char *path,
+     char *list,
+     size_t size )
+{
+	libcerror_error_t *error                           = NULL;
+	libfsapfs_extended_attribute_t *extended_attribute = NULL;
+	mount_file_entry_t *file_entry                     = NULL;
+	static char *function                              = "mount_fuse_listxattr";
+	size_t extended_attribute_name_size                = 0;
+	size_t list_offset                                 = 0;
+	int extended_attribute_index                       = 0;
+	int number_of_extended_attributes                  = 0;
+	int result                                         = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: %s\n",
+		 function,
+		 path );
+	}
+#endif
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	/* When size is 0 determine and return the required list size
+	 */
+	if( size > 0 )
+	{
+		if( list == NULL )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+			 "%s: invalid list.",
+			 function );
+
+			result = -EINVAL;
+
+			goto on_error;
+		}
+	}
+	if( size > (size_t) INT_MAX )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+		 "%s: invalid size value exceeds maximum.",
+		 function );
+
+		result = -EINVAL;
+
+		goto on_error;
+	}
+	result = mount_handle_get_file_entry_by_path(
+	          fsapfsmount_mount_handle,
+	          path,
+	          &file_entry,
+	          &error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve value for: %s.",
+		 function,
+		 path );
+
+		result = -ENOENT;
+
+		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( -ENOENT );
+	}
+	if( libfsapfs_file_entry_get_number_of_extended_attributes(
+	     file_entry->fsapfs_file_entry,
+	     &number_of_extended_attributes,
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve number of extended attributes.",
+		 function );
+
+		result = -EIO;
+
+		goto on_error;
+	}
+	for( extended_attribute_index = 0;
+	     extended_attribute_index < number_of_extended_attributes;
+	     extended_attribute_index++ )
+	{
+		if( libfsapfs_file_entry_get_extended_attribute_by_index(
+		     file_entry->fsapfs_file_entry,
+		     extended_attribute_index,
+		     &extended_attribute,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve extended attribute: %d.",
+			 function,
+			 extended_attribute_index );
+
+			result = -EIO;
+
+			goto on_error;
+		}
+		if( libfsapfs_extended_attribute_get_utf8_name_size(
+		     extended_attribute,
+		     &extended_attribute_name_size,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve extended attribute: %d name string size.",
+			 function,
+			 extended_attribute_index );
+
+			result = -EIO;
+
+			goto on_error;
+		}
+		if( size > 0 )
+		{
+			if( extended_attribute_name_size > ( size - list_offset ) )
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid extended attribute name size value out of bounds.",
+				 function );
+
+				result = -EIO;
+
+				goto on_error;
+			}
+			if( libfsapfs_extended_attribute_get_utf8_name(
+			     extended_attribute,
+			     (uint8_t *) &( list[ list_offset ] ),
+			     extended_attribute_name_size,
+			     &error ) != 1 )
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve extended attribute name: %d string.",
+				 function,
+				 extended_attribute_index );
+
+				result = -EIO;
+
+				goto on_error;
+			}
+		}
+		list_offset += extended_attribute_name_size;
+
+		if( libfsapfs_extended_attribute_free(
+		     &extended_attribute,
+		     &error ) != 1 )
+		{
+			libcerror_error_set(
+			 &error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free extended attribute: %d.",
+			 function,
+			 extended_attribute_index );
+
+			result = -EIO;
+
+			goto on_error;
+		}
+	}
+	if( mount_file_entry_free(
+	     &file_entry,
+	     &error ) != 1 )
+	{
+		libcerror_error_set(
+		 &error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free file entry.",
+		 function );
+
+		result = -EIO;
+
+		goto on_error;
+	}
+	return( (int) list_offset );
+
+on_error:
+	if( error != NULL )
+	{
+		libcnotify_print_error_backtrace(
+		 error );
+		libcerror_error_free(
+		 &error );
+	}
+	if( extended_attribute != NULL )
+	{
+		libfsapfs_extended_attribute_free(
+		 &extended_attribute,
+		 NULL );
+	}
+	if( file_entry != NULL )
+	{
+		mount_file_entry_free(
+		 &file_entry,
+		 NULL );
+	}
+	return( result );
+}
+
 /* Opens a directory
  * Returns 0 if successful or a negative errno value otherwise
  */

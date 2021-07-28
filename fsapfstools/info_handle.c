@@ -2473,8 +2473,9 @@ int info_handle_file_entry_value_with_name_fprint(
 					 error,
 					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 					 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-					 "%s: unable to retrieve extended attribute name string size.",
-					 function );
+					 "%s: unable to retrieve extended attribute: %d name string size.",
+					 function,
+					 extended_attribute_index );
 
 					goto on_error;
 				}
@@ -2495,8 +2496,9 @@ int info_handle_file_entry_value_with_name_fprint(
 						 error,
 						 LIBCERROR_ERROR_DOMAIN_MEMORY,
 						 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-						 "%s: unable to create extended attribute name string.",
-						 function );
+						 "%s: unable to create extended attribute: %d name string.",
+						 function,
+						 extended_attribute_index );
 
 						goto on_error;
 					}
@@ -2519,8 +2521,9 @@ int info_handle_file_entry_value_with_name_fprint(
 						 error,
 						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 						 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-						 "%s: unable to retrieve extended attribute name string.",
-						 function );
+						 "%s: unable to retrieve extended attribute name: %d string.",
+						 function,
+						 extended_attribute_index );
 
 						goto on_error;
 					}

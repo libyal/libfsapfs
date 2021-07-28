@@ -427,6 +427,8 @@ int main( int argc, char * const argv[] )
 	fsapfsmount_fuse_operations.open       = &mount_fuse_open;
 	fsapfsmount_fuse_operations.read       = &mount_fuse_read;
 	fsapfsmount_fuse_operations.release    = &mount_fuse_release;
+	fsapfsmount_fuse_operations.getxattr   = &mount_fuse_getxattr;
+	fsapfsmount_fuse_operations.listxattr  = &mount_fuse_listxattr;
 	fsapfsmount_fuse_operations.opendir    = &mount_fuse_opendir;
 	fsapfsmount_fuse_operations.readdir    = &mount_fuse_readdir;
 	fsapfsmount_fuse_operations.releasedir = &mount_fuse_releasedir;
