@@ -574,7 +574,7 @@ int libfsapfs_file_entry_get_parent_file_entry(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve inode: %" PRIu64 " from file system B-tree.",
+			 "%s: unable to retrieve parent inode: %" PRIu64 " from file system B-tree.",
 			 function,
 			 file_system_identifier );
 
@@ -594,7 +594,7 @@ int libfsapfs_file_entry_get_parent_file_entry(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file entry.",
+			 "%s: unable to create parent file entry.",
 			 function );
 
 			goto on_error;

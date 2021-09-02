@@ -325,6 +325,15 @@ void pyfsapfs_container_free(
 
 		return;
 	}
+	if( pyfsapfs_container->file_io_handle != NULL )
+	{
+		if( pyfsapfs_container_close(
+		     pyfsapfs_container,
+		     NULL ) == NULL )
+		{
+			return;
+		}
+	}
 	if( pyfsapfs_container->container != NULL )
 	{
 		Py_BEGIN_ALLOW_THREADS

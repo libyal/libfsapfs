@@ -68,7 +68,6 @@ Tools:
 ** add owner and group identifier support?
 ** add support for all volumes
 ** add volume selection support
-** add extended attributes support
 ** does fuse override file types such as socket?
 ** dokan add symbolic link support
 

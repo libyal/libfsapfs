@@ -178,6 +178,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_attributes.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_btree_entry.c"
 				>
 			</File>
@@ -469,6 +473,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_attribute_values.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_attributes.h"
 				>
 			</File>
 			<File

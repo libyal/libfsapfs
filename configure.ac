@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsapfs],
- [20210728],
+ [20210902],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -163,7 +163,7 @@ AS_IF(
  ])
 
 AS_IF(
- [test "x$ac_cv_libfuse" != xno],
+ [test "x$ac_cv_libcrypto" != xno || test "x$ac_cv_libfuse" != xno],
  [AC_SUBST(
   [libfsapfs_spec_tools_build_requires],
   [BuildRequires:])

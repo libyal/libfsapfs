@@ -52,8 +52,8 @@ Python 3 bindings for libfsapfs
 %package -n libfsapfs-tools
 Summary: Several tools for reading Apple File System (APFS) volumes
 Group: Applications/System
-Requires: libfsapfs = %{version}-%{release} @ax_libfuse_spec_requires@
-@libfsapfs_spec_tools_build_requires@ @ax_libfuse_spec_build_requires@
+Requires: libfsapfs = %{version}-%{release} @ax_libcrypto_spec_requires@ @ax_libfuse_spec_requires@
+@libfsapfs_spec_tools_build_requires@ @ax_libcrypto_spec_build_requires@ @ax_libfuse_spec_build_requires@
 
 %description -n libfsapfs-tools
 Several tools for reading Apple File System (APFS) volumes

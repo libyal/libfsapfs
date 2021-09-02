@@ -677,7 +677,7 @@ int mount_file_entry_get_file_mode(
 
 		return( -1 );
 	}
-	/* The APFS file mode matches that of POSIX, with the exception of S_IFWHT
+	/* The APFS file mode matches that of POSIX
 	 */
 	if( ( *file_mode & 0xf000 ) == 0xe000 )
 	{

@@ -1,9 +1,9 @@
-.Dd March  3, 2019
+.Dd July 29, 2021
 .Dt fsapfsmount
 .Os libfsapfs
 .Sh NAME
 .Nm fsapfsmount
-.Nd mounts an Apple File System (APFS) volume
+.Nd mounts an Apple File System (APFS) container
 .Sh SYNOPSIS
 .Nm fsapfsmount
 .Op Fl f Ar file_system_index
@@ -14,14 +14,14 @@
 .Ar source
 .Sh DESCRIPTION
 .Nm fsapfsmount
-is a utility to mount an n Apple File System (APFS) volume
+is a utility to mount an Apple File System (APFS) container
 .Pp
 .Nm fsapfsmount
 is part of the
 .Nm libfsapfs
 package.
 .Nm libfsapfs
-is a library to access the n Apple File System (APFS) format
+is a library to access the Apple File System (APFS) format
 .Pp
 .Ar source
 is the source file.
@@ -33,7 +33,7 @@ mounts a specific file system or "all"
 .It Fl h
 shows this help
 .It Fl o Ar offset
-specify the volume offset in bytes
+specify the container offset in bytes
 .It Fl p Ar password
 specify the password
 .It Fl r Ar password
@@ -53,7 +53,7 @@ None
 .Bd -literal
 # fsapfsmount -f 1 -p Password /dev/sda1
 fsapfsmount 20181214
-
+.sp
 .Ed
 .Sh DIAGNOSTICS
 Errors, verbose and debug output are printed to stderr when verbose output \-v is enabled.

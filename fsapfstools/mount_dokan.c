@@ -1009,7 +1009,7 @@ NTSTATUS __stdcall mount_dokan_FindFiles(
 		 &error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set find data.",
+		 "%s: unable to set self find data.",
 		 function );
 
 		result = MOUNT_DOKAN_ERROR_GENERIC_FAILURE;
@@ -1047,7 +1047,7 @@ NTSTATUS __stdcall mount_dokan_FindFiles(
 		 &error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set find data.",
+		 "%s: unable to set parent find data.",
 		 function );
 
 		result = MOUNT_DOKAN_ERROR_GENERIC_FAILURE;
@@ -1171,7 +1171,7 @@ NTSTATUS __stdcall mount_dokan_FindFiles(
 			 &error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set find data for sub file entry: %d.",
+			 "%s: unable to set sub file entry: %d find data.",
 			 function,
 			 sub_file_entry_index );
 
