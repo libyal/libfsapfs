@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20191025
+# Version: 20211115
 
 from __future__ import print_function
 
@@ -16,10 +16,8 @@ import subprocess
 import sys
 import tarfile
 
-from distutils import sysconfig
 from distutils.ccompiler import new_compiler
-from distutils.command.bdist import bdist
-from setuptools import dist
+
 from setuptools import Extension
 from setuptools import setup
 from setuptools.command.build_ext import build_ext
@@ -29,6 +27,11 @@ try:
   from distutils.command.bdist_msi import bdist_msi
 except ImportError:
   bdist_msi = None
+
+try:
+  from setuptools.command.bdist_rpm import bdist_rpm
+except ImportError:
+  from distutils.command.bdist import bdist as bdist_rpm
 
 
 if not bdist_msi:
@@ -51,7 +54,7 @@ else:
       bdist_msi.run(self)
 
 
-class custom_bdist_rpm(bdist):
+class custom_bdist_rpm(bdist_rpm):
   """Custom handler for the bdist_rpm command."""
 
   def run(self):
@@ -272,6 +275,14 @@ class ProjectInformation(object):
 
 project_information = ProjectInformation()
 
+CMDCLASS = {
+  "build_ext": custom_build_ext,
+  "bdist_rpm": custom_bdist_rpm,
+  "sdist": custom_sdist}
+
+if custom_bdist_msi:
+  CMDCLASS["bdist_msi"] = custom_bdist_msi
+
 SOURCES = []
 
 # TODO: replace by detection of MSC
@@ -315,12 +326,7 @@ setup(
     author="Joachim Metz",
     author_email="joachim.metz@gmail.com",
     license="GNU Lesser General Public License v3 or later (LGPLv3+)",
-    cmdclass={
-        "build_ext": custom_build_ext,
-        "bdist_msi": custom_bdist_msi,
-        "bdist_rpm": custom_bdist_rpm,
-        "sdist": custom_sdist,
-    },
+    cmdclass=CMDCLASS,
     ext_modules=[
         Extension(
             project_information.module_name,

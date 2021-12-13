@@ -69,14 +69,14 @@ environment:
   - TARGET: python27-x64
     BUILD_ENVIRONMENT: python
     PYTHON: "C:\\Python27-x64\\python.exe"
-  - TARGET: python39
+  - TARGET: python310
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    PYTHON: "C:\\Python39\\python.exe"
-  - TARGET: python39-x64
+    PYTHON: "C:\\Python310\\python.exe"
+  - TARGET: python310-x64
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    PYTHON: "C:\\Python39-x64\\python.exe"
+    PYTHON: "C:\\Python310-x64\\python.exe"
   - TARGET: python39-x64
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: macos

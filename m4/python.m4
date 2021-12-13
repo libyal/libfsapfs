@@ -1,6 +1,6 @@
 dnl Functions for Python bindings
 dnl
-dnl Version: 20201230
+dnl Version: 20211114
 
 dnl Function to check if the python binary is available
 dnl "python${PYTHON_VERSION} python python# python#.#"
@@ -8,13 +8,13 @@ AC_DEFUN([AX_PROG_PYTHON],
   [AS_IF(
     [test "x${PYTHON_VERSION}" != x],
     [ax_python_progs="python${PYTHON_VERSION}"],
-    [ax_python_progs="python python3 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0 python2 python2.7 python2.6 python2.5"])
+    [ax_python_progs="python python3 python3.11 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0 python2 python2.7 python2.6 python2.5"])
   AC_CHECK_PROGS(
     [PYTHON],
     [$ax_python_progs])
   AS_IF(
     [test "x${PYTHON}" != x],
-    [ax_prog_python_version=`${PYTHON} -c "import sys; sys.stdout.write(sys.version[[:3]])" 2>/dev/null`;
+    [ax_prog_python_version=`${PYTHON} -c "import sys; sys.stdout.write('%d.%d' % (sys.version_info[[0]], sys.version_info[[1]]))" 2>/dev/null`;
     ax_prog_python_platform=`${PYTHON} -c "import sys; sys.stdout.write(sys.platform)" 2>/dev/null`;
     AC_SUBST(
       [PYTHON_PLATFORM],
@@ -37,7 +37,7 @@ AC_DEFUN([AX_PROG_PYTHON2],
     [$ax_python2_progs])
   AS_IF(
     [test "x${PYTHON2}" != x],
-    [ax_prog_python2_version=`${PYTHON2} -c "import sys; sys.stdout.write(sys.version[[:3]])" 2>/dev/null`;
+    [ax_prog_python2_version=`${PYTHON2} -c "import sys; sys.stdout.write('%d.%d' % (sys.version_info[[0]], sys.version_info[[1]]))" 2>/dev/null`;
     AC_SUBST(
       [PYTHON2_VERSION],
       [$ax_prog_python2_version])
@@ -58,13 +58,13 @@ AC_DEFUN([AX_PROG_PYTHON2],
 dnl Function to check if the python3 binary is available
 dnl "python3 python3.#"
 AC_DEFUN([AX_PROG_PYTHON3],
-  [ax_python3_progs="python3 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0"
+  [ax_python3_progs="python3 python3.11 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0"
   AC_CHECK_PROGS(
     [PYTHON3],
     [$ax_python3_progs])
   AS_IF(
     [test "x${PYTHON3}" != x],
-    [ax_prog_python3_version=`${PYTHON3} -c "import sys; sys.stdout.write(sys.version[[:3]])" 2>/dev/null`;
+    [ax_prog_python3_version=`${PYTHON3} -c "import sys; sys.stdout.write('%d.%d' % (sys.version_info[[0]], sys.version_info[[1]]))" 2>/dev/null`;
     AC_SUBST(
       [PYTHON3_VERSION],
       [$ax_prog_python3_version])
@@ -95,7 +95,7 @@ AC_DEFUN([AX_PROG_PYTHON_CONFIG],
     [test "x${PYTHON_CONFIG}" = x],
     [AC_CHECK_PROGS(
       [PYTHON_CONFIG],
-      [python-config python3-config python3.10-config python3.9-config python3.8-config python3.7-config python3.6-config python3.5-config python3.4-config python3.3-config python3.2-config python3.1-config python3.0-config python2-config python2.7-config python2.6-config python2.5-config])
+      [python-config python3-config python3.11-config python3.10-config python3.9-config python3.8-config python3.7-config python3.6-config python3.5-config python3.4-config python3.3-config python3.2-config python3.1-config python3.0-config python2-config python2.7-config python2.6-config python2.5-config])
     ])
   AS_IF(
     [test "x${PYTHON_CONFIG}" = x],
@@ -131,7 +131,7 @@ AC_DEFUN([AX_PROG_PYTHON3_CONFIG],
     [test "x${PYTHON3_CONFIG}" = x],
     [AC_CHECK_PROGS(
       [PYTHON3_CONFIG],
-      [python3-config python3.10-config python3.9-config python3.8-config python3.7-config python3.6-config python3.5-config python3.4-config python3.3-config python3.2-config python3.1-config python3.0-config])
+      [python3-config python3.11-config python3.10-config python3.9-config python3.8-config python3.7-config python3.6-config python3.5-config python3.4-config python3.3-config python3.2-config python3.1-config python3.0-config])
     ])
   AS_IF(
     [test "x${PYTHON3_CONFIG}" = x],

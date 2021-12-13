@@ -1,6 +1,6 @@
 dnl Checks for libuna or required headers and functions
 dnl
-dnl Version: 20200711
+dnl Version: 20210801
 
 dnl Function to detect if a specific libuna definition is available.
 AC_DEFUN([AX_LIBUNA_CHECK_DEFINITION],
@@ -43,7 +43,7 @@ AC_DEFUN([AX_LIBUNA_CHECK_LIB],
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
         [PKG_CHECK_MODULES(
           [libuna],
-          [libuna >= 20200711],
+          [libuna >= 20210801],
           [ac_cv_libuna=yes],
           [ac_cv_libuna=check])
         ])

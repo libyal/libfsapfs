@@ -2,7 +2,7 @@ AC_PREREQ( 2.59 )
 
 AC_INIT(
  [libfsapfs],
- [20210902],
+ [20211213],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
