@@ -5056,6 +5056,7 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
 {
 	libfsapfs_btree_entry_t *btree_entry = NULL;
 	libfsapfs_btree_node_t *btree_node   = NULL;
+	libfsapfs_inode_t *safe_inode        = NULL;
 	static char *function                = "libfsapfs_file_system_btree_get_inode_by_identifier";
 	int result                           = 0;
 
@@ -5170,7 +5171,7 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
 			goto on_error;
 		}
 		if( libfsapfs_inode_initialize(
-		     inode,
+		     &safe_inode,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -5183,7 +5184,7 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
 			goto on_error;
 		}
 		if( libfsapfs_inode_read_key_data(
-		     *inode,
+		     safe_inode,
 		     btree_entry->key_data,
 		     (size_t) btree_entry->key_data_size,
 		     error ) != 1 )
@@ -5198,7 +5199,7 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
 			goto on_error;
 		}
 		if( libfsapfs_inode_read_value_data(
-		     *inode,
+		     safe_inode,
 		     btree_entry->value_data,
 		     (size_t) btree_entry->value_data_size,
 		     error ) != 1 )
@@ -5237,13 +5238,15 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
 	}
 #endif /* defined( HAVE_PROFILER ) */
 
+	*inode = safe_inode;
+
 	return( result );
 
 on_error:
-	if( *inode != NULL )
+	if( safe_inode != NULL )
 	{
 		libfsapfs_inode_free(
-		 inode,
+		 &safe_inode,
 		 NULL );
 	}
 	return( -1 );

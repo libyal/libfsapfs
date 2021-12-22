@@ -3580,6 +3580,10 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 		 "%s: unable to release read/write lock for writing.",
 		 function );
 
+		libfsapfs_file_entry_free(
+		 sub_file_entry,
+		 NULL );
+
 		return( -1 );
 	}
 #endif
@@ -3742,6 +3746,10 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 		 "%s: unable to release read/write lock for writing.",
 		 function );
 
+		libfsapfs_file_entry_free(
+		 sub_file_entry,
+		 NULL );
+
 		return( -1 );
 	}
 #endif
@@ -3903,6 +3911,10 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
 		 "%s: unable to release read/write lock for writing.",
 		 function );
+
+		libfsapfs_file_entry_free(
+		 sub_file_entry,
+		 NULL );
 
 		return( -1 );
 	}

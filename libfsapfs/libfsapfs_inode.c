@@ -519,7 +519,7 @@ int libfsapfs_inode_read_value_data(
 			 "%s: invalid data size value out of bounds.",
 			 function );
 
-			return( -1 );
+			goto on_error;
 		}
 		byte_stream_copy_to_uint16_little_endian(
 		 &( data[ data_offset ] ),
@@ -559,7 +559,7 @@ int libfsapfs_inode_read_value_data(
 				 "%s: invalid data size value out of bounds.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			extended_field_type  = data[ data_offset ];
 			extended_field_flags = data[ data_offset + 1 ];
@@ -608,7 +608,7 @@ int libfsapfs_inode_read_value_data(
 				 "%s: invalid data size value out of bounds.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			if( ( value_data_size == 0 )
 			 || ( (size_t) value_data_size > ( data_size - value_data_offset ) ) )
@@ -620,7 +620,7 @@ int libfsapfs_inode_read_value_data(
 				 "%s: invalid value data size value out of bounds.",
 				 function );
 
-				return( -1 );
+				goto on_error;
 			}
 			value_data = &( data[ value_data_offset ] );
 
@@ -650,6 +650,19 @@ int libfsapfs_inode_read_value_data(
 					break;
 
 				case 4:
+					/* Error in case the inode defines multiple name extended fields
+					 */
+					if( inode->name != NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+						 "%s: invalid inode - name value already set.",
+						 function );
+
+						goto on_error;
+					}
 					inode->name = (uint8_t *) memory_allocate(
 					                           sizeof( uint8_t ) * (size_t) value_data_size );
 
@@ -701,7 +714,7 @@ int libfsapfs_inode_read_value_data(
 						 "%s: invalid value data size value out of bounds.",
 						 function );
 
-						return( -1 );
+						goto on_error;
 					}
 					byte_stream_copy_to_uint64_little_endian(
 					 ( (fsapfs_file_system_data_stream_attribute_t *) value_data )->used_size,
@@ -762,7 +775,7 @@ int libfsapfs_inode_read_value_data(
 					 function,
 					 extended_field_type );
 
-					return( -1 );
+					goto on_error;
 			}
 			value_data_offset += value_data_size;
 
