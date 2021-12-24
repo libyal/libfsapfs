@@ -82,6 +82,8 @@ environment:
     APPVEYOR_BUILD_WORKER_IMAGE: macos
     PYTHON: "/usr/local/opt/python@3.9/bin/python3"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CFLAGS: "-I/usr/local/include"
+    LDFLAGS: "-L/usr/local/lib"
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
     CONFIGURE_OPTIONS: ""
