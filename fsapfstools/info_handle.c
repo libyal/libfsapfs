@@ -2233,16 +2233,20 @@ int info_handle_file_entry_value_with_name_fprint(
 		}
 		fprintf(
 		 info_handle->bodyfile_stream,
-		 "|%" PRIu64 "|%s|%" PRIu32 "|%" PRIu32 "|%" PRIu64 "|%.9f|%.9f|%.9f|%.9f\n",
+		 "|%" PRIu64 "|%s|%" PRIu32 "|%" PRIu32 "|%" PRIu64 "|%" PRIi64 ".%09" PRIi64 "|%" PRIi64 ".%09" PRIi64 "|%" PRIi64 ".%09" PRIi64 "|%" PRIi64 ".%09" PRIi64 "\n",
 		 file_entry_identifier,
 		 file_mode_string,
 		 owner_identifier,
 		 group_identifier,
 		 size,
-		 (double) access_time / 1000000000,
-		 (double) modification_time / 1000000000,
-		 (double) inode_change_time / 1000000000,
-		 (double) creation_time / 1000000000 );
+		 access_time / 1000000000,
+		 access_time - ( ( access_time / 1000000000 ) * 1000000000 ),
+		 modification_time / 1000000000,
+		 modification_time - ( ( modification_time / 1000000000 ) * 1000000000 ),
+		 inode_change_time / 1000000000,
+		 inode_change_time - ( ( inode_change_time / 1000000000 ) * 1000000000 ),
+		 creation_time / 1000000000,
+		 creation_time - ( ( creation_time / 1000000000 ) * 1000000000 ) );
 	}
 	else
 	{
