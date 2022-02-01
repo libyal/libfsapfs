@@ -1,7 +1,7 @@
 /*
- * Encryption functions
+ * Encryption context functions
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -19,8 +19,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_ENCRYPTION_H )
-#define _LIBFSAPFS_ENCRYPTION_H
+#if !defined( _LIBFSAPFS_ENCRYPTION_CONTEXT_H )
+#define _LIBFSAPFS_ENCRYPTION_CONTEXT_H
 
 #include <common.h>
 #include <types.h>
@@ -86,5 +86,5 @@ int libfsapfs_encryption_aes_key_unwrap(
 }
 #endif
 
-#endif /* !defined( _LIBFSAPFS_ENCRYPTION_H ) */
+#endif /* !defined( _LIBFSAPFS_ENCRYPTION_CONTEXT_H ) */
 

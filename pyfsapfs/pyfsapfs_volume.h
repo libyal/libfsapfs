@@ -1,7 +1,7 @@
 /*
  * Python object wrapper of libfsapfs_volume_t
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -66,20 +66,6 @@ int pyfsapfs_volume_init(
 
 void pyfsapfs_volume_free(
       pyfsapfs_volume_t *pyfsapfs_volume );
-
-PyObject *pyfsapfs_volume_open(
-           pyfsapfs_volume_t *pyfsapfs_volume,
-           PyObject *arguments,
-           PyObject *keywords );
-
-PyObject *pyfsapfs_volume_open_file_object(
-           pyfsapfs_volume_t *pyfsapfs_volume,
-           PyObject *arguments,
-           PyObject *keywords );
-
-PyObject *pyfsapfs_volume_close(
-           pyfsapfs_volume_t *pyfsapfs_volume,
-           PyObject *arguments );
 
 PyObject *pyfsapfs_volume_unlock(
            pyfsapfs_volume_t *pyfsapfs_volume,

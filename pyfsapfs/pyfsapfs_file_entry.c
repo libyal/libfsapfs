@@ -1,7 +1,7 @@
 /*
  * Python object wrapper of libfsapfs_file_entry_t
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *

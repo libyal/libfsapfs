@@ -1,6 +1,6 @@
 # Script that runs the tests
 #
-# Version: 20200414
+# Version: 20220103
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -42,7 +42,7 @@ Foreach (${Line} in ${Lines})
 		}
 		Catch
 		{
-			$LastExitCode = {ExitIgnore}
+			$LastExitCode = ${ExitIgnore}
 		}
 		If (${LastExitCode} -eq ${ExitFailure})
 		{

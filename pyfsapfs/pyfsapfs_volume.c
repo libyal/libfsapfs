@@ -1,7 +1,7 @@
 /*
  * Python object wrapper of libfsapfs_volume_t
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -57,7 +57,7 @@ PyMethodDef pyfsapfs_volume_object_methods[] = {
 	  METH_NOARGS,
 	  "unlock() -> Boolean\n"
 	  "\n"
-	  "Unlock a volume." },
+	  "Unlocks the volume." },
 
 	{ "get_size",
 	  (PyCFunction) pyfsapfs_volume_get_size,
@@ -417,7 +417,7 @@ void pyfsapfs_volume_free(
 	 (PyObject*) pyfsapfs_volume );
 }
 
-/* Unlocks a volume
+/* Unlocks the volume
  * Returns a Python object if successful or NULL on error
  */
 PyObject *pyfsapfs_volume_unlock(

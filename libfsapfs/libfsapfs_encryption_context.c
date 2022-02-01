@@ -1,7 +1,7 @@
 /*
- * Encryption functions
+ * Encryption context functions
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -640,7 +640,8 @@ int libfsapfs_encryption_aes_key_unwrap(
 		 wrapped_data_size,
 		 0 );
 	}
-#endif
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+
 /* TODO make this code more readable */
 	initialization_vector = unwrapped_data;
 

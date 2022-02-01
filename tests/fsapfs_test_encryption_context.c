@@ -1,7 +1,7 @@
 /*
  * Library encryption_context type test program
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -94,6 +94,8 @@ int main(
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
+	/* TODO: add tests for libfsapfs_encryption_context_initialize */
+
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_encryption_context_free",
 	 fsapfs_test_encryption_context_free );
@@ -102,11 +104,17 @@ int main(
 
 	/* TODO: add tests for libfsapfs_encryption_context_crypt */
 
+	/* TODO: add tests for libfsapfs_encryption_aes_key_unwrap */
+
 #endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 }
 

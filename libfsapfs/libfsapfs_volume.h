@@ -1,7 +1,7 @@
 /*
  * Volume functions
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -119,10 +119,6 @@ struct libfsapfs_internal_volume
 	 */
 	size_t user_password_size;
 
-	/* Value to indicate the user password is set
-	 */
-	uint8_t user_password_is_set;
-
 	/* The recovery password
 	 */
 	uint8_t *recovery_password;
@@ -130,10 +126,6 @@ struct libfsapfs_internal_volume
         /* The recovery password size
 	 */
 	size_t recovery_password_size;
-
-	/* Value to indicate the recovery password is set
-	 */
-	uint8_t recovery_password_is_set;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock

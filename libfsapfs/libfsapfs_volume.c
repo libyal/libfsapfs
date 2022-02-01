@@ -1,7 +1,7 @@
 /*
  * Volume functions
  *
- * Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -2068,8 +2068,6 @@ int libfsapfs_volume_set_utf8_password(
 	}
 	internal_volume->user_password[ internal_volume->user_password_size - 1 ] = 0;
 
-	internal_volume->user_password_is_set = 1;
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -2242,8 +2240,6 @@ int libfsapfs_volume_set_utf16_password(
 	}
 	internal_volume->user_password[ internal_volume->user_password_size - 1 ] = 0;
 
-	internal_volume->user_password_is_set = 1;
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -2401,8 +2397,6 @@ int libfsapfs_volume_set_utf8_recovery_password(
 		goto on_error;
 	}
 	internal_volume->recovery_password[ internal_volume->recovery_password_size - 1 ] = 0;
-
-	internal_volume->recovery_password_is_set = 1;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
@@ -2575,8 +2569,6 @@ int libfsapfs_volume_set_utf16_recovery_password(
 		goto on_error;
 	}
 	internal_volume->recovery_password[ internal_volume->recovery_password_size - 1 ] = 0;
-
-	internal_volume->recovery_password_is_set = 1;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
