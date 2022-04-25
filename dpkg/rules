@@ -7,7 +7,7 @@
 export SKIP_PYTHON_TESTS=1
 
 %:
-	dh $@ --with=autoreconf
+	dh $@ --buildsystem=autoconf --with=autoreconf,python3
 
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:
@@ -16,6 +16,10 @@ override_dh_auto_configure:
 .PHONY: override_dh_install
 override_dh_install:
 	dh_install --fail-missing -X.la -X/pyfsapfs.a
+
+.PHONY: override_dh_missing
+override_dh_missing:
+	dh_missing -X.la -X/pyfsapfs.a --fail-missing
 
 .PHONY: override_dh_strip
 override_dh_strip:

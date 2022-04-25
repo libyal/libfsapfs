@@ -39,7 +39,6 @@ DPKG_FILES = \
 	dpkg/rules \
 	dpkg/libfsapfs-dev.install \
 	dpkg/libfsapfs.install \
-	dpkg/libfsapfs-python.install \
 	dpkg/libfsapfs-python3.install \
 	dpkg/libfsapfs-tools.install \
 	dpkg/source/format

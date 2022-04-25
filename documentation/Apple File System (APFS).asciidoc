@@ -141,7 +141,7 @@ the start of the container, is used as the tweak value.
 
 [NOTE]
 When a T2 chip is present, it is currently assumed that the T2 is used to
-encrypte the container key bag instead of the "container identifier".
+encrypted the container key bag instead of the "container identifier".
 
 The unit size is the sector size, which is assumed to be 512 bytes also for 4k
 sector media.
