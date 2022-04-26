@@ -169,6 +169,21 @@ int libfsapfs_extended_attribute_get_size(
      size64_t *size,
      libcerror_error_t **error );
 
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_number_of_extents(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     int *number_of_extents,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_extended_attribute_get_extent_by_index(
+     libfsapfs_extended_attribute_t *extended_attribute,
+     int extent_index,
+     off64_t *extent_offset,
+     size64_t *extent_size,
+     uint32_t *extent_flags,
+     libcerror_error_t **error );
+
 #if defined( __cplusplus )
 }
 #endif

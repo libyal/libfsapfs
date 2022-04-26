@@ -1,4 +1,4 @@
-.Dd November  3, 2020
+.Dd April 26, 2022
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -240,6 +240,10 @@ Extended attribute functions
 .Fn libfsapfs_extended_attribute_get_offset "libfsapfs_extended_attribute_t *extended_attribute" "off64_t *offset" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_extended_attribute_get_size "libfsapfs_extended_attribute_t *extended_attribute" "size64_t *size" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_extended_attribute_get_number_of_extents "libfsapfs_extended_attribute_t *extended_attribute" "int *number_of_extents" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_extended_attribute_get_extent_by_index "libfsapfs_extended_attribute_t *extended_attribute" "int extent_index" "off64_t *extent_offset" "size64_t *extent_size" "uint32_t *extent_flags" "libfsapfs_error_t **error"
 .Sh DESCRIPTION
 The
 .Fn libfsapfs_get_version

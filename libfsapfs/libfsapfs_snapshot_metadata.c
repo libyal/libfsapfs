@@ -306,7 +306,7 @@ int libfsapfs_snapshot_metadata_read_value_data(
 		 value_64bit );
 
 		libcnotify_printf(
-		 "%s: volume superblock block number\t\t\t: %" PRIu32 "\n",
+		 "%s: volume superblock block number\t\t: %" PRIu32 "\n",
 		 function,
 		 snapshot_metadata->volume_superblock_block_number );
 

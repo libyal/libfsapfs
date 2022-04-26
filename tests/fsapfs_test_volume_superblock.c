@@ -586,6 +586,7 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	          volume_superblock,
 	          file_io_handle,
 	          0,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -602,6 +603,7 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	result = libfsapfs_volume_superblock_read_file_io_handle(
 	          NULL,
 	          file_io_handle,
+	          0,
 	          0,
 	          &error );
 
@@ -620,6 +622,7 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	result = libfsapfs_volume_superblock_read_file_io_handle(
 	          volume_superblock,
 	          NULL,
+	          0,
 	          0,
 	          &error );
 
@@ -639,6 +642,7 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	          volume_superblock,
 	          file_io_handle,
 	          -1,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -692,6 +696,7 @@ int fsapfs_test_volume_superblock_read_file_io_handle(
 	result = libfsapfs_volume_superblock_read_file_io_handle(
 	          volume_superblock,
 	          file_io_handle,
+	          0,
 	          0,
 	          &error );
 
@@ -799,6 +804,7 @@ int fsapfs_test_volume_superblock_read_data(
 	          volume_superblock,
 	          fsapfs_test_volume_superblock_data1,
 	          4096,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -816,6 +822,7 @@ int fsapfs_test_volume_superblock_read_data(
 	          NULL,
 	          fsapfs_test_volume_superblock_data1,
 	          4096,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -834,6 +841,7 @@ int fsapfs_test_volume_superblock_read_data(
 	          volume_superblock,
 	          NULL,
 	          4096,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -852,6 +860,7 @@ int fsapfs_test_volume_superblock_read_data(
 	          volume_superblock,
 	          fsapfs_test_volume_superblock_data1,
 	          (size_t) SSIZE_MAX + 1,
+	          0,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -869,6 +878,7 @@ int fsapfs_test_volume_superblock_read_data(
 	result = libfsapfs_volume_superblock_read_data(
 	          volume_superblock,
 	          fsapfs_test_volume_superblock_data1,
+	          0,
 	          0,
 	          &error );
 
@@ -969,7 +979,11 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 on_error:
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 }
 
