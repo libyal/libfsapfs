@@ -39,13 +39,13 @@ struct libfsapfs_snapshot_metadata
 	 */
 	uint64_t volume_superblock_block_number;
 
-	/* Name size
-	 */
-	uint16_t name_size;
-
 	/* Name
 	 */
 	uint8_t *name;
+
+	/* Name size
+	 */
+	uint16_t name_size;
 };
 
 int libfsapfs_snapshot_metadata_initialize(

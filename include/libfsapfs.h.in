@@ -1102,7 +1102,7 @@ int libfsapfs_extended_attribute_get_size(
      size64_t *size,
      libfsapfs_error_t **error );
 
-/* Retrieves the number of extents for the extended attribute
+/* Retrieves the number of extents
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
@@ -1111,7 +1111,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
      int *number_of_extents,
      libfsapfs_error_t **error );
 
-/* Retrieves a specific extended attribute's physical offset, size, and flags
+/* Retrieves a specific extent
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \

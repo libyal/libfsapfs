@@ -964,7 +964,7 @@ int info_handle_get_volume_by_index(
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve volume: %d.",
 		 function,
-		 volume_index );
+		 volume_index + 1 );
 
 		goto on_error;
 	}
@@ -3024,7 +3024,7 @@ int info_handle_file_system_hierarchy_fprint(
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve volume: %d.",
 			 function,
-			 volume_index );
+			 volume_index + 1 );
 
 			goto on_error;
 		}
@@ -3126,7 +3126,7 @@ int info_handle_file_system_hierarchy_fprint(
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve root directory file entry from volume: %d.",
 			 function,
-			 volume_index );
+			 volume_index + 1 );
 
 			goto on_error;
 		}
@@ -3275,7 +3275,7 @@ int info_handle_file_entry_fprint_by_identifier(
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve volume: %d.",
 		 function,
-		 volume_index );
+		 volume_index + 1 );
 
 		goto on_error;
 	}
@@ -4006,10 +4006,6 @@ int info_handle_volume_fprint(
 		 info_handle->notify_stream,
 		 "\tIs locked\n" );
 	}
-	fprintf(
-	 info_handle->notify_stream,
-	 "\n" );
-
 	if( libfsapfs_volume_get_number_of_snapshots(
 	     volume,
 	     &number_of_snapshots,
@@ -4024,6 +4020,11 @@ int info_handle_volume_fprint(
 
 		goto on_error;
 	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\tNumber of snapshots\t\t: %d\n",
+	 number_of_snapshots );
+
 	if( number_of_snapshots > 0 )
 	{
 		for( snapshot_index = 0;
@@ -4042,20 +4043,19 @@ int info_handle_volume_fprint(
 				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 				 "%s: unable to retrieve snapshot: %d.",
 				 function,
-				 snapshot_index );
+				 snapshot_index + 1 );
 
 				goto on_error;
 			}
 /* TODO move into separate print function */
 			fprintf(
 			 info_handle->notify_stream,
-			 "Volume: %d snapshot: %d information:\n",
-			 volume_index + 1,
+			 "\tSnapshot: %d information:\n",
 			 snapshot_index + 1 );
 
 			fprintf(
 			 info_handle->notify_stream,
-			 "\tName\t\t\t\t: " );
+			 "\t\tName\t\t\t: " );
 
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 			result = libfsapfs_snapshot_get_utf16_name_size(
@@ -4147,9 +4147,6 @@ int info_handle_volume_fprint(
 				goto on_error;
 			}
 		}
-		fprintf(
-		 info_handle->notify_stream,
-		 "\n" );
 	}
 	return( 1 );
 
@@ -4292,7 +4289,7 @@ int info_handle_container_fprint(
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 			 "%s: unable to retrieve volume: %d.",
 			 function,
-			 volume_index );
+			 volume_index + 1 );
 
 			goto on_error;
 		}
@@ -4308,7 +4305,7 @@ int info_handle_container_fprint(
 			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
 			 "%s: unable to print volume: %d.",
 			 function,
-			 volume_index );
+			 volume_index + 1 );
 
 			goto on_error;
 		}
@@ -4326,6 +4323,10 @@ int info_handle_container_fprint(
 			goto on_error;
 		}
 	}
+	fprintf(
+	 info_handle->notify_stream,
+	 "\n" );
+
 	return( 1 );
 
 on_error:

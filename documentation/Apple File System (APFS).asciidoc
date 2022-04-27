@@ -31,7 +31,7 @@ for the libfsapfs project.
 == License
 
 ....
-Copyright (C) 2018-2021, Joachim Metz <joachim.metz@gmail.com>.
+Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>.
 Permission is granted to copy, distribute and/or modify this document under the
 terms of the GNU Free Documentation License, Version 1.3 or any later version
 published by the Free Software Foundation; with no Invariant Sections, no
@@ -56,6 +56,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.9 | J.B. Metz | October 2020 | Additional format information regarding extended attributes.
 | 0.0.10 | J.B. Metz | June 2021 | Textual corrections.
 | 0.0.11 | J.B. Metz | July 2021 | Additional format information regarding extended attributes.
+| 0.0.12 | J.B. Metz | April 2022 | Additional format information.
 |===
 
 :numbered:
@@ -141,7 +142,7 @@ the start of the container, is used as the tweak value.
 
 [NOTE]
 When a T2 chip is present, it is currently assumed that the T2 is used to
-encrypte the container key bag instead of the "container identifier".
+encrypted the container key bag instead of the "container identifier".
 
 The unit size is the sector size, which is assumed to be 512 bytes also for 4k
 sector media.
@@ -1374,7 +1375,8 @@ See section: <<extent_reference_tree,Extent reference tree>>
 See section: <<snapshot_metadata_tree,Snapshot metadata tree>>
 | 164 | 8 | | [yellow-background]*Unknown (apfs_revert_to_xid)*
 | 172 | 8 | | [yellow-background]*Unknown (apfs_revert_to_sblock_oid)*
-| 180 | 8 | | Next (available) file system object identifier (apfs_next_obj_id)
+| 180 | 8 | | Next (available) file system object identifier (apfs_next_obj_id) +
+Seen upper 32-bit contain 0xffffffff
 | 188 | 8 | | [yellow-background]*Unknown (apfs_num_files)*
 | 196 | 8 | | [yellow-background]*Unknown (apfs_num_directories)*
 | 204 | 8 | | [yellow-background]*Unknown (apfs_num_symlinks)*

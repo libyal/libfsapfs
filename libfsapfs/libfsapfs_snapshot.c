@@ -280,6 +280,7 @@ int libfsapfs_internal_snapshot_open_read(
 	     internal_snapshot->volume_superblock,
 	     file_io_handle,
 	     file_offset,
+	     1,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -293,8 +294,7 @@ int libfsapfs_internal_snapshot_open_read(
 
 		goto on_error;
 	}
-/* TODO implement */
-	return( -1 );
+	return( 1 );
 
 on_error:
 	return( -1 );

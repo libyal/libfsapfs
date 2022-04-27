@@ -381,6 +381,7 @@ int libfsapfs_internal_volume_open_read(
 	     internal_volume->superblock,
 	     file_io_handle,
 	     file_offset,
+	     0,
 	     error ) != 1 )
 	{
 		libcerror_error_set(

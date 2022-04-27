@@ -93,12 +93,14 @@ int libfsapfs_volume_superblock_read_file_io_handle(
      libfsapfs_volume_superblock_t *volume_superblock,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     int8_t is_snapshot,
      libcerror_error_t **error );
 
 int libfsapfs_volume_superblock_read_data(
      libfsapfs_volume_superblock_t *volume_superblock,
      const uint8_t *data,
      size_t data_size,
+     int8_t is_snapshot,
      libcerror_error_t **error );
 
 int libfsapfs_volume_superblock_get_volume_identifier(

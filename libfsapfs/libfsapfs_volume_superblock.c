@@ -147,6 +147,7 @@ int libfsapfs_volume_superblock_read_file_io_handle(
      libfsapfs_volume_superblock_t *volume_superblock,
      libbfio_handle_t *file_io_handle,
      off64_t file_offset,
+     int8_t is_snapshot,
      libcerror_error_t **error )
 {
 	uint8_t volume_superblock_data[ 4096 ];
@@ -199,6 +200,7 @@ int libfsapfs_volume_superblock_read_file_io_handle(
 	     volume_superblock,
 	     (uint8_t *) &volume_superblock_data,
 	     4096,
+	     is_snapshot,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -220,17 +222,19 @@ int libfsapfs_volume_superblock_read_data(
      libfsapfs_volume_superblock_t *volume_superblock,
      const uint8_t *data,
      size_t data_size,
+     int8_t is_snapshot,
      libcerror_error_t **error )
 {
-	static char *function        = "libfsapfs_volume_superblock_read_data";
-	uint64_t calculated_checksum = 0;
-	uint64_t stored_checksum     = 0;
-	uint32_t object_subtype      = 0;
-	uint32_t object_type         = 0;
+	static char *function         = "libfsapfs_volume_superblock_read_data";
+	uint64_t calculated_checksum  = 0;
+	uint64_t stored_checksum      = 0;
+	uint32_t expected_object_type = 0;
+	uint32_t object_subtype       = 0;
+	uint32_t object_type          = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit         = 0;
-	uint32_t value_32bit         = 0;
+	uint64_t value_64bit          = 0;
+	uint32_t value_32bit          = 0;
 #endif
 
 	if( volume_superblock == NULL )
@@ -267,6 +271,14 @@ int libfsapfs_volume_superblock_read_data(
 
 		return( -1 );
 	}
+	if( is_snapshot == 0 )
+	{
+		expected_object_type = 0x0000000dUL;
+	}
+	else
+	{
+		expected_object_type = 0x4000000dUL;
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -287,7 +299,7 @@ int libfsapfs_volume_superblock_read_data(
 	 ( (fsapfs_volume_superblock_t *) data )->object_type,
 	 object_type );
 
-	if( object_type != 0x0000000dUL )
+	if( object_type != expected_object_type )
 	{
 		libcerror_error_set(
 		 error,
