@@ -93,6 +93,19 @@ PyObject *pyfsapfs_extended_attribute_get_size(
            pyfsapfs_extended_attribute_t *pyfsapfs_extended_attribute,
            PyObject *arguments );
 
+PyObject *pyfsapfs_extended_attribute_get_number_of_extents(
+           pyfsapfs_extended_attribute_t *pyfsapfs_extended_attribute,
+           PyObject *arguments );
+
+PyObject *pyfsapfs_extended_attribute_get_extent_by_index(
+           pyfsapfs_extended_attribute_t *pyfsapfs_extended_attribute,
+           int extent_index );
+
+PyObject *pyfsapfs_extended_attribute_get_extent(
+           pyfsapfs_extended_attribute_t *pyfsapfs_extended_attribute,
+           PyObject *arguments,
+           PyObject *keywords );
+
 #if defined( __cplusplus )
 }
 #endif

@@ -1120,7 +1120,7 @@ int libfsapfs_extended_attribute_get_size(
 		return( -1 );
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
+	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1128,7 +1128,7 @@ int libfsapfs_extended_attribute_get_size(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
+		 "%s: unable to grab read/write lock for reading.",
 		 function );
 
 		return( -1 );
@@ -1137,7 +1137,7 @@ int libfsapfs_extended_attribute_get_size(
 	*size = internal_extended_attribute->attribute_values->value_data_size;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
+	if( libcthreads_read_write_lock_release_for_read(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1145,7 +1145,7 @@ int libfsapfs_extended_attribute_get_size(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
+		 "%s: unable to release read/write lock for reading.",
 		 function );
 
 		return( -1 );
@@ -1190,7 +1190,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 		return( -1 );
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
+	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1198,7 +1198,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
+		 "%s: unable to grab read/write lock for reading.",
 		 function );
 
 		return( -1 );
@@ -1219,7 +1219,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 		goto on_error;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
+	if( libcthreads_read_write_lock_release_for_read(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1227,7 +1227,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
+		 "%s: unable to release read/write lock for reading.",
 		 function );
 
 		return( -1 );
@@ -1237,7 +1237,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 
 on_error:
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
+	libcthreads_read_write_lock_release_for_read(
 	 internal_extended_attribute->read_write_lock,
 	 NULL );
 #endif
@@ -1328,7 +1328,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		return( -1 );
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
+	if( libcthreads_read_write_lock_grab_for_read(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1336,7 +1336,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
+		 "%s: unable to grab read/write lock for reading.",
 		 function );
 
 		return( -1 );
@@ -1375,7 +1375,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 	*extent_flags  = 0;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
+	if( libcthreads_read_write_lock_release_for_read(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1383,7 +1383,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
+		 "%s: unable to release read/write lock for reading.",
 		 function );
 
 		return( -1 );
@@ -1393,7 +1393,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 
 on_error:
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
+	libcthreads_read_write_lock_release_for_read(
 	 internal_extended_attribute->read_write_lock,
 	 NULL );
 #endif

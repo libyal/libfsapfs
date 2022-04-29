@@ -1,8 +1,11 @@
 TODO
-* move libfsapfs_internal_extended_attribute_get_data_stream to libfsapfs_attributes.[ch]
-* handle non-inline attribute symbolic link
+* complete snapshot support
+* extended attribute extent support
+  * extent support, add to Python binding
+  * move libfsapfs_internal_extended_attribute_get_data_stream to libfsapfs_attributes.[ch]
+  * for extended attributes by name look up use native B-tree structures
 
-* for extended attributes by name look up use native B-tree structures
+* handle non-inline attribute symbolic link
 
 * improve format support
 ** check for more compression methods
