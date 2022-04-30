@@ -25,7 +25,13 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_encryption_context.h"
+#include "libfsapfs_file_system_btree.h"
+#include "libfsapfs_io_handle.h"
+#include "libfsapfs_libbfio.h"
 #include "libfsapfs_libcerror.h"
+#include "libfsapfs_libcthreads.h"
+#include "libfsapfs_types.h"
 
 #if defined( __cplusplus )
 extern "C" {
@@ -35,17 +41,57 @@ typedef struct libfsapfs_file_system libfsapfs_file_system_t;
 
 struct libfsapfs_file_system
 {
-	/* Dummy value
+	/* The IO handle
 	 */
-	int dummy;
+	libfsapfs_io_handle_t *io_handle;
+
+	/* The encryption context
+	 */
+	libfsapfs_encryption_context_t *encryption_context;
+
+	/* The file system B-tree
+	 */
+	libfsapfs_file_system_btree_t *file_system_btree;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	/* The read/write lock
+	 */
+	libcthreads_read_write_lock_t *read_write_lock;
+#endif
 };
 
 int libfsapfs_file_system_initialize(
      libfsapfs_file_system_t **file_system,
+     libfsapfs_io_handle_t *io_handle,
+     libfsapfs_encryption_context_t *encryption_context,
+     libfsapfs_file_system_btree_t *file_system_btree,
      libcerror_error_t **error );
 
 int libfsapfs_file_system_free(
      libfsapfs_file_system_t **file_system,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_get_file_entry_by_identifier(
+     libfsapfs_file_system_t *file_system,
+     libbfio_handle_t *file_io_handle,
+     uint64_t identifier,
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_get_file_entry_by_utf8_path(
+     libfsapfs_file_system_t *file_system,
+     libbfio_handle_t *file_io_handle,
+     const uint8_t *utf8_string,
+     size_t utf8_string_length,
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error );
+
+int libfsapfs_file_system_get_file_entry_by_utf16_path(
+     libfsapfs_file_system_t *file_system,
+     libbfio_handle_t *file_io_handle,
+     const uint16_t *utf16_string,
+     size_t utf16_string_length,
+     libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

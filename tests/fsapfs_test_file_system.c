@@ -57,6 +57,9 @@ int fsapfs_test_file_system_initialize(
 	 */
 	result = libfsapfs_file_system_initialize(
 	          &file_system,
+	          NULL,
+	          NULL,
+	          NULL,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -93,6 +96,9 @@ int fsapfs_test_file_system_initialize(
 	 */
 	result = libfsapfs_file_system_initialize(
 	          NULL,
+	          NULL,
+	          NULL,
+	          NULL,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -111,6 +117,9 @@ int fsapfs_test_file_system_initialize(
 
 	result = libfsapfs_file_system_initialize(
 	          &file_system,
+	          NULL,
+	          NULL,
+	          NULL,
 	          &error );
 
 	file_system = NULL;
@@ -139,6 +148,9 @@ int fsapfs_test_file_system_initialize(
 
 		result = libfsapfs_file_system_initialize(
 		          &file_system,
+		          NULL,
+		          NULL,
+		          NULL,
 		          &error );
 
 		if( fsapfs_test_malloc_attempts_before_fail != -1 )
@@ -181,6 +193,9 @@ int fsapfs_test_file_system_initialize(
 
 		result = libfsapfs_file_system_initialize(
 		          &file_system,
+		          NULL,
+		          NULL,
+		          NULL,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )

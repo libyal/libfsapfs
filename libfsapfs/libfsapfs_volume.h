@@ -29,6 +29,7 @@
 #include "libfsapfs_container_key_bag.h"
 #include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extern.h"
+#include "libfsapfs_file_system.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_io_handle.h"
@@ -94,6 +95,10 @@ struct libfsapfs_internal_volume
 	/* The file system data block vector
 	 */
 	libfdata_vector_t *file_system_data_block_vector;
+
+	/* The file system
+	 */
+	libfsapfs_file_system_t *file_system;
 
 	/* The file system B-tree
 	 */
@@ -251,7 +256,7 @@ int libfsapfs_volume_get_next_file_entry_identifier(
      uint64_t *identifier,
      libcerror_error_t **error );
 
-int libfsapfs_internal_volume_get_file_system_btree(
+int libfsapfs_internal_volume_get_file_system(
      libfsapfs_internal_volume_t *internal_volume,
      libcerror_error_t **error );
 

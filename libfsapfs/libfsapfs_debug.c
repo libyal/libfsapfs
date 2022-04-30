@@ -603,6 +603,12 @@ const char *libfsapfs_debug_print_inode_extended_field_type(
 
 		case 14:
 			return( "(INO_EXT_TYPE_RDEV)" );
+
+		case 15:
+			return( "(INO_EXT_TYPE_PURGEABLE_FLAGS)" );
+
+		case 16:
+			return( "(INO_EXT_TYPE_ORIG_SYNC_ROOT_ID)" );
 	}
 	return( "Unknown" );
 }

@@ -2293,7 +2293,7 @@ The extended field data contains a 32-bit integer value
 The extended field data contains a <<data_stream_attribute,data stream attribute>>
 | 9 | INO_EXT_TYPE_RESERVED_9 | [yellow-background]*Unknown (Reserved)*
 | 10 | INO_EXT_TYPE_DIR_STATS_KEY | Direcotry statistics +
-[yellow-background]*Unknown if this contains the object identifier of the directory statisticts or a j_dir_stats_val_t structure*
+[yellow-background]*Unknown if this contains the object identifier of the directory statisticts or a j_dir_stats_val_t structure, seen 8 byte value*
 | 11 | INO_EXT_TYPE_FS_UUID | Mounted file system identifier +
 The extended field data contains a 128-bit UUID value
 | 12 | INO_EXT_TYPE_RESERVED_12 | [yellow-background]*Unknown (Reserved)*
@@ -2301,6 +2301,9 @@ The extended field data contains a 128-bit UUID value
 The extended field data contains a 64-bit integer value
 | 14 | INO_EXT_TYPE_RDEV | Block- or character-device identifier +
 The extended field data contains a 32-bit integer value
+| 15 | INO_EXT_TYPE_PURGEABLE_FLAGS | Information about a purgeable file +
+[yellow-background]*Unknown (Reserved), seen 8 byte value*
+| 16 | INO_EXT_TYPE_ORIG_SYNC_ROOT_ID | [yellow-background]*Unknown (Inode number of the sync-root hierarchy)*
 |===
 
 ==== [[extended_field_flags]]Extended field flags

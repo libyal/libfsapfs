@@ -2217,7 +2217,7 @@ PyObject *pyfsapfs_file_entry_get_sub_file_entry_by_index(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve sub : %d.",
+		 "%s: unable to retrieve sub file entry: %d.",
 		 function,
 		 sub_file_entry_index );
 
@@ -2397,7 +2397,7 @@ PyObject *pyfsapfs_file_entry_get_sub_file_entry_by_name(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve sub .",
+		 "%s: unable to retrieve sub file entry.",
 		 function );
 
 		libcerror_error_free(

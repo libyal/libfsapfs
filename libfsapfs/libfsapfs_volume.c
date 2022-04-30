@@ -32,6 +32,7 @@
 #include "libfsapfs_encryption_context.h"
 #include "libfsapfs_extent_reference_tree.h"
 #include "libfsapfs_file_entry.h"
+#include "libfsapfs_file_system.h"
 #include "libfsapfs_file_system_btree.h"
 #include "libfsapfs_file_system_data_handle.h"
 #include "libfsapfs_inode.h"
@@ -1090,17 +1091,17 @@ int libfsapfs_internal_volume_close(
 
 		result = -1;
 	}
-	if( internal_volume->file_system_btree != NULL )
+	if( internal_volume->file_system != NULL )
 	{
-		if( libfsapfs_file_system_btree_free(
-		     &( internal_volume->file_system_btree ),
+		if( libfsapfs_file_system_free(
+		     &( internal_volume->file_system ),
 		     error ) != 1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-			 "%s: unable to free file system B-tree.",
+			 "%s: unable to free file system.",
 			 function );
 
 			result = -1;
@@ -2689,15 +2690,16 @@ int libfsapfs_volume_get_next_file_entry_identifier(
 	return( 1 );
 }
 
-/* Determines the file system B-tree
+/* Determines the file system
  * Returns 1 if successful or -1 on error
  */
-int libfsapfs_internal_volume_get_file_system_btree(
+int libfsapfs_internal_volume_get_file_system(
      libfsapfs_internal_volume_t *internal_volume,
      libcerror_error_t **error )
 {
+	libfsapfs_file_system_btree_t *file_system_btree         = NULL;
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
-	static char *function                                    = "libfsapfs_internal_volume_get_file_system_btree";
+	static char *function                                    = "libfsapfs_internal_volume_get_file_system";
 	uint8_t use_case_folding                                 = 0;
 
 	if( internal_volume == NULL )
@@ -2771,7 +2773,7 @@ int libfsapfs_internal_volume_get_file_system_btree(
 		use_case_folding = 1;
 	}
 	if( libfsapfs_file_system_btree_initialize(
-	     &( internal_volume->file_system_btree ),
+	     &file_system_btree,
 	     internal_volume->io_handle,
 	     internal_volume->encryption_context,
 	     internal_volume->file_system_data_block_vector,
@@ -2785,6 +2787,22 @@ int libfsapfs_internal_volume_get_file_system_btree(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 		 "%s: unable to create file system B-tree.",
+		 function );
+
+		goto on_error;
+	}
+	if( libfsapfs_file_system_initialize(
+	     &( internal_volume->file_system ),
+	     internal_volume->io_handle,
+	     internal_volume->encryption_context,
+	     file_system_btree,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+		 "%s: unable to create file system.",
 		 function );
 
 		goto on_error;
@@ -2811,10 +2829,16 @@ on_error:
 		 &object_map_descriptor,
 		 NULL );
 	}
-	if( internal_volume->file_system_btree != NULL )
+	if( file_system_btree != NULL )
 	{
 		libfsapfs_file_system_btree_free(
-		 &( internal_volume->file_system_btree ),
+		 &file_system_btree,
+		 NULL );
+	}
+	if( internal_volume->file_system != NULL )
+	{
+		libfsapfs_file_system_free(
+		 &( internal_volume->file_system ),
 		 NULL );
 	}
 	return( -1 );
@@ -2829,10 +2853,9 @@ int libfsapfs_volume_get_file_entry_by_identifier(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_inode_t *inode                     = NULL;
 	libfsapfs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsapfs_volume_get_file_entry_by_identifier";
-	int result                                   = 0;
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -2847,28 +2870,6 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 	}
 	internal_volume = (libfsapfs_internal_volume_t *) volume;
 
-	if( file_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	if( *file_entry != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid file entry value already set.",
-		 function );
-
-		return( -1 );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -2884,9 +2885,9 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 		return( -1 );
 	}
 #endif
-	if( internal_volume->file_system_btree == NULL )
+	if( internal_volume->file_system == NULL )
 	{
-		if( libfsapfs_internal_volume_get_file_system_btree(
+		if( libfsapfs_internal_volume_get_file_system(
 		     internal_volume,
 		     error ) != 1 )
 		{
@@ -2894,51 +2895,32 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file system B-tree.",
+			 "%s: unable to determine file system.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	result = libfsapfs_file_system_btree_get_inode_by_identifier(
-	          internal_volume->file_system_btree,
-	          internal_volume->file_io_handle,
-	          identifier,
-	          &inode,
-	          error );
-
-	if( result == -1 )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve inode: %" PRIu64 " from file system B-tree.",
-		 function,
-		 identifier );
+		result = libfsapfs_file_system_get_file_entry_by_identifier(
+		          internal_volume->file_system,
+		          internal_volume->file_io_handle,
+		          identifier,
+		          file_entry,
+		          error );
 
-		goto on_error;
-	}
-	else if( result != 0 )
-	{
-		if( libfsapfs_file_entry_initialize(
-		     file_entry,
-		     internal_volume->io_handle,
-		     internal_volume->file_io_handle,
-		     internal_volume->encryption_context,
-		     internal_volume->file_system_btree,
-		     inode,
-		     NULL,
-		     error ) != 1 )
+		if( result == -1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file entry.",
-			 function );
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve inode: %" PRIu64 " from file system B-tree.",
+			 function,
+			 identifier );
 
-			goto on_error;
+			result = -1;
 		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
@@ -2957,14 +2939,6 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 	}
 #endif
 	return( result );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_volume->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
 }
 
 /* Retrieves the root directory file entry
@@ -2975,10 +2949,9 @@ int libfsapfs_volume_get_root_directory(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_inode_t *inode                     = NULL;
 	libfsapfs_internal_volume_t *internal_volume = NULL;
 	static char *function                        = "libfsapfs_volume_get_root_directory";
-	int result                                   = 0;
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -2993,28 +2966,6 @@ int libfsapfs_volume_get_root_directory(
 	}
 	internal_volume = (libfsapfs_internal_volume_t *) volume;
 
-	if( file_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	if( *file_entry != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid file entry value already set.",
-		 function );
-
-		return( -1 );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -3030,9 +2981,9 @@ int libfsapfs_volume_get_root_directory(
 		return( -1 );
 	}
 #endif
-	if( internal_volume->file_system_btree == NULL )
+	if( internal_volume->file_system == NULL )
 	{
-		if( libfsapfs_internal_volume_get_file_system_btree(
+		if( libfsapfs_internal_volume_get_file_system(
 		     internal_volume,
 		     error ) != 1 )
 		{
@@ -3040,7 +2991,7 @@ int libfsapfs_volume_get_root_directory(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file system B-tree.",
+			 "%s: unable to determine file system.",
 			 function );
 
 			result = -1;
@@ -3048,12 +2999,11 @@ int libfsapfs_volume_get_root_directory(
 	}
 	if( result != -1 )
 	{
-/* TODO refactor to libfsapfs_file_system_get_file_entry_by_identifier */
-		result = libfsapfs_file_system_btree_get_inode_by_identifier(
-		          internal_volume->file_system_btree,
+		result = libfsapfs_file_system_get_file_entry_by_identifier(
+		          internal_volume->file_system,
 		          internal_volume->file_io_handle,
 		          2,
-		          &inode,
+		          file_entry,
 		          error );
 
 		if( result == -1 )
@@ -3062,32 +3012,10 @@ int libfsapfs_volume_get_root_directory(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve root directory inode from file system B-tree.",
+			 "%s: unable to retrieve root directory inode: 2 from file system B-tree.",
 			 function );
 
 			result = -1;
-		}
-		else if( result != 0 )
-		{
-			if( libfsapfs_file_entry_initialize(
-			     file_entry,
-			     internal_volume->io_handle,
-			     internal_volume->file_io_handle,
-			     internal_volume->encryption_context,
-			     internal_volume->file_system_btree,
-			     inode,
-			     NULL,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-				 "%s: unable to create file entry.",
-				 function );
-
-				result = -1;
-			}
 		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
@@ -3105,20 +3033,7 @@ int libfsapfs_volume_get_root_directory(
 		return( -1 );
 	}
 #endif
-	if( result == -1 )
-	{
-		goto on_error;
-	}
 	return( result );
-
-on_error:
-	if( inode != NULL )
-	{
-		libfsapfs_inode_free(
-		 &inode,
-		 NULL );
-	}
-	return( -1 );
 }
 
 /* Retrieves the file entry for an UTF-8 encoded path
@@ -3131,11 +3046,9 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record = NULL;
-	libfsapfs_inode_t *inode                       = NULL;
-	libfsapfs_internal_volume_t *internal_volume   = NULL;
-	static char *function                          = "libfsapfs_volume_get_file_entry_by_utf8_path";
-	int result                                     = 0;
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_file_entry_by_utf8_path";
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -3187,9 +3100,9 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 		return( -1 );
 	}
 #endif
-	if( internal_volume->file_system_btree == NULL )
+	if( internal_volume->file_system == NULL )
 	{
-		if( libfsapfs_internal_volume_get_file_system_btree(
+		if( libfsapfs_internal_volume_get_file_system(
 		     internal_volume,
 		     error ) != 1 )
 		{
@@ -3197,56 +3110,33 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file system B-tree.",
+			 "%s: unable to determine file system.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	result = libfsapfs_file_system_btree_get_inode_by_utf8_path(
-	          internal_volume->file_system_btree,
-	          internal_volume->file_io_handle,
-	          2,
-	          utf8_string,
-	          utf8_string_length,
-	          &inode,
-	          &directory_record,
-	          error );
-
-	if( result == -1 )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve inode from file system B-tree.",
-		 function );
+		result = libfsapfs_file_system_get_file_entry_by_utf8_path(
+		          internal_volume->file_system,
+		          internal_volume->file_io_handle,
+		          utf8_string,
+		          utf8_string_length,
+		          file_entry,
+		          error );
 
-		goto on_error;
-	}
-	else if( result != 0 )
-	{
-		if( libfsapfs_file_entry_initialize(
-		     file_entry,
-		     internal_volume->io_handle,
-		     internal_volume->file_io_handle,
-		     internal_volume->encryption_context,
-		     internal_volume->file_system_btree,
-		     inode,
-		     directory_record,
-		     error ) != 1 )
+		if( result == -1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file entry.",
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file entry from file system by UTF-8 path.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
-		inode            = NULL;
-		directory_record = NULL;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3264,32 +3154,6 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 	}
 #endif
 	return( result );
-
-on_error:
-	if( *file_entry != NULL )
-	{
-		libfsapfs_file_entry_free(
-		 file_entry,
-		 NULL );
-	}
-	if( directory_record != NULL )
-	{
-		libfsapfs_directory_record_free(
-		 &directory_record,
-		 NULL );
-	}
-	if( inode != NULL )
-	{
-		libfsapfs_inode_free(
-		 &inode,
-		 NULL );
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_volume->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
 }
 
 /* Retrieves the file entry for an UTF-16 encoded path
@@ -3302,11 +3166,9 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
-	libfsapfs_directory_record_t *directory_record = NULL;
-	libfsapfs_inode_t *inode                       = NULL;
-	libfsapfs_internal_volume_t *internal_volume   = NULL;
-	static char *function                          = "libfsapfs_volume_get_file_entry_by_utf16_path";
-	int result                                     = 0;
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_file_entry_by_utf16_path";
+	int result                                   = 1;
 
 	if( volume == NULL )
 	{
@@ -3321,28 +3183,6 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 	}
 	internal_volume = (libfsapfs_internal_volume_t *) volume;
 
-	if( file_entry == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid file entry.",
-		 function );
-
-		return( -1 );
-	}
-	if( *file_entry != NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
-		 "%s: invalid file entry value already set.",
-		 function );
-
-		return( -1 );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -3358,9 +3198,9 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 		return( -1 );
 	}
 #endif
-	if( internal_volume->file_system_btree == NULL )
+	if( internal_volume->file_system == NULL )
 	{
-		if( libfsapfs_internal_volume_get_file_system_btree(
+		if( libfsapfs_internal_volume_get_file_system(
 		     internal_volume,
 		     error ) != 1 )
 		{
@@ -3368,56 +3208,33 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file system B-tree.",
+			 "%s: unable to determine file system.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	result = libfsapfs_file_system_btree_get_inode_by_utf16_path(
-	          internal_volume->file_system_btree,
-	          internal_volume->file_io_handle,
-	          2,
-	          utf16_string,
-	          utf16_string_length,
-	          &inode,
-	          &directory_record,
-	          error );
-
-	if( result == -1 )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve inode from file system B-tree.",
-		 function );
+		result = libfsapfs_file_system_get_file_entry_by_utf16_path(
+		          internal_volume->file_system,
+		          internal_volume->file_io_handle,
+		          utf16_string,
+		          utf16_string_length,
+		          file_entry,
+		          error );
 
-		goto on_error;
-	}
-	else if( result != 0 )
-	{
-		if( libfsapfs_file_entry_initialize(
-		     file_entry,
-		     internal_volume->io_handle,
-		     internal_volume->file_io_handle,
-		     internal_volume->encryption_context,
-		     internal_volume->file_system_btree,
-		     inode,
-		     directory_record,
-		     error ) != 1 )
+		if( result == -1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create file entry.",
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file entry from file system by UTF-16 path.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
-		inode            = NULL;
-		directory_record = NULL;
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3435,32 +3252,6 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 	}
 #endif
 	return( result );
-
-on_error:
-	if( *file_entry != NULL )
-	{
-		libfsapfs_file_entry_free(
-		 file_entry,
-		 NULL );
-	}
-	if( directory_record != NULL )
-	{
-		libfsapfs_directory_record_free(
-		 &directory_record,
-		 NULL );
-	}
-	if( inode != NULL )
-	{
-		libfsapfs_inode_free(
-		 &inode,
-		 NULL );
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_volume->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
 }
 
 /* Retrieves the number of snapshots
