@@ -1154,6 +1154,7 @@ int libfsapfs_extended_attribute_get_size(
 	return( 1 );
 }
 
+
 /* Retrieves the number of extents
  * Returns 1 if successful or -1 on error
  */
@@ -1204,6 +1205,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 		return( -1 );
 	}
 #endif
+
 	if( libcdata_array_get_number_of_entries(
 	     internal_extended_attribute->attribute_values->value_data_file_extents,
 	     number_of_extents,
@@ -1351,6 +1353,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		libcerror_error_set(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
 		 "%s: unable to retrieve file extent: %d.",
 		 function,
