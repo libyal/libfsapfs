@@ -118,7 +118,7 @@ PyMethodDef pyfsapfs_volume_object_methods[] = {
 	{ "get_root_directory",
 	  (PyCFunction) pyfsapfs_volume_get_root_directory,
 	  METH_NOARGS,
-	  "get_root_directory() -> Object\n"
+	  "get_root_directory() -> Object or None\n"
 	  "\n"
 	  "Retrieves the root directory file entry." },
 

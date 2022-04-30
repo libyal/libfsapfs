@@ -3115,10 +3115,12 @@ int info_handle_file_system_hierarchy_fprint(
 
 			goto on_error;
 		}
-		if( libfsapfs_volume_get_root_directory(
-		     volume,
-		     &file_entry,
-		     error ) != 1 )
+		result = libfsapfs_volume_get_root_directory(
+		          volume,
+		          &file_entry,
+		          error );
+
+		if( result == -1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -3130,20 +3132,23 @@ int info_handle_file_system_hierarchy_fprint(
 
 			goto on_error;
 		}
-		if( info_handle_file_system_hierarchy_fprint_file_entry(
-		     info_handle,
-		     file_entry,
-		     uuid_string,
-		     error ) != 1 )
+		else if( result != 0 )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print root directory file entry information.",
-			 function );
+			if( info_handle_file_system_hierarchy_fprint_file_entry(
+			     info_handle,
+			     file_entry,
+			     uuid_string,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+				 "%s: unable to print root directory file entry information.",
+				 function );
 
-			goto on_error;
+				goto on_error;
+			}
 		}
 		if( libfsapfs_file_entry_free(
 		     &file_entry,

@@ -75,6 +75,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_extent_reference_tree.c libfsapfs_extent_reference_tree.h \
 	libfsapfs_file_entry.c libfsapfs_file_entry.h \
 	libfsapfs_file_extent.c libfsapfs_file_extent.h \
+	libfsapfs_file_system.c libfsapfs_file_system.h \
 	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
 	libfsapfs_file_system_data_handle.c libfsapfs_file_system_data_handle.h \
 	libfsapfs_fusion_middle_tree.c libfsapfs_fusion_middle_tree.h \

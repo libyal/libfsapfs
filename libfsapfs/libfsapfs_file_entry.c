@@ -4718,7 +4718,7 @@ int libfsapfs_internal_file_entry_get_data_size(
 	if( internal_file_entry->compressed_data_attribute_values != NULL )
 	{
 		if( libfsapfs_attributes_get_data_stream(
-		     internal_file_entry->symbolic_link_attribute_values,
+		     internal_file_entry->compressed_data_attribute_values,
 		     internal_file_entry->io_handle,
 		     internal_file_entry->file_io_handle,
 		     internal_file_entry->encryption_context,

@@ -381,7 +381,7 @@ on_error:
 }
 
 /* Retrieves the file system B-tree root node
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, 0 if not available or -1 on error
  */
 int libfsapfs_file_system_btree_get_root_node(
      libfsapfs_file_system_btree_t *file_system_btree,
@@ -543,6 +543,23 @@ int libfsapfs_file_system_btree_get_root_node(
 			 function );
 
 			goto on_error;
+		}
+		if( node->object_type == 0x00000000UL )
+		{
+			if( libfsapfs_btree_node_free(
+			     &node,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+				 "%s: unable to free node.",
+				 function );
+
+				goto on_error;
+			}
+			return( 0 );
 		}
 		if( ( node->object_type != 0x00000002UL )
 		 && ( node->object_type != 0x10000002UL ) )
@@ -1254,12 +1271,14 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 
 		return( -1 );
 	}
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -1269,6 +1288,10 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 		 function );
 
 		return( -1 );
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	do
 	{
@@ -3372,12 +3395,14 @@ int libfsapfs_file_system_btree_get_directory_entries(
 		 parent_identifier );
 	}
 #endif
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &root_node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &root_node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -3387,6 +3412,10 @@ int libfsapfs_file_system_btree_get_directory_entries(
 		 function );
 
 		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	if( root_node == NULL )
 	{
@@ -4175,12 +4204,14 @@ int libfsapfs_file_system_btree_get_attributes(
 		 identifier );
 	}
 #endif
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &root_node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &root_node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -4190,6 +4221,10 @@ int libfsapfs_file_system_btree_get_attributes(
 		 function );
 
 		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	if( root_node == NULL )
 	{
@@ -4970,12 +5005,14 @@ int libfsapfs_file_system_btree_get_file_extents(
 		 identifier );
 	}
 #endif
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &root_node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &root_node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -4985,6 +5022,10 @@ int libfsapfs_file_system_btree_get_file_extents(
 		 function );
 
 		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                root_node,
@@ -5351,12 +5392,14 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 
 		return( -1 );
 	}
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &root_node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &root_node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -5366,6 +5409,10 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 		 function );
 
 		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                root_node,
@@ -5665,12 +5712,14 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 
 		return( -1 );
 	}
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &root_node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &root_node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -5680,6 +5729,10 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 		 function );
 
 		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                root_node,
@@ -6050,12 +6103,14 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 
 		return( -1 );
 	}
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &root_node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &root_node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -6065,6 +6120,10 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 		 function );
 
 		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                root_node,
@@ -6364,12 +6423,14 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 
 		return( -1 );
 	}
-	if( libfsapfs_file_system_btree_get_root_node(
-	     file_system_btree,
-	     file_io_handle,
-	     file_system_btree->root_node_block_number,
-	     &root_node,
-	     error ) != 1 )
+	result = libfsapfs_file_system_btree_get_root_node(
+	          file_system_btree,
+	          file_io_handle,
+	          file_system_btree->root_node_block_number,
+	          &root_node,
+	          error );
+
+	if( result == -1 )
 	{
 		libcerror_error_set(
 		 error,
@@ -6379,6 +6440,10 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 		 function );
 
 		goto on_error;
+	}
+	else if( result == 0 )
+	{
+		return( 0 );
 	}
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                root_node,

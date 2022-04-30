@@ -323,6 +323,9 @@ See section: <<object_types,Object types>>
 See section: <<object_subtypes,Object subtypes>>
 |===
 
+[NOTE]
+Object type can be 0x00000000 if the B-tree is empty.
+
 ==== B-tree node object
 
 [cols="1,1,1,5",options="header"]

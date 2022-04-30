@@ -156,6 +156,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_extent_reference_tree
 /tests/fsapfs_test_file_entry
 /tests/fsapfs_test_file_extent
+/tests/fsapfs_test_file_system
 /tests/fsapfs_test_file_system_btree
 /tests/fsapfs_test_file_system_data_handle
 /tests/fsapfs_test_fusion_middle_tree

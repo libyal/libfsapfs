@@ -2968,7 +2968,7 @@ on_error:
 }
 
 /* Retrieves the root directory file entry
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, or 0 if not available or -1 on error
  */
 int libfsapfs_volume_get_root_directory(
      libfsapfs_volume_t *volume,
@@ -3043,47 +3043,52 @@ int libfsapfs_volume_get_root_directory(
 			 "%s: unable to determine file system B-tree.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	result = libfsapfs_file_system_btree_get_inode_by_identifier(
-	          internal_volume->file_system_btree,
-	          internal_volume->file_io_handle,
-	          2,
-	          &inode,
-	          error );
-
-	if( result != 1 )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve root directory inode from file system B-tree.",
-		 function );
+/* TODO refactor to libfsapfs_file_system_get_file_entry_by_identifier */
+		result = libfsapfs_file_system_btree_get_inode_by_identifier(
+		          internal_volume->file_system_btree,
+		          internal_volume->file_io_handle,
+		          2,
+		          &inode,
+		          error );
 
-		goto on_error;
-	}
-/* TODO return 0 if no root directory inode */
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve root directory inode from file system B-tree.",
+			 function );
 
-	if( libfsapfs_file_entry_initialize(
-	     file_entry,
-	     internal_volume->io_handle,
-	     internal_volume->file_io_handle,
-	     internal_volume->encryption_context,
-	     internal_volume->file_system_btree,
-	     inode,
-	     NULL,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to create file entry.",
-		 function );
+			result = -1;
+		}
+		else if( result != 0 )
+		{
+			if( libfsapfs_file_entry_initialize(
+			     file_entry,
+			     internal_volume->io_handle,
+			     internal_volume->file_io_handle,
+			     internal_volume->encryption_context,
+			     internal_volume->file_system_btree,
+			     inode,
+			     NULL,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+				 "%s: unable to create file entry.",
+				 function );
 
-		goto on_error;
+				result = -1;
+			}
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -3100,7 +3105,11 @@ int libfsapfs_volume_get_root_directory(
 		return( -1 );
 	}
 #endif
-	return( 1 );
+	if( result == -1 )
+	{
+		goto on_error;
+	}
+	return( result );
 
 on_error:
 	if( inode != NULL )
@@ -3109,11 +3118,6 @@ on_error:
 		 &inode,
 		 NULL );
 	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_volume->read_write_lock,
-	 NULL );
-#endif
 	return( -1 );
 }
 

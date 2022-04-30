@@ -77,6 +77,7 @@ check_PROGRAMS = \
 	fsapfs_test_extended_attribute \
 	fsapfs_test_extent_reference_tree \
 	fsapfs_test_file_extent \
+	fsapfs_test_file_system \
 	fsapfs_test_file_system_btree \
 	fsapfs_test_file_system_data_handle \
 	fsapfs_test_fusion_middle_tree \
@@ -521,6 +522,18 @@ fsapfs_test_file_extent_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_file_extent_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_file_system_SOURCES = \
+	fsapfs_test_file_system.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_file_system_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

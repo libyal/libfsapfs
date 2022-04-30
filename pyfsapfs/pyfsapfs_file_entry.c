@@ -3025,7 +3025,7 @@ PyObject *pyfsapfs_file_entry_get_size(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: failed to retrieve .",
+		 "%s: failed to retrieve size.",
 		 function );
 
 		libcerror_error_free(

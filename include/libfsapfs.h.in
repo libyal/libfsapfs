@@ -497,7 +497,7 @@ int libfsapfs_volume_get_file_entry_by_identifier(
      libfsapfs_error_t **error );
 
 /* Retrieves the root directory file entry
- * Returns 1 if successful or -1 on error
+ * Returns 1 if successful, or 0 if not available or -1 on error
  */
 LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_root_directory(

@@ -749,7 +749,8 @@ int libfsapfs_btree_node_read_object_data(
 
 	object_type = btree_node->object_type & 0x0ffffffUL;
 
-	if( ( object_type != 0x00000002UL )
+	if( ( object_type != 0x00000000UL )
+	 && ( object_type != 0x00000002UL )
 	 && ( object_type != 0x00000003UL ) )
 	{
 		libcerror_error_set(
