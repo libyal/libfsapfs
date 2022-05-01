@@ -440,7 +440,7 @@ PyObject *pyfsapfs_extended_attribute_get_identifier(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve identfier.",
 		 function );
 
 		libcerror_error_free(
@@ -494,7 +494,7 @@ PyObject *pyfsapfs_extended_attribute_get_name(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to determine size of  as UTF-8 string.",
+		 "%s: unable to determine size of name as UTF-8 string.",
 		 function );
 
 		libcerror_error_free(
@@ -537,7 +537,7 @@ PyObject *pyfsapfs_extended_attribute_get_name(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve  as UTF-8 string.",
+		 "%s: unable to retrieve name as UTF-8 string.",
 		 function );
 
 		libcerror_error_free(
@@ -1216,7 +1216,7 @@ PyObject *pyfsapfs_extended_attribute_get_number_of_extents(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve number of extents.",
 		 function );
 
 		libcerror_error_free(

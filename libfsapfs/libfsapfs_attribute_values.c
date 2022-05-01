@@ -348,7 +348,6 @@ int libfsapfs_attribute_values_read_value_data(
 	static char *function                = "libfsapfs_attribute_values_read_value_data";
 	size_t data_offset                   = 0;
 	uint16_t attribute_values_data_size  = 0;
-	uint16_t attribute_values_flags      = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit                 = 0;
@@ -413,7 +412,7 @@ int libfsapfs_attribute_values_read_value_data(
 #endif
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsapfs_file_system_btree_value_extended_attribute_t *) data )->flags,
-	 attribute_values_flags );
+	 attribute_values->flags );
 
 	byte_stream_copy_to_uint16_little_endian(
 	 ( (fsapfs_file_system_btree_value_extended_attribute_t *) data )->data_size,
@@ -425,9 +424,9 @@ int libfsapfs_attribute_values_read_value_data(
 		libcnotify_printf(
 		 "%s: flags\t\t\t: 0x%04" PRIx16 "\n",
 		 function,
-		 attribute_values_flags );
+		 attribute_values->flags );
 		libfsapfs_debug_print_extended_attribute_flags(
-		 attribute_values_flags );
+		 attribute_values->flags );
 		libcnotify_printf(
 		 "\n" );
 
@@ -469,7 +468,7 @@ int libfsapfs_attribute_values_read_value_data(
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 	}
 #endif
-	if( ( attribute_values_flags & 0x0001 ) != 0 )
+	if( ( attribute_values->flags & 0x0001 ) != 0 )
 	{
 		if( (size_t) attribute_values_data_size != sizeof( fsapfs_file_system_extended_attribute_data_stream_t ) )
 		{
@@ -540,7 +539,7 @@ int libfsapfs_attribute_values_read_value_data(
 		}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 	}
-	else if( ( ( attribute_values_flags & 0x0002 ) != 0 )
+	else if( ( ( attribute_values->flags & 0x0002 ) != 0 )
 	      && ( attribute_values_data_size > 0 ) )
 	{
 		attribute_values->value_data = (uint8_t *) memory_allocate(
@@ -841,3 +840,99 @@ int libfsapfs_attribute_values_get_utf16_name(
 	return( 1 );
 }
 
+/* Retrieves the number of extents
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_attribute_values_get_number_of_extents(
+     libfsapfs_attribute_values_t *attribute_values,
+     int *number_of_extents,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_attribute_values_get_number_of_extents";
+
+	if( attribute_values == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid attribute values.",
+		 function );
+
+		return( -1 );
+	}
+	if( attribute_values->value_data_file_extents == NULL )
+	{
+		if( number_of_extents == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+			 "%s: invalid number of extents.",
+			 function );
+
+			return( -1 );
+		}
+		*number_of_extents = 0;
+	}
+	else
+	{
+		if( libcdata_array_get_number_of_entries(
+		     attribute_values->value_data_file_extents,
+		     number_of_extents,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from array.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	return( 1 );
+}
+
+/* Retrieves a specific extent
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_attribute_values_get_extent_by_index(
+     libfsapfs_attribute_values_t *attribute_values,
+     int extent_index,
+     libfsapfs_file_extent_t **file_extent,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_attribute_values_get_extent_by_index";
+
+	if( attribute_values == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid attribute values.",
+		 function );
+
+		return( -1 );
+	}
+	if( libcdata_array_get_entry_by_index(
+	     attribute_values->value_data_file_extents,
+	     extent_index,
+	     (intptr_t **) file_extent,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to retrieve file extent: %d.",
+		 function,
+		 extent_index );
+
+		return( -1 );
+	}
+	return( 1 );
+}

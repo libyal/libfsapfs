@@ -1,4 +1,5 @@
 TODO
+* fill attribute value_data_file_extents
 * complete snapshot support
 * extended attribute extent support
   * extent support, add to Python binding

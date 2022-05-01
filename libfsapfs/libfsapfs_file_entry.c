@@ -4566,6 +4566,7 @@ int libfsapfs_file_entry_get_offset(
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_offset";
+	int result                                           = 1;
 
 	if( file_entry == NULL )
 	{
@@ -4608,22 +4609,25 @@ int libfsapfs_file_entry_get_offset(
 			 "%s: unable to determine data stream.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	if( libfdata_stream_get_offset(
-	     internal_file_entry->data_stream,
-	     offset,
-	     error ) != 1 )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve offset from data stream.",
-		 function );
+		if( libfdata_stream_get_offset(
+		     internal_file_entry->data_stream,
+		     offset,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve offset from data stream.",
+			 function );
 
-		goto on_error;
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -4640,15 +4644,7 @@ int libfsapfs_file_entry_get_offset(
 		return( -1 );
 	}
 #endif
-	return( 1 );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_file_entry->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
+	return( result );
 }
 
 /* Determines the data size
@@ -4867,6 +4863,7 @@ int libfsapfs_file_entry_get_size(
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_size";
+	int result                                           = 1;
 
 	if( file_entry == NULL )
 	{
@@ -4920,11 +4917,13 @@ int libfsapfs_file_entry_get_size(
 			 "%s: unable to determine data size.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	*size = internal_file_entry->data_size;
-
+	if( result != -1 )
+	{
+		*size = internal_file_entry->data_size;
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_file_entry->read_write_lock,
@@ -4940,15 +4939,7 @@ int libfsapfs_file_entry_get_size(
 		return( -1 );
 	}
 #endif
-	return( 1 );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_file_entry->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
+	return( result );
 }
 
 /* Retrieves the number of extents
@@ -4961,6 +4952,7 @@ int libfsapfs_file_entry_get_number_of_extents(
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_number_of_extents";
+	int result                                           = 1;
 
 	if( file_entry == NULL )
 	{
@@ -5003,22 +4995,25 @@ int libfsapfs_file_entry_get_number_of_extents(
 			 "%s: unable to determine file extents.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	if( libcdata_array_get_number_of_entries(
-	     internal_file_entry->file_extents,
-	     number_of_extents,
-	     error ) != 1 )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from array.",
-		 function );
+		if( libcdata_array_get_number_of_entries(
+		     internal_file_entry->file_extents,
+		     number_of_extents,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries from array.",
+			 function );
 
-		goto on_error;
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
@@ -5035,15 +5030,7 @@ int libfsapfs_file_entry_get_number_of_extents(
 		return( -1 );
 	}
 #endif
-	return( 1 );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_file_entry->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
+	return( result );
 }
 
 /* Retrieves a specific extent
@@ -5060,6 +5047,7 @@ int libfsapfs_file_entry_get_extent_by_index(
 	libfsapfs_file_extent_t *file_extent                 = NULL;
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
 	static char *function                                = "libfsapfs_file_entry_get_extent_by_index";
+	int result                                           = 1;
 
 	if( file_entry == NULL )
 	{
@@ -5146,41 +5134,46 @@ int libfsapfs_file_entry_get_extent_by_index(
 			 "%s: unable to determine file extents.",
 			 function );
 
-			goto on_error;
+			result = -1;
 		}
 	}
-	if( libcdata_array_get_entry_by_index(
-	     internal_file_entry->file_extents,
-	     extent_index,
-	     (intptr_t **) &file_extent,
-	     error ) != 1 )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve file extent: %d.",
-		 function,
-		 extent_index );
+		if( libcdata_array_get_entry_by_index(
+		     internal_file_entry->file_extents,
+		     extent_index,
+		     (intptr_t **) &file_extent,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file extent: %d.",
+			 function,
+			 extent_index );
 
-		goto on_error;
+			result = -1;
+		}
+		else if( file_extent == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing file extent: %d.",
+			 function,
+			 extent_index );
+
+			result = -1;
+		}
+		else
+		{
+			*extent_offset = file_extent->physical_block_number * internal_file_entry->io_handle->block_size;
+			*extent_size   = file_extent->data_size;
+			*extent_flags  = 0;
+		}
 	}
-	if( file_extent == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: missing file extent: %d.",
-		 function,
-		 extent_index );
-
-		goto on_error;
-	}
-	*extent_offset = file_extent->physical_block_number * internal_file_entry->io_handle->block_size;
-	*extent_size   = file_extent->data_size;
-	*extent_flags  = 0;
-
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_release_for_write(
 	     internal_file_entry->read_write_lock,
@@ -5196,14 +5189,6 @@ int libfsapfs_file_entry_get_extent_by_index(
 		return( -1 );
 	}
 #endif
-	return( 1 );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_write(
-	 internal_file_entry->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
+	return( result );
 }
 

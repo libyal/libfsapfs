@@ -1164,6 +1164,7 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 {
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
 	static char *function                                                = "libfsapfs_extended_attribute_get_number_of_extents";
+	int result                                                           = 1;
 
 	if( extended_attribute == NULL )
 	{
@@ -1178,19 +1179,8 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 	}
 	internal_extended_attribute = (libfsapfs_internal_extended_attribute_t *) extended_attribute;
 
-	if( internal_extended_attribute->attribute_values == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal extended attribute - missing attribute values.",
-		 function );
-
-		return( -1 );
-	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_read(
+	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1198,28 +1188,49 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for reading.",
+		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
 #endif
-	if( libcdata_array_get_number_of_entries(
-	     internal_extended_attribute->attribute_values->value_data_file_extents,
-	     number_of_extents,
-	     error ) != 1 )
+	if( internal_extended_attribute->data_stream == NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve number of entries from array.",
-		 function );
+		/* Determining the data stream will initialize the extents array
+		 */
+		if( libfsapfs_internal_extended_attribute_get_data_stream(
+		     internal_extended_attribute,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine data stream.",
+			 function );
 
-		goto on_error;
+			result = -1;
+		}
+	}
+	if( result != -1 )
+	{
+		if( libfsapfs_attribute_values_get_number_of_extents(
+		     internal_extended_attribute->attribute_values,
+		     number_of_extents,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve number of entries.",
+			 function );
+
+			result = -1;
+		}
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_read(
+	if( libcthreads_read_write_lock_release_for_write(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1227,21 +1238,13 @@ int libfsapfs_extended_attribute_get_number_of_extents(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for reading.",
+		 "%s: unable to release read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
 #endif
-	return( 1 );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_read(
-	 internal_extended_attribute->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
+	return( result );
 }
 
 /* Retrieves a specific extent
@@ -1258,6 +1261,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 	libfsapfs_file_extent_t *file_extent                                 = NULL;
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
 	static char *function                                                = "libfsapfs_extended_attribute_get_extent_by_index";
+	int result                                                           = 1;
 
 	if( extended_attribute == NULL )
 	{
@@ -1279,17 +1283,6 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid internal extended attribute - missing IO handle.",
-		 function );
-
-		return( -1 );
-	}
-	if( internal_extended_attribute->attribute_values == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid internal extended attribute - missing attribute values.",
 		 function );
 
 		return( -1 );
@@ -1328,7 +1321,7 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		return( -1 );
 	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_read(
+	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1336,46 +1329,69 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for reading.",
+		 "%s: unable to grab read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
 #endif
-	if( libcdata_array_get_entry_by_index(
-	     internal_extended_attribute->attribute_values->value_data_file_extents,
-	     extent_index,
-	     (intptr_t **) &file_extent,
-	     error ) != 1 )
+	if( internal_extended_attribute->data_stream == NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve file extent: %d.",
-		 function,
-		 extent_index );
+		/* Determining the data stream will initialize the extents array
+		 */
+		if( libfsapfs_internal_extended_attribute_get_data_stream(
+		     internal_extended_attribute,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine data stream.",
+			 function );
 
-		goto on_error;
+			result = -1;
+		}
 	}
-	if( file_extent == NULL )
+	if( result != -1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: missing file extent: %d.",
-		 function,
-		 extent_index );
+		if( libfsapfs_attribute_values_get_extent_by_index(
+		     internal_extended_attribute->attribute_values,
+		     extent_index,
+		     &file_extent,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve file extent: %d.",
+			 function,
+			 extent_index );
 
-		goto on_error;
+			result = -1;
+		}
+		else if( file_extent == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+			 "%s: missing file extent: %d.",
+			 function,
+			 extent_index );
+
+			result = -1;
+		}
+		else
+		{
+			*extent_offset = file_extent->physical_block_number * internal_extended_attribute->io_handle->block_size;
+			*extent_size   = file_extent->data_size;
+			*extent_flags  = 0;
+		}
 	}
-	*extent_offset = file_extent->physical_block_number * internal_extended_attribute->io_handle->block_size;
-	*extent_size   = file_extent->data_size;
-	*extent_flags  = 0;
-
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_read(
+	if( libcthreads_read_write_lock_release_for_write(
 	     internal_extended_attribute->read_write_lock,
 	     error ) != 1 )
 	{
@@ -1383,20 +1399,12 @@ int libfsapfs_extended_attribute_get_extent_by_index(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for reading.",
+		 "%s: unable to release read/write lock for writing.",
 		 function );
 
 		return( -1 );
 	}
 #endif
-	return( 1 );
-
-on_error:
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	libcthreads_read_write_lock_release_for_read(
-	 internal_extended_attribute->read_write_lock,
-	 NULL );
-#endif
-	return( -1 );
+	return( result );
 }
 

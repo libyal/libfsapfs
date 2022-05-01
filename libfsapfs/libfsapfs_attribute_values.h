@@ -25,6 +25,7 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_file_extent.h"
 #include "libfsapfs_libcdata.h"
 #include "libfsapfs_libcerror.h"
 
@@ -36,6 +37,10 @@ typedef struct libfsapfs_attribute_values libfsapfs_attribute_values_t;
 
 struct libfsapfs_attribute_values
 {
+	/* The flags
+	 */
+	uint16_t flags;
+
 	/* The name
 	 */
 	uint8_t *name;
@@ -113,6 +118,17 @@ int libfsapfs_attribute_values_get_utf16_name(
      libfsapfs_attribute_values_t *attribute_values,
      uint16_t *utf16_string,
      size_t utf16_string_size,
+     libcerror_error_t **error );
+
+int libfsapfs_attribute_values_get_number_of_extents(
+     libfsapfs_attribute_values_t *attribute_values,
+     int *number_of_extents,
+     libcerror_error_t **error );
+
+int libfsapfs_attribute_values_get_extent_by_index(
+     libfsapfs_attribute_values_t *attribute_values,
+     int extent_index,
+     libfsapfs_file_extent_t **file_extent,
      libcerror_error_t **error );
 
 #if defined( __cplusplus )

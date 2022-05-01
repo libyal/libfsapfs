@@ -1377,7 +1377,7 @@ PyObject *pyfsapfs_file_entry_get_owner_identifier(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve owner identifier.",
 		 function );
 
 		libcerror_error_free(
@@ -1429,7 +1429,7 @@ PyObject *pyfsapfs_file_entry_get_group_identifier(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve group identifier.",
 		 function );
 
 		libcerror_error_free(
@@ -1481,7 +1481,7 @@ PyObject *pyfsapfs_file_entry_get_file_mode(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve file mode.",
 		 function );
 
 		libcerror_error_free(
@@ -1539,7 +1539,7 @@ PyObject *pyfsapfs_file_entry_get_name(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to determine size of  as UTF-8 string.",
+		 "%s: unable to determine size of name as UTF-8 string.",
 		 function );
 
 		libcerror_error_free(
@@ -1582,7 +1582,7 @@ PyObject *pyfsapfs_file_entry_get_name(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve  as UTF-8 string.",
+		 "%s: unable to retrieve name as UTF-8 string.",
 		 function );
 
 		libcerror_error_free(
@@ -1773,7 +1773,7 @@ PyObject *pyfsapfs_file_entry_get_number_of_extended_attributes(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve number of extended attributes.",
 		 function );
 
 		libcerror_error_free(
@@ -1828,7 +1828,7 @@ PyObject *pyfsapfs_file_entry_get_extended_attribute_by_index(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve : %d.",
+		 "%s: unable to retrieve extended attribute: %d.",
 		 function,
 		 extended_attribute_index );
 
@@ -2162,7 +2162,7 @@ PyObject *pyfsapfs_file_entry_get_number_of_sub_file_entries(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve number of sub file entries.",
 		 function );
 
 		libcerror_error_free(
@@ -2966,7 +2966,7 @@ PyObject *pyfsapfs_file_entry_get_offset(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve current offset.",
 		 function );
 
 		libcerror_error_free(
@@ -3077,7 +3077,7 @@ PyObject *pyfsapfs_file_entry_get_number_of_extents(
 		pyfsapfs_error_raise(
 		 error,
 		 PyExc_IOError,
-		 "%s: unable to retrieve .",
+		 "%s: unable to retrieve number of extents.",
 		 function );
 
 		libcerror_error_free(

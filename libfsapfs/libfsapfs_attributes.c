@@ -138,25 +138,7 @@ int libfsapfs_attributes_get_data_stream(
 
 		return( -1 );
 	}
-	if( attribute_values->value_data != NULL )
-	{
-		if( libfsapfs_data_stream_initialize_from_data(
-		     data_stream,
-		     attribute_values->value_data,
-		     attribute_values->value_data_size,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-			 "%s: unable to create value data stream from data.",
-			 function );
-
-			return( -1 );
-		}
-	}
-	else
+	if( ( attribute_values->flags & 0x0001 ) != 0 )
 	{
 		if( attribute_values->value_data_file_extents == NULL )
 		{
@@ -190,6 +172,24 @@ int libfsapfs_attributes_get_data_stream(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
 			 "%s: unable to create value data stream from file extents.",
+			 function );
+
+			return( -1 );
+		}
+	}
+	else if( ( attribute_values->flags & 0x0002 ) != 0 )
+	{
+		if( libfsapfs_data_stream_initialize_from_data(
+		     data_stream,
+		     attribute_values->value_data,
+		     attribute_values->value_data_size,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to create value data stream from data.",
 			 function );
 
 			return( -1 );
