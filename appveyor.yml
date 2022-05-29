@@ -86,49 +86,61 @@ environment:
     LDFLAGS: "-L/usr/local/lib"
   - TARGET: cygwin-gcc
     BUILD_ENVIRONMENT: cygwin
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: ""
   - TARGET: cygwin-gcc-no-optimization
     BUILD_ENVIRONMENT: cygwin
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-shared=no"
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
     LDFLAGS: "--coverage"
   - TARGET: cygwin-gcc-python
     BUILD_ENVIRONMENT: cygwin
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python"
   - TARGET: cygwin-gcc-python2
     BUILD_ENVIRONMENT: cygwin
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python2"
     PYTHON_VERSION: 2
   - TARGET: cygwin-gcc-python3
     BUILD_ENVIRONMENT: cygwin
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python3"
     PYTHON_VERSION: 3
   - TARGET: cygwin-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-static-executables"
   - TARGET: cygwin64-gcc
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: ""
   - TARGET: cygwin64-gcc-no-optimization
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-shared=no"
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
     LDFLAGS: "--coverage"
   - TARGET: cygwin64-gcc-python
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python"
   - TARGET: cygwin64-gcc-python2
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python2"
     PYTHON_VERSION: 2
   - TARGET: cygwin64-gcc-python3
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python3"
     PYTHON_VERSION: 3
   - TARGET: cygwin64-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-static-executables"
   - TARGET: mingw-gcc
     BUILD_ENVIRONMENT: mingw

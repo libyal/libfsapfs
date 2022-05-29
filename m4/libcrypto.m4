@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20210623
+dnl Version: 20220529
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -434,15 +434,41 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
 
   AC_CHECK_LIB(
     crypto,
-    EVP_CIPHER_CTX_set_padding,
+    EVP_CipherInit_ex2,
     [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_cipher=no])
+    [ac_cv_libcrypto_dummy=no])
 
-  AC_CHECK_LIB(
-    crypto,
-    EVP_CipherInit_ex,
-    [ac_cv_libcrypto_dummy=yes],
-    [ac_cv_libcrypto_evp_cipher=no])
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_CipherInit_ex2" = xyes],
+    [dnl Check for OpenSSL 3 API functions
+    AC_CHECK_LIB(
+      crypto,
+      EVP_CIPHER_CTX_reset,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_CIPHER_fetch,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_CIPHER_free,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    ],
+    [AC_CHECK_LIB(
+      crypto,
+      EVP_CipherInit_ex,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    AC_CHECK_LIB(
+      crypto,
+      EVP_CIPHER_CTX_set_padding,
+      [ac_cv_libcrypto_dummy=yes],
+      [ac_cv_libcrypto_evp_cipher=no])
+    ])
+
   AC_CHECK_LIB(
     crypto,
     EVP_CipherUpdate,
@@ -475,6 +501,14 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
       [HAVE_EVP_CIPHER_CTX_CLEANUP],
       [1],
       [Define to 1 if you have the `EVP_CIPHER_CTX_cleanup' function".])
+    ])
+
+  AS_IF(
+    [test "x$ac_cv_lib_crypto_EVP_CipherInit_ex2" = xyes],
+    [AC_DEFINE(
+      [HAVE_EVP_CIPHERINIT_EX2],
+      [1],
+      [Define to 1 if you have the `EVP_CipherInit_ex2' function".])
     ])
   ])
 
