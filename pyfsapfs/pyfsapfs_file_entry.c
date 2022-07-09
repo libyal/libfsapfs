@@ -125,6 +125,13 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	  "\n"
 	  "Returns the added date and time as a 64-bit integer containing an APFS timestamp value." },
 
+	{ "get_number_of_links",
+	  (PyCFunction) pyfsapfs_file_entry_get_number_of_links,
+	  METH_NOARGS,
+	  "get_number_of_links() -> Integer\n"
+	  "\n"
+	  "Retrieves the number of (hard) links." },
+
 	{ "get_owner_identifier",
 	  (PyCFunction) pyfsapfs_file_entry_get_owner_identifier,
 	  METH_NOARGS,
@@ -332,6 +339,12 @@ PyGetSetDef pyfsapfs_file_entry_object_get_set_definitions[] = {
 	  (getter) pyfsapfs_file_entry_get_added_time,
 	  (setter) 0,
 	  "The added date and time.",
+	  NULL },
+
+	{ "number_of_links",
+	  (getter) pyfsapfs_file_entry_get_number_of_links,
+	  (setter) 0,
+	  "The number of (hard) links.",
 	  NULL },
 
 	{ "owner_identifier",
@@ -1348,6 +1361,58 @@ PyObject *pyfsapfs_file_entry_get_added_time_as_integer(
 	}
 	integer_object = pyfsapfs_integer_signed_new_from_64bit(
 	                  posix_time );
+
+	return( integer_object );
+}
+
+/* Retrieves the number of (hard) links
+ * Returns a Python object if successful or NULL on error
+ */
+PyObject *pyfsapfs_file_entry_get_number_of_links(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments PYFSAPFS_ATTRIBUTE_UNUSED )
+{
+	PyObject *integer_object = NULL;
+	libcerror_error_t *error = NULL;
+	static char *function    = "pyfsapfs_file_entry_get_number_of_links";
+	uint32_t number_of_links = 0;
+	int result               = 0;
+
+	PYFSAPFS_UNREFERENCED_PARAMETER( arguments )
+
+	if( pyfsapfs_file_entry == NULL )
+	{
+		PyErr_Format(
+		 PyExc_ValueError,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( NULL );
+	}
+	Py_BEGIN_ALLOW_THREADS
+
+	result = libfsapfs_file_entry_get_number_of_links(
+	          pyfsapfs_file_entry->file_entry,
+	          &number_of_links,
+	          &error );
+
+	Py_END_ALLOW_THREADS
+
+	if( result != 1 )
+	{
+		pyfsapfs_error_raise(
+		 error,
+		 PyExc_IOError,
+		 "%s: unable to retrieve number of (hard) links.",
+		 function );
+
+		libcerror_error_free(
+		 &error );
+
+		return( NULL );
+	}
+	integer_object = PyLong_FromUnsignedLong(
+	                  (unsigned long) number_of_links );
 
 	return( integer_object );
 }

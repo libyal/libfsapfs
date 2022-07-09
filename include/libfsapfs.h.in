@@ -738,6 +738,16 @@ int libfsapfs_file_entry_get_file_mode(
      uint16_t *file_mode,
      libfsapfs_error_t **error );
 
+/* Retrieves the number of (hard) links (or children of a directory)
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_links(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *number_of_links,
+     libfsapfs_error_t **error );
+
 /* Retrieves the size of the UTF-8 encoded name
  * The returned size includes the end of string character
  * Returns 1 if successful or -1 on error

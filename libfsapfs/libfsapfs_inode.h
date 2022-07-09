@@ -75,6 +75,10 @@ struct libfsapfs_inode
 	 */
 	uint16_t file_mode;
 
+	/* Number of (hard) links
+	 */
+	uint32_t number_of_links;
+
 	/* The name size
 	 */
 	uint16_t name_size;
@@ -165,6 +169,11 @@ int libfsapfs_inode_get_device_number(
 int libfsapfs_inode_get_file_mode(
      libfsapfs_inode_t *inode,
      uint16_t *file_mode,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_number_of_links(
+     libfsapfs_inode_t *inode,
+     uint32_t *number_of_links,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_utf8_name_size(

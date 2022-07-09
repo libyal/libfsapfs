@@ -211,6 +211,12 @@ int libfsapfs_file_entry_get_file_mode(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_links(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *number_of_links,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_utf8_name_size(
      libfsapfs_file_entry_t *file_entry,
      size_t *utf8_string_size,

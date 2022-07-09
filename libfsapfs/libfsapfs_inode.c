@@ -333,6 +333,10 @@ int libfsapfs_inode_read_value_data(
 	 inode->flags );
 
 	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_file_system_btree_value_inode_t *) data )->number_of_links,
+	 inode->number_of_links );
+
+	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_file_system_btree_value_inode_t *) data )->owner_identifier,
 	 inode->owner_identifier );
 
@@ -442,14 +446,20 @@ int libfsapfs_inode_read_value_data(
 		libcnotify_printf(
 		 "\n" );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_file_system_btree_value_inode_t *) data )->number_of_children,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: number of children\t\t\t: %" PRIu32 "\n",
-		 function,
-		 value_32bit );
-
+		if( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_DIRECTORY )
+		{
+			libcnotify_printf(
+			 "%s: number of children\t\t\t: %" PRIu32 "\n",
+			 function,
+			 inode->number_of_links );
+		}
+		else
+		{
+			libcnotify_printf(
+			 "%s: number of links\t\t\t: %" PRIu32 "\n",
+			 function,
+			 inode->number_of_links );
+		}
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_file_system_btree_value_inode_t *) data )->unknown1,
 		 value_32bit );
@@ -1301,6 +1311,43 @@ int libfsapfs_inode_get_utf8_name_size(
 
 		return( -1 );
 	}
+	return( 1 );
+}
+
+/* Retrieves the number of (hard) links (or children of a directory)
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_inode_get_number_of_links(
+     libfsapfs_inode_t *inode,
+     uint32_t *number_of_links,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_number_of_links";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( number_of_links == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid number of links.",
+		 function );
+
+		return( -1 );
+	}
+	*number_of_links = inode->number_of_links;
+
 	return( 1 );
 }
 

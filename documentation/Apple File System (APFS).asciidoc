@@ -1661,7 +1661,7 @@ Signed integer that contains the number of nanoseconds since January 1, 1970 00:
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 56 | 8 | | Inode flags (internal_flags) +
 See section: <<inode_flags,Inode flags>>
-| 64 | 4 | | Number of children (nchildren) or number of links (nlink)
+| 64 | 4 | | Number of children (nchildren) or number of (hard) links (nlink)
 | 68 | 4 | | [yellow-background]*Unknown (default_protection_class)*
 | 72 | 4 | | [yellow-background]*Unknown (write_generation_counter)*
 | 76 | 4 | | BSD file entry flags (bsd_flags) +
@@ -1675,6 +1675,9 @@ See section: <<file_modes,File modes>>
 | 98 | ... | | Extended fields (xfields) +
 See section: <<extended_fields,Extended fields>>
 |===
+
+[NOTE]
+The MacOS stat command treats nchildren equivalent to nlink
 
 ===== [[inode_flags]]Inode flags
 

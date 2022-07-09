@@ -246,10 +246,10 @@ struct fsapfs_file_system_btree_value_inode
 	 */
 	uint8_t inode_flags[ 8 ];
 
-	/* The number of children
+	/* The number of (hard) links (or children of a directory)
 	 * Consists of 4 bytes
 	 */
-	uint8_t number_of_children[ 4 ];
+	uint8_t number_of_links[ 4 ];
 
 	/* Unknown
 	 * Consists of 4 bytes
