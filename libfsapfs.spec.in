@@ -81,7 +81,6 @@ rm -rf %{buildroot}
 %defattr(644,root,root,755)
 %license COPYING COPYING.LESSER
 %doc AUTHORS README
-%{_libdir}/*.la
 %{_libdir}/*.so
 %{_libdir}/pkgconfig/libfsapfs.pc
 %{_includedir}/*
@@ -92,7 +91,6 @@ rm -rf %{buildroot}
 %license COPYING COPYING.LESSER
 %doc AUTHORS README
 %{_libdir}/python3*/site-packages/*.a
-%{_libdir}/python3*/site-packages/*.la
 %{_libdir}/python3*/site-packages/*.so
 
 %files -n libfsapfs-tools

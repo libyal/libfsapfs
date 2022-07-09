@@ -25,6 +25,7 @@
 #include <types.h>
 
 #include "libfsapfs_debug.h"
+#include "libfsapfs_definitions.h"
 #include "libfsapfs_inode.h"
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_libcnotify.h"
@@ -647,7 +648,6 @@ int libfsapfs_inode_read_value_data(
 				case 10:
 				case 11:
 				case 13:
-				case 14:
 				case 15:
 					break;
 
@@ -761,6 +761,36 @@ int libfsapfs_inode_read_value_data(
 						 "%s: number of bytes read\t\t\t: %" PRIu64 "\n",
 						 function,
 						 value_64bit );
+
+						libcnotify_printf(
+						 "\n" );
+					}
+#endif /* defined( HAVE_DEBUG_OUTPUT ) */
+					break;
+
+				case 14:
+					if( value_data_size != 4 )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+						 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+						 "%s: invalid value data size value out of bounds.",
+						 function );
+
+						goto on_error;
+					}
+					byte_stream_copy_to_uint32_little_endian(
+					 value_data,
+					 inode->device_information );
+
+#if defined( HAVE_DEBUG_OUTPUT )
+					if( libcnotify_verbose != 0 )
+					{
+						libcnotify_printf(
+						 "%s: device information\t\t\t: 0x%08" PRIx32 "\n",
+						 function,
+						 inode->device_information );
 
 						libcnotify_printf(
 						 "\n" );
@@ -1129,6 +1159,72 @@ int libfsapfs_inode_get_group_identifier(
 	*group_identifier = inode->group_identifier;
 
 	return( 1 );
+}
+
+/* Retrieves the device number
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_inode_get_device_number(
+     libfsapfs_inode_t *inode,
+     uint32_t *major_device_number,
+     uint32_t *minor_device_number,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_device_number";
+	int result            = 0;
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( major_device_number == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid major device number.",
+		 function );
+
+		return( -1 );
+	}
+	if( minor_device_number == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid minor device number.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_CHARACTER_DEVICE )
+	 || ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_BLOCK_DEVICE ) )
+	{
+		if( ( inode->device_information & 0xffff0000UL ) == 0 )
+		{
+			*major_device_number = ( inode->device_information >> 8 ) & 0x000000ffUL;
+			*minor_device_number = inode->device_information & 0x000000ffUL;
+
+			result = 1;
+		}
+		else if( ( inode->device_information & 0x00ffff00UL ) == 0 )
+		{
+			*major_device_number = ( inode->device_information >> 24 ) & 0x000000ffUL;
+			*minor_device_number = inode->device_information & 0x000000ffUL;
+
+			result = 1;
+		}
+	}
+	return( result );
 }
 
 /* Retrieves the file mode

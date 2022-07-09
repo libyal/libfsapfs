@@ -717,6 +717,17 @@ int libfsapfs_file_entry_get_group_identifier(
      uint32_t *group_identifier,
      libfsapfs_error_t **error );
 
+/* Retrieves the device number
+ * This value is retrieved from the inode
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_device_number(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *major_device_number,
+     uint32_t *minor_device_number,
+     libfsapfs_error_t **error );
+
 /* Retrieves the file mode
  * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error

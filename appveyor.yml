@@ -144,27 +144,33 @@ environment:
     CONFIGURE_OPTIONS: "--enable-static-executables"
   - TARGET: mingw-gcc
     BUILD_ENVIRONMENT: mingw
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: ""
   - TARGET: mingw-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-shared=no"
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
     LDFLAGS: "--coverage"
   - TARGET: mingw-gcc-static-executables
     BUILD_ENVIRONMENT: mingw
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-static-executables"
   - TARGET: mingw-w64-gcc
     BUILD_ENVIRONMENT: mingw-w64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: ""
   - TARGET: mingw-w64-gcc-no-optimization
     BUILD_ENVIRONMENT: mingw-w64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-shared=no"
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
     LDFLAGS: "--coverage"
   - TARGET: mingw-w64-gcc-static-executables
     BUILD_ENVIRONMENT: mingw-w64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-static-executables"
 
 install:

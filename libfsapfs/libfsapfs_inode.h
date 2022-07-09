@@ -67,6 +67,10 @@ struct libfsapfs_inode
 	 */
 	uint32_t group_identifier;
 
+	/* Device information
+	 */
+	uint32_t device_information;
+
 	/* The file mode
 	 */
 	uint16_t file_mode;
@@ -150,6 +154,12 @@ int libfsapfs_inode_get_owner_identifier(
 int libfsapfs_inode_get_group_identifier(
      libfsapfs_inode_t *inode,
      uint32_t *group_identifier,
+     libcerror_error_t **error );
+
+int libfsapfs_inode_get_device_number(
+     libfsapfs_inode_t *inode,
+     uint32_t *major_device_number,
+     uint32_t *minor_device_number,
      libcerror_error_t **error );
 
 int libfsapfs_inode_get_file_mode(

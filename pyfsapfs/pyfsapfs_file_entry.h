@@ -118,6 +118,10 @@ PyObject *pyfsapfs_file_entry_get_group_identifier(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );
 
+PyObject *pyfsapfs_file_entry_get_device_number(
+           pyfsapfs_file_entry_t *pyfsapfs_file_entry,
+           PyObject *arguments );
+
 PyObject *pyfsapfs_file_entry_get_file_mode(
            pyfsapfs_file_entry_t *pyfsapfs_file_entry,
            PyObject *arguments );

@@ -3,7 +3,7 @@ name: build
 on: [push, pull_request]
 jobs:
   build_ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
@@ -51,7 +51,7 @@ jobs:
       run: |
         tests/runtests.sh
   build_python_ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
@@ -88,7 +88,7 @@ jobs:
       run: |
         tests/runtests.sh
   build_setup_py_ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
@@ -120,7 +120,7 @@ jobs:
       run: |
         python setup.py build
   coverage_ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         include:
