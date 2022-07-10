@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to generate ./configure using the autotools
 #
-# Version: 20200425
+# Version: 20220709
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -20,11 +20,6 @@ if ! test -x "${BINDIR}/aclocal";
 then
 	# Default location of MacPorts installed binaries.
 	BINDIR="/opt/local/bin";
-fi
-if ! test -x "${BINDIR}/aclocal";
-then
-	# Default location of MSYS-MinGW installed binaries.
-	BINDIR="/mingw/bin";
 fi
 if ! test -x "${BINDIR}/aclocal";
 then

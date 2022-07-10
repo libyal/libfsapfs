@@ -142,21 +142,6 @@ environment:
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-static-executables"
-  - TARGET: mingw-gcc
-    BUILD_ENVIRONMENT: mingw
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: ""
-  - TARGET: mingw-gcc-no-optimization
-    BUILD_ENVIRONMENT: mingw
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-shared=no"
-    CFLAGS: "--coverage -O0"
-    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
-    LDFLAGS: "--coverage"
-  - TARGET: mingw-gcc-static-executables
-    BUILD_ENVIRONMENT: mingw
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-static-executables"
   - TARGET: mingw-w64-gcc
     BUILD_ENVIRONMENT: mingw-w64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -232,10 +217,8 @@ install:
     C:\cygwin\setup-x86.exe -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s http://cygwin.mirror.constant.com -P gettext-devel -P zlib-devel -P libssl-devel -P python2-devel -P python3-devel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P gettext-devel -P zlib-devel -P libssl-devel -P python2-devel -P python3-devel )
-- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\bin\mingw-get install libz-dev )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\pacman -S --noconfirm --needed msys/zlib-devel )
+    C:\msys64\usr\bin\pacman -S --noconfirm --needed autoconf automake gcc gettext-devel libtool make msys/zlib-devel )
 
 build_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or ($env:BUILD_ENVIRONMENT -eq "python" -and $isWindows)) {
@@ -266,9 +249,6 @@ build_script:
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
     C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
-- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    xcopy /i /q /s C:\projects\libfsapfs C:\MinGW\msys\1.0\home\appveyor\libfsapfs &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && sed 's/@VERSION@/0.29/g' m4/pkg.m4.in > m4/pkg.m4 && tests/build.sh ${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
     C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
@@ -283,15 +263,13 @@ test_script:
     C:\cygwin\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
-- cmd: if [%BUILD_ENVIRONMENT%]==[mingw] (
-    C:\MinGW\msys\1.0\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 
 after_test:
-- cmd: if [%TARGET%]==[mingw-gcc-no-optimization] (
-    copy C:\projects\codecov-bash\codecov C:\MinGW\msys\1.0\home\appveyor\libfsapfs\codecov.sh &&
-    C:\MinGW\msys\1.0\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && ./codecov.sh -n ${TARGET}" )
+- cmd: if [%TARGET%]==[mingw-w64-gcc-no-optimization] (
+    copy C:\projects\codecov-bash\codecov C:\msys64\home\appveyor\libfsapfs\codecov.sh &&
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && ./codecov.sh -n ${TARGET}" )
 
 artifacts:
 - path: dist\*.whl

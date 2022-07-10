@@ -95,11 +95,7 @@ jobs:
         - architecture: 'x64'
           compiler: 'gcc'
           configure_options: ''
-          python-version: 2.7
-        - architecture: 'x64'
-          compiler: 'gcc'
-          configure_options: ''
-          python-version: 3.8
+          python-version: 3.9
     steps:
     - uses: actions/checkout@v2
     - name: Set up Python ${{ matrix.python-version }}
