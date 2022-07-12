@@ -198,6 +198,12 @@ int libfsapfs_file_entry_get_group_identifier(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_device_identifier(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *device_identifier,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_file_entry_get_device_number(
      libfsapfs_file_entry_t *file_entry,
      uint32_t *major_device_number,

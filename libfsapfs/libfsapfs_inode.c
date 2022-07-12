@@ -792,15 +792,15 @@ int libfsapfs_inode_read_value_data(
 					}
 					byte_stream_copy_to_uint32_little_endian(
 					 value_data,
-					 inode->device_information );
+					 inode->device_identifier );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 					if( libcnotify_verbose != 0 )
 					{
 						libcnotify_printf(
-						 "%s: device information\t\t\t: 0x%08" PRIx32 "\n",
+						 "%s: device identifier\t\t\t: 0x%08" PRIx32 "\n",
 						 function,
-						 inode->device_information );
+						 inode->device_identifier );
 
 						libcnotify_printf(
 						 "\n" );
@@ -1171,6 +1171,48 @@ int libfsapfs_inode_get_group_identifier(
 	return( 1 );
 }
 
+/* Retrieves the device identifier
+ * Returns 1 if successful, 0 if not available or -1 on error
+ */
+int libfsapfs_inode_get_device_identifier(
+     libfsapfs_inode_t *inode,
+     uint32_t *device_identifier,
+     libcerror_error_t **error )
+{
+	static char *function = "libfsapfs_inode_get_device_identifier";
+
+	if( inode == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid inode.",
+		 function );
+
+		return( -1 );
+	}
+	if( device_identifier == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid major device identifier.",
+		 function );
+
+		return( -1 );
+	}
+	if( ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_CHARACTER_DEVICE )
+	 || ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_BLOCK_DEVICE ) )
+	{
+		*device_identifier = inode->device_identifier;
+
+		return( 1 );
+	}
+	return( 0 );
+}
+
 /* Retrieves the device number
  * Returns 1 if successful, 0 if not available or -1 on error
  */
@@ -1219,17 +1261,17 @@ int libfsapfs_inode_get_device_number(
 	if( ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_CHARACTER_DEVICE )
 	 || ( ( inode->file_mode & 0xf000 ) == LIBFSAPFS_FILE_TYPE_BLOCK_DEVICE ) )
 	{
-		if( ( inode->device_information & 0xffff0000UL ) == 0 )
+		if( ( inode->device_identifier & 0xffff0000UL ) == 0 )
 		{
-			*major_device_number = ( inode->device_information >> 8 ) & 0x000000ffUL;
-			*minor_device_number = inode->device_information & 0x000000ffUL;
+			*major_device_number = ( inode->device_identifier >> 8 ) & 0x000000ffUL;
+			*minor_device_number = inode->device_identifier & 0x000000ffUL;
 
 			result = 1;
 		}
-		else if( ( inode->device_information & 0x00ffff00UL ) == 0 )
+		else if( ( inode->device_identifier & 0x00ffff00UL ) == 0 )
 		{
-			*major_device_number = ( inode->device_information >> 24 ) & 0x000000ffUL;
-			*minor_device_number = inode->device_information & 0x000000ffUL;
+			*major_device_number = ( inode->device_identifier >> 24 ) & 0x000000ffUL;
+			*minor_device_number = inode->device_identifier & 0x000000ffUL;
 
 			result = 1;
 		}

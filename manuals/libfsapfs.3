@@ -1,4 +1,4 @@
-.Dd July  9, 2022
+.Dd July 12, 2022
 .Dt libfsapfs 3
 .Os libfsapfs
 .Sh NAME
@@ -164,6 +164,8 @@ File entry functions
 .Fn libfsapfs_file_entry_get_owner_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *owner_identifier" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_group_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *group_identifier" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_device_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *device_identifier" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_device_number "libfsapfs_file_entry_t *file_entry" "uint32_t *major_device_number" "uint32_t *minor_device_number" "libfsapfs_error_t **error"
 .Ft int

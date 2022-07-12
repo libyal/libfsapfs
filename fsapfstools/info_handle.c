@@ -38,6 +38,7 @@
 #include "fsapfstools_libfsapfs.h"
 #include "fsapfstools_libhmac.h"
 #include "fsapfstools_libuna.h"
+#include "fsapfstools_unused.h"
 #include "info_handle.h"
 
 #if !defined( LIBFSAPFS_HAVE_BFIO )
@@ -1711,9 +1712,11 @@ void info_handle_incompatible_features_flags_fprint(
 /* Prints the read-only compatible features flags to the notify stream
  */
 void info_handle_read_only_compatible_features_flags_fprint(
-      uint64_t read_only_compatible_features_flags,
+      uint64_t read_only_compatible_features_flags FSAPFSTOOLS_ATTRIBUTE_UNUSED,
       FILE *notify_stream )
 {
+	FSAPFSTOOLS_UNREFERENCED_PARAMETER( read_only_compatible_features_flags )
+
 	/* Currently there are no container read-only compatible feature flags defined */
 
 	fprintf(

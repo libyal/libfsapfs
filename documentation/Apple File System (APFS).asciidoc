@@ -57,7 +57,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.10 | J.B. Metz | June 2021 | Textual corrections.
 | 0.0.11 | J.B. Metz | July 2021 | Additional format information regarding extended attributes.
 | 0.0.12 | J.B. Metz | April 2022 | Additional format information.
-| 0.0.13 | J.B. Metz | July 2022 | Additional information about device information.
+| 0.0.13 | J.B. Metz | July 2022 | Additional information about device identifier.
 |===
 
 :numbered:
@@ -2303,8 +2303,8 @@ The extended field data contains a 128-bit UUID value
 | 12 | INO_EXT_TYPE_RESERVED_12 | [yellow-background]*Unknown (Reserved)*
 | 13 | INO_EXT_TYPE_SPARSE_BYTES | Number of sparse bytes in the data stream +
 The extended field data contains a 64-bit integer value
-| 14 | INO_EXT_TYPE_RDEV | Block or character device information +
-The extended field data contains a 32-bit integer value with <<device_information,Device information>>
+| 14 | INO_EXT_TYPE_RDEV | Block or character device identifier +
+The extended field data contains a 32-bit integer value with <<device_identifier,Device identifier>>
 | 15 | INO_EXT_TYPE_PURGEABLE_FLAGS | Information about a purgeable file +
 [yellow-background]*Unknown (Reserved), seen 8 byte value*
 | 16 | INO_EXT_TYPE_ORIG_SYNC_ROOT_ID | [yellow-background]*Unknown (Inode number of the sync-root hierarchy)*
@@ -2325,13 +2325,13 @@ The extended field data contains a 32-bit integer value with <<device_informatio
 | 0x80 | XF_RESERVED_80 | [yellow-background]*Unknown (Reserved)*
 |===
 
-==== [[device_information]]Device information
+==== [[device_identifier]]Device identifier
 
-The device information can be stored in different formats, such as: native,
+The device identifier can be stored in different formats, such as: native,
 386bsd, 4bsd, bsdos, freebsd, hpux, isc, linux, netbsd, osf1, sco, solaris,
 sunos, svr3, svr4 and ultrix.
 
-The "native" and "hpux" device information is 4 bytes of size and consists of:
+The "native" and "hpux" device identifier is 4 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2342,7 +2342,7 @@ The "native" and "hpux" device information is 4 bytes of size and consists of:
 |===
 
 The "386bsd", "4bsd", "freebsd", "isc", "linux", "netbsd", "sco", "sunos",
-"svr3" and "ultrix" device information is 4 bytes of size and consists of:
+"svr3" and "ultrix" device identifier is 4 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2352,7 +2352,7 @@ The "386bsd", "4bsd", "freebsd", "isc", "linux", "netbsd", "sco", "sunos",
 | 3 | 1 | | Minor device number
 |===
 
-The "solaris" and "svr4" device information is 4 bytes of size and consists of:
+The "solaris" and "svr4" device identifier is 4 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2361,7 +2361,7 @@ The "solaris" and "svr4" device information is 4 bytes of size and consists of:
 | 2.2 | 14 bits | | Major device number
 |===
 
-The "bsdos" and "osf1" device information is 4 bytes of size and consists of:
+The "bsdos" and "osf1" device identifier is 4 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2370,7 +2370,7 @@ The "bsdos" and "osf1" device information is 4 bytes of size and consists of:
 | 2.4 | 12 bits | | Major device number
 |===
 
-The "bsdos" alternative device information is 4 bytes of size and consists of:
+The "bsdos" alternative device identifier is 4 bytes of size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
