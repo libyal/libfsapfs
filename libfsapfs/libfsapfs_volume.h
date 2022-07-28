@@ -251,6 +251,12 @@ int libfsapfs_volume_set_utf16_recovery_password(
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_root_directory(
+     libfsapfs_volume_t *volume,
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_next_file_entry_identifier(
      libfsapfs_volume_t *volume,
      uint64_t *identifier,
@@ -264,12 +270,6 @@ LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_file_entry_by_identifier(
      libfsapfs_volume_t *volume,
      uint64_t identifier,
-     libfsapfs_file_entry_t **file_entry,
-     libcerror_error_t **error );
-
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_get_root_directory(
-     libfsapfs_volume_t *volume,
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 

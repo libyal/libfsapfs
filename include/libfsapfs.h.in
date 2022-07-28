@@ -477,6 +477,15 @@ int libfsapfs_volume_set_utf16_recovery_password(
      size_t utf16_string_length,
      libfsapfs_error_t **error );
 
+/* Retrieves the root directory file entry
+ * Returns 1 if successful, or 0 if not available or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_get_root_directory(
+     libfsapfs_volume_t *volume,
+     libfsapfs_file_entry_t **file_entry,
+     libfsapfs_error_t **error );
+
 /* Retrieves the next file entry identifier
  * Returns 1 if successful or -1 on error
  */
@@ -493,15 +502,6 @@ LIBFSAPFS_EXTERN \
 int libfsapfs_volume_get_file_entry_by_identifier(
      libfsapfs_volume_t *volume,
      uint64_t identifier,
-     libfsapfs_file_entry_t **file_entry,
-     libfsapfs_error_t **error );
-
-/* Retrieves the root directory file entry
- * Returns 1 if successful, or 0 if not available or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_volume_get_root_directory(
-     libfsapfs_volume_t *volume,
      libfsapfs_file_entry_t **file_entry,
      libfsapfs_error_t **error );
 

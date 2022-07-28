@@ -2620,6 +2620,101 @@ on_error:
 	return( -1 );
 }
 
+/* Retrieves the root directory file entry
+ * Returns 1 if successful, or 0 if not available or -1 on error
+ */
+int libfsapfs_volume_get_root_directory(
+     libfsapfs_volume_t *volume,
+     libfsapfs_file_entry_t **file_entry,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function                        = "libfsapfs_volume_get_root_directory";
+	int result                                   = 1;
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	if( internal_volume->file_system == NULL )
+	{
+		if( libfsapfs_internal_volume_get_file_system(
+		     internal_volume,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to determine file system.",
+			 function );
+
+			result = -1;
+		}
+	}
+	if( result != -1 )
+	{
+		result = libfsapfs_file_system_get_file_entry_by_identifier(
+		          internal_volume->file_system,
+		          internal_volume->file_io_handle,
+		          2,
+		          file_entry,
+		          error );
+
+		if( result == -1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve root directory inode: 2 from file system B-tree.",
+			 function );
+
+			result = -1;
+		}
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( result );
+}
+
 /* Retrieves the next file entry identifier
  * Returns 1 if successful or -1 on error
  */
@@ -2919,101 +3014,6 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 			 "%s: unable to retrieve inode: %" PRIu64 " from file system B-tree.",
 			 function,
 			 identifier );
-
-			result = -1;
-		}
-	}
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_release_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to release read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	return( result );
-}
-
-/* Retrieves the root directory file entry
- * Returns 1 if successful, or 0 if not available or -1 on error
- */
-int libfsapfs_volume_get_root_directory(
-     libfsapfs_volume_t *volume,
-     libfsapfs_file_entry_t **file_entry,
-     libcerror_error_t **error )
-{
-	libfsapfs_internal_volume_t *internal_volume = NULL;
-	static char *function                        = "libfsapfs_volume_get_root_directory";
-	int result                                   = 1;
-
-	if( volume == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid volume.",
-		 function );
-
-		return( -1 );
-	}
-	internal_volume = (libfsapfs_internal_volume_t *) volume;
-
-#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
-	if( libcthreads_read_write_lock_grab_for_write(
-	     internal_volume->read_write_lock,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to grab read/write lock for writing.",
-		 function );
-
-		return( -1 );
-	}
-#endif
-	if( internal_volume->file_system == NULL )
-	{
-		if( libfsapfs_internal_volume_get_file_system(
-		     internal_volume,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to determine file system.",
-			 function );
-
-			result = -1;
-		}
-	}
-	if( result != -1 )
-	{
-		result = libfsapfs_file_system_get_file_entry_by_identifier(
-		          internal_volume->file_system,
-		          internal_volume->file_io_handle,
-		          2,
-		          file_entry,
-		          error );
-
-		if( result == -1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve root directory inode: 2 from file system B-tree.",
-			 function );
 
 			result = -1;
 		}
