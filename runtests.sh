@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20210503
+# Version: 20220805
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -209,17 +209,29 @@ echo "${CONFIGURE_HELP}" | grep -- '--enable-debug-output' > /dev/null;
 
 HAVE_ENABLE_DEBUG_OUTPUT=$?;
 
+echo "${CONFIGURE_HELP}" | grep -- '--with-bzip2' > /dev/null;
+
+HAVE_WITH_BZIP2=$?;
+
+echo "${CONFIGURE_HELP}" | grep -- '--with-libfuse' > /dev/null;
+
+HAVE_WITH_LIBFUSE=$?;
+
+echo "${CONFIGURE_HELP}" | grep -- '--with-lzma' > /dev/null;
+
+HAVE_WITH_LZMA=$?;
+
 echo "${CONFIGURE_HELP}" | grep -- '--with-pthread' > /dev/null;
 
 HAVE_WITH_PTHREAD=$?;
 
-echo "${CONFIGURE_HELP}" | grep -- '--with-zlib' > /dev/null;
-
-HAVE_WITH_ZLIB=$?;
-
 echo "${CONFIGURE_HELP}" | grep -- '--with-openssl' > /dev/null;
 
 HAVE_WITH_OPENSSL=$?;
+
+echo "${CONFIGURE_HELP}" | grep -- '--with-zlib' > /dev/null;
+
+HAVE_WITH_ZLIB=$?;
 
 echo "${CONFIGURE_HELP}" | grep -- '--enable-python' > /dev/null;
 
@@ -412,7 +424,29 @@ fi
 
 if test ${HAVE_ENABLE_STATIC_EXECUTABLES} -eq 0;
 then
-	run_configure_make_check "--enable-static-executables --enable-multi-threading-support=no --with-libfuse=no";
+	CONFIGURE_OPTIONS="--enable-static-executables --enable-multi-threading-support=no";
+
+	if test ${HAVE_WITH_BZIP2} -eq 0;
+	then
+		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-bzip2=no";
+	fi
+	if test ${HAVE_WITH_LIBFUSE} -eq 0;
+	then
+		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-libfuse=no";
+	fi
+	if test ${HAVE_WITH_LZMA} -eq 0;
+	then
+		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-lzma=no";
+	fi
+	if test ${HAVE_WITH_OPENSSL} -eq 0;
+	then
+		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-openssl=no";
+	fi
+	if test ${HAVE_WITH_ZLIB} -eq 0;
+	then
+		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-zlib=no";
+	fi
+	run_configure_make_check ${CONFIGURE_OPTIONS};
 	RESULT=$?;
 
 	if test ${RESULT} -ne ${EXIT_SUCCESS};
@@ -428,13 +462,21 @@ if test ${HAVE_ENABLE_WIDE_CHARACTER_TYPE} -eq 0;
 then
 	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --enable-wide-character-type";
 fi
-if test ${HAVE_WITH_ZLIB} -eq 0;
+if test ${HAVE_WITH_BZIP2} -eq 0;
 then
-	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-zlib=no";
+	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-bzip2=no";
+fi
+if test ${HAVE_WITH_LZMA} -eq 0;
+then
+	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-lzma=no";
 fi
 if test ${HAVE_WITH_OPENSSL} -eq 0;
 then
 	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-openssl=no";
+fi
+if test ${HAVE_WITH_ZLIB} -eq 0;
+then
+	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-zlib=no";
 fi
 if test ${HAVE_ENABLE_PYTHON} -eq 0 && test -n "${PYTHON_CONFIG}";
 then
@@ -458,13 +500,21 @@ if test ${HAVE_ENABLE_WIDE_CHARACTER_TYPE} -eq 0;
 then
 	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --enable-wide-character-type";
 fi
-if test ${HAVE_WITH_ZLIB} -eq 0;
+if test ${HAVE_WITH_BZIP2} -eq 0;
 then
-	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-zlib=no";
+	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-bzip2=no";
+fi
+if test ${HAVE_WITH_LZMA} -eq 0;
+then
+	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-lzma=no";
 fi
 if test ${HAVE_WITH_OPENSSL} -eq 0;
 then
 	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-openssl=no";
+fi
+if test ${HAVE_WITH_ZLIB} -eq 0;
+then
+	CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-zlib=no";
 fi
 
 run_configure_make_check_with_coverage ${CONFIGURE_OPTIONS};

@@ -1,5 +1,5 @@
 /*
- * LZVN (un)compression functions
+ * The libfmos header wrapper
  *
  * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -19,28 +19,33 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#if !defined( _LIBFSAPFS_LZVN_COMPRESSION_H )
-#define _LIBFSAPFS_LZVN_COMPRESSION_H
+#if !defined( _LIBFSAPFS_LIBFMOS_H )
+#define _LIBFSAPFS_LIBFMOS_H
 
 #include <common.h>
-#include <types.h>
 
-#include "libfsapfs_libcerror.h"
+/* Define HAVE_LOCAL_LIBFMOS for local use of libfmos
+ */
+#if defined( HAVE_LOCAL_LIBFMOS )
 
-#if defined( __cplusplus )
-extern "C" {
+#include <libfmos_definitions.h>
+#include <libfmos_adc.h>
+#include <libfmos_lzfse.h>
+#include <libfmos_lzvn.h>
+#include <libfmos_types.h>
+
+#else
+
+/* If libtool DLL support is enabled set LIBFMOS_DLL_IMPORT
+ * before including libfmos.h
+ */
+#if defined( _WIN32 ) && defined( DLL_IMPORT )
+#define LIBFMOS_DLL_IMPORT
 #endif
 
-int libfsapfs_lzvn_decompress(
-     const uint8_t *compressed_data,
-     size_t compressed_data_size,
-     uint8_t *uncompressed_data,
-     size_t *uncompressed_data_size,
-     libcerror_error_t **error );
+#include <libfmos.h>
 
-#if defined( __cplusplus )
-}
-#endif
+#endif /* defined( HAVE_LOCAL_LIBFMOS ) */
 
-#endif /* !defined( _LIBFSAPFS_LZVN_COMPRESSION_H ) */
+#endif /* !defined( _LIBFSAPFS_LIBFMOS_H ) */
 

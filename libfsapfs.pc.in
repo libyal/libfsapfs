@@ -7,6 +7,6 @@ Name: libfsapfs
 Description: Library to access the Apple File System (APFS) format
 Version: @VERSION@
 Libs: -L${libdir} -lfsapfs
-Libs.private: @ax_libbfio_pc_libs_private@ @ax_libcaes_pc_libs_private@ @ax_libcdata_pc_libs_private@ @ax_libcerror_pc_libs_private@ @ax_libcfile_pc_libs_private@ @ax_libclocale_pc_libs_private@ @ax_libcnotify_pc_libs_private@ @ax_libcpath_pc_libs_private@ @ax_libcrypto_pc_libs_private@ @ax_libcsplit_pc_libs_private@ @ax_libcthreads_pc_libs_private@ @ax_libfcache_pc_libs_private@ @ax_libfdata_pc_libs_private@ @ax_libfdatetime_pc_libs_private@ @ax_libfguid_pc_libs_private@ @ax_libhmac_pc_libs_private@ @ax_libuna_pc_libs_private@ @ax_pthread_pc_libs_private@ @ax_zlib_pc_libs_private@
+Libs.private: @ax_libbfio_pc_libs_private@ @ax_libcaes_pc_libs_private@ @ax_libcdata_pc_libs_private@ @ax_libcerror_pc_libs_private@ @ax_libcfile_pc_libs_private@ @ax_libclocale_pc_libs_private@ @ax_libcnotify_pc_libs_private@ @ax_libcpath_pc_libs_private@ @ax_libcrypto_pc_libs_private@ @ax_libcsplit_pc_libs_private@ @ax_libcthreads_pc_libs_private@ @ax_libfcache_pc_libs_private@ @ax_libfdata_pc_libs_private@ @ax_libfdatetime_pc_libs_private@ @ax_libfguid_pc_libs_private@ @ax_libfmos_pc_libs_private@ @ax_libhmac_pc_libs_private@ @ax_libuna_pc_libs_private@ @ax_pthread_pc_libs_private@ @ax_zlib_pc_libs_private@
 Cflags: -I${includedir}
 

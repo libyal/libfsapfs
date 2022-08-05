@@ -21,6 +21,7 @@ coverage:
     - "libfdata/*"
     - "libfdatetime/*"
     - "libfguid/*"
+    - "libfmos/*"
     - "libhmac/*"
     - "libuna/*"
     - "tests/*"

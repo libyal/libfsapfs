@@ -4340,6 +4340,11 @@ int libfsapfs_internal_file_entry_get_data_stream(
 				compression_method = LIBFSAPFS_COMPRESSION_METHOD_LZVN;
 				break;
 
+			case 11:
+			case 12:
+				compression_method = LIBFSAPFS_COMPRESSION_METHOD_LZFSE;
+				break;
+
 			default:
 				libcerror_error_set(
 				 error,

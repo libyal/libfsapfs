@@ -2,10 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="fsapfs_test_lzvn"
-	ProjectGUID="{474EFE62-F584-403C-805F-7F414603A1A8}"
-	RootNamespace="fsapfs_test_lzvn"
-	Keyword="Win32Proj"
+	Name="libfmos"
+	ProjectGUID="{A3665675-E698-4821-9A91-EFE487C46D9F}"
+	RootNamespace="libfmos"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -20,9 +19,8 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="1"
-			WholeProgramOptimization="1"
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
@@ -41,8 +39,8 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libhmac;..\..\libcaes;..\..\..\zlib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;ZLIB_DLL;LIBFSAPFS_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcnotify"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBFMOS"
 				RuntimeLibrary="2"
 				WarningLevel="4"
 				CompileAs="1"
@@ -57,21 +55,13 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="2"
-				DataExecutionPrevention="2"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\$(ProjectName).lib"
+				ModuleDefinitionFile=""
+				IgnoreAllDefaultLibraries="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -83,9 +73,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -93,7 +80,7 @@
 			Name="VSDebug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="4"
 			CharacterSet="1"
 			>
 			<Tool
@@ -114,8 +101,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcdata;..\..\libclocale;..\..\libcnotify;..\..\libcsplit;..\..\libuna;..\..\libcfile;..\..\libcpath;..\..\libbfio;..\..\libfcache;..\..\libfdata;..\..\libfdatetime;..\..\libfguid;..\..\libhmac;..\..\libcaes;..\..\..\zlib"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCDATA;HAVE_LOCAL_LIBCLOCALE;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBCSPLIT;HAVE_LOCAL_LIBUNA;HAVE_LOCAL_LIBCFILE;HAVE_LOCAL_LIBCPATH;HAVE_LOCAL_LIBBFIO;HAVE_LOCAL_LIBFCACHE;HAVE_LOCAL_LIBFDATA;HAVE_LOCAL_LIBFDATETIME;HAVE_LOCAL_LIBFGUID;HAVE_LOCAL_LIBHMAC;HAVE_LOCAL_LIBCAES;ZLIB_DLL;LIBFSAPFS_DLL_IMPORT"
+				AdditionalIncludeDirectories="..\..\include;..\..\common;..\..\libcerror;..\..\libcthreads;..\..\libcnotify"
+				PreprocessorDefinitions="_CRT_SECURE_NO_DEPRECATE;HAVE_LOCAL_LIBCERROR;HAVE_LOCAL_LIBCTHREADS;HAVE_LOCAL_LIBCNOTIFY;HAVE_LOCAL_LIBFMOS"
 				BasicRuntimeChecks="3"
 				SmallerTypeCheck="true"
 				RuntimeLibrary="3"
@@ -133,22 +120,13 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
-				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(OutDir)&quot;"
-				GenerateDebugInformation="true"
-				SubSystem="1"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				RandomizedBaseAddress="1"
-				DataExecutionPrevention="1"
-				TargetMachine="1"
+				Name="VCLibrarianTool"
+				OutputFile="$(OutDir)\$(ProjectName).lib"
+				ModuleDefinitionFile=""
+				IgnoreAllDefaultLibraries="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -158,9 +136,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -176,7 +151,35 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_lzvn.c"
+				RelativePath="..\..\libfmos\libfmos_adc.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_error.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzfse.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzfse_bit_stream.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzfse_decoder.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzvn.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_notify.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_support.c"
 				>
 			</File>
 		</Filter>
@@ -186,23 +189,59 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libcerror.h"
+				RelativePath="..\..\libfmos\libfmos_adc.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libcnotify.h"
+				RelativePath="..\..\libfmos\libfmos_definitions.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_libfsapfs.h"
+				RelativePath="..\..\libfmos\libfmos_error.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_macros.h"
+				RelativePath="..\..\libfmos\libfmos_extern.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\tests\fsapfs_test_unused.h"
+				RelativePath="..\..\libfmos\libfmos_libcerror.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_libcnotify.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzfse.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzfse_bit_stream.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzfse_decoder.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_lzvn.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_notify.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_support.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_types.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfmos\libfmos_unused.h"
 				>
 			</File>
 		</Filter>
