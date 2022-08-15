@@ -2,7 +2,7 @@ AC_PREREQ([2.71])
 
 AC_INIT(
  [libfsapfs],
- [20220805],
+ [20220815],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
@@ -108,7 +108,7 @@ AX_LIBFDATETIME_CHECK_ENABLE
 dnl Check if libfguid or required headers and functions are available
 AX_LIBFGUID_CHECK_ENABLE
 
-dnl Check for enabling libfmos for file Mac OS type support
+dnl Check if libfmos or required headers and functions are available
 AX_LIBFMOS_CHECK_ENABLE
 
 dnl Check if zlib or required headers and functions are available

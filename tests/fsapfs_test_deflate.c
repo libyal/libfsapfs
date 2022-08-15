@@ -34,13 +34,15 @@
 #include "fsapfs_test_macros.h"
 #include "fsapfs_test_unused.h"
 
+#include "../libfsapfs/libfsapfs_bit_stream.h"
 #include "../libfsapfs/libfsapfs_deflate.h"
+#include "../libfsapfs/libfsapfs_huffman_tree.h"
 
 /* Define to make fsapfs_test_deflate generate verbose output
 #define FSAPFS_TEST_DEFLATE
  */
 
-uint8_t fsapfs_test_deflate_compressed_byte_stream[ 2627 ] = {
+uint8_t fsapfs_test_deflate_compressed_data[ 2627 ] = {
 	0x78, 0xda, 0xbd, 0x59, 0x6d, 0x8f, 0xdb, 0xb8, 0x11, 0xfe, 0x7c, 0xfa, 0x15, 0xc4, 0x7e, 0xb9,
 	0x5d, 0xc0, 0x75, 0x5e, 0x7b, 0x45, 0x0f, 0x45, 0x81, 0xed, 0xde, 0x26, 0xdd, 0x62, 0x2f, 0x0d,
 	0xb2, 0x97, 0x16, 0xfd, 0x48, 0x4b, 0xb4, 0xcd, 0x46, 0x12, 0x5d, 0x52, 0x5a, 0xc7, 0xfd, 0xf5,
@@ -207,7 +209,7 @@ uint8_t fsapfs_test_deflate_compressed_byte_stream[ 2627 ] = {
 	0x7d, 0x8a, 0x87, 0xf9, 0x9d, 0x74, 0x33, 0x0e, 0x79, 0xc5, 0xf8, 0x73, 0xcd, 0xff, 0x00, 0x30,
 	0x4a, 0x56, 0xa4 };
 
-uint8_t fsapfs_test_deflate_uncompressed_byte_stream[ 7640 ] = {
+uint8_t fsapfs_test_deflate_uncompressed_data[ 7640 ] = {
 	0x09, 0x09, 0x20, 0x20, 0x20, 0x47, 0x4e, 0x55, 0x20, 0x4c, 0x45, 0x53, 0x53, 0x45, 0x52, 0x20,
 	0x47, 0x45, 0x4e, 0x45, 0x52, 0x41, 0x4c, 0x20, 0x50, 0x55, 0x42, 0x4c, 0x49, 0x43, 0x20, 0x4c,
 	0x49, 0x43, 0x45, 0x4e, 0x53, 0x45, 0x0a, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
@@ -689,336 +691,32 @@ uint8_t fsapfs_test_deflate_uncompressed_byte_stream[ 7640 ] = {
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
-/* Tests the libfsapfs_deflate_bit_stream_get_value function
+/* Tests the libfsapfs_deflate_build_dynamic_huffman_trees function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_deflate_bit_stream_get_value(
+int fsapfs_test_deflate_build_dynamic_huffman_trees(
      void )
 {
-	libfsapfs_deflate_bit_stream_t bit_stream;
-
-	libcerror_error_t *error = NULL;
-	void *memset_result      = NULL;
-	uint32_t value_32bit     = 0;
-	int result               = 0;
-
-	/* Initialize test
-	 */
-	memset_result = memory_set(
-	                 &bit_stream,
-	                 0,
-	                 sizeof( libfsapfs_deflate_bit_stream_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
-	/* Test regular cases
-	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 0;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
-	          0,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "value_32bit",
-	 value_32bit,
-	 (uint32_t) 0x00000000UL );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_SIZE(
-	 "bit_stream.byte_stream_offset",
-	 bit_stream.byte_stream_offset,
-	 (size_t) 0 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "bit_stream.bit_buffer",
-	 bit_stream.bit_buffer,
-	 (uint32_t) 0x00000000UL );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT8(
-	 "bit_stream.bit_buffer_size",
-	 bit_stream.bit_buffer_size,
-	 (uint8_t) 0 );
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
-	          4,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "value_32bit",
-	 value_32bit,
-	 (uint32_t) 0x00000008UL );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_SIZE(
-	 "bit_stream.byte_stream_offset",
-	 bit_stream.byte_stream_offset,
-	 (size_t) 1 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "bit_stream.bit_buffer",
-	 bit_stream.bit_buffer,
-	 (uint32_t) 0x00000007UL );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT8(
-	 "bit_stream.bit_buffer_size",
-	 bit_stream.bit_buffer_size,
-	 (uint8_t) 4 );
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
-	          12,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "value_32bit",
-	 value_32bit,
-	 (uint32_t) 0x00000da7UL );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_SIZE(
-	 "bit_stream.byte_stream_offset",
-	 bit_stream.byte_stream_offset,
-	 (size_t) 2 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "bit_stream.bit_buffer",
-	 bit_stream.bit_buffer,
-	 (uint32_t) 0x00000000UL );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT8(
-	 "bit_stream.bit_buffer_size",
-	 bit_stream.bit_buffer_size,
-	 (uint8_t) 0 );
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
-	          32,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 1 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "value_32bit",
-	 value_32bit,
-	 (uint32_t) 0x8f6d59bdUL );
-
-	FSAPFS_TEST_ASSERT_IS_NULL(
-	 "error",
-	 error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_SIZE(
-	 "bit_stream.byte_stream_offset",
-	 bit_stream.byte_stream_offset,
-	 (size_t) 6 );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "bit_stream.bit_buffer",
-	 bit_stream.bit_buffer,
-	 (uint32_t) 0x00000000UL );
-
-	FSAPFS_TEST_ASSERT_EQUAL_UINT8(
-	 "bit_stream.bit_buffer_size",
-	 bit_stream.bit_buffer_size,
-	 (uint8_t) 0 );
-
-	/* Test error cases
-	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 0;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          NULL,
-	          32,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
-	          64,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
-	          32,
-	          NULL,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	bit_stream.byte_stream_offset = 2627;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
-	          32,
-	          &value_32bit,
-	          &error );
-
-	bit_stream.byte_stream_offset = 0;
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	return( 1 );
-
-on_error:
-	if( error != NULL )
-	{
-		libcerror_error_free(
-		 &error );
-	}
-	return( 0 );
-}
-
-/* Tests the libfsapfs_deflate_huffman_table_construct function
- * Returns 1 if successful or 0 if not
- */
-int fsapfs_test_deflate_huffman_table_construct(
-     void )
-{
-	uint16_t code_size_array[ 318 ];
-
-	libfsapfs_deflate_huffman_table_t table;
-
-	libcerror_error_t *error        = NULL;
-	void *memset_result             = NULL;
-	uint16_t symbol                 = 0;
-	int result                      = 0;
+	libfsapfs_bit_stream_t *bit_stream       = NULL;
+	libfsapfs_huffman_tree_t *distances_tree = NULL;
+	libfsapfs_huffman_tree_t *literals_tree  = NULL;
+	libcerror_error_t *error               = NULL;
+	uint32_t value_32bit                   = 0;
+	int result                             = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_memset_fail_tests = 2;
-	int test_number                 = 0;
+	int number_of_memset_fail_tests        = 6;
+	int test_number                        = 0;
 #endif
 
 	/* Initialize test
 	 */
-	memset_result = memory_set(
-	                 &table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
-	for( symbol = 0;
-	     symbol < 318;
-	     symbol++ )
-	{
-		if( symbol < 144 )
-		{
-			code_size_array[ symbol ] = 8;
-		}
-		else if( symbol < 256 )
-		{
-			code_size_array[ symbol ] = 9;
-		}
-		else if( symbol < 280 )
-		{
-			code_size_array[ symbol ] = 7;
-		}
-		else if( symbol < 288 )
-		{
-			code_size_array[ symbol ] = 8;
-		}
-		else
-		{
-			code_size_array[ symbol ] = 5;
-		}
-	}
-	/* Test regular cases
-	 */
-	result = libfsapfs_deflate_huffman_table_construct(
-	          &table,
-	          code_size_array,
-	          288,
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1026,163 +724,18 @@ int fsapfs_test_deflate_huffman_table_construct(
 	 result,
 	 1 );
 
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "bit_stream",
+	 bit_stream );
+
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	/* Test error cases
-	 */
-	result = libfsapfs_deflate_huffman_table_construct(
-	          NULL,
-	          code_size_array,
+	result = libfsapfs_huffman_tree_initialize(
+	          &literals_tree,
 	          288,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_deflate_huffman_table_construct(
-	          &table,
-	          NULL,
-	          288,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_deflate_huffman_table_construct(
-	          &table,
-	          code_size_array,
-	          -1,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-#if defined( HAVE_FSAPFS_TEST_MEMORY )
-
-	for( test_number = 0;
-	     test_number < number_of_memset_fail_tests;
-	     test_number++ )
-	{
-		/* Test libfsapfs_write_io_handle_initialize with memset failing
-		 */
-		fsapfs_test_memset_attempts_before_fail = test_number;
-
-		result = libfsapfs_deflate_huffman_table_construct(
-		          &table,
-		          code_size_array,
-		          288,
-		          &error );
-
-		if( fsapfs_test_memset_attempts_before_fail != -1 )
-		{
-			fsapfs_test_memset_attempts_before_fail = -1;
-		}
-		else
-		{
-			FSAPFS_TEST_ASSERT_EQUAL_INT(
-			 "result",
-			 result,
-			 -1 );
-
-			FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-			 "error",
-			 error );
-
-			libcerror_error_free(
-			 &error );
-		}
-	}
-#endif /* defined( HAVE_FSAPFS_TEST_MEMORY ) */
-
-	/* TODO test errornous data */
-
-	return( 1 );
-
-on_error:
-	if( error != NULL )
-	{
-		libcerror_error_free(
-		 &error );
-	}
-	return( 0 );
-}
-
-/* Tests the libfsapfs_deflate_bit_stream_get_huffman_encoded_value function
- * Returns 1 if successful or 0 if not
- */
-int fsapfs_test_deflate_bit_stream_get_huffman_encoded_value(
-     void )
-{
-	libfsapfs_deflate_bit_stream_t bit_stream;
-	libfsapfs_deflate_huffman_table_t distances_table;
-	libfsapfs_deflate_huffman_table_t literals_table;
-
-	libcerror_error_t *error = NULL;
-	void *memset_result      = NULL;
-	uint32_t value_32bit     = 0;
-	int result               = 0;
-
-	/* Initialize test
-	 */
-	memset_result = memory_set(
-	                 &bit_stream,
-	                 0,
-	                 sizeof( libfsapfs_deflate_bit_stream_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
-	memset_result = memory_set(
-	                 &distances_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
-	memset_result = memory_set(
-	                 &literals_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
-	result = libfsapfs_deflate_initialize_fixed_huffman_tables(
-	          &literals_table,
-	          &distances_table,
+	          15,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1190,24 +743,18 @@ int fsapfs_test_deflate_bit_stream_get_huffman_encoded_value(
 	 result,
 	 1 );
 
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "literals_tree",
+	 literals_tree );
+
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	/* Test regular cases
-	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	value_32bit = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_huffman_encoded_value(
-	          &bit_stream,
-	          &literals_table,
-	          &value_32bit,
+	result = libfsapfs_huffman_tree_initialize(
+	          &distances_tree,
+	          30,
+	          15,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1215,172 +762,18 @@ int fsapfs_test_deflate_bit_stream_get_huffman_encoded_value(
 	 result,
 	 1 );
 
-	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "value_32bit",
-	 value_32bit,
-	 (uint32_t) 141 );
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "distances_tree",
+	 distances_tree );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	/* Test error cases
-	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	value_32bit = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_huffman_encoded_value(
-	          NULL,
-	          &literals_table,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_deflate_bit_stream_get_huffman_encoded_value(
-	          &bit_stream,
-	          NULL,
-	          &value_32bit,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	result = libfsapfs_deflate_bit_stream_get_huffman_encoded_value(
-	          &bit_stream,
-	          &literals_table,
-	          NULL,
-	          &error );
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	bit_stream.byte_stream_offset = 2627;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_huffman_encoded_value(
-	          &bit_stream,
-	          &literals_table,
-	          &value_32bit,
-	          &error );
-
-	bit_stream.byte_stream_offset = 2;
-
-	FSAPFS_TEST_ASSERT_EQUAL_INT(
-	 "result",
-	 result,
-	 -1 );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "error",
-	 error );
-
-	libcerror_error_free(
-	 &error );
-
-	return( 1 );
-
-on_error:
-	if( error != NULL )
-	{
-		libcerror_error_free(
-		 &error );
-	}
-	return( 0 );
-}
-
-/* Tests the libfsapfs_deflate_initialize_dynamic_huffman_tables function
- * Returns 1 if successful or 0 if not
- */
-int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
-     void )
-{
-	libfsapfs_deflate_bit_stream_t bit_stream;
-	libfsapfs_deflate_huffman_table_t distances_table;
-	libfsapfs_deflate_huffman_table_t literals_table;
-
-	libcerror_error_t *error        = NULL;
-	void *memset_result             = NULL;
-	uint32_t value_32bit            = 0;
-	int result                      = 0;
-
-#if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_memset_fail_tests = 6;
-	int test_number                 = 0;
-#endif
-
-	/* Initialize test
-	 */
-	memset_result = memory_set(
-	                 &bit_stream,
-	                 0,
-	                 sizeof( libfsapfs_deflate_bit_stream_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
-	memset_result = memory_set(
-	                 &distances_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
-	memset_result = memory_set(
-	                 &literals_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
-
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
-
 	/* Test regular cases
 	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
+	result = libfsapfs_bit_stream_get_value(
+	          bit_stream,
 	          3,
 	          &value_32bit,
 	          &error );
@@ -1399,10 +792,10 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	 "error",
 	 error );
 
-	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
-	          &bit_stream,
-	          &literals_table,
-	          &distances_table,
+	result = libfsapfs_deflate_build_dynamic_huffman_trees(
+	          bit_stream,
+	          literals_tree,
+	          distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1414,16 +807,52 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	 "error",
 	 error );
 
+	/* Clean up
+	 */
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	/* Test error cases
 	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
+	result = libfsapfs_bit_stream_get_value(
+	          bit_stream,
 	          3,
 	          &value_32bit,
 	          &error );
@@ -1442,10 +871,10 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	 "error",
 	 error );
 
-	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
+	result = libfsapfs_deflate_build_dynamic_huffman_trees(
 	          NULL,
-	          &literals_table,
-	          &distances_table,
+	          literals_tree,
+	          distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1460,10 +889,10 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
-	          &bit_stream,
+	result = libfsapfs_deflate_build_dynamic_huffman_trees(
+	          bit_stream,
 	          NULL,
-	          &distances_table,
+	          distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1478,9 +907,9 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
-	          &bit_stream,
-	          &literals_table,
+	result = libfsapfs_deflate_build_dynamic_huffman_trees(
+	          bit_stream,
+	          literals_tree,
 	          NULL,
 	          &error );
 
@@ -1506,10 +935,10 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
-		          &bit_stream,
-		          &literals_table,
-		          &distances_table,
+		result = libfsapfs_deflate_build_dynamic_huffman_trees(
+		          bit_stream,
+		          literals_tree,
+		          distances_tree,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
@@ -1533,9 +962,80 @@ int fsapfs_test_deflate_initialize_dynamic_huffman_tables(
 	}
 #endif /* defined( HAVE_FSAPFS_TEST_MEMORY ) */
 
+	/* Clean up
+	 */
+	result = libfsapfs_huffman_tree_free(
+	          &distances_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "distances_tree",
+	 distances_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_free(
+	          &literals_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "literals_tree",
+	 literals_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	return( 1 );
 
 on_error:
+	if( distances_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &distances_tree,
+		 NULL );
+	}
+	if( literals_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &literals_tree,
+		 NULL );
+	}
+	if( bit_stream != NULL )
+	{
+		libfsapfs_bit_stream_free(
+		 &bit_stream,
+		 NULL );
+	}
 	if( error != NULL )
 	{
 		libcerror_error_free(
@@ -1544,49 +1044,67 @@ on_error:
 	return( 0 );
 }
 
-/* Tests the libfsapfs_deflate_initialize_fixed_huffman_tables function
+/* Tests the libfsapfs_deflate_build_fixed_huffman_trees function
  * Returns 1 if successful or 0 if not
  */
-int fsapfs_test_deflate_initialize_fixed_huffman_tables(
+int fsapfs_test_deflate_build_fixed_huffman_trees(
      void )
 {
-	libfsapfs_deflate_huffman_table_t distances_table;
-	libfsapfs_deflate_huffman_table_t literals_table;
-
-	libcerror_error_t *error        = NULL;
-	void *memset_result             = NULL;
-	int result                      = 0;
+	libfsapfs_huffman_tree_t *distances_tree = NULL;
+	libfsapfs_huffman_tree_t *literals_tree  = NULL;
+	libcerror_error_t *error               = NULL;
+	int result                             = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_memset_fail_tests = 4;
-	int test_number                 = 0;
+	int number_of_memset_fail_tests        = 4;
+	int test_number                        = 0;
 #endif
 
 	/* Initialize test
 	 */
-	memset_result = memory_set(
-	                 &distances_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
+	result = libfsapfs_huffman_tree_initialize(
+	          &literals_tree,
+	          288,
+	          15,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
+	 "literals_tree",
+	 literals_tree );
 
-	memset_result = memory_set(
-	                 &literals_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_initialize(
+	          &distances_tree,
+	          30,
+	          15,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
+	 "distances_tree",
+	 distances_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test regular cases
 	 */
-	result = libfsapfs_deflate_initialize_fixed_huffman_tables(
-	          &literals_table,
-	          &distances_table,
+	result = libfsapfs_deflate_build_fixed_huffman_trees(
+	          literals_tree,
+	          distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1600,9 +1118,9 @@ int fsapfs_test_deflate_initialize_fixed_huffman_tables(
 
 	/* Test error cases
 	 */
-	result = libfsapfs_deflate_initialize_fixed_huffman_tables(
+	result = libfsapfs_deflate_build_fixed_huffman_trees(
 	          NULL,
-	          &distances_table,
+	          distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1617,8 +1135,8 @@ int fsapfs_test_deflate_initialize_fixed_huffman_tables(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_deflate_initialize_fixed_huffman_tables(
-	          &literals_table,
+	result = libfsapfs_deflate_build_fixed_huffman_trees(
+	          literals_tree,
 	          NULL,
 	          &error );
 
@@ -1644,9 +1162,9 @@ int fsapfs_test_deflate_initialize_fixed_huffman_tables(
 		 */
 		fsapfs_test_memset_attempts_before_fail = test_number;
 
-		result = libfsapfs_deflate_initialize_fixed_huffman_tables(
-		          &literals_table,
-		          &distances_table,
+		result = libfsapfs_deflate_build_fixed_huffman_trees(
+		          literals_tree,
+		          distances_tree,
 		          &error );
 
 		if( fsapfs_test_memset_attempts_before_fail != -1 )
@@ -1670,9 +1188,57 @@ int fsapfs_test_deflate_initialize_fixed_huffman_tables(
 	}
 #endif /* defined( HAVE_FSAPFS_TEST_MEMORY ) */
 
+	/* Clean up
+	 */
+	result = libfsapfs_huffman_tree_free(
+	          &distances_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "distances_tree",
+	 distances_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_free(
+	          &literals_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "literals_tree",
+	 literals_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	return( 1 );
 
 on_error:
+	if( distances_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &distances_tree,
+		 NULL );
+	}
+	if( literals_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &literals_tree,
+		 NULL );
+	}
 	if( error != NULL )
 	{
 		libcerror_error_free(
@@ -1689,55 +1255,79 @@ int fsapfs_test_deflate_decode_huffman(
 {
 	uint8_t uncompressed_data[ 8192 ];
 
-	libfsapfs_deflate_bit_stream_t bit_stream;
-	libfsapfs_deflate_huffman_table_t distances_table;
-	libfsapfs_deflate_huffman_table_t literals_table;
-
-	libcerror_error_t *error        = NULL;
-	void *memset_result             = NULL;
-	size_t uncompressed_data_offset = 0;
-	uint32_t value_32bit            = 0;
-	int result                      = 0;
+	libfsapfs_bit_stream_t *bit_stream       = NULL;
+	libfsapfs_huffman_tree_t *distances_tree = NULL;
+	libfsapfs_huffman_tree_t *literals_tree  = NULL;
+	libcerror_error_t *error               = NULL;
+	size_t uncompressed_data_offset        = 0;
+	uint32_t value_32bit                   = 0;
+	int result                             = 0;
 
 	/* Initialize test
 	 */
-	memset_result = memory_set(
-	                 &bit_stream,
-	                 0,
-	                 sizeof( libfsapfs_deflate_bit_stream_t ) );
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
+	 "bit_stream",
+	 bit_stream );
 
-	memset_result = memory_set(
-	                 &distances_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_initialize(
+	          &literals_tree,
+	          288,
+	          15,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
+	 "literals_tree",
+	 literals_tree );
 
-	memset_result = memory_set(
-	                 &literals_table,
-	                 0,
-	                 sizeof( libfsapfs_deflate_huffman_table_t ) );
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_initialize(
+	          &distances_tree,
+	          30,
+	          15,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
+	 "distances_tree",
+	 distances_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test regular cases
 	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
+	result = libfsapfs_bit_stream_get_value(
+	          bit_stream,
 	          3,
 	          &value_32bit,
 	          &error );
@@ -1756,10 +1346,10 @@ int fsapfs_test_deflate_decode_huffman(
 	 "error",
 	 error );
 
-	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
-	          &bit_stream,
-	          &literals_table,
-	          &distances_table,
+	result = libfsapfs_deflate_build_dynamic_huffman_trees(
+	          bit_stream,
+	          literals_tree,
+	          distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1772,9 +1362,9 @@ int fsapfs_test_deflate_decode_huffman(
 	 error );
 
 	result = libfsapfs_deflate_decode_huffman(
-	          &bit_stream,
-	          &literals_table,
-	          &distances_table,
+	          bit_stream,
+	          literals_tree,
+	          distances_tree,
 	          uncompressed_data,
 	          8192,
 	          &uncompressed_data_offset,
@@ -1784,6 +1374,48 @@ int fsapfs_test_deflate_decode_huffman(
 	 "result",
 	 result,
 	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "bit_stream",
+	 bit_stream );
 
 	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
@@ -1791,14 +1423,8 @@ int fsapfs_test_deflate_decode_huffman(
 
 	/* Test error cases
 	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
-	result = libfsapfs_deflate_bit_stream_get_value(
-	          &bit_stream,
+	result = libfsapfs_bit_stream_get_value(
+	          bit_stream,
 	          3,
 	          &value_32bit,
 	          &error );
@@ -1817,10 +1443,10 @@ int fsapfs_test_deflate_decode_huffman(
 	 "error",
 	 error );
 
-	result = libfsapfs_deflate_initialize_dynamic_huffman_tables(
-	          &bit_stream,
-	          &literals_table,
-	          &distances_table,
+	result = libfsapfs_deflate_build_dynamic_huffman_trees(
+	          bit_stream,
+	          literals_tree,
+	          distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -1834,8 +1460,8 @@ int fsapfs_test_deflate_decode_huffman(
 
 	result = libfsapfs_deflate_decode_huffman(
 	          NULL,
-	          &literals_table,
-	          &distances_table,
+	          literals_tree,
+	          distances_tree,
 	          uncompressed_data,
 	          8192,
 	          &uncompressed_data_offset,
@@ -1854,9 +1480,9 @@ int fsapfs_test_deflate_decode_huffman(
 	 &error );
 
 	result = libfsapfs_deflate_decode_huffman(
-	          &bit_stream,
+	          bit_stream,
 	          NULL,
-	          &distances_table,
+	          distances_tree,
 	          uncompressed_data,
 	          8192,
 	          &uncompressed_data_offset,
@@ -1875,8 +1501,8 @@ int fsapfs_test_deflate_decode_huffman(
 	 &error );
 
 	result = libfsapfs_deflate_decode_huffman(
-	          &bit_stream,
-	          &literals_table,
+	          bit_stream,
+	          literals_tree,
 	          NULL,
 	          uncompressed_data,
 	          8192,
@@ -1896,9 +1522,9 @@ int fsapfs_test_deflate_decode_huffman(
 	 &error );
 
 	result = libfsapfs_deflate_decode_huffman(
-	          &bit_stream,
-	          &literals_table,
-	          &distances_table,
+	          bit_stream,
+	          literals_tree,
+	          distances_tree,
 	          NULL,
 	          8192,
 	          &uncompressed_data_offset,
@@ -1917,9 +1543,9 @@ int fsapfs_test_deflate_decode_huffman(
 	 &error );
 
 	result = libfsapfs_deflate_decode_huffman(
-	          &bit_stream,
-	          &literals_table,
-	          &distances_table,
+	          bit_stream,
+	          literals_tree,
+	          distances_tree,
 	          uncompressed_data,
 	          (size_t) SSIZE_MAX + 1,
 	          &uncompressed_data_offset,
@@ -1938,9 +1564,9 @@ int fsapfs_test_deflate_decode_huffman(
 	 &error );
 
 	result = libfsapfs_deflate_decode_huffman(
-	          &bit_stream,
-	          &literals_table,
-	          &distances_table,
+	          bit_stream,
+	          literals_tree,
+	          distances_tree,
 	          uncompressed_data,
 	          8192,
 	          NULL,
@@ -1958,9 +1584,80 @@ int fsapfs_test_deflate_decode_huffman(
 	libcerror_error_free(
 	 &error );
 
+	/* Clean up
+	 */
+	result = libfsapfs_huffman_tree_free(
+	          &distances_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "distances_tree",
+	 distances_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_free(
+	          &literals_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "literals_tree",
+	 literals_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	return( 1 );
 
 on_error:
+	if( distances_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &distances_tree,
+		 NULL );
+	}
+	if( literals_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &literals_tree,
+		 NULL );
+	}
+	if( bit_stream != NULL )
+	{
+		libfsapfs_bit_stream_free(
+		 &bit_stream,
+		 NULL );
+	}
 	if( error != NULL )
 	{
 		libcerror_error_free(
@@ -1983,7 +1680,7 @@ int fsapfs_test_deflate_calculate_adler32(
 	 */
 	result = libfsapfs_deflate_calculate_adler32(
 	          &checksum,
-	          fsapfs_test_deflate_uncompressed_byte_stream,
+	          fsapfs_test_deflate_uncompressed_data,
 	          7640,
 	          1,
 	          &error );
@@ -2006,7 +1703,7 @@ int fsapfs_test_deflate_calculate_adler32(
 	 */
 	result = libfsapfs_deflate_calculate_adler32(
 	          NULL,
-	          fsapfs_test_deflate_uncompressed_byte_stream,
+	          fsapfs_test_deflate_uncompressed_data,
 	          7640,
 	          1,
 	          &error );
@@ -2044,7 +1741,7 @@ int fsapfs_test_deflate_calculate_adler32(
 
 	result = libfsapfs_deflate_calculate_adler32(
 	          &checksum,
-	          fsapfs_test_deflate_uncompressed_byte_stream,
+	          fsapfs_test_deflate_uncompressed_data,
 	          (size_t) SSIZE_MAX + 1,
 	          1,
 	          &error );
@@ -2087,7 +1784,7 @@ int fsapfs_test_deflate_read_data_header(
 	uncompressed_data_offset = 0;
 
 	result = libfsapfs_deflate_read_data_header(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          2627,
 	          &uncompressed_data_offset,
 	          &error );
@@ -2129,7 +1826,7 @@ int fsapfs_test_deflate_read_data_header(
 	 &error );
 
 	result = libfsapfs_deflate_read_data_header(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          (size_t) SSIZE_MAX + 1,
 	          &uncompressed_data_offset,
 	          &error );
@@ -2147,7 +1844,7 @@ int fsapfs_test_deflate_read_data_header(
 	 &error );
 
 	result = libfsapfs_deflate_read_data_header(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          2627,
 	          NULL,
 	          &error );
@@ -2165,7 +1862,7 @@ int fsapfs_test_deflate_read_data_header(
 	 &error );
 
 	result = libfsapfs_deflate_read_data_header(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          1,
 	          &uncompressed_data_offset,
 	          &error );
@@ -2196,6 +1893,192 @@ on_error:
 	return( 0 );
 }
 
+/* Tests the deflate_read_block_header function
+ * Returns 1 if successful or 0 if not
+ */
+int fsapfs_test_deflate_read_block_header(
+     void )
+{
+	libfsapfs_bit_stream_t *bit_stream = NULL;
+	libcerror_error_t *error         = NULL;
+	uint8_t block_type               = 0;
+	uint8_t last_block_flag          = 0;
+	int result                       = 0;
+
+	/* Initialize test
+	 */
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsapfs_deflate_read_block_header(
+	          bit_stream,
+	          &block_type,
+	          &last_block_flag,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test error cases
+	 */
+	result = libfsapfs_deflate_read_block_header(
+	          NULL,
+	          &block_type,
+	          &last_block_flag,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_deflate_read_block_header(
+	          bit_stream,
+	          NULL,
+	          &last_block_flag,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	result = libfsapfs_deflate_read_block_header(
+	          bit_stream,
+	          &block_type,
+	          NULL,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	return( 1 );
+
+on_error:
+	if( bit_stream != NULL )
+	{
+		libfsapfs_bit_stream_free(
+		 &bit_stream,
+		 NULL );
+	}
+	if( error != NULL )
+	{
+		libcerror_error_free(
+		 &error );
+	}
+	return( 0 );
+}
+
 /* Tests the libfsapfs_deflate_read_block function
  * Returns 1 if successful or 0 if not
  */
@@ -2204,40 +2087,116 @@ int fsapfs_test_deflate_read_block(
 {
 	uint8_t uncompressed_data[ 8192 ];
 
-	libfsapfs_deflate_bit_stream_t bit_stream;
-
-	libcerror_error_t *error        = NULL;
-	void *memset_result             = NULL;
-	size_t uncompressed_data_offset = 0;
-	size_t uncompressed_data_size   = 7640;
-	uint8_t last_block_flag         = 0;
-	int result                      = 0;
+	libfsapfs_bit_stream_t *bit_stream             = NULL;
+	libfsapfs_huffman_tree_t *fixed_distances_tree = NULL;
+	libfsapfs_huffman_tree_t *fixed_literals_tree  = NULL;
+	libcerror_error_t *error                     = NULL;
+	size_t uncompressed_data_offset              = 0;
+	size_t uncompressed_data_size                = 7640;
+	uint8_t block_type                           = 0;
+	uint8_t last_block_flag                      = 0;
+	int result                                   = 0;
 
 	/* Initialize test
 	 */
-	memset_result = memory_set(
-	                 &bit_stream,
-	                 0,
-	                 sizeof( libfsapfs_deflate_bit_stream_t ) );
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
 
 	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
-	 "memset_result",
-	 memset_result );
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_initialize(
+	          &fixed_literals_tree,
+	          288,
+	          15,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "fixed_literals_tree",
+	 fixed_literals_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_huffman_tree_initialize(
+	          &fixed_distances_tree,
+	          30,
+	          15,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "fixed_distances_tree",
+	 fixed_distances_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_deflate_build_fixed_huffman_trees(
+	          fixed_literals_tree,
+	          fixed_distances_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_deflate_read_block_header(
+	          bit_stream,
+	          &block_type,
+	          &last_block_flag,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test regular cases
 	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
 	result = libfsapfs_deflate_read_block(
-	          &bit_stream,
+	          bit_stream,
+	          block_type,
+	          fixed_literals_tree,
+	          fixed_distances_tree,
 	          uncompressed_data,
 	          uncompressed_data_size,
 	          &uncompressed_data_offset,
-	          &last_block_flag,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -2256,20 +2215,58 @@ int fsapfs_test_deflate_read_block(
 
 /* TODO: test uncompressed data too small */
 
+	/* Clean up
+	 */
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_bit_stream_initialize(
+	          &bit_stream,
+	          fsapfs_test_deflate_compressed_data,
+	          2627,
+	          2,
+	          LIBFSAPFS_BIT_STREAM_STORAGE_TYPE_BYTE_BACK_TO_FRONT,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	/* Test error cases
 	 */
-	bit_stream.byte_stream        = fsapfs_test_deflate_compressed_byte_stream;
-	bit_stream.byte_stream_size   = 2627;
-	bit_stream.byte_stream_offset = 2;
-	bit_stream.bit_buffer         = 0;
-	bit_stream.bit_buffer_size    = 0;
-
 	result = libfsapfs_deflate_read_block(
 	          NULL,
+	          block_type,
+	          fixed_literals_tree,
+	          fixed_distances_tree,
 	          uncompressed_data,
 	          uncompressed_data_size,
 	          &uncompressed_data_offset,
-	          &last_block_flag,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -2285,11 +2282,13 @@ int fsapfs_test_deflate_read_block(
 	 &error );
 
 	result = libfsapfs_deflate_read_block(
-	          &bit_stream,
+	          bit_stream,
+	          block_type,
+	          fixed_literals_tree,
+	          fixed_distances_tree,
 	          NULL,
 	          uncompressed_data_size,
 	          &uncompressed_data_offset,
-	          &last_block_flag,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -2305,11 +2304,13 @@ int fsapfs_test_deflate_read_block(
 	 &error );
 
 	result = libfsapfs_deflate_read_block(
-	          &bit_stream,
+	          bit_stream,
+	          block_type,
+	          fixed_literals_tree,
+	          fixed_distances_tree,
 	          uncompressed_data,
 	          (size_t) SSIZE_MAX + 1,
 	          &uncompressed_data_offset,
-	          &last_block_flag,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -2325,11 +2326,13 @@ int fsapfs_test_deflate_read_block(
 	 &error );
 
 	result = libfsapfs_deflate_read_block(
-	          &bit_stream,
+	          bit_stream,
+	          block_type,
+	          fixed_literals_tree,
+	          fixed_distances_tree,
 	          uncompressed_data,
 	          uncompressed_data_size,
 	          NULL,
-	          &last_block_flag,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
@@ -2344,29 +2347,80 @@ int fsapfs_test_deflate_read_block(
 	libcerror_error_free(
 	 &error );
 
-	result = libfsapfs_deflate_read_block(
-	          &bit_stream,
-	          uncompressed_data,
-	          uncompressed_data_size,
-	          &uncompressed_data_offset,
-	          NULL,
+	/* Clean up
+	 */
+	result = libfsapfs_huffman_tree_free(
+	          &fixed_distances_tree,
 	          &error );
 
 	FSAPFS_TEST_ASSERT_EQUAL_INT(
 	 "result",
 	 result,
-	 -1 );
+	 1 );
 
-	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "fixed_distances_tree",
+	 fixed_distances_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
 	 "error",
 	 error );
 
-	libcerror_error_free(
-	 &error );
+	result = libfsapfs_huffman_tree_free(
+	          &fixed_literals_tree,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "fixed_literals_tree",
+	 fixed_literals_tree );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_bit_stream_free(
+	          &bit_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "bit_stream",
+	 bit_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	return( 1 );
 
 on_error:
+	if( fixed_distances_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &fixed_distances_tree,
+		 NULL );
+	}
+	if( fixed_literals_tree != NULL )
+	{
+		libfsapfs_huffman_tree_free(
+		 &fixed_literals_tree,
+		 NULL );
+	}
+	if( bit_stream != NULL )
+	{
+		libfsapfs_bit_stream_free(
+		 &bit_stream,
+		 NULL );
+	}
 	if( error != NULL )
 	{
 		libcerror_error_free(
@@ -2390,7 +2444,7 @@ int fsapfs_test_deflate_decompress(
 	/* Test regular cases
 	 */
 	result = libfsapfs_deflate_decompress(
-	          &( fsapfs_test_deflate_compressed_byte_stream[ 2 ] ),
+	          &( fsapfs_test_deflate_compressed_data[ 2 ] ),
 	          2627 - 6,
 	          uncompressed_data,
 	          &uncompressed_data_size,
@@ -2434,7 +2488,7 @@ int fsapfs_test_deflate_decompress(
 	 &error );
 
 	result = libfsapfs_deflate_decompress(
-	          &( fsapfs_test_deflate_compressed_byte_stream[ 2 ] ),
+	          &( fsapfs_test_deflate_compressed_data[ 2 ] ),
 	          (size_t) SSIZE_MAX + 1,
 	          uncompressed_data,
 	          &uncompressed_data_size,
@@ -2453,7 +2507,7 @@ int fsapfs_test_deflate_decompress(
 	 &error );
 
 	result = libfsapfs_deflate_decompress(
-	          &( fsapfs_test_deflate_compressed_byte_stream[ 2 ] ),
+	          &( fsapfs_test_deflate_compressed_data[ 2 ] ),
 	          2627 - 6,
 	          NULL,
 	          &uncompressed_data_size,
@@ -2472,7 +2526,7 @@ int fsapfs_test_deflate_decompress(
 	 &error );
 
 	result = libfsapfs_deflate_decompress(
-	          &( fsapfs_test_deflate_compressed_byte_stream[ 2 ] ),
+	          &( fsapfs_test_deflate_compressed_data[ 2 ] ),
 	          2627 - 6,
 	          uncompressed_data,
 	          NULL,
@@ -2516,7 +2570,7 @@ int fsapfs_test_deflate_decompress_zlib(
 	/* Test regular cases
 	 */
 	result = libfsapfs_deflate_decompress_zlib(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          2627,
 	          uncompressed_data,
 	          &uncompressed_data_size,
@@ -2560,7 +2614,7 @@ int fsapfs_test_deflate_decompress_zlib(
 	 &error );
 
 	result = libfsapfs_deflate_decompress_zlib(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          (size_t) SSIZE_MAX + 1,
 	          uncompressed_data,
 	          &uncompressed_data_size,
@@ -2579,7 +2633,7 @@ int fsapfs_test_deflate_decompress_zlib(
 	 &error );
 
 	result = libfsapfs_deflate_decompress_zlib(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          2627,
 	          NULL,
 	          &uncompressed_data_size,
@@ -2598,7 +2652,7 @@ int fsapfs_test_deflate_decompress_zlib(
 	 &error );
 
 	result = libfsapfs_deflate_decompress_zlib(
-	          fsapfs_test_deflate_compressed_byte_stream,
+	          fsapfs_test_deflate_compressed_data,
 	          2627,
 	          uncompressed_data,
 	          NULL,
@@ -2655,24 +2709,12 @@ int main(
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_deflate_bit_stream_get_value",
-	 fsapfs_test_deflate_bit_stream_get_value );
+	 "libfsapfs_deflate_build_dynamic_huffman_trees",
+	 fsapfs_test_deflate_build_dynamic_huffman_trees );
 
 	FSAPFS_TEST_RUN(
-	 "libfsapfs_deflate_huffman_table_construct",
-	 fsapfs_test_deflate_huffman_table_construct );
-
-	FSAPFS_TEST_RUN(
-	 "libfsapfs_deflate_bit_stream_get_huffman_encoded_value",
-	 fsapfs_test_deflate_bit_stream_get_huffman_encoded_value );
-
-	FSAPFS_TEST_RUN(
-	 "libfsapfs_deflate_initialize_dynamic_huffman_tables",
-	 fsapfs_test_deflate_initialize_dynamic_huffman_tables );
-
-	FSAPFS_TEST_RUN(
-	 "libfsapfs_deflate_initialize_fixed_huffman_tables",
-	 fsapfs_test_deflate_initialize_fixed_huffman_tables );
+	 "libfsapfs_deflate_build_fixed_huffman_trees",
+	 fsapfs_test_deflate_build_fixed_huffman_trees );
 
 	FSAPFS_TEST_RUN(
 	 "libfsapfs_deflate_decode_huffman",

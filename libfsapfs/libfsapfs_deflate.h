@@ -25,6 +25,8 @@
 #include <common.h>
 #include <types.h>
 
+#include "libfsapfs_bit_stream.h"
+#include "libfsapfs_huffman_tree.h"
 #include "libfsapfs_libcerror.h"
 
 #if defined( __cplusplus )
@@ -41,86 +43,21 @@ enum LIBFSAPFS_DEFLATE_BLOCK_TYPES
 	LIBFSAPFS_DEFLATE_BLOCK_TYPE_RESERVED		= 0x03
 };
 
-typedef struct libfsapfs_deflate_bit_stream libfsapfs_deflate_bit_stream_t;
-
-struct libfsapfs_deflate_bit_stream
-{
-	/* The byte stream
-	 */
-	const uint8_t *byte_stream;
-
-	/* The byte stream size
-	 */
-	size_t byte_stream_size;
-
-	/* The byte stream offset
-	 */
-	size_t byte_stream_offset;
-
-	/* The bit buffer
-	 */
-	uint32_t bit_buffer;
-
-	/* The number of bits remaining in the bit buffer
-	 */
-	uint8_t bit_buffer_size;
-};
-
-typedef struct libfsapfs_deflate_huffman_table libfsapfs_deflate_huffman_table_t;
-
-struct libfsapfs_deflate_huffman_table
-{
-	/* The maximum number of bits representable by the Huffman table
-	 */
-	uint8_t maximum_number_of_bits;
-
-/* TODO create initialize function that sets the size of codes array? */
-	/* The codes array
-	 */
-	int codes_array[ 288 ];
-
-	/* The code counts array
-	 */
-	int code_counts_array[ 16 ];
-
-	/* The number of codes
-	 */
-	int number_of_codes;
-};
-
-int libfsapfs_deflate_bit_stream_get_value(
-     libfsapfs_deflate_bit_stream_t *bit_stream,
-     uint8_t number_of_bits,
-     uint32_t *value_32bit,
+int libfsapfs_deflate_build_dynamic_huffman_trees(
+     libfsapfs_bit_stream_t *bit_stream,
+     libfsapfs_huffman_tree_t *literals_tree,
+     libfsapfs_huffman_tree_t *distances_tree,
      libcerror_error_t **error );
 
-int libfsapfs_deflate_huffman_table_construct(
-     libfsapfs_deflate_huffman_table_t *table,
-     const uint16_t *code_sizes_array,
-     int number_of_code_sizes,
-     libcerror_error_t **error );
-
-int libfsapfs_deflate_bit_stream_get_huffman_encoded_value(
-     libfsapfs_deflate_bit_stream_t *bit_stream,
-     libfsapfs_deflate_huffman_table_t *table,
-     uint32_t *value_32bit,
-     libcerror_error_t **error );
-
-int libfsapfs_deflate_initialize_dynamic_huffman_tables(
-     libfsapfs_deflate_bit_stream_t *bit_stream,
-     libfsapfs_deflate_huffman_table_t *literals_table,
-     libfsapfs_deflate_huffman_table_t *distances_table,
-     libcerror_error_t **error );
-
-int libfsapfs_deflate_initialize_fixed_huffman_tables(
-     libfsapfs_deflate_huffman_table_t *literals_table,
-     libfsapfs_deflate_huffman_table_t *distances_table,
+int libfsapfs_deflate_build_fixed_huffman_trees(
+     libfsapfs_huffman_tree_t *literals_tree,
+     libfsapfs_huffman_tree_t *distances_tree,
      libcerror_error_t **error );
 
 int libfsapfs_deflate_decode_huffman(
-     libfsapfs_deflate_bit_stream_t *bit_stream,
-     libfsapfs_deflate_huffman_table_t *literals_table,
-     libfsapfs_deflate_huffman_table_t *distances_table,
+     libfsapfs_bit_stream_t *bit_stream,
+     libfsapfs_huffman_tree_t *literals_tree,
+     libfsapfs_huffman_tree_t *distances_tree,
      uint8_t *uncompressed_data,
      size_t uncompressed_data_size,
      size_t *uncompressed_data_offset,
@@ -128,8 +65,8 @@ int libfsapfs_deflate_decode_huffman(
 
 int libfsapfs_deflate_calculate_adler32(
      uint32_t *checksum_value,
-     const uint8_t *buffer,
-     size_t size,
+     const uint8_t *data,
+     size_t data_size,
      uint32_t initial_value,
      libcerror_error_t **error );
 
@@ -139,12 +76,20 @@ int libfsapfs_deflate_read_data_header(
      size_t *compressed_data_offset,
      libcerror_error_t **error );
 
+int libfsapfs_deflate_read_block_header(
+     libfsapfs_bit_stream_t *bit_stream,
+     uint8_t *block_type,
+     uint8_t *last_block_flag,
+     libcerror_error_t **error );
+
 int libfsapfs_deflate_read_block(
-     libfsapfs_deflate_bit_stream_t *bit_stream,
+     libfsapfs_bit_stream_t *bit_stream,
+     uint8_t block_type,
+     libfsapfs_huffman_tree_t *fixed_huffman_literals_tree,
+     libfsapfs_huffman_tree_t *fixed_huffman_distances_tree,
      uint8_t *uncompressed_data,
      size_t uncompressed_data_size,
      size_t *uncompressed_data_offset,
-     uint8_t *last_block_flag,
      libcerror_error_t **error );
 
 int libfsapfs_deflate_decompress(

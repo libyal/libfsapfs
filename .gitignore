@@ -128,6 +128,7 @@ stamp-h[1-9]
 /fsapfstools/fsapfsinfo
 /fsapfstools/fsapfsmount
 /tests/*.exe
+/tests/fsapfs_test_bit_stream
 /tests/fsapfs_test_btree_entry
 /tests/fsapfs_test_btree_footer
 /tests/fsapfs_test_btree_node
@@ -160,6 +161,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_file_system_btree
 /tests/fsapfs_test_file_system_data_handle
 /tests/fsapfs_test_fusion_middle_tree
+/tests/fsapfs_test_huffman_tree
 /tests/fsapfs_test_inode
 /tests/fsapfs_test_io_handle
 /tests/fsapfs_test_key_bag_entry

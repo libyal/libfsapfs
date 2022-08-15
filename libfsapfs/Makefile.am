@@ -44,6 +44,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs.c \
 	libfsapfs_attributes.c libfsapfs_attributes.h \
 	libfsapfs_attribute_values.c libfsapfs_attribute_values.h \
+	libfsapfs_bit_stream.c libfsapfs_bit_stream.h \
 	libfsapfs_btree_entry.c libfsapfs_btree_entry.h \
 	libfsapfs_btree_footer.c libfsapfs_btree_footer.h \
 	libfsapfs_btree_node.c libfsapfs_btree_node.h \
@@ -80,6 +81,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_file_system_btree.c libfsapfs_file_system_btree.h \
 	libfsapfs_file_system_data_handle.c libfsapfs_file_system_data_handle.h \
 	libfsapfs_fusion_middle_tree.c libfsapfs_fusion_middle_tree.h \
+	libfsapfs_huffman_tree.c libfsapfs_huffman_tree.h \
 	libfsapfs_inode.c libfsapfs_inode.h \
 	libfsapfs_io_handle.c libfsapfs_io_handle.h \
 	libfsapfs_key_bag_entry.c libfsapfs_key_bag_entry.h \

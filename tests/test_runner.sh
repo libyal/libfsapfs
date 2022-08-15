@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20201215
+# Version: 20220807
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -14,6 +14,8 @@
 #
 # When CHECK_WITH_VALGRIND is set to a non-empty value the test executable
 # is run with valgrind, otherwise it is run without.
+#
+# PYTHON and PYTHON_VERSION are used to determine the Python interpreter.
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -442,7 +444,7 @@ run_test_with_arguments()
 	echo "${EXECUTABLE_TYPE}" | grep -i "python script" > /dev/null 2>&1;
 	local IS_PYTHON_SCRIPT=$?;
 
-	if test ${IS_PYTHON_SCRIPT} -eq 0;
+	if test ${IS_PYTHON_SCRIPT} -eq 0 && test -z ${PYTHON};
 	then
 		local PYTHON=`which python${PYTHON_VERSION} 2> /dev/null`;
 
@@ -762,7 +764,7 @@ run_test_with_input_and_arguments()
 	echo "${EXECUTABLE_TYPE}" | grep -i "python script" > /dev/null 2>&1;
 	local IS_PYTHON_SCRIPT=$?;
 
-	if test ${IS_PYTHON_SCRIPT} -eq 0;
+	if test ${IS_PYTHON_SCRIPT} -eq 0 && test -z ${PYTHON};
 	then
 		local PYTHON=`which python${PYTHON_VERSION} 2> /dev/null`;
 

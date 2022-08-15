@@ -182,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_bit_stream.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_btree_entry.c"
 				>
 			</File>
@@ -315,6 +319,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_fusion_middle_tree.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_huffman_tree.c"
 				>
 			</File>
 			<File
@@ -480,6 +488,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_bit_stream.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_btree_entry.h"
 				>
 			</File>
@@ -621,6 +633,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_fusion_middle_tree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_huffman_tree.h"
 				>
 			</File>
 			<File

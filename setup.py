@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20211115
+# Version: 20220806
 
 from __future__ import print_function
 
@@ -323,6 +323,7 @@ setup(
     version=project_information.library_version,
     description=project_information.package_description,
     long_description=project_information.package_description,
+    long_description_content_type="text/plain",
     author="Joachim Metz",
     author_email="joachim.metz@gmail.com",
     license="GNU Lesser General Public License v3 or later (LGPLv3+)",

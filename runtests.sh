@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script that runs the tests
 #
-# Version: 20220805
+# Version: 20220807
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -195,6 +195,8 @@ run_setup_py_tests()
 	return ${EXIT_SUCCESS};
 }
 
+PROJECT_NAME=`basename $PWD`;
+
 CONFIGURE_HELP=`./configure --help`;
 
 echo "${CONFIGURE_HELP}" | grep -- '--enable-wide-character-type' > /dev/null;
@@ -271,7 +273,7 @@ then
 	fi
 fi
 
-if test ${HAVE_WITH_PTHREAD} -eq 0;
+if test ${HAVE_WITH_PTHREAD} -eq 0 && test ${PROJECT_NAME} != "libcthreads";
 then
 	# Test "./configure && make && make check" without multi-threading support.
 

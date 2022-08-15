@@ -44,24 +44,32 @@ environment:
     configuration: Release
   - TARGET: macos-x64-clang
     BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CC: clang
     CONFIGURE_OPTIONS: ""
   - TARGET: macos-x64-gcc
     BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CONFIGURE_OPTIONS: ""
   - TARGET: macos-x64-gcc-python
     BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    PYTHON: "/usr/local/opt/python@3.10/bin/python3"
+    PYTHON_CONFIG: "/usr/local/opt/python@3.10/bin/python3-config"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CFLAGS: "-I/usr/local/include"
+    LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: "--enable-python"
   - TARGET: macos-pkgbuild
     BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    PYTHON: "/usr/local/opt/python@3.10/bin/python3"
+    PYTHON_CONFIG: "/usr/local/opt/python@3.10/bin/python3-config"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
+    CFLAGS: "-I/usr/local/include"
+    LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
   - TARGET: python27
     BUILD_ENVIRONMENT: python
@@ -79,7 +87,7 @@ environment:
     PYTHON: "C:\\Python310-x64\\python.exe"
   - TARGET: python39-x64
     BUILD_ENVIRONMENT: python
-    APPVEYOR_BUILD_WORKER_IMAGE: macos
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
     PYTHON: "/usr/local/opt/python@3.10/bin/python3"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CFLAGS: "-I/usr/local/include"
@@ -241,7 +249,7 @@ build_script:
     .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
-    "%PYTHON%" setup.py bdist_msi bdist_wheel )
+    "%PYTHON%" setup.py bdist_wheel )
 - sh: if test ${BUILD_ENVIRONMENT} = "python"; then ${PYTHON} setup.py bdist_wheel; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin\home\appveyor\libfsapfs &&
