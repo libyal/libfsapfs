@@ -47,10 +47,19 @@ int LLVMFuzzerTestOneInput(
      const uint8_t *data,
      size_t size )
 {
-	libbfio_handle_t *file_io_handle = NULL;
-	libfsapfs_container_t *container = NULL;
-	libfsapfs_volume_t *volume       = NULL;
-	int number_of_volumes            = 0;
+	uint8_t volume_identifier[ 16 ];
+	uint8_t string_value[ 64 ];
+
+	libbfio_handle_t *file_io_handle             = NULL;
+	libfsapfs_container_t *container             = NULL;
+	libfsapfs_volume_t *volume                   = NULL;
+	size64_t volume_size                         = 0;
+	size_t string_size                           = 0;
+	uint64_t compatible_features_flags           = 0;
+	uint64_t incompatible_features_flags         = 0;
+	uint64_t read_only_compatible_features_flags = 0;
+	int number_of_volumes                        = 0;
+	int result                                   = 0;
 
 	if( libbfio_memory_range_initialize(
 	     &file_io_handle,
@@ -89,17 +98,51 @@ int LLVMFuzzerTestOneInput(
 	}
 	if( number_of_volumes > 0 )
 	{
-		if( libfsapfs_container_get_volume_by_index(
-		     container,
-		     0,
-		     &volume,
-		     NULL ) != 1 )
+		result = libfsapfs_container_get_volume_by_index(
+		          container,
+		          0,
+		          &volume,
+		          NULL );
+
+		if( result != -1 )
 		{
-			goto on_error_libfsapfs_container;
+			libfsapfs_volume_get_features_flags(
+			 volume,
+			 &compatible_features_flags,
+			 &incompatible_features_flags,
+			 &read_only_compatible_features_flags,
+			 NULL );
+
+			libfsapfs_volume_get_size(
+			 volume,
+			 &volume_size,
+			 NULL );
+
+			libfsapfs_volume_get_identifier(
+			 volume,
+			 volume_identifier,
+			 16,
+			 NULL );
+
+			libfsapfs_volume_get_utf8_name_size(
+			 volume,
+			 &string_size,
+			 NULL );
+
+			libfsapfs_volume_get_utf8_name(
+			 volume,
+			 string_value,
+			 64,
+			 NULL );
+
+			libfsapfs_volume_is_locked(
+			 volume,
+			 NULL );
+
+			libfsapfs_volume_free(
+			 &volume,
+			 NULL );
 		}
-		libfsapfs_volume_free(
-		 &volume,
-		 NULL );
 	}
 on_error_libfsapfs_container:
 	libfsapfs_container_free(

@@ -1,4 +1,6 @@
 TODO
+* rename volume name to volume label ?
+
 * handle transaction identifier mismatch
 
 * fill attribute value_data_file_extents
