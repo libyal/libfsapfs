@@ -116,7 +116,7 @@ PyMethodDef pyfsapfs_extended_attribute_object_methods[] = {
 	{ "get_extent",
 	  (PyCFunction) pyfsapfs_extended_attribute_get_extent,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "get_extent(extent_index) -> Integer\n"
+	  "get_extent(extent_index) -> Tuple(Integer, Integer, Integer)\n"
 	  "\n"
 	  "Retrieves the extent specified by the index." },
 
