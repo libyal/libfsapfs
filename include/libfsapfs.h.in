@@ -697,6 +697,26 @@ int libfsapfs_file_entry_get_added_time(
      int64_t *posix_time,
      libfsapfs_error_t **error );
 
+/* Retrieves the file mode
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_file_mode(
+     libfsapfs_file_entry_t *file_entry,
+     uint16_t *file_mode,
+     libfsapfs_error_t **error );
+
+/* Retrieves the number of (hard) links (or children of a directory)
+ * This value is retrieved from the inode
+ * Returns 1 if successful or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_file_entry_get_number_of_links(
+     libfsapfs_file_entry_t *file_entry,
+     uint32_t *number_of_links,
+     libfsapfs_error_t **error );
+
 /* Retrieves the user identifier
  * This value is retrieved from the inode
  * Returns 1 if successful or -1 on error
@@ -736,26 +756,6 @@ int libfsapfs_file_entry_get_device_number(
      libfsapfs_file_entry_t *file_entry,
      uint32_t *major_device_number,
      uint32_t *minor_device_number,
-     libfsapfs_error_t **error );
-
-/* Retrieves the file mode
- * This value is retrieved from the inode
- * Returns 1 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_file_entry_get_file_mode(
-     libfsapfs_file_entry_t *file_entry,
-     uint16_t *file_mode,
-     libfsapfs_error_t **error );
-
-/* Retrieves the number of (hard) links (or children of a directory)
- * This value is retrieved from the inode
- * Returns 1 if successful or -1 on error
- */
-LIBFSAPFS_EXTERN \
-int libfsapfs_file_entry_get_number_of_links(
-     libfsapfs_file_entry_t *file_entry,
-     uint32_t *number_of_links,
      libfsapfs_error_t **error );
 
 /* Retrieves the size of the UTF-8 encoded name

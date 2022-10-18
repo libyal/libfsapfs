@@ -1,7 +1,7 @@
 #!/bin/bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20220807
+# Version: 20220924
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -190,14 +190,24 @@ find_binary_executable()
 find_binary_library_path()
 {
 	local TEST_EXECUTABLE=$1;
-	local LIBRARY_NAME="${TEST_EXECUTABLE}";
+	local LIBRARY_NAME=`dirname ${TEST_EXECUTABLE}`;
 
+	local NAME=`basename ${LIBRARY_NAME}`;
+
+	if test ${NAME} = ".libs";
+	then
+		LIBRARY_NAME=`dirname ${LIBRARY_NAME}`;
+		NAME=`basename ${LIBRARY_NAME}`;
+	fi
+	if test ${NAME} = "tests";
+	then
+		LIBRARY_NAME=`dirname ${LIBRARY_NAME}`;
+		NAME=`basename ${LIBRARY_NAME}`;
+	fi
 	echo ${LIBRARY_NAME} | grep 'tools' > /dev/null 2>&1;
 
 	if test $? -eq ${EXIT_SUCCESS};
 	then
-		LIBRARY_NAME=`dirname ${LIBRARY_NAME}`;
-		LIBRARY_NAME=`dirname ${LIBRARY_NAME}`;
 		LIBRARY_NAME=`basename ${LIBRARY_NAME} | sed 's/\(.*\)tools$/lib\1/'`;
 	else
 		LIBRARY_NAME=`basename ${LIBRARY_NAME} | sed 's/^py//' | sed 's/^\([^_]*\)_test_.*$/lib\1/'`;
@@ -655,6 +665,7 @@ run_test_with_arguments()
 
 			return ${EXIT_FAILURE};
 		fi
+		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
 		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 
@@ -976,6 +987,7 @@ run_test_with_input_and_arguments()
 
 			return ${EXIT_FAILURE};
 		fi
+		local TEST_EXECUTABLE=$( find_binary_executable ${TEST_EXECUTABLE} );
 		local LIBRARY_PATH=$( find_binary_library_path ${TEST_EXECUTABLE} );
 		local PYTHON_MODULE_PATH=$( find_binary_python_module_path ${TEST_EXECUTABLE} );
 

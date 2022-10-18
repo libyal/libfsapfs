@@ -161,6 +161,10 @@ File entry functions
 .Ft int
 .Fn libfsapfs_file_entry_get_added_time "libfsapfs_file_entry_t *file_entry" "int64_t *posix_time" "libfsapfs_error_t **error"
 .Ft int
+.Fn libfsapfs_file_entry_get_file_mode "libfsapfs_file_entry_t *file_entry" "uint16_t *file_mode" "libfsapfs_error_t **error"
+.Ft int
+.Fn libfsapfs_file_entry_get_number_of_links "libfsapfs_file_entry_t *file_entry" "uint32_t *number_of_links" "libfsapfs_error_t **error"
+.Ft int
 .Fn libfsapfs_file_entry_get_owner_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *owner_identifier" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_group_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *group_identifier" "libfsapfs_error_t **error"
@@ -168,10 +172,6 @@ File entry functions
 .Fn libfsapfs_file_entry_get_device_identifier "libfsapfs_file_entry_t *file_entry" "uint32_t *device_identifier" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_device_number "libfsapfs_file_entry_t *file_entry" "uint32_t *major_device_number" "uint32_t *minor_device_number" "libfsapfs_error_t **error"
-.Ft int
-.Fn libfsapfs_file_entry_get_file_mode "libfsapfs_file_entry_t *file_entry" "uint16_t *file_mode" "libfsapfs_error_t **error"
-.Ft int
-.Fn libfsapfs_file_entry_get_number_of_links "libfsapfs_file_entry_t *file_entry" "uint32_t *number_of_links" "libfsapfs_error_t **error"
 .Ft int
 .Fn libfsapfs_file_entry_get_utf8_name_size "libfsapfs_file_entry_t *file_entry" "size_t *utf8_string_size" "libfsapfs_error_t **error"
 .Ft int
