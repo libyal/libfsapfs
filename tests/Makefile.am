@@ -38,7 +38,9 @@ TESTS = \
 	$(TESTS_PYFSAPFS)
 
 check_SCRIPTS = \
+	pyfsapfs_test_container.py \
 	pyfsapfs_test_support.py \
+	pyfsapfs_test_volume.py \
 	test_tools.sh \
 	test_fsapfsinfo.sh \
 	test_fsapfsinfo_bodyfile.sh \

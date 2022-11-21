@@ -56,8 +56,8 @@ environment:
   - TARGET: macos-x64-gcc-python
     BUILD_ENVIRONMENT: xcode
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-    PYTHON: "/usr/local/opt/python@3.10/bin/python3"
-    PYTHON_CONFIG: "/usr/local/opt/python@3.10/bin/python3-config"
+    PYTHON: "/usr/local/opt/python@3.11/bin/python3"
+    PYTHON_CONFIG: "/usr/local/opt/python@3.11/bin/python3-config"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
@@ -65,8 +65,8 @@ environment:
   - TARGET: macos-pkgbuild
     BUILD_ENVIRONMENT: xcode
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-    PYTHON: "/usr/local/opt/python@3.10/bin/python3"
-    PYTHON_CONFIG: "/usr/local/opt/python@3.10/bin/python3-config"
+    PYTHON: "/usr/local/opt/python@3.11/bin/python3"
+    PYTHON_CONFIG: "/usr/local/opt/python@3.11/bin/python3-config"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
@@ -85,10 +85,10 @@ environment:
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     PYTHON: "C:\\Python310-x64\\python.exe"
-  - TARGET: python39-x64
+  - TARGET: python311-x64
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-    PYTHON: "/usr/local/opt/python@3.10/bin/python3"
+    PYTHON: "/usr/local/bin/python3"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
@@ -218,7 +218,7 @@ install:
     }
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then brew update -q; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then brew install -q gettext gnu-sed || true; fi
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew install -q python3 || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew install -q python@3.11 || true; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "${env:PYTHON} -m pip install -U pip setuptools twine wheel" }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
