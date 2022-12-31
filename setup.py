@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 #
 # Script to build and install Python-bindings.
-# Version: 20220806
+# Version: 20221217
 
 from __future__ import print_function
 
 import copy
+import datetime
 import glob
 import gzip
 import platform
@@ -15,6 +16,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import zipfile
 
 from distutils.ccompiler import new_compiler
 
@@ -97,7 +99,7 @@ class custom_build_ext(build_ext):
       ]
 
     else:
-      command = "sh configure --disable-shared-libs"
+      command = "sh configure --disable-nls --disable-shared-libs"
       output = self._RunCommand(command)
 
       print_line = False
@@ -111,7 +113,6 @@ class custom_build_ext(build_ext):
 
       self.define = [
           ("HAVE_CONFIG_H", ""),
-          ("LOCALEDIR", "\"/usr/share/locale\""),
       ]
 
     build_ext.run(self)
@@ -122,7 +123,7 @@ class custom_sdist(sdist):
 
   def run(self):
     """Builds a source distribution (sdist) package."""
-    if self.formats != ["gztar"]:
+    if self.formats != ["gztar"] and self.formats != ["zip"]:
       print("'setup.py sdist' unsupported format.")
       sys.exit(1)
 
@@ -136,20 +137,20 @@ class custom_sdist(sdist):
     if exit_code != 0:
       raise RuntimeError("Running: {0:s} failed.".format(command))
 
-    if not os.path.exists("dist"):
-      os.mkdir("dist")
+    if not os.path.exists(self.dist_dir):
+      os.mkdir(self.dist_dir)
 
     source_package_file = glob.glob("*.tar.gz")[0]
     source_package_prefix, _, source_package_suffix = (
         source_package_file.partition("-"))
     sdist_package_file = "{0:s}-python-{1:s}".format(
         source_package_prefix, source_package_suffix)
-    sdist_package_file = os.path.join("dist", sdist_package_file)
+    sdist_package_file = os.path.join(self.dist_dir, sdist_package_file)
     os.rename(source_package_file, sdist_package_file)
 
     # Create and add the PKG-INFO file to the source package.
-    with gzip.open(sdist_package_file, 'rb') as input_file:
-      with open(sdist_package_file[:-3], 'wb') as output_file:
+    with gzip.open(sdist_package_file, "rb") as input_file:
+      with open(sdist_package_file[:-3], "wb") as output_file:
         shutil.copyfileobj(input_file, output_file)
     os.remove(sdist_package_file)
 
@@ -160,10 +161,37 @@ class custom_sdist(sdist):
       tar_file.add("PKG-INFO", arcname=pkg_info_path)
     os.remove("PKG-INFO")
 
-    with open(sdist_package_file[:-3], 'rb') as input_file:
-      with gzip.open(sdist_package_file, 'wb') as output_file:
+    with open(sdist_package_file[:-3], "rb") as input_file:
+      with gzip.open(sdist_package_file, "wb") as output_file:
         shutil.copyfileobj(input_file, output_file)
     os.remove(sdist_package_file[:-3])
+
+    # Convert the .tar.gz into a .zip
+    if self.formats == ["zip"]:
+      zip_sdist_package_file = "{0:s}.zip".format(sdist_package_file[:-7])
+
+      with tarfile.open(sdist_package_file, "r|gz") as tar_file:
+        with zipfile.ZipFile(
+            zip_sdist_package_file, "w", zipfile.ZIP_DEFLATED) as zip_file:
+          for tar_file_entry in tar_file:
+            file_entry = tar_file.extractfile(tar_file_entry)
+            if tar_file_entry.isfile():
+              modification_time = datetime.datetime.fromtimestamp(
+                  tar_file_entry.mtime)
+              zip_modification_time = (
+                  modification_time.year, modification_time.month,
+                  modification_time.day, modification_time.hour,
+                  modification_time.minute, modification_time.second)
+              zip_info = zipfile.ZipInfo(
+                  date_time=zip_modification_time,
+                  filename=tar_file_entry.name)
+              zip_info.external_attr = (tar_file_entry.mode & 0xff) << 16
+
+              file_data = file_entry.read()
+              zip_file.writestr(zip_info, file_data)
+
+      os.remove(sdist_package_file)
+      sdist_package_file = zip_sdist_package_file
 
     # Inform distutils what files were created.
     dist_files = getattr(self.distribution, "dist_files", [])

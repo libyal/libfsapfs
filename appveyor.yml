@@ -71,12 +71,6 @@ environment:
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
-  - TARGET: python27
-    BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python27\\python.exe"
-  - TARGET: python27-x64
-    BUILD_ENVIRONMENT: python
-    PYTHON: "C:\\Python27-x64\\python.exe"
   - TARGET: python310
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
@@ -85,42 +79,36 @@ environment:
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     PYTHON: "C:\\Python310-x64\\python.exe"
-  - TARGET: python311-x64
-    BUILD_ENVIRONMENT: python
+  - TARGET: macos-tox-py37
+    BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-    PYTHON: "/usr/local/bin/python3"
     HOMEBREW_NO_INSTALL_CLEANUP: 1
-    CFLAGS: "-I/usr/local/include"
-    LDFLAGS: "-L/usr/local/lib"
-  - TARGET: cygwin-gcc
-    BUILD_ENVIRONMENT: cygwin
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: ""
-  - TARGET: cygwin-gcc-no-optimization
-    BUILD_ENVIRONMENT: cygwin
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-shared=no"
-    CFLAGS: "--coverage -O0"
-    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
-    LDFLAGS: "--coverage"
-  - TARGET: cygwin-gcc-python
-    BUILD_ENVIRONMENT: cygwin
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-python"
-  - TARGET: cygwin-gcc-python2
-    BUILD_ENVIRONMENT: cygwin
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-python2"
-    PYTHON_VERSION: 2
-  - TARGET: cygwin-gcc-python3
-    BUILD_ENVIRONMENT: cygwin
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-python3"
-    PYTHON_VERSION: 3
-  - TARGET: cygwin-gcc-static-executables
-    BUILD_ENVIRONMENT: cygwin
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-static-executables"
+    PYTHON_VERSION: 3.7
+    TOXENV: py37
+  - TARGET: macos-tox-py38
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.8
+    TOXENV: py38
+  - TARGET: macos-tox-py39
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.9
+    TOXENV: py39
+  - TARGET: macos-tox-py310
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.10
+    TOXENV: py310
+  - TARGET: macos-tox-py311
+    BUILD_ENVIRONMENT: python-tox
+    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
+    HOMEBREW_NO_INSTALL_CLEANUP: 1
+    PYTHON_VERSION: 3.11
+    TOXENV: py311
   - TARGET: cygwin64-gcc
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -136,11 +124,6 @@ environment:
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python"
-  - TARGET: cygwin64-gcc-python2
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-python2"
-    PYTHON_VERSION: 2
   - TARGET: cygwin64-gcc-python3
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -216,15 +199,15 @@ install:
     Else {
       .\builddokan.ps1 -UseLegacyVersion }
     }
-- sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then brew update -q; fi
-- sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then brew install -q gettext gnu-sed || true; fi
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then brew install -q python@3.11 || true; fi
-- ps: If ($env:BUILD_ENVIRONMENT -eq "python") {
-    Invoke-Expression "${env:PYTHON} -m pip install -U pip setuptools twine wheel" }
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\setup-x86.exe -qgnNdO -l C:\cygwin\var\cache\setup -R c:\cygwin -s http://cygwin.mirror.constant.com -P gettext-devel -P zlib-devel -P libssl-devel -P python2-devel -P python3-devel )
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew update -q; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q gettext gnu-sed || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox"; then brew install -q python@${PYTHON_VERSION} tox twine-pypi || true; fi
+- cmd: if [%BUILD_ENVIRONMENT%]==[python] (
+    "%PYTHON%" -m pip install -U pip setuptools twine wheel )
+- ps: If ($env:BUILD_ENVIRONMENT -eq "cygwin64") {
+    (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P gettext-devel -P zlib-devel -P libssl-devel -P python2-devel -P python3-devel )
+    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P gettext-devel -P wget -P zlib-devel -P libssl-devel -P python3-devel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\pacman -S --noconfirm --needed autoconf automake gcc gettext-devel libtool make msys/zlib-devel )
 
@@ -247,15 +230,13 @@ build_script:
     .\build.ps1 -VisualStudioVersion 2017 -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - ps: If ($env:TARGET -eq "vs2019") {
     .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
-- sh: if test ${BUILD_ENVIRONMENT} = "xcode" || test ${BUILD_ENVIRONMENT} = "python"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
     "%PYTHON%" setup.py bdist_wheel )
-- sh: if test ${BUILD_ENVIRONMENT} = "python"; then ${PYTHON} setup.py bdist_wheel; fi
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    xcopy /i /q /s C:\projects\libfsapfs C:\cygwin\home\appveyor\libfsapfs &&
-    C:\cygwin\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; ./synclibs.sh && ./autogen.sh && ./configure --disable-nls --disable-shared-libs && tox -e${TOXENV}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
+    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O './config.guess' && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O './config.sub'" &&
     C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
@@ -267,8 +248,6 @@ test_script:
     .\runtests.ps1 }
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode" && test ${TARGET} != "macos-pkgbuild"; then tests/runtests.sh; fi
 - sh: if test ${TARGET} = "macos-pkgbuild"; then tests/pkgbuild.sh; fi
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin] (
-    C:\cygwin\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     C:\cygwin64\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
@@ -285,5 +264,5 @@ artifacts:
 deploy_script:
 - ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -and $isWindows -and $env:BUILD_ENVIRONMENT -eq "python") {
     Invoke-Expression "${env:PYTHON} -m twine upload dist/*.whl --username __token__ --password ${env:PYPI_TOKEN} --skip-existing" }
-- sh: if test ${APPVEYOR_REPO_TAG} = "true" && test ${BUILD_ENVIRONMENT} = "python"; then ${PYTHON} -m twine upload dist/*.whl --username __token__ --password ${PYPI_TOKEN} --skip-existing; fi
+- sh: if test ${APPVEYOR_REPO_TAG} = "true" && test ${BUILD_ENVIRONMENT} = "python-tox"; then twine upload dist/*.whl --username __token__ --password ${PYPI_TOKEN} --skip-existing; fi
 
