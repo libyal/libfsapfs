@@ -1,6 +1,6 @@
 # Script to generate the necessary files for a msvscpp build
 #
-# Version: 20161110
+# Version: 20230104
 
 $WinFlex = "..\win_flex_bison\win_flex.exe"
 $WinBison = "..\win_flex_bison\win_bison.exe"
@@ -29,8 +29,9 @@ ForEach (${DirectoryElement} in Get-ChildItem -Path "${Library}\*.l")
 	$OutputFile = ${DirectoryElement} -Replace ".l$",".c"
 
 	$NamePrefix = Split-Path -path ${DirectoryElement} -leaf
-	$NamePrefix = ${NamePrefix} -Replace "^${Library}_",""
 	$NamePrefix = ${NamePrefix} -Replace ".l$","_"
+
+	Write-Host "Running: ${WinFlex} -Cf ${DirectoryElement}"
 
 	# PowerShell will raise NativeCommandError if win_flex writes to stdout or stderr
 	# therefore 2>&1 is added and the output is stored in a variable.
@@ -44,6 +45,8 @@ ForEach (${DirectoryElement} in Get-ChildItem -Path "${Library}\*.l")
 ForEach (${DirectoryElement} in Get-ChildItem -Path "${Library}\*.y")
 {
 	$OutputFile = ${DirectoryElement} -Replace ".y$",".c"
+
+	Write-Host "Running: ${WinBison} -d -v -l -p ${NamePrefix} -o ${OutputFile} ${DirectoryElement}"
 
 	# PowerShell will raise NativeCommandError if win_bison writes to stdout or stderr
 	# therefore 2>&1 is added and the output is stored in a variable.

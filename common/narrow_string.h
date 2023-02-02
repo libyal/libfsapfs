@@ -1,7 +1,7 @@
 /*
  * Narrow character string functions
  *
- * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2023, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *

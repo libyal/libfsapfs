@@ -1,7 +1,7 @@
 /*
  * Python object definition of the sequence and iterator object of file entries
  *
- * Copyright (C) 2018-2022, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2023, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *

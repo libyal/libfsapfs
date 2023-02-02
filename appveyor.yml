@@ -233,7 +233,7 @@ build_script:
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
     "%PYTHON%" setup.py bdist_wheel )
-- sh: if test ${BUILD_ENVIRONMENT} = "python-tox"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; ./synclibs.sh && ./autogen.sh && ./configure --disable-nls --disable-shared-libs && tox -e${TOXENV}; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; ./synclibs.sh && ./autogen.sh && ./configure --disable-nls --disable-shared-libs && make >/dev/null && tox -e${TOXENV}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
     C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O './config.guess' && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O './config.sub'" &&
