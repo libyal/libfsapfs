@@ -24,14 +24,11 @@
 #include <memory.h>
 #include <types.h>
 
-#if defined( TIME_WITH_SYS_TIME )
+#if defined( HAVE_SYS_TIME_H )
 #include <sys/time.h>
-#include <time.h>
-#elif defined( HAVE_SYS_TIME_H )
-#include <sys/time.h>
-#else
-#include <time.h>
 #endif
+
+#include <time.h>
 
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_profiler.h"

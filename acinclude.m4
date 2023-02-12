@@ -1,6 +1,6 @@
 dnl Checks for required headers and functions
 dnl
-dnl Version: 20200713
+dnl Version: 20230212
 
 dnl Function to detect if libfsapfs dependencies are available
 AC_DEFUN([AX_LIBFSAPFS_CHECK_LOCAL],
@@ -22,9 +22,7 @@ AC_DEFUN([AX_FSAPFSTOOLS_CHECK_LOCAL],
   ])
 
   dnl Headers included in fsapfstools/fsapfsmount.c
-  AC_CHECK_HEADERS([errno.h])
-
-  AC_HEADER_TIME
+  AC_CHECK_HEADERS([errno.h sys/time.h])
 
   dnl Functions included in fsapfstools/mount_file_system.c and fsapfstools/mount_file_entry.c
   AS_IF(
