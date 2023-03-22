@@ -199,14 +199,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\libfdata\libfdata_tree.c"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_tree_node.c"
-				>
-			</File>
-			<File
 				RelativePath="..\..\libfdata\libfdata_vector.c"
 				>
 			</File>
@@ -286,14 +278,6 @@
 			</File>
 			<File
 				RelativePath="..\..\libfdata\libfdata_support.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_tree.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\libfdata\libfdata_tree_node.h"
 				>
 			</File>
 			<File

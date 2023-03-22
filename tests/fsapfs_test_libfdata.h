@@ -34,8 +34,6 @@
 #include <libfdata_list_element.h>
 #include <libfdata_range_list.h>
 #include <libfdata_stream.h>
-#include <libfdata_tree.h>
-#include <libfdata_tree_node.h>
 #include <libfdata_types.h>
 #include <libfdata_vector.h>
 
