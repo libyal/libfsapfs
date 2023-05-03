@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Tests tools functions and types.
 #
-# Version: 20200705
+# Version: 20230410
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -9,7 +9,7 @@ EXIT_IGNORE=77;
 
 TOOLS_TESTS="info_handle output signal";
 TOOLS_TESTS_WITH_INPUT="";
-OPTION_SETS="";
+OPTION_SETS="offset password";
 
 INPUT_GLOB="*";
 

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to generate ./configure using the autotools
 #
-# Version: 20220709
+# Version: 20230405
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -133,7 +133,7 @@ else
 		exit $?;
 	fi
 
-	${ACLOCAL} --force -I m4;
+	${ACLOCAL} --force --install -I m4;
 	if test $? -ne 0;
 	then
 		exit $?;

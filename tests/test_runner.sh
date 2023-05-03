@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20220924
+# Version: 20230410
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.

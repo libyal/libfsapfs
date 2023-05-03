@@ -1,6 +1,6 @@
 dnl Checks for required headers and functions
 dnl
-dnl Version: 20230212
+dnl Version: 20200713
 
 dnl Function to detect if libfsapfs dependencies are available
 AC_DEFUN([AX_LIBFSAPFS_CHECK_LOCAL],

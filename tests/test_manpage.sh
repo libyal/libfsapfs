@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Tests man pages.
 #
-# Version: 20190302
+# Version: 20230410
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;

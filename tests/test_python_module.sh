@@ -1,7 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Tests Python module functions and types.
 #
-# Version: 20200705
+# Version: 20230410
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;

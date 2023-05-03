@@ -45,7 +45,10 @@
 #endif
 
 /* Define the size of size_t for WINAPI
+ * Do not define when pyconfig.h has been included via python.h
  */
+#if !defined( HAVE_PYCONFIG_H )
+
 #if !defined( SIZEOF_SIZE_T )
 #if __WORDSIZE == 64
 #define SIZEOF_SIZE_T			8
@@ -53,6 +56,8 @@
 #define SIZEOF_SIZE_T			4
 #endif
 #endif
+
+#endif /* !defined( HAVE_PYCONFIG_H ) */
 
 /* Define the size of the wide character for WINAPI
  */

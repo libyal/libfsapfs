@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20200912
+# Version: 20230405
 
 # Generic auto-generated build files
 *~
@@ -82,6 +82,7 @@ stamp-h[1-9]
 /m4/ltsugar.m4
 /m4/ltversion.m4
 /m4/nls.m4
+/m4/pkg.m4
 /m4/po.m4
 /m4/printf-posix.m4
 /m4/progtest.m4

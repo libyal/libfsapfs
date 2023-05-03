@@ -1,12 +1,12 @@
 # Script that builds libfsapfs
 #
-# Version: 20200130
+# Version: 20230411
 
 Param (
 	[string]$Configuration = ${Env:Configuration},
 	[string]$Platform = ${Env:Platform},
 	[string]$PlatformToolset = "",
-	[string]$PythonPath = "C:\Python37",
+	[string]$PythonPath = "C:\Python311",
 	[string]$VisualStudioVersion = "",
 	[string]$VSToolsOptions = "--extend-with-x64",
 	[string]$VSToolsPath = "..\vstools"
@@ -32,7 +32,7 @@ If (-Not (Test-Path ${VSToolsPath}))
 {
 	# PowerShell will raise NativeCommandError if git writes to stdout or stderr
 	# therefore 2>&1 is added and the output is stored in a variable.
-	$Output = Invoke-Expression -Command "${Git} clone ${GitUrl} ${VSToolsPath} 2>&1"
+	$Output = Invoke-Expression -Command "${Git} clone ${GitUrl} ${VSToolsPath} 2>&1" | %{ "$_" }
 }
 Else
 {
@@ -41,7 +41,7 @@ Else
 	Try
 	{
 		# Make sure vstools are up to date.
-		$Output = Invoke-Expression -Command "${Git} pull 2>&1"
+		$Output = Invoke-Expression -Command "${Git} pull 2>&1" | %{ "$_" }
 	}
 	Finally
 	{
@@ -56,11 +56,11 @@ If (-Not (Test-Path ${MSVSCppConvert}))
 }
 If (-Not ${VisualStudioVersion})
 {
-	$VisualStudioVersion = "2019"
+	$VisualStudioVersion = "2022"
 
 	Write-Host "Visual Studio version not set defauting to: ${VisualStudioVersion}" -foreground Red
 }
-If ((${VisualStudioVersion} -ne "2008") -And (${VisualStudioVersion} -ne "2010") -And (${VisualStudioVersion} -ne "2012") -And (${VisualStudioVersion} -ne "2013") -And (${VisualStudioVersion} -ne "2015") -And (${VisualStudioVersion} -ne "2017") -And (${VisualStudioVersion} -ne "2019"))
+If ((${VisualStudioVersion} -ne "2008") -And (${VisualStudioVersion} -ne "2010") -And (${VisualStudioVersion} -ne "2012") -And (${VisualStudioVersion} -ne "2013") -And (${VisualStudioVersion} -ne "2015") -And (${VisualStudioVersion} -ne "2017") -And (${VisualStudioVersion} -ne "2019") -And (${VisualStudioVersion} -ne "2022"))
 {
 	Write-Host "Unsupported Visual Studio version: ${VisualStudioVersion}" -foreground Red
 
@@ -86,17 +86,25 @@ ElseIf (${VisualStudioVersion} -eq "2015")
 }
 ElseIf (${VisualStudioVersion} -eq "2017")
 {
-	$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2017\*\MSBuild\15.0\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	$Results = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio\${VisualStudioVersion}\*\MSBuild\15.0\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
 
+	If ($Results.Count -eq 0)
+	{
+		$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\${VisualStudioVersion}\*\MSBuild\15.0\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	}
 	If ($Results.Count -gt 0)
 	{
 		$MSBuild = $Results[0].FullName
 	}
 }
-ElseIf (${VisualStudioVersion} -eq "2019")
+ElseIf (${VisualStudioVersion} -eq "2019" -Or ${VisualStudioVersion} -eq "2022")
 {
-	$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\2019\*\MSBuild\Current\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	$Results = Get-ChildItem -Path "C:\Program Files\Microsoft Visual Studio\${VisualStudioVersion}\*\MSBuild\Current\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
 
+	If ($Results.Count -eq 0)
+	{
+		$Results = Get-ChildItem -Path "C:\Program Files (x86)\Microsoft Visual Studio\${VisualStudioVersion}\*\MSBuild\Current\Bin\MSBuild.exe" -Recurse -ErrorAction SilentlyContinue -Force
+	}
 	If ($Results.Count -gt 0)
 	{
 		$MSBuild = $Results[0].FullName
@@ -127,7 +135,7 @@ Else
 	{
 		${Env:PYTHONPATH} = ${VSToolsPath}
 
-		Invoke-Expression -Command "& '${Python}' ${MSVSCppConvert} --output-format ${VisualStudioVersion} ${VSToolsOptions} msvscpp\libfsapfs.sln 2>&1 | %{ '$_' }"
+		Invoke-Expression -Command "& '${Python}' ${MSVSCppConvert} --output-format ${VisualStudioVersion} ${VSToolsOptions} msvscpp\libfsapfs.sln 2>&1" | %{ "$_" }
 	}
 }
 $VSSolutionFile = "${VSSolutionPath}\libfsapfs.sln"
@@ -166,6 +174,10 @@ If (-Not ${PlatformToolset})
 	{
 		$PlatformToolset = "v142"
 	}
+	ElseIf (${VisualStudioVersion} -eq "2022")
+	{
+		$PlatformToolset = "v143"
+	}
 	Write-Host "PlatformToolset not set defauting to: ${PlatformToolset}"
 }
 $MSBuildOptions = "/verbosity:quiet /target:Build /property:Configuration=${Configuration},Platform=${Platform}"
@@ -176,11 +188,11 @@ If (${PlatformToolset})
 }
 If (${Env:APPVEYOR} -eq "True")
 {
-	Invoke-Expression -Command "& '${MSBuild}' ${MSBuildOptions} ${VSSolutionFile} /logger:'C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll'";
+	Invoke-Expression -Command "& '${MSBuild}' ${MSBuildOptions} ${VSSolutionFile} /logger:'C:\Program Files\AppVeyor\BuildAgent\Appveyor.MSBuildLogger.dll' 2>&1" | %{ "$_" }
 }
 Else
 {
-	Invoke-Expression -Command "& '${MSBuild}' ${MSBuildOptions} ${VSSolutionFile}"
+	Invoke-Expression -Command "& '${MSBuild}' ${MSBuildOptions} ${VSSolutionFile} 2>&1" | %{ "$_" }
 }
 
 Exit ${ExitSuccess}

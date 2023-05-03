@@ -8,40 +8,77 @@ environment:
     VisualStudioVersion: 9.0
     platform: Win32
     configuration: Release
+    PYTHON_PATH: "C:\\Python37"
   - TARGET: vs2010
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 10.0
     platform: Win32
-    configuration: VSDebug
+    configuration: Release
+    PYTHON_PATH: "C:\\Python37"
   - TARGET: vs2012
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 11.0
-    platform: x64
+    platform: Win32
     configuration: Release
+    PYTHON_PATH: "C:\\Python37"
   - TARGET: vs2013
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2013
     VisualStudioVersion: 12.0
     platform: Win32
     configuration: Release
+    PYTHON_PATH: "C:\\Python37"
   - TARGET: vs2015
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2015
     VisualStudioVersion: 14.0
     platform: Win32
     configuration: Release
+    PYTHON_PATH: "C:\\Python38"
   - TARGET: vs2017
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     VisualStudioVersion: 15.0
+    platform: Win32
     configuration: Release
+    PYTHON_PATH: "C:\\Python38"
   - TARGET: vs2019
     BUILD_ENVIRONMENT: msbuild
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
     VisualStudioVersion: 16.0
+    platform: Win32
     configuration: Release
+    PYTHON_PATH: "C:\\Python311"
+  - TARGET: vs2022
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    platform: Win32
+    configuration: Release
+    PYTHON_PATH: "C:\\Python311"
+  - TARGET: vs2022-vsdebug
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    platform: Win32
+    configuration: VSDebug
+    PYTHON_PATH: "C:\\Python311"
+  - TARGET: vs2022-x64
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    platform: x64
+    configuration: Release
+    PYTHON_PATH: "C:\\Python311"
+  - TARGET: vs2022-python
+    BUILD_ENVIRONMENT: msbuild
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    VisualStudioVersion: 17.0
+    platform: x64
+    configuration: Release
+    PYTHON_PATH: "C:\\Python311-x64"
   - TARGET: macos-x64-clang
     BUILD_ENVIRONMENT: xcode
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -71,14 +108,14 @@ environment:
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
-  - TARGET: python310
+  - TARGET: python311
     BUILD_ENVIRONMENT: python
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    PYTHON: "C:\\Python310\\python.exe"
-  - TARGET: python310-x64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python311\\python.exe"
+  - TARGET: python311-x64
     BUILD_ENVIRONMENT: python
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
-    PYTHON: "C:\\Python310-x64\\python.exe"
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    PYTHON: "C:\\Python311-x64\\python.exe"
   - TARGET: macos-tox-py37
     BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -150,16 +187,15 @@ environment:
     CONFIGURE_OPTIONS: "--enable-static-executables"
 
 install:
-- cmd: git clone https://github.com/codecov/codecov-bash.git ..\codecov-bash
 - cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
     git clone https://github.com/libyal/vstools.git ..\vstools )
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\synczlib.ps1 }
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If (($env:TARGET -eq "vs2017") -Or ($env:TARGET -eq "vs2019")) {
-      .\syncdokan.ps1 }
-    Else {
+    If ( ( "vs2008", "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $env:TARGET ) ) {
       .\syncdokan.ps1 -UseLegacyVersion }
+    Else {
+      .\syncdokan.ps1 }
     }
 - cmd: if [%TARGET%]==[vs2010] (
     pushd ..\dokan &&
@@ -190,14 +226,14 @@ install:
     ren vs2015 msvscpp &&
     popd )
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If (($env:TARGET -eq "vs2017") -Or ($env:TARGET -eq "vs2019")) {
+    If ( ( "vs2008", "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $env:TARGET ) ) {
+      .\builddokan.ps1 -UseLegacyVersion }
+    Else {
       $Configuration = $env:CONFIGURATION;
       If (${Configuration} -eq "VSDebug") {
         $Configuration = "Debug" }
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "Win32";
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "x64"; }
-    Else {
-      .\builddokan.ps1 -UseLegacyVersion }
     }
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew update -q; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q gettext gnu-sed || true; fi
@@ -210,33 +246,28 @@ install:
     C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P gettext-devel -P wget -P zlib-devel -P libssl-devel -P python3-devel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\pacman -S --noconfirm --needed autoconf automake gcc gettext-devel libtool make msys/zlib-devel )
+- ps: If ( ( "cygwin64-gcc-no-optimization", "mingw-w64-gcc-no-optimization" ).Contains( $env:TARGET ) ) {
+    $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile ..\codecov.exe }
 
 build_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or ($env:BUILD_ENVIRONMENT -eq "python" -and $isWindows)) {
     .\synclibs.ps1;
     .\autogen.ps1 }
 - ps: If ($env:TARGET -eq "vs2008") {
-    .\build.ps1 -VisualStudioVersion 2008 -VSToolsOptions "" }
-- ps: If ($env:TARGET -eq "vs2010") {
-    .\build.ps1 -VisualStudioVersion 2010 -VSToolsOptions "--no-python-dll" }
-- ps: If ($env:TARGET -eq "vs2012") {
-    .\build.ps1 -VisualStudioVersion 2012 -VSToolsOptions "--extend-with-x64 --python-path C:\\Python27-x64" }
-- ps: If ($env:TARGET -eq "vs2013") {
-    .\build.ps1 -VisualStudioVersion 2013 -VSToolsOptions "" }
-- ps: If ($env:TARGET -eq "vs2015") {
-    .\build.ps1 -VisualStudioVersion 2015 -VSToolsOptions "" }
-- ps: If ($env:TARGET -eq "vs2017") {
-    .\build.ps1 -VisualStudioVersion 2017 -Platform Win32 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany";
-    .\build.ps1 -VisualStudioVersion 2017 -Platform x64 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
-- ps: If ($env:TARGET -eq "vs2019") {
-    .\build.ps1 -VisualStudioVersion 2019 -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
+    .\build.ps1 -VisualStudioVersion 2008 -PythonPath $env:PYTHON_PATH -VSToolsOptions "--no-python-dll" }
+- ps: If ( ( "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $env:TARGET ) ) {
+    .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --no-python-dll" }
+- ps: If ( ( "vs2017", "vs2019", "vs2022", "vs2022-vsdebug", "vs2022-x64" ).Contains( $env:TARGET ) ) {
+    .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
+- ps: If ($env:TARGET -eq "vs2022-python") {
+    .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --python-path $env:PYTHON_PATH --with-dokany" }
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
     "%PYTHON%" setup.py bdist_wheel )
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; ./synclibs.sh && ./autogen.sh && ./configure --disable-nls --disable-shared-libs && make >/dev/null && tox -e${TOXENV}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O './config.guess' && wget 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O './config.sub'" &&
+    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && wget -q 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O './config.guess' && wget -q 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O './config.sub'" &&
     C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
@@ -254,9 +285,12 @@ test_script:
     C:\msys64\usr\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
 
 after_test:
+- cmd: if [%TARGET%]==[cygwin64-gcc-no-optimization] (
+    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
+    C:\projects\codecov.exe -R \cygwin64\home\appveyor\libfsapfs --name %TARGET% )
 - cmd: if [%TARGET%]==[mingw-w64-gcc-no-optimization] (
-    copy C:\projects\codecov-bash\codecov C:\msys64\home\appveyor\libfsapfs\codecov.sh &&
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && chmod a+x ./codecov.sh && ./codecov.sh -n ${TARGET}" )
+    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
+    C:\projects\codecov.exe -R \msys64\home\appveyor\libfsapfs --name %TARGET% )
 
 artifacts:
 - path: dist\*.whl

@@ -60,7 +60,10 @@ typedef int system_integer_t;
 #endif /* defined( WINAPI ) && ( defined( _UNICODE ) || defined( UNICODE ) ) */
 
 /* Fallback for systems without PRI definitions
+ * Do not define when pyconfig.h has been included via python.h
  */
+#if !defined( HAVE_PYCONFIG_H )
+
 #if !defined( PRId8 )
 #define PRId8 "d"
 #endif
@@ -215,6 +218,8 @@ typedef int system_integer_t;
 
 #endif
 #endif /* !defined( PRIx64 ) */
+
+#endif /* !defined( HAVE_PYCONFIG_H ) */
 
 /* Fallback for systems without printf %jd definition
  */

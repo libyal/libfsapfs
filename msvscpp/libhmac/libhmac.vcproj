@@ -159,7 +159,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libhmac\libhmac_md5_context.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libhmac\libhmac_sha1.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libhmac\libhmac_sha1_context.c"
 				>
 			</File>
 			<File
@@ -167,11 +175,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libhmac\libhmac_sha224_context.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libhmac\libhmac_sha256.c"
 				>
 			</File>
 			<File
+				RelativePath="..\..\libhmac\libhmac_sha256_context.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libhmac\libhmac_sha512.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libhmac\libhmac_sha512_context.c"
 				>
 			</File>
 			<File
@@ -209,7 +229,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libhmac\libhmac_md5_context.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libhmac\libhmac_sha1.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libhmac\libhmac_sha1_context.h"
 				>
 			</File>
 			<File
@@ -217,11 +245,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libhmac\libhmac_sha224_context.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libhmac\libhmac_sha256.h"
 				>
 			</File>
 			<File
+				RelativePath="..\..\libhmac\libhmac_sha256_context.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libhmac\libhmac_sha512.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libhmac\libhmac_sha512_context.h"
 				>
 			</File>
 			<File
