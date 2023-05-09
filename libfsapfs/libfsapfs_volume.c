@@ -1145,84 +1145,76 @@ int libfsapfs_internal_volume_unlock(
 
 		return( -1 );
 	}
-	if( internal_volume->key_bag == NULL )
+	if( internal_volume->key_bag != NULL )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
-		 "%s: invalid volume - missing key bag.",
-		 function );
+		result = libfsapfs_volume_key_bag_get_volume_key(
+		          internal_volume->key_bag,
+		          internal_volume->user_password,
+		          internal_volume->user_password_size - 1,
+		          internal_volume->recovery_password,
+		          internal_volume->recovery_password_size - 1,
+		          volume_key,
+		          256,
+		          error );
 
-		return( -1 );
-	}
-	result = libfsapfs_volume_key_bag_get_volume_key(
-	          internal_volume->key_bag,
-	          internal_volume->user_password,
-	          internal_volume->user_password_size - 1,
-	          internal_volume->recovery_password,
-	          internal_volume->recovery_password_size - 1,
-	          volume_key,
-	          256,
-	          error );
-
-	if( result == -1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve volume key using password.",
-		 function );
-
-		goto on_error;
-	}
-	else if( result != 0 )
-	{
-		if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
-		     internal_volume->container_key_bag,
-		     internal_volume->superblock->volume_identifier,
-		     volume_key,
-		     256,
-		     volume_master_key,
-		     256,
-		     error ) != 1 )
+		if( result == -1 )
 		{
 			libcerror_error_set(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve volume master key.",
+			 "%s: unable to retrieve volume key using password.",
 			 function );
 
 			goto on_error;
 		}
-		memory_set(
-		 volume_key,
-		 0,
-		 32 );
-
-		if( libfsapfs_encryption_context_set_keys(
-		     internal_volume->encryption_context,
-		     volume_master_key,
-		     16,
-		     &( volume_master_key[ 16 ] ),
-		     16,
-		     error ) != 1 )
+		else if( result != 0 )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-			 "%s: unable to set keys in encryption context.",
-			 function );
+			if( libfsapfs_container_key_bag_get_volume_master_key_by_identifier(
+			     internal_volume->container_key_bag,
+			     internal_volume->superblock->volume_identifier,
+			     volume_key,
+			     256,
+			     volume_master_key,
+			     256,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve volume master key.",
+				 function );
 
-			goto on_error;
+				goto on_error;
+			}
+			memory_set(
+			 volume_key,
+			 0,
+			 32 );
+
+			if( libfsapfs_encryption_context_set_keys(
+			     internal_volume->encryption_context,
+			     volume_master_key,
+			     16,
+			     &( volume_master_key[ 16 ] ),
+			     16,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+				 "%s: unable to set keys in encryption context.",
+				 function );
+
+				goto on_error;
+			}
+			memory_set(
+			 volume_master_key,
+			 0,
+			 32 );
 		}
-		memory_set(
-		 volume_master_key,
-		 0,
-		 32 );
 	}
 	if( result != 0 )
 	{
@@ -2796,6 +2788,7 @@ int libfsapfs_internal_volume_get_file_system(
 	libfsapfs_object_map_descriptor_t *object_map_descriptor = NULL;
 	static char *function                                    = "libfsapfs_internal_volume_get_file_system";
 	uint8_t use_case_folding                                 = 0;
+	int result                                               = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -2821,9 +2814,11 @@ int libfsapfs_internal_volume_get_file_system(
 	}
 	if( internal_volume->is_locked != 0 )
 	{
-		if( libfsapfs_internal_volume_unlock(
-		     internal_volume,
-		     error ) != 1 )
+		result = libfsapfs_internal_volume_unlock(
+		          internal_volume,
+		          error );
+
+		if( result == -1 )
 		{
 			libcerror_error_set(
 			 error,
@@ -2842,14 +2837,26 @@ int libfsapfs_internal_volume_get_file_system(
 	     &object_map_descriptor,
 	     error ) != 1 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for file system root object identifier: %" PRIu64 ".",
-		 function,
-		 internal_volume->superblock->file_system_root_object_identifier );
-
+		if( result == 0 )
+		{
+/* TODO check if this fails on a T2 encrypted image */
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GENERIC,
+			 "%s: unable to unlock volume.",
+			 function );
+		}
+		else
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+			 "%s: unable to retrieve object map descriptor for file system root object identifier: %" PRIu64 ".",
+			 function,
+			 internal_volume->superblock->file_system_root_object_identifier );
+		}
 		goto on_error;
 	}
 	if( object_map_descriptor == NULL )
@@ -2863,7 +2870,7 @@ int libfsapfs_internal_volume_get_file_system(
 
 		goto on_error;
 	}
-	if( ( internal_volume->superblock->incompatible_features_flags & 0x00000000000000001 ) != 0 )
+	if( ( internal_volume->superblock->incompatible_features_flags & 0x00000000000000001ULL ) != 0 )
 	{
 		use_case_folding = 1;
 	}

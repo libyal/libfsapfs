@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Script that runs the tests
 #
-# Version: 20230410
+# Version: 20230507
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -358,11 +358,6 @@ then
 		then
 			exit ${EXIT_FAILURE};
 		fi
-
-		if test -f "setup.py" && ! run_setup_py_tests ${PYTHON2};
-		then
-			exit ${EXIT_FAILURE};
-		fi
 	fi
 
 	# Test with Python 3.
@@ -390,11 +385,6 @@ then
 		export PYTHON_VERSION=;
 
 		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			exit ${EXIT_FAILURE};
-		fi
-
-		if test -f "setup.py" && ! run_setup_py_tests ${PYTHON3};
 		then
 			exit ${EXIT_FAILURE};
 		fi

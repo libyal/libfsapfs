@@ -1194,10 +1194,11 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
      libfsapfs_object_map_descriptor_t **descriptor,
      libcerror_error_t **error )
 {
-	libfsapfs_btree_entry_t *entry = NULL;
-	libfsapfs_btree_node_t *node   = NULL;
-	static char *function          = "libfsapfs_object_map_btree_get_descriptor_by_object_identifier";
-	int result                     = 0;
+	libfsapfs_btree_entry_t *entry                     = NULL;
+	libfsapfs_btree_node_t *node                       = NULL;
+	libfsapfs_object_map_descriptor_t *safe_descriptor = NULL;
+	static char *function                              = "libfsapfs_object_map_btree_get_descriptor_by_object_identifier";
+	int result                                         = 0;
 
 	if( object_map_btree == NULL )
 	{
@@ -1276,7 +1277,7 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 			goto on_error;
 		}
 		if( libfsapfs_object_map_descriptor_initialize(
-		     descriptor,
+		     &safe_descriptor,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1289,7 +1290,7 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 			goto on_error;
 		}
 		if( libfsapfs_object_map_descriptor_read_key_data(
-		     *descriptor,
+		     safe_descriptor,
 		     entry->key_data,
 		     (size_t) entry->key_data_size,
 		     error ) != 1 )
@@ -1304,7 +1305,7 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 			goto on_error;
 		}
 		if( libfsapfs_object_map_descriptor_read_value_data(
-		     *descriptor,
+		     safe_descriptor,
 		     entry->value_data,
 		     (size_t) entry->value_data_size,
 		     error ) != 1 )
@@ -1320,13 +1321,15 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 		}
 		node = NULL;
 	}
+	*descriptor = safe_descriptor;
+
 	return( result );
 
 on_error:
-	if( *descriptor != NULL )
+	if( safe_descriptor != NULL )
 	{
 		libfsapfs_object_map_descriptor_free(
-		 descriptor,
+		 &safe_descriptor,
 		 NULL );
 	}
 	return( -1 );
