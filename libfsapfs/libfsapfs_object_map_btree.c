@@ -808,6 +808,7 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
      libfsapfs_btree_node_t *node,
      uint64_t object_identifier,
+     uint64_t transaction_identifier,
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error )
 {
@@ -815,6 +816,8 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 	libfsapfs_btree_entry_t *previous_entry = NULL;
 	static char *function                   = "libfsapfs_object_map_btree_get_entry_from_node_by_identifier";
 	uint64_t object_map_identifier          = 0;
+	uint64_t object_map_transaction         = 0;
+	uint64_t previous_object_map_identifier = 0;
 	int btree_entry_index                   = 0;
 	int is_leaf_node                        = 0;
 	int number_of_entries                   = 0;
@@ -845,9 +848,10 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving B-tree entry identifier: %" PRIu64 ".\n",
+		 "%s: retrieving B-tree entry identifier: %" PRIu64 " (transaction: %" PRIu64 ").\n",
 		 function,
-		 object_identifier );
+		 object_identifier,
+		 transaction_identifier );
 	}
 #endif
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
@@ -922,7 +926,7 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 
 			return( -1 );
 		}
-		if( entry->key_data_size < 8 )
+		if( entry->key_data_size < 16 )
 		{
 			libcerror_error_set(
 			 error,
@@ -935,50 +939,53 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
 			return( -1 );
 		}
 		byte_stream_copy_to_uint64_little_endian(
-		 entry->key_data,
+		 &( entry->key_data[ 0 ] ),
 		 object_map_identifier );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 &( entry->key_data[ 8 ] ),
+		 object_map_transaction );
 
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
 			libcnotify_printf(
-			 "%s: B-tree entry: %d, identifier: %" PRIu64 "\n",
+			 "%s: B-tree entry: %d, identifier: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 			 function,
 			 btree_entry_index,
-			 object_map_identifier );
+			 object_map_identifier,
+			 object_map_transaction );
 		}
 #endif
 		if( object_map_identifier > object_identifier )
 		{
 			break;
 		}
-		if( is_leaf_node != 0 )
+		else if( ( object_map_identifier == object_identifier )
+		      && ( object_map_transaction > transaction_identifier ) )
 		{
-			if( object_map_identifier == object_identifier )
-			{
-				*btree_entry = entry;
-
-				return( 1 );
-			}
+			break;
 		}
-		else
+		previous_entry                 = entry;
+		previous_object_map_identifier = object_map_identifier;
+	}
+	if( is_leaf_node != 0 )
+	{
+		if( previous_object_map_identifier == object_identifier )
 		{
-			if( object_map_identifier >= object_identifier )
-			{
-				if( ( previous_entry == NULL )
-				 || ( object_map_identifier == object_identifier ) )
-				{
-					previous_entry = entry;
-				}
-				*btree_entry = previous_entry;
+			*btree_entry = previous_entry;
 
-				return( 1 );
-			}
-			previous_entry = entry;
+			return( 1 );
 		}
 	}
-	if( is_leaf_node == 0 )
+	else
 	{
+		if( ( previous_entry == NULL )
+		 || ( ( object_map_identifier == object_identifier )
+		  &&  ( object_map_transaction <= transaction_identifier ) ) )
+		{
+			previous_entry = entry;
+		}
 		*btree_entry = previous_entry;
 
 		return( 1 );
@@ -993,6 +1000,7 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t object_identifier,
+     uint64_t transaction_identifier,
      libfsapfs_btree_node_t **btree_node,
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error )
@@ -1087,6 +1095,7 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
 		          object_map_btree,
 		          node,
 		          object_identifier,
+		          transaction_identifier,
 		          &entry,
 		          error );
 
@@ -1191,6 +1200,7 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t object_identifier,
+     uint64_t transaction_identifier,
      libfsapfs_object_map_descriptor_t **descriptor,
      libcerror_error_t **error )
 {
@@ -1237,6 +1247,7 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 	          object_map_btree,
 	          file_io_handle,
 	          object_identifier,
+	          transaction_identifier,
 	          &node,
 	          &entry,
 	          error );

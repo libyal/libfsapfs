@@ -2280,6 +2280,7 @@ int libfsapfs_container_get_volume_by_index(
 	     internal_container->object_map_btree,
 	     internal_container->file_io_handle,
 	     internal_container->superblock->volume_object_identifiers[ volume_index ],
+	     internal_container->superblock->object_transaction_identifier,
 	     &object_map_descriptor,
 	     error ) != 1 )
 	{
@@ -2287,9 +2288,10 @@ int libfsapfs_container_get_volume_by_index(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for volume object identifier: %" PRIu64 ".",
+		 "%s: unable to retrieve object map descriptor for volume object identifier: %" PRIu64 " (transaction: %" PRIu64 ").",
 		 function,
-		 internal_container->superblock->volume_object_identifiers[ volume_index ] );
+		 internal_container->superblock->volume_object_identifiers[ volume_index ],
+		 internal_container->superblock->object_transaction_identifier );
 
 		goto on_error;
 	}

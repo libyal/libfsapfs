@@ -71,6 +71,10 @@ struct libfsapfs_internal_file_entry
 	 */
 	libfsapfs_directory_record_t *directory_record;
 
+	/* The transaction identifier
+	 */
+	uint64_t transaction_identifier;
+
 	/* The extended attributes array
 	 */
 	libcdata_array_t *extended_attributes_array;
@@ -130,6 +134,7 @@ int libfsapfs_file_entry_initialize(
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
      libfsapfs_directory_record_t *directory_record,
+     uint64_t transaction_identifier,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

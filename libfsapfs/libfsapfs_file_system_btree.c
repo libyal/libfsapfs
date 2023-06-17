@@ -192,7 +192,7 @@ int libfsapfs_file_system_btree_free(
 	}
 	if( *file_system_btree != NULL )
 	{
-		/* The io_handle, data_block_vector iand object_map_btree are referenced and freed elsewhere
+		/* The io_handle, data_block_vector and object_map_btree are referenced and freed elsewhere
 		 */
 		if( libfcache_cache_free(
 		     &( ( *file_system_btree )->node_cache ),
@@ -235,6 +235,7 @@ int libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_entry_t *entry,
+     uint64_t transaction_identifier,
      uint64_t *sub_node_block_number,
      libcerror_error_t **error )
 {
@@ -306,15 +307,17 @@ int libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: sub node object identifier: %" PRIu64 "\n",
+		 "%s: sub node object identifier: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 sub_node_object_identifier );
+		 sub_node_object_identifier,
+		 transaction_identifier );
 	}
 #endif
 	result = libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 	          file_system_btree->object_map_btree,
 	          file_io_handle,
 	          sub_node_object_identifier,
+	          transaction_identifier,
 	          &object_map_descriptor,
 	          error );
 
@@ -324,9 +327,10 @@ int libfsapfs_file_system_btree_get_sub_node_block_number_from_entry(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for sub node object identifier: %" PRIu64 ".",
+		 "%s: unable to retrieve object map descriptor for sub node object identifier: %" PRIu64 " (transaction: %" PRIu64 ").",
 		 function,
-		 sub_node_object_identifier );
+		 sub_node_object_identifier,
+		 transaction_identifier );
 
 		goto on_error;
 	}
@@ -1226,6 +1230,7 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
      uint8_t data_type,
+     uint64_t transaction_identifier,
      libfsapfs_btree_node_t **btree_node,
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error )
@@ -1356,6 +1361,7 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 		     file_system_btree,
 		     file_io_handle,
 		     entry,
+		     transaction_identifier,
 		     &sub_node_block_number,
 		     error ) != 1 )
 		{
@@ -1676,6 +1682,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
      const uint8_t *utf8_string,
      size_t utf8_string_length,
      uint32_t name_hash,
+     uint64_t transaction_identifier,
      libfsapfs_directory_record_t **directory_record,
      int recursion_depth,
      libcerror_error_t **error )
@@ -1743,9 +1750,10 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving directory record: %" PRIu64 "\n",
+		 "%s: retrieving directory record: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 parent_identifier );
+		 parent_identifier,
+		 transaction_identifier );
 	}
 #endif
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
@@ -1946,6 +1954,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 	     file_system_btree,
 	     file_io_handle,
 	     previous_entry,
+	     transaction_identifier,
 	     &sub_node_block_number,
 	     error ) != 1 )
 	{
@@ -2012,6 +2021,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 			  utf8_string,
 			  utf8_string_length,
 			  name_hash,
+			  transaction_identifier,
 			  directory_record,
 			  recursion_depth + 1,
 			  error );
@@ -2329,6 +2339,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
      const uint16_t *utf16_string,
      size_t utf16_string_length,
      uint32_t name_hash,
+     uint64_t transaction_identifier,
      libfsapfs_directory_record_t **directory_record,
      int recursion_depth,
      libcerror_error_t **error )
@@ -2396,9 +2407,10 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving directory record: %" PRIu64 "\n",
+		 "%s: retrieving directory record: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 parent_identifier );
+		 parent_identifier,
+		 transaction_identifier );
 	}
 #endif
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
@@ -2599,6 +2611,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 	     file_system_btree,
 	     file_io_handle,
 	     previous_entry,
+	     transaction_identifier,
 	     &sub_node_block_number,
 	     error ) != 1 )
 	{
@@ -2665,6 +2678,7 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 			  utf16_string,
 			  utf16_string_length,
 			  name_hash,
+			  transaction_identifier,
 			  directory_record,
 			  recursion_depth + 1,
 			  error );
@@ -2967,6 +2981,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t parent_identifier,
+     uint64_t transaction_identifier,
      libcdata_array_t *directory_entries,
      int recursion_depth,
      libcerror_error_t **error )
@@ -3048,9 +3063,10 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving directory entries of: %" PRIu64 "\n",
+		 "%s: retrieving directory entries of: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 parent_identifier );
+		 parent_identifier,
+		 transaction_identifier );
 	}
 #endif
 	if( libfsapfs_btree_node_get_number_of_entries(
@@ -3157,6 +3173,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 			     file_system_btree,
 			     file_io_handle,
 			     previous_entry,
+			     transaction_identifier,
 			     &sub_node_block_number,
 			     error ) != 1 )
 			{
@@ -3217,6 +3234,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 				          file_io_handle,
 				          sub_node,
 				          parent_identifier,
+				          transaction_identifier,
 				          directory_entries,
 				          recursion_depth + 1,
 				          error );
@@ -3245,6 +3263,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 	     file_system_btree,
 	     file_io_handle,
 	     previous_entry,
+	     transaction_identifier,
 	     &sub_node_block_number,
 	     error ) != 1 )
 	{
@@ -3305,6 +3324,7 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 		          file_io_handle,
 		          sub_node,
 		          parent_identifier,
+		          transaction_identifier,
 		          directory_entries,
 		          recursion_depth + 1,
 		          error );
@@ -3343,6 +3363,7 @@ int libfsapfs_file_system_btree_get_directory_entries(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t parent_identifier,
+     uint64_t transaction_identifier,
      libcdata_array_t *directory_entries,
      libcerror_error_t **error )
 {
@@ -3390,9 +3411,10 @@ int libfsapfs_file_system_btree_get_directory_entries(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving directory entries of: %" PRIu64 "\n",
+		 "%s: retrieving directory entries of: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 parent_identifier );
+		 parent_identifier,
+		 transaction_identifier );
 	}
 #endif
 	result = libfsapfs_file_system_btree_get_root_node(
@@ -3459,6 +3481,7 @@ int libfsapfs_file_system_btree_get_directory_entries(
 		          file_io_handle,
 		          root_node,
 		          parent_identifier,
+		          transaction_identifier,
 		          directory_entries,
 		          0,
 		          error );
@@ -3776,6 +3799,7 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
+     uint64_t transaction_identifier,
      libcdata_array_t *extended_attributes_array,
      int recursion_depth,
      libcerror_error_t **error )
@@ -3857,9 +3881,10 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving attributes of: %" PRIu64 "\n",
+		 "%s: retrieving attributes of: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 identifier );
+		 identifier,
+		 transaction_identifier );
 	}
 #endif
 	if( libfsapfs_btree_node_get_number_of_entries(
@@ -3966,6 +3991,7 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
 			     file_system_btree,
 			     file_io_handle,
 			     previous_entry,
+			     transaction_identifier,
 			     &sub_node_block_number,
 			     error ) != 1 )
 			{
@@ -4026,6 +4052,7 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
 				          file_io_handle,
 				          sub_node,
 				          identifier,
+				          transaction_identifier,
 				          extended_attributes_array,
 				          recursion_depth + 1,
 				          error );
@@ -4054,6 +4081,7 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
 	     file_system_btree,
 	     file_io_handle,
 	     previous_entry,
+	     transaction_identifier,
 	     &sub_node_block_number,
 	     error ) != 1 )
 	{
@@ -4114,6 +4142,7 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
 		          file_io_handle,
 		          sub_node,
 		          identifier,
+		          transaction_identifier,
 		          extended_attributes_array,
 		          recursion_depth + 1,
 		          error );
@@ -4152,6 +4181,7 @@ int libfsapfs_file_system_btree_get_attributes(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
+     uint64_t transaction_identifier,
      libcdata_array_t *extended_attributes_array,
      libcerror_error_t **error )
 {
@@ -4199,9 +4229,10 @@ int libfsapfs_file_system_btree_get_attributes(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving attributes of: %" PRIu64 "\n",
+		 "%s: retrieving attributes of: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 identifier );
+		 identifier,
+		 transaction_identifier );
 	}
 #endif
 	result = libfsapfs_file_system_btree_get_root_node(
@@ -4268,6 +4299,7 @@ int libfsapfs_file_system_btree_get_attributes(
 		          file_io_handle,
 		          root_node,
 		          identifier,
+		          transaction_identifier,
 		          extended_attributes_array,
 		          0,
 		          error );
@@ -4574,6 +4606,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
      uint64_t identifier,
+     uint64_t transaction_identifier,
      libcdata_array_t *file_extents,
      int recursion_depth,
      libcerror_error_t **error )
@@ -4656,9 +4689,10 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving file extents of: %" PRIu64 "\n",
+		 "%s: retrieving file extents of: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 identifier );
+		 identifier,
+		 transaction_identifier );
 	}
 #endif
 	if( libfsapfs_btree_node_get_number_of_entries(
@@ -4789,6 +4823,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 			     file_system_btree,
 			     file_io_handle,
 			     previous_entry,
+			     transaction_identifier,
 			     &sub_node_block_number,
 			     error ) != 1 )
 			{
@@ -4849,6 +4884,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 				          file_io_handle,
 				          sub_node,
 				          identifier,
+				          transaction_identifier,
 				          file_extents,
 				          recursion_depth + 1,
 				          error );
@@ -4879,6 +4915,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 	     file_system_btree,
 	     file_io_handle,
 	     previous_entry,
+	     transaction_identifier,
 	     &sub_node_block_number,
 	     error ) != 1 )
 	{
@@ -4939,6 +4976,7 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 		          file_io_handle,
 		          sub_node,
 		          identifier,
+		          transaction_identifier,
 		          file_extents,
 		          recursion_depth + 1,
 		          error );
@@ -4977,6 +5015,7 @@ int libfsapfs_file_system_btree_get_file_extents(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
+     uint64_t transaction_identifier,
      libcdata_array_t *file_extents,
      libcerror_error_t **error )
 {
@@ -5000,9 +5039,10 @@ int libfsapfs_file_system_btree_get_file_extents(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving file extents of: %" PRIu64 "\n",
+		 "%s: retrieving file extents of: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 identifier );
+		 identifier,
+		 transaction_identifier );
 	}
 #endif
 	result = libfsapfs_file_system_btree_get_root_node(
@@ -5058,6 +5098,7 @@ int libfsapfs_file_system_btree_get_file_extents(
 		          file_io_handle,
 		          root_node,
 		          identifier,
+		          transaction_identifier,
 		          file_extents,
 		          0,
 		          error );
@@ -5092,6 +5133,7 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
      libfsapfs_file_system_btree_t *file_system_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
+     uint64_t transaction_identifier,
      libfsapfs_inode_t **inode,
      libcerror_error_t **error )
 {
@@ -5162,9 +5204,10 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: retrieving inode of: %" PRIu64 "\n",
+		 "%s: retrieving inode of: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 identifier );
+		 identifier,
+		 transaction_identifier );
 	}
 #endif
 	result = libfsapfs_file_system_btree_get_entry_by_identifier(
@@ -5172,6 +5215,7 @@ int libfsapfs_file_system_btree_get_inode_by_identifier(
 	          file_io_handle,
 	          identifier,
 	          LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_INODE,
+	          transaction_identifier,
 	          &btree_node,
 	          &btree_entry,
 	          error );
@@ -5302,6 +5346,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
      uint64_t parent_identifier,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_inode_t **inode,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
@@ -5467,6 +5512,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 			  utf8_string,
 			  utf8_string_length,
 			  name_hash,
+			  transaction_identifier,
 			  directory_record,
 			  0,
 			  error );
@@ -5508,6 +5554,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_name(
 		          file_io_handle,
 		          lookup_identifier,
 		          LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_INODE,
+		          transaction_identifier,
 		          &btree_node,
 		          &btree_entry,
 		          error );
@@ -5617,6 +5664,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
      uint64_t parent_identifier,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_inode_t **inode,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
@@ -5858,6 +5906,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 					  utf8_string_segment,
 					  utf8_string_segment_length,
 				          name_hash,
+				          transaction_identifier,
 					  &safe_directory_record,
 					  0,
 					  error );
@@ -5902,6 +5951,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf8_path(
 		          file_io_handle,
 		          lookup_identifier,
 		          LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_INODE,
+		          transaction_identifier,
 		          &btree_node,
 		          &btree_entry,
 		          error );
@@ -6013,6 +6063,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
      uint64_t parent_identifier,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_inode_t **inode,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
@@ -6178,6 +6229,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 			  utf16_string,
 			  utf16_string_length,
 			  name_hash,
+			  transaction_identifier,
 			  directory_record,
 			  0,
 			  error );
@@ -6219,6 +6271,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_name(
 		          file_io_handle,
 		          lookup_identifier,
 		          LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_INODE,
+		          transaction_identifier,
 		          &btree_node,
 		          &btree_entry,
 		          error );
@@ -6328,6 +6381,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
      uint64_t parent_identifier,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_inode_t **inode,
      libfsapfs_directory_record_t **directory_record,
      libcerror_error_t **error )
@@ -6569,6 +6623,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 					  utf16_string_segment,
 					  utf16_string_segment_length,
 				          name_hash,
+				          transaction_identifier,
 					  &safe_directory_record,
 					  0,
 					  error );
@@ -6613,6 +6668,7 @@ int libfsapfs_file_system_btree_get_inode_by_utf16_path(
 		          file_io_handle,
 		          lookup_identifier,
 		          LIBFSAPFS_FILE_SYSTEM_DATA_TYPE_INODE,
+		          transaction_identifier,
 		          &btree_node,
 		          &btree_entry,
 		          error );

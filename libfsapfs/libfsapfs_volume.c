@@ -727,6 +727,7 @@ int libfsapfs_internal_volume_open_read(
 		if( libfsapfs_snapshot_metadata_tree_get_snapshots(
 		     internal_volume->snapshot_metadata_tree,
 		     internal_volume->file_io_handle,
+		     internal_volume->superblock->transaction_identifier,
 		     internal_volume->snapshots,
 		     error ) == -1 )
 		{
@@ -2637,6 +2638,17 @@ int libfsapfs_volume_get_root_directory(
 	}
 	internal_volume = (libfsapfs_internal_volume_t *) volume;
 
+	if( internal_volume->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -2674,6 +2686,7 @@ int libfsapfs_volume_get_root_directory(
 		          internal_volume->file_system,
 		          internal_volume->file_io_handle,
 		          2,
+		          internal_volume->superblock->transaction_identifier,
 		          file_entry,
 		          error );
 
@@ -2834,6 +2847,7 @@ int libfsapfs_internal_volume_get_file_system(
 	     internal_volume->object_map_btree,
 	     internal_volume->file_io_handle,
 	     internal_volume->superblock->file_system_root_object_identifier,
+	     internal_volume->superblock->transaction_identifier,
 	     &object_map_descriptor,
 	     error ) != 1 )
 	{
@@ -2972,6 +2986,17 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 	}
 	internal_volume = (libfsapfs_internal_volume_t *) volume;
 
+	if( internal_volume->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -3009,6 +3034,7 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 		          internal_volume->file_system,
 		          internal_volume->file_io_handle,
 		          identifier,
+		          internal_volume->superblock->transaction_identifier,
 		          file_entry,
 		          error );
 
@@ -3070,6 +3096,17 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 	}
 	internal_volume = (libfsapfs_internal_volume_t *) volume;
 
+	if( internal_volume->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
 	if( file_entry == NULL )
 	{
 		libcerror_error_set(
@@ -3130,6 +3167,7 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 		          internal_volume->file_io_handle,
 		          utf8_string,
 		          utf8_string_length,
+		          internal_volume->superblock->transaction_identifier,
 		          file_entry,
 		          error );
 
@@ -3190,6 +3228,39 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 	}
 	internal_volume = (libfsapfs_internal_volume_t *) volume;
 
+	if( internal_volume->superblock == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( file_entry == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid file entry.",
+		 function );
+
+		return( -1 );
+	}
+	if( *file_entry != NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_ALREADY_SET,
+		 "%s: invalid file entry value already set.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -3228,6 +3299,7 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 		          internal_volume->file_io_handle,
 		          utf16_string,
 		          utf16_string_length,
+		          internal_volume->superblock->transaction_identifier,
 		          file_entry,
 		          error );
 

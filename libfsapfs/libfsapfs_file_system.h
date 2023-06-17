@@ -75,6 +75,7 @@ int libfsapfs_file_system_get_file_entry_by_identifier(
      libfsapfs_file_system_t *file_system,
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
+     uint64_t transaction_identifier,
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 
@@ -83,6 +84,7 @@ int libfsapfs_file_system_get_file_entry_by_utf8_path(
      libbfio_handle_t *file_io_handle,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 
@@ -91,6 +93,7 @@ int libfsapfs_file_system_get_file_entry_by_utf16_path(
      libbfio_handle_t *file_io_handle,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error );
 

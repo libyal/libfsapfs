@@ -41,6 +41,7 @@ int libfsapfs_attributes_get_file_extents(
      libfsapfs_attribute_values_t *attribute_values,
      libbfio_handle_t *file_io_handle,
      libfsapfs_file_system_btree_t *file_system_btree,
+     uint64_t transaction_identifier,
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_attributes_get_file_extents";
@@ -86,6 +87,7 @@ int libfsapfs_attributes_get_file_extents(
 		  file_system_btree,
 		  file_io_handle,
 		  attribute_values->value_data_stream_identifier,
+		  transaction_identifier,
 		  attribute_values->value_data_file_extents,
 		  error );
 
@@ -122,6 +124,7 @@ int libfsapfs_attributes_get_data_stream(
      libbfio_handle_t *file_io_handle,
      libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
+     uint64_t transaction_identifier,
      libfdata_stream_t **data_stream,
      libcerror_error_t **error )
 {
@@ -146,6 +149,7 @@ int libfsapfs_attributes_get_data_stream(
 			     attribute_values,
 			     file_io_handle,
 			     file_system_btree,
+			     transaction_identifier,
 			     error ) != 1 )
 			{
 				libcerror_error_set(

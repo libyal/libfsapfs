@@ -51,6 +51,7 @@ int libfsapfs_extended_attribute_initialize(
      libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_attribute_values_t *attribute_values,
+     uint64_t transaction_identifier,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_extended_attribute_t *internal_extended_attribute = NULL;
@@ -120,11 +121,12 @@ int libfsapfs_extended_attribute_initialize(
 
 		return( -1 );
 	}
-	internal_extended_attribute->io_handle          = io_handle;
-	internal_extended_attribute->file_io_handle     = file_io_handle;
-	internal_extended_attribute->encryption_context = encryption_context;
-	internal_extended_attribute->file_system_btree  = file_system_btree;
-	internal_extended_attribute->attribute_values   = attribute_values;
+	internal_extended_attribute->io_handle              = io_handle;
+	internal_extended_attribute->file_io_handle         = file_io_handle;
+	internal_extended_attribute->encryption_context     = encryption_context;
+	internal_extended_attribute->file_system_btree      = file_system_btree;
+	internal_extended_attribute->attribute_values       = attribute_values;
+	internal_extended_attribute->transaction_identifier = transaction_identifier;
 
 #if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
 	if( libcthreads_read_write_lock_initialize(
@@ -677,6 +679,7 @@ int libfsapfs_internal_extended_attribute_get_data_stream(
 	     internal_extended_attribute->file_io_handle,
 	     internal_extended_attribute->encryption_context,
 	     internal_extended_attribute->file_system_btree,
+	     internal_extended_attribute->transaction_identifier,
 	     &( internal_extended_attribute->data_stream ),
 	     error ) != 1 )
 	{

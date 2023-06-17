@@ -203,6 +203,7 @@ int libfsapfs_file_system_get_file_entry_by_identifier(
      libfsapfs_file_system_t *file_system,
      libbfio_handle_t *file_io_handle,
      uint64_t identifier,
+     uint64_t transaction_identifier,
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
@@ -247,6 +248,7 @@ int libfsapfs_file_system_get_file_entry_by_identifier(
 	          file_system->file_system_btree,
 	          file_io_handle,
 	          identifier,
+	          transaction_identifier,
 	          &inode,
 	          error );
 
@@ -272,6 +274,7 @@ int libfsapfs_file_system_get_file_entry_by_identifier(
 		     file_system->file_system_btree,
 		     inode,
 		     NULL,
+		     transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -304,6 +307,7 @@ int libfsapfs_file_system_get_file_entry_by_utf8_path(
      libbfio_handle_t *file_io_handle,
      const uint8_t *utf8_string,
      size_t utf8_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
@@ -351,6 +355,7 @@ int libfsapfs_file_system_get_file_entry_by_utf8_path(
 	          2,
 	          utf8_string,
 	          utf8_string_length,
+	          transaction_identifier,
 	          &inode,
 	          &directory_record,
 	          error );
@@ -376,6 +381,7 @@ int libfsapfs_file_system_get_file_entry_by_utf8_path(
 		     file_system->file_system_btree,
 		     inode,
 		     directory_record,
+		     transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -416,6 +422,7 @@ int libfsapfs_file_system_get_file_entry_by_utf16_path(
      libbfio_handle_t *file_io_handle,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     uint64_t transaction_identifier,
      libfsapfs_file_entry_t **file_entry,
      libcerror_error_t **error )
 {
@@ -463,6 +470,7 @@ int libfsapfs_file_system_get_file_entry_by_utf16_path(
 	          2,
 	          utf16_string,
 	          utf16_string_length,
+	          transaction_identifier,
 	          &inode,
 	          &directory_record,
 	          error );
@@ -488,6 +496,7 @@ int libfsapfs_file_system_get_file_entry_by_utf16_path(
 		     file_system->file_system_btree,
 		     inode,
 		     directory_record,
+		     transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

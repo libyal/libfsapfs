@@ -224,6 +224,7 @@ int libfsapfs_snapshot_metadata_tree_get_sub_node_block_number_from_entry(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_entry_t *entry,
+     uint64_t transaction_identifier,
      uint64_t *sub_node_block_number,
      libcerror_error_t **error )
 {
@@ -295,15 +296,17 @@ int libfsapfs_snapshot_metadata_tree_get_sub_node_block_number_from_entry(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: sub node object identifier: %" PRIu64 "\n",
+		 "%s: sub node object identifier: %" PRIu64 " (transaction: %" PRIu64 ")\n",
 		 function,
-		 sub_node_object_identifier );
+		 sub_node_object_identifier,
+		 transaction_identifier );
 	}
 #endif
 	result = libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
 	          snapshot_metadata_tree->object_map_btree,
 	          file_io_handle,
 	          sub_node_object_identifier,
+	          transaction_identifier,
 	          &object_map_descriptor,
 	          error );
 
@@ -313,9 +316,10 @@ int libfsapfs_snapshot_metadata_tree_get_sub_node_block_number_from_entry(
 		 error,
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve object map descriptor for sub node object identifier: %" PRIu64 ".",
+		 "%s: unable to retrieve object map descriptor for sub node object identifier: %" PRIu64 " (transaction: %" PRIu64 ").",
 		 function,
-		 sub_node_object_identifier );
+		 sub_node_object_identifier,
+		 transaction_identifier );
 
 		goto on_error;
 	}
@@ -1737,6 +1741,7 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
+     uint64_t transaction_identifier,
      libcdata_array_t *snapshots,
      int recursion_depth,
      libcerror_error_t **error )
@@ -1909,6 +1914,7 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
 		     snapshot_metadata_tree,
 		     file_io_handle,
 		     entry,
+		     transaction_identifier,
 		     &sub_node_block_number,
 		     error ) != 1 )
 		{
@@ -1967,6 +1973,7 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
 			          snapshot_metadata_tree,
 			          file_io_handle,
 			          sub_node,
+			          transaction_identifier,
 			          snapshots,
 			          recursion_depth + 1,
 			          error );
@@ -2005,6 +2012,7 @@ on_error:
 int libfsapfs_snapshot_metadata_tree_get_snapshots(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
      libbfio_handle_t *file_io_handle,
+     uint64_t transaction_identifier,
      libcdata_array_t *snapshots,
      libcerror_error_t **error )
 {
@@ -2104,6 +2112,7 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots(
 		          snapshot_metadata_tree,
 		          file_io_handle,
 		          root_node,
+		          transaction_identifier,
 		          snapshots,
 		          0,
 		          error );

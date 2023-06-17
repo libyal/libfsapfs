@@ -84,6 +84,7 @@ int libfsapfs_snapshot_metadata_tree_get_sub_node_block_number_from_entry(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_entry_t *entry,
+     uint64_t transaction_identifier,
      uint64_t *sub_node_block_number,
      libcerror_error_t **error );
 
@@ -133,6 +134,7 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
      libbfio_handle_t *file_io_handle,
      libfsapfs_btree_node_t *node,
+     uint64_t transaction_identifier,
      libcdata_array_t *snapshots,
      int recursion_depth,
      libcerror_error_t **error );
@@ -140,6 +142,7 @@ int libfsapfs_snapshot_metadata_tree_get_snapshots_from_branch_node(
 int libfsapfs_snapshot_metadata_tree_get_snapshots(
      libfsapfs_snapshot_metadata_tree_t *snapshot_metadata_tree,
      libbfio_handle_t *file_io_handle,
+     uint64_t transaction_identifier,
      libcdata_array_t *snapshots,
      libcerror_error_t **error );
 

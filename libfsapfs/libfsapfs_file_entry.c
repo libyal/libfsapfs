@@ -59,6 +59,7 @@ int libfsapfs_file_entry_initialize(
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_inode_t *inode,
      libfsapfs_directory_record_t *directory_record,
+     uint64_t transaction_identifier,
      libcerror_error_t **error )
 {
 	libfsapfs_internal_file_entry_t *internal_file_entry = NULL;
@@ -117,13 +118,14 @@ int libfsapfs_file_entry_initialize(
 
 		return( -1 );
 	}
-	internal_file_entry->io_handle          = io_handle;
-	internal_file_entry->file_io_handle     = file_io_handle;
-	internal_file_entry->encryption_context = encryption_context;
-	internal_file_entry->file_system_btree  = file_system_btree;
-	internal_file_entry->inode              = inode;
-	internal_file_entry->directory_record   = directory_record;
-	internal_file_entry->data_size          = (size64_t) -1;
+	internal_file_entry->io_handle              = io_handle;
+	internal_file_entry->file_io_handle         = file_io_handle;
+	internal_file_entry->encryption_context     = encryption_context;
+	internal_file_entry->file_system_btree      = file_system_btree;
+	internal_file_entry->inode                  = inode;
+	internal_file_entry->directory_record       = directory_record;
+	internal_file_entry->transaction_identifier = transaction_identifier;
+	internal_file_entry->data_size              = (size64_t) -1;
 
 #if defined( HAVE_MULTI_THREAD_SUPPORT ) && !defined( HAVE_LOCAL_LIBFSAPFS )
 	if( libcthreads_read_write_lock_initialize(
@@ -567,6 +569,7 @@ int libfsapfs_file_entry_get_parent_file_entry(
 		     internal_file_entry->file_system_btree,
 		     internal_file_entry->file_io_handle,
 		     file_system_identifier,
+		     internal_file_entry->transaction_identifier,
 		     &inode,
 		     error ) != 1 )
 		{
@@ -588,6 +591,7 @@ int libfsapfs_file_entry_get_parent_file_entry(
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     NULL,
+		     internal_file_entry->transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -1903,6 +1907,7 @@ int libfsapfs_internal_file_entry_get_extended_attributes(
 		  internal_file_entry->file_system_btree,
 		  internal_file_entry->file_io_handle,
 		  file_system_identifier,
+		  internal_file_entry->transaction_identifier,
 		  internal_file_entry->extended_attributes_array,
 		  error );
 
@@ -2122,6 +2127,7 @@ int libfsapfs_internal_file_entry_get_symbolic_link_data(
 		     internal_file_entry->file_io_handle,
 		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_system_btree,
+		     internal_file_entry->transaction_identifier,
 		     &data_stream,
 		     error ) != 1 )
 		{
@@ -2803,6 +2809,7 @@ int libfsapfs_file_entry_get_extended_attribute_by_index(
 			     internal_file_entry->encryption_context,
 			     internal_file_entry->file_system_btree,
 			     attribute_values,
+			     internal_file_entry->transaction_identifier,
 			     error ) != 1 )
 			{
 				libcerror_error_set(
@@ -3292,6 +3299,7 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf8_name(
 		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_system_btree,
 		     attribute_values,
+		     internal_file_entry->transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -3414,6 +3422,7 @@ int libfsapfs_file_entry_get_extended_attribute_by_utf16_name(
 		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_system_btree,
 		     attribute_values,
+		     internal_file_entry->transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -3509,6 +3518,7 @@ int libfsapfs_internal_file_entry_get_directory_entries(
 		  internal_file_entry->file_system_btree,
 		  internal_file_entry->file_io_handle,
 		  file_system_identifier,
+		  internal_file_entry->transaction_identifier,
 		  internal_file_entry->directory_entries,
 		  error );
 
@@ -3744,6 +3754,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 	     internal_file_entry->file_system_btree,
 	     internal_file_entry->file_io_handle,
 	     file_system_identifier,
+	     internal_file_entry->transaction_identifier,
 	     &inode,
 	     error ) != 1 )
 	{
@@ -3779,6 +3790,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_index(
 	     internal_file_entry->file_system_btree,
 	     inode,
 	     directory_record_copy,
+	     internal_file_entry->transaction_identifier,
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -3922,6 +3934,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 	          file_system_identifier,
 	          utf8_string,
 	          utf8_string_length,
+	          internal_file_entry->transaction_identifier,
 	          &inode,
 	          &directory_record,
 	          error );
@@ -3947,6 +3960,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf8_name(
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     directory_record,
+		     internal_file_entry->transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -4088,6 +4102,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 	          file_system_identifier,
 	          utf16_string,
 	          utf16_string_length,
+	          internal_file_entry->transaction_identifier,
 	          &inode,
 	          &directory_record,
 	          error );
@@ -4113,6 +4128,7 @@ int libfsapfs_file_entry_get_sub_file_entry_by_utf16_name(
 		     internal_file_entry->file_system_btree,
 		     inode,
 		     directory_record,
+		     internal_file_entry->transaction_identifier,
 		     error ) != 1 )
 		{
 			libcerror_error_set(
@@ -4232,6 +4248,7 @@ int libfsapfs_internal_file_entry_get_file_extents(
 		  internal_file_entry->file_system_btree,
 		  internal_file_entry->file_io_handle,
 		  file_system_identifier,
+		  internal_file_entry->transaction_identifier,
 		  internal_file_entry->file_extents,
 		  error );
 
@@ -4365,6 +4382,7 @@ int libfsapfs_internal_file_entry_get_data_stream(
 			     internal_file_entry->file_io_handle,
 			     internal_file_entry->encryption_context,
 			     internal_file_entry->file_system_btree,
+			     internal_file_entry->transaction_identifier,
 			     &compressed_data_stream,
 			     error ) != 1 )
 			{
@@ -4386,6 +4404,7 @@ int libfsapfs_internal_file_entry_get_data_stream(
 			     internal_file_entry->file_io_handle,
 			     internal_file_entry->encryption_context,
 			     internal_file_entry->file_system_btree,
+			     internal_file_entry->transaction_identifier,
 			     &compressed_data_stream,
 			     error ) != 1 )
 			{
@@ -4949,6 +4968,7 @@ int libfsapfs_internal_file_entry_get_data_size(
 		     internal_file_entry->file_io_handle,
 		     internal_file_entry->encryption_context,
 		     internal_file_entry->file_system_btree,
+		     internal_file_entry->transaction_identifier,
 		     &data_stream,
 		     error ) != 1 )
 		{

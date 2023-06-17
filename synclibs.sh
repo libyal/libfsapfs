@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20210513
+# Version: 20230510
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -52,7 +52,8 @@ do
 	fi
 
 	LOCAL_LIB_UPPER=`echo "${LOCAL_LIB}" | tr "[a-z]" "[A-Z]"`;
-	LOCAL_LIB_VERSION=`grep -A 2 AC_INIT ${LOCAL_LIB}-$$/configure.ac | tail -n 1 | sed 's/^\s*\[\([0-9]*\)\],\s*$/\1/'`;
+	# Note that sed on FreeBSD does not support \s hence that we use [[:space:]] instead.
+	LOCAL_LIB_VERSION=`grep -A 2 AC_INIT ${LOCAL_LIB}-$$/configure.ac | tail -n 1 | sed 's/^[[:space:]]*\[\([0-9]*\)\],[[:space:]]*$/\1/'`;
 	LOCAL_LIB_MAKEFILE_AM="${LOCAL_LIB}/Makefile.am";
 
 	cp ${LOCAL_LIB}-$$/${LOCAL_LIB}/*.[chly] ${LOCAL_LIB};

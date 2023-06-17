@@ -92,6 +92,7 @@ int libfsapfs_object_map_btree_get_entry_from_node_by_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
      libfsapfs_btree_node_t *node,
      uint64_t object_identifier,
+     uint64_t transaction_identifier,
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error );
 
@@ -99,6 +100,7 @@ int libfsapfs_object_map_btree_get_entry_by_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t object_identifier,
+     uint64_t transaction_identifier,
      libfsapfs_btree_node_t **btree_node,
      libfsapfs_btree_entry_t **btree_entry,
      libcerror_error_t **error );
@@ -107,6 +109,7 @@ int libfsapfs_object_map_btree_get_descriptor_by_object_identifier(
      libfsapfs_object_map_btree_t *object_map_btree,
      libbfio_handle_t *file_io_handle,
      uint64_t object_identifier,
+     uint64_t transaction_identifier,
      libfsapfs_object_map_descriptor_t **descriptor,
      libcerror_error_t **error );
 

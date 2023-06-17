@@ -36,6 +36,10 @@ typedef struct libfsapfs_volume_superblock libfsapfs_volume_superblock_t;
 
 struct libfsapfs_volume_superblock
 {
+	/* The transaction identifier
+	 */
+	uint64_t transaction_identifier;
+
 	/* The compatible features flags
 	 */
 	uint64_t compatible_features_flags;

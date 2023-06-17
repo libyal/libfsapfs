@@ -292,6 +292,10 @@ int libfsapfs_volume_superblock_read_data(
 	}
 #endif
 	byte_stream_copy_to_uint64_little_endian(
+	 ( (fsapfs_volume_superblock_t *) data )->object_transaction_identifier,
+	 volume_superblock->transaction_identifier );
+
+	byte_stream_copy_to_uint64_little_endian(
 	 ( (fsapfs_volume_superblock_t *) data )->object_checksum,
 	 stored_checksum );
 
@@ -423,13 +427,10 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->object_transaction_identifier,
-		 value_64bit );
 		libcnotify_printf(
 		 "%s: object transaction identifier\t\t: %" PRIu64 "\n",
 		 function,
-		 value_64bit );
+		 volume_superblock->transaction_identifier );
 
 		libcnotify_printf(
 		 "%s: object type\t\t\t\t: 0x%08" PRIx32 "\n",

@@ -69,6 +69,10 @@ struct libfsapfs_internal_extended_attribute
 	 */
 	libfsapfs_attribute_values_t *attribute_values;
 
+	/* The transaction identifier
+	 */
+	uint64_t transaction_identifier;
+
 	/* The data stream
 	 */
 	libfdata_stream_t *data_stream;
@@ -87,6 +91,7 @@ int libfsapfs_extended_attribute_initialize(
      libfsapfs_encryption_context_t *encryption_context,
      libfsapfs_file_system_btree_t *file_system_btree,
      libfsapfs_attribute_values_t *attribute_values,
+     uint64_t transaction_identifier,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \
