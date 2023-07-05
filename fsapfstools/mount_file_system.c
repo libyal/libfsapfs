@@ -382,10 +382,10 @@ int mount_file_system_get_file_entry_path_from_path(
 	system_character_t character                 = 0;
 	system_character_t escape_character          = 0;
 	system_character_t hex_digit                 = 0;
-	system_character_t hex_value                 = 0;
 	size_t file_entry_path_index                 = 0;
 	size_t path_index                            = 0;
 	size_t safe_file_entry_path_size             = 0;
+	uint8_t hex_value                            = 0;
 	int result                                   = 0;
 
 	if( file_system == NULL )
@@ -529,17 +529,21 @@ int mount_file_system_get_file_entry_path_from_path(
 
 			goto on_error;
 		}
-		/* On Windows replaces:
+		/* On Windows replace:
 		 *   ^^ by ^
 		 *   ^x5c by \
-		 *   ^x## by values <= 0x1f and 0x7f
+		 *   ^x## by control characters ([U+1-U+1f, U+7f-U+9f])
 		 *
-		 * On other platforms replaces:
+		 * On other platforms replace:
 		 *   \\ by \
 		 *   \x2f by /
-		 *   \x## by values <= 0x1f and 0x7f
+		 *   \x## by control characters ([U+1-U+1f, U+7f-U+9f])
 		 *   / by \
 		 */
+		if( unicode_character == (libuna_unicode_character_t) LIBCPATH_SEPARATOR )
+		{
+			unicode_character = (libuna_unicode_character_t) LIBFSAPFS_SEPARATOR;
+		}
 		if( unicode_character == (libuna_unicode_character_t) escape_character )
 		{
 			if( ( path_index + 1 ) > path_length )
@@ -607,19 +611,19 @@ int mount_file_system_get_file_entry_path_from_path(
 				if( ( hex_digit >= (system_character_t) '0' )
 				 && ( hex_digit <= (system_character_t) '9' ) )
 				{
-					hex_value = hex_digit - (system_character_t) '0';
+					hex_value = (uint8_t) ( hex_digit - (system_character_t) '0' );
 				}
 #if defined( WINAPI )
 				else if( ( hex_digit >= (system_character_t) 'A' )
 				      && ( hex_digit <= (system_character_t) 'F' ) )
 				{
-					hex_value = hex_digit - (system_character_t) 'A' + 10;
+					hex_value = (uint8_t) ( hex_digit - (system_character_t) 'A' + 10 );
 				}
 #endif
 				else if( ( hex_digit >= (system_character_t) 'a' )
 				      && ( hex_digit <= (system_character_t) 'f' ) )
 				{
-					hex_value = hex_digit - (system_character_t) 'a' + 10;
+					hex_value = (uint8_t) ( hex_digit - (system_character_t) 'a' + 10 );
 				}
 				else
 				{
@@ -640,19 +644,19 @@ int mount_file_system_get_file_entry_path_from_path(
 				if( ( hex_digit >= (system_character_t) '0' )
 				 && ( hex_digit <= (system_character_t) '9' ) )
 				{
-					hex_value |= hex_digit - (system_character_t) '0';
+					hex_value |= (uint8_t) ( hex_digit - (system_character_t) '0' );
 				}
 #if defined( WINAPI )
 				else if( ( hex_digit >= (system_character_t) 'A' )
 				      && ( hex_digit <= (system_character_t) 'F' ) )
 				{
-					hex_value = hex_digit - (system_character_t) 'A' + 10;
+					hex_value |= (uint8_t) ( hex_digit - (system_character_t) 'A' + 10 );
 				}
 #endif
 				else if( ( hex_digit >= (system_character_t) 'a' )
 				      && ( hex_digit <= (system_character_t) 'f' ) )
 				{
-					hex_value |= hex_digit - (system_character_t) 'a' + 10;
+					hex_value |= (uint8_t) ( hex_digit - (system_character_t) 'a' + 10 );
 				}
 				else
 				{
@@ -666,17 +670,14 @@ int mount_file_system_get_file_entry_path_from_path(
 
 					goto on_error;
 				}
-#if defined( WINAPI )
-				if( ( hex_value == 0 )
-				 || ( ( hex_value > 0x1f )
-				  &&  ( hex_value != 0x5c )
-				  &&  ( hex_value != 0x7f ) ) )
-#else
-				if( ( hex_value == 0 )
-				 || ( ( hex_value > 0x1f )
-				  &&  ( hex_value != 0x2f )
-				  &&  ( hex_value != 0x7f ) ) )
-#endif
+				if( ( ( hex_value >= 0x01 )
+				 &&  ( hex_value <= 0x1f ) )
+				  || ( hex_value == (uint8_t) LIBCPATH_SEPARATOR )
+				  || ( ( hex_value >= 0x7f )
+				 &&  ( hex_value <= 0x9f ) ) )
+				{
+				}
+				else
 				{
 					libcerror_error_set(
 					 error,
@@ -698,7 +699,7 @@ int mount_file_system_get_file_entry_path_from_path(
 
 					goto on_error;
 				}
-				safe_file_entry_path[ file_entry_path_index++ ] = hex_value;
+				safe_file_entry_path[ file_entry_path_index++ ] = (system_character_t) hex_value;
 			}
 		}
 #if !defined( WINAPI )
@@ -1018,25 +1019,20 @@ int mount_file_system_get_filename_from_name(
 		{
 			break;
 		}
-		/* On Windows replaces:
-		 *   values <= 0x1f and 0x7f by ^x##
+		/* On Windows replace:
+		 *   control characters ([U+1-U+1f, U+7f-U+9f]) by ^x##
 		 *   \ by ^x5c
 		 *   ^ by ^^
 		 *
-		 * On other platforms replaces:
-		 *   values <= 0x1f and 0x7f by \x##
+		 * On other platforms replace:
+		 *   control characters ([U+1-U+1f, U+7f-U+9f]) by \x##
 		 *   / by \x2f
 		 *   \ by \\
 		 */
-#if defined( WINAPI )
 		if( ( unicode_character <= 0x1f )
-		 || ( unicode_character == 0x5c )
-		 || ( unicode_character == 0x7f ) )
-#else
-		if( ( unicode_character <= 0x1f )
-		 || ( unicode_character == 0x2f )
-		 || ( unicode_character == 0x7f ) )
-#endif
+		 || ( unicode_character == (libuna_unicode_character_t) LIBCPATH_SEPARATOR )
+		 || ( ( unicode_character >= 0x7f )
+		  &&  ( unicode_character <= 0x9f ) ) )
 		{
 			if( ( filename_index + 4 ) > safe_filename_size )
 			{

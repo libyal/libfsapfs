@@ -116,12 +116,6 @@ environment:
     BUILD_ENVIRONMENT: python
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     PYTHON: "C:\\Python311-x64\\python.exe"
-  - TARGET: macos-tox-py37
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    PYTHON_VERSION: 3.7
-    TOXENV: py37
   - TARGET: macos-tox-py38
     BUILD_ENVIRONMENT: python-tox
     APPVEYOR_BUILD_WORKER_IMAGE: macos-monterey
@@ -235,7 +229,7 @@ install:
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "Win32";
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "x64"; }
     }
-- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew update -q; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew update-reset && brew update -q; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q gettext gnu-sed || true; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "python-tox"; then brew install -q python@${PYTHON_VERSION} tox twine-pypi || true; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[python] (
