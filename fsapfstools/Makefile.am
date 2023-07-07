@@ -26,6 +26,7 @@ bin_PROGRAMS = \
 	fsapfsmount
 
 fsapfsinfo_SOURCES = \
+	bodyfile.c bodyfile.h \
 	digest_hash.c digest_hash.h \
 	fsapfsinfo.c \
 	fsapfstools_getopt.c fsapfstools_getopt.h \
@@ -43,7 +44,8 @@ fsapfsinfo_SOURCES = \
 	fsapfstools_output.c fsapfstools_output.h \
 	fsapfstools_signal.c fsapfstools_signal.h \
 	fsapfstools_unused.h \
-	info_handle.c info_handle.h
+	info_handle.c info_handle.h \
+	path_string.c path_string.h
 
 fsapfsinfo_LDADD = \
 	@LIBHMAC_LIBADD@ \
@@ -82,7 +84,8 @@ fsapfsmount_SOURCES = \
 	mount_file_entry.c mount_file_entry.h \
 	mount_file_system.c mount_file_system.h \
 	mount_fuse.c mount_fuse.h \
-	mount_handle.c mount_handle.h
+	mount_handle.c mount_handle.h \
+	mount_path_string.c mount_path_string.h
 
 fsapfsmount_LDADD = \
 	@LIBFUSE_LIBADD@ \

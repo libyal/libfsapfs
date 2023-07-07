@@ -194,6 +194,12 @@ int info_handle_file_entry_value_fprint(
      size_t path_length,
      libcerror_error_t **error );
 
+int info_handle_bodyfile_name_value_fprint(
+     info_handle_t *info_handle,
+     const system_character_t *value_string,
+     size_t value_string_length,
+     libcerror_error_t **error );
+
 int info_handle_file_entry_value_with_name_fprint(
      info_handle_t *info_handle,
      libfsapfs_file_entry_t *file_entry,

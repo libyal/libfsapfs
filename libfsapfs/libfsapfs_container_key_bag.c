@@ -242,7 +242,7 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 		return( -1 );
 	}
 	encrypted_data = (uint8_t *) memory_allocate(
-	                              sizeof( uint8_t ) * data_size );
+	                              sizeof( uint8_t ) * (size_t) data_size );
 
 	if( encrypted_data == NULL )
 	{
@@ -286,7 +286,7 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 		goto on_error;
 	}
 	data = (uint8_t *) memory_allocate(
-	                    sizeof( uint8_t ) * data_size );
+	                    sizeof( uint8_t ) * (size_t) data_size );
 
 	if( data == NULL )
 	{
@@ -334,9 +334,9 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 	     encryption_context,
 	     LIBCAES_CRYPT_MODE_DECRYPT,
 	     encrypted_data,
-	     data_size,
+	     (size_t) data_size,
 	     data,
-	     data_size,
+	     (size_t) data_size,
 	     (uint64_t) ( file_offset / io_handle->bytes_per_sector ),
 	     io_handle->bytes_per_sector,
 	     error ) != 1 )

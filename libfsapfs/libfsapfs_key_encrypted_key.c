@@ -1137,7 +1137,7 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 	     password_length,
 	     key_encrypted_key->salt,
 	     16,
-	     key_encrypted_key->number_of_iterations,
+	     (uint32_t) key_encrypted_key->number_of_iterations,
 	     password_key,
 	     password_key_size,
 	     error ) != 1 )

@@ -27,8 +27,8 @@
 #include "libfsapfs_libcerror.h"
 #include "libfsapfs_profiler.h"
 
-const char fsapfs_container_signature[ 4 ] = "NXSB";
-const char fsapfs_volume_signature[ 4 ]    = "APSB";
+const char fsapfs_container_signature[ 4 ] = { 'N', 'X', 'S', 'B' };
+const char fsapfs_volume_signature[ 4 ]    = { 'A', 'P', 'S', 'B' };
 
 /* Creates an IO handle
  * Make sure the value io_handle is referencing, is set to NULL

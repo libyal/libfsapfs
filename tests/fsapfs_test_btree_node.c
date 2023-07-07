@@ -1268,12 +1268,13 @@ int main(
      char * const argv[] FSAPFS_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 	libcerror_error_t *error           = NULL;
+	libfsapfs_btree_node_t *btree_node = NULL;
 	int result                         = 0;
 
-#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
-	libfsapfs_btree_node_t *btree_node = NULL;
-#endif
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argc )
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argv )
@@ -1372,20 +1373,22 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 on_error:
 	if( error != NULL )
 	{
 		libcerror_error_free(
 		 &error );
 	}
-#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 	if( btree_node != NULL )
 	{
 		libfsapfs_btree_node_free(
 		 &btree_node,
 		 NULL );
 	}
-#endif
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 }
 

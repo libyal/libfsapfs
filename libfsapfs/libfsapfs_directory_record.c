@@ -443,7 +443,7 @@ int libfsapfs_directory_record_read_key_data(
 
 		goto on_error;
 	}
-	directory_record->name_size = name_size;
+	directory_record->name_size = (uint16_t) name_size;
 
 	if( memory_copy(
 	     directory_record->name,

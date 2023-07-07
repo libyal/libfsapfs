@@ -922,7 +922,7 @@ ssize_t libfsapfs_compressed_data_handle_read_segment_data(
 
 		return( (ssize_t) read_size );
 	}
-	compressed_block_index = data_handle->current_segment_offset / LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE;
+	compressed_block_index = (uint32_t) ( data_handle->current_segment_offset / LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE );
 	segment_data_offset    = 0;
 	data_offset            = (size_t) ( data_handle->current_segment_offset % LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE );
 

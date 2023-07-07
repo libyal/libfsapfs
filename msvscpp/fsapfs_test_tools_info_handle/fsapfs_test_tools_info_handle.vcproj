@@ -176,11 +176,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
+				RelativePath="..\..\fsapfstools\bodyfile.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\fsapfstools\digest_hash.c"
 				>
 			</File>
 			<File
 				RelativePath="..\..\fsapfstools\info_handle.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsapfstools\path_string.c"
 				>
 			</File>
 			<File
@@ -198,11 +206,19 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
+				RelativePath="..\..\fsapfstools\bodyfile.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\fsapfstools\digest_hash.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\fsapfstools\info_handle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsapfstools\path_string.h"
 				>
 			</File>
 			<File

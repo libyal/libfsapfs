@@ -43,14 +43,14 @@
 int fsapfs_test_file_system_initialize(
      void )
 {
-	libcerror_error_t *error                 = NULL;
+	libcerror_error_t *error             = NULL;
 	libfsapfs_file_system_t *file_system = NULL;
-	int result                               = 0;
+	int result                           = 0;
 
 #if defined( HAVE_FSAPFS_TEST_MEMORY )
-	int number_of_malloc_fail_tests          = 1;
-	int number_of_memset_fail_tests          = 1;
-	int test_number                          = 0;
+	int number_of_malloc_fail_tests      = 1;
+	int number_of_memset_fail_tests      = 1;
+	int test_number                      = 0;
 #endif
 
 	/* Test regular cases

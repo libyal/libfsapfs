@@ -104,8 +104,12 @@ check_PROGRAMS = \
 	fsapfs_test_snapshot_metadata_tree \
 	fsapfs_test_space_manager \
 	fsapfs_test_support \
+	fsapfs_test_tools_bodyfile \
+	fsapfs_test_tools_digest_hash \
 	fsapfs_test_tools_info_handle \
+	fsapfs_test_tools_mount_path_string \
 	fsapfs_test_tools_output \
+	fsapfs_test_tools_path_string \
 	fsapfs_test_tools_signal \
 	fsapfs_test_volume \
 	fsapfs_test_volume_key_bag \
@@ -882,9 +886,34 @@ fsapfs_test_support_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
+fsapfs_test_tools_bodyfile_SOURCES = \
+	../fsapfstools/bodyfile.c ../fsapfstools/bodyfile.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libcpath.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_tools_bodyfile.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_tools_bodyfile_LDADD = \
+	@LIBUNA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_tools_digest_hash_SOURCES = \
+	../fsapfstools/digest_hash.c ../fsapfstools/digest_hash.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_tools_digest_hash.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_tools_digest_hash_LDADD = \
+	@LIBCERROR_LIBADD@
+
 fsapfs_test_tools_info_handle_SOURCES = \
+	../fsapfstools/bodyfile.c ../fsapfstools/bodyfile.h \
 	../fsapfstools/digest_hash.c ../fsapfstools/digest_hash.h \
 	../fsapfstools/info_handle.c ../fsapfstools/info_handle.h \
+	../fsapfstools/path_string.c ../fsapfstools/path_string.h \
 	fsapfs_test_libcerror.h \
 	fsapfs_test_macros.h \
 	fsapfs_test_memory.c fsapfs_test_memory.h \
@@ -908,6 +937,18 @@ fsapfs_test_tools_info_handle_LDADD = \
 	@LIBCRYPTO_LIBADD@ \
 	@LIBDL_LIBADD@
 
+fsapfs_test_tools_mount_path_string_SOURCES = \
+	../fsapfstools/mount_path_string.c ../fsapfstools/mount_path_string.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_tools_mount_path_string.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_tools_mount_path_string_LDADD = \
+	@LIBUNA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
 fsapfs_test_tools_output_SOURCES = \
 	../fsapfstools/fsapfstools_output.c ../fsapfstools/fsapfstools_output.h \
 	fsapfs_test_libcerror.h \
@@ -916,6 +957,19 @@ fsapfs_test_tools_output_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_tools_output_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_tools_path_string_SOURCES = \
+	../fsapfstools/path_string.c ../fsapfstools/path_string.h \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libcpath.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_tools_path_string.c \
+	fsapfs_test_unused.h
+
+fsapfs_test_tools_path_string_LDADD = \
+	@LIBUNA_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 

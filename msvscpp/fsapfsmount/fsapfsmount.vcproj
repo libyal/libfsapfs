@@ -213,6 +213,10 @@
 				RelativePath="..\..\fsapfstools\mount_handle.c"
 				>
 			</File>
+			<File
+				RelativePath="..\..\fsapfstools\mount_path_string.c"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -289,6 +293,10 @@
 			</File>
 			<File
 				RelativePath="..\..\fsapfstools\mount_handle.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\fsapfstools\mount_path_string.h"
 				>
 			</File>
 		</Filter>

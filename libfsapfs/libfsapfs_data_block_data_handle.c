@@ -413,7 +413,7 @@ ssize_t libfsapfs_data_block_data_handle_read_segment_data(
 
 			return( -1 );
 		}
-		read_size = data_block->data_size - data_block_offset;
+		read_size = (size_t) ( data_block->data_size - data_block_offset );
 
 		if( read_size > segment_data_size )
 		{

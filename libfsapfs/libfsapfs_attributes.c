@@ -186,7 +186,7 @@ int libfsapfs_attributes_get_data_stream(
 		if( libfsapfs_data_stream_initialize_from_data(
 		     data_stream,
 		     attribute_values->value_data,
-		     attribute_values->value_data_size,
+		     (size_t) attribute_values->value_data_size,
 		     error ) != 1 )
 		{
 			libcerror_error_set(

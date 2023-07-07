@@ -25,12 +25,16 @@
 #include <system_string.h>
 #include <types.h>
 
-#if defined( HAVE_UNISTD_H )
-#include <unistd.h>
+#if defined( HAVE_IO_H ) || defined( WINAPI )
+#include <io.h>
 #endif
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
 #include <stdlib.h>
+#endif
+
+#if defined( HAVE_UNISTD_H )
+#include <unistd.h>
 #endif
 
 #include "fsapfstools_getopt.h"

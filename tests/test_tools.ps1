@@ -6,7 +6,7 @@ $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
 
-$ToolsTests = "info_handle output signal"
+$ToolsTests = "bodyfile digest_hash info_handle mount_path_string output path_string signal"
 $ToolsTestsWithInput = ""
 
 $InputGlob = "*"

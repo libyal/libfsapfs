@@ -7,7 +7,7 @@ EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
-TOOLS_TESTS="info_handle output signal";
+TOOLS_TESTS="bodyfile digest_hash info_handle mount_path_string output path_string signal";
 TOOLS_TESTS_WITH_INPUT="";
 OPTION_SETS="offset password";
 

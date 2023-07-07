@@ -1143,12 +1143,13 @@ int main(
      char * const argv[] FSAPFS_TEST_ATTRIBUTE_UNUSED )
 #endif
 {
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 	libcerror_error_t *error                   = NULL;
+	libfsapfs_checkpoint_map_t *checkpoint_map = NULL;
 	int result                                 = 0;
 
-#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
-	libfsapfs_checkpoint_map_t *checkpoint_map = NULL;
-#endif
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argc )
 	FSAPFS_TEST_UNREFERENCED_PARAMETER( argv )
@@ -1237,20 +1238,22 @@ int main(
 
 	return( EXIT_SUCCESS );
 
+#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
+
 on_error:
 	if( error != NULL )
 	{
 		libcerror_error_free(
 		 &error );
 	}
-#if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 	if( checkpoint_map != NULL )
 	{
 		libfsapfs_checkpoint_map_free(
 		 &checkpoint_map,
 		 NULL );
 	}
-#endif
 	return( EXIT_FAILURE );
+
+#endif /* defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT ) */
 }
 

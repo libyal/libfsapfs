@@ -27,6 +27,7 @@
 #include <types.h>
 #include <wide_string.h>
 
+#include "bodyfile.h"
 #include "digest_hash.h"
 #include "fsapfstools_libbfio.h"
 #include "fsapfstools_libcerror.h"
@@ -40,6 +41,7 @@
 #include "fsapfstools_libuna.h"
 #include "fsapfstools_unused.h"
 #include "info_handle.h"
+#include "path_string.h"
 
 #if !defined( LIBFSAPFS_HAVE_BFIO )
 
@@ -1247,14 +1249,9 @@ int info_handle_name_value_fprint(
      size_t value_string_length,
      libcerror_error_t **error )
 {
-	system_character_t *escaped_value_string     = NULL;
-	static char *function                        = "info_handle_name_value_fprint";
-	libuna_unicode_character_t unicode_character = 0;
-	size_t escaped_value_string_index            = 0;
-	size_t escaped_value_string_size             = 0;
-	size_t value_string_index                    = 0;
-	int print_count                              = 0;
-	int result                                   = 0;
+	system_character_t *escaped_value_string = NULL;
+	static char *function                    = "info_handle_name_value_fprint";
+	size_t escaped_value_string_size         = 0;
 
 	if( info_handle == NULL )
 	{
@@ -1267,148 +1264,27 @@ int info_handle_name_value_fprint(
 
 		return( -1 );
 	}
-	if( value_string == NULL )
+	if( path_string_copy_from_file_entry_path(
+	     &escaped_value_string,
+	     &escaped_value_string_size,
+	     value_string,
+	     value_string_length,
+	     error ) != 1 )
 	{
 		libcerror_error_set(
 		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
-		 "%s: invalid value string.",
-		 function );
-
-		return( -1 );
-	}
-	/* To ensure normalization in the escaped string is handled correctly
-	 * it stored in a temporary variable. Note that there is a worst-case of
-	 * a 1 to 4 ratio for each escaped character.
-	 */
-	if( value_string_length > (size_t) ( ( MEMORY_MAXIMUM_ALLOCATION_SIZE - 1 ) / ( sizeof( system_character_t ) * 4 ) ) )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
-		 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
-		 "%s: invalid value string length value exceeds maximum.",
-		 function );
-
-		return( -1 );
-	}
-	escaped_value_string_size = ( value_string_length * 4 ) + 1;
-
-	escaped_value_string = (system_character_t *) memory_allocate(
-	                                               sizeof( system_character_t ) * escaped_value_string_size );
-
-	if( escaped_value_string == NULL )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create escaped value string.",
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy path from file entry path.",
 		 function );
 
 		goto on_error;
 	}
-	while( value_string_index < value_string_length )
-	{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-		result = libuna_unicode_character_copy_from_utf16(
-		          &unicode_character,
-		          (libuna_utf16_character_t *) value_string,
-		          value_string_length,
-		          &value_string_index,
-		          error );
-#else
-		result = libuna_unicode_character_copy_from_utf8(
-		          &unicode_character,
-		          (libuna_utf8_character_t *) value_string,
-		          value_string_length,
-		          &value_string_index,
-		          error );
-#endif
-		if( result != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_CONVERSION,
-			 LIBCERROR_CONVERSION_ERROR_INPUT_FAILED,
-			 "%s: unable to copy Unicode character from value string.",
-			 function );
+	fprintf(
+	 info_handle->notify_stream,
+	 "%" PRIs_SYSTEM "",
+	 escaped_value_string );
 
-			goto on_error;
-		}
-		/* Replace:
-		 *   Control characters ([U+0-U+1f, U+7f-U+9f]) by \x##
-		 */
-		if( ( unicode_character <= 0x1f )
-		 || ( ( unicode_character >= 0x7f )
-		  &&  ( unicode_character <= 0x9f ) ) )
-		{
-			print_count = system_string_sprintf(
-			               &( escaped_value_string[ escaped_value_string_index ] ),
-			               escaped_value_string_size - escaped_value_string_index,
-			               "\\x%02" PRIx32 "",
-			               unicode_character );
-
-			if( print_count < 0 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_CONVERSION,
-				 LIBCERROR_CONVERSION_ERROR_INPUT_FAILED,
-				 "%s: unable to copy escaped Unicode character to escaped value string.",
-				 function );
-
-				goto on_error;
-			}
-			escaped_value_string_index += print_count;
-		}
-		else
-		{
-#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
-			result = libuna_unicode_character_copy_to_utf16(
-			          unicode_character,
-			          (libuna_utf16_character_t *) escaped_value_string,
-			          escaped_value_string_size,
-			          &escaped_value_string_index,
-			          error );
-#else
-			result = libuna_unicode_character_copy_to_utf8(
-			          unicode_character,
-			          (libuna_utf8_character_t *) escaped_value_string,
-			          escaped_value_string_size,
-			          &escaped_value_string_index,
-			          error );
-#endif
-			if( result != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_CONVERSION,
-				 LIBCERROR_CONVERSION_ERROR_INPUT_FAILED,
-				 "%s: unable to copy Unicode character to escaped value string.",
-				 function );
-
-				goto on_error;
-			}
-		}
-	}
-	escaped_value_string[ escaped_value_string_index ] = 0;
-
-	if( info_handle->bodyfile_stream != NULL )
-	{
-		fprintf(
-		 info_handle->bodyfile_stream,
-		 "%" PRIs_SYSTEM "",
-		 escaped_value_string );
-	}
-	else
-	{
-		fprintf(
-		 info_handle->notify_stream,
-		 "%" PRIs_SYSTEM "",
-		 escaped_value_string );
-	}
 	memory_free(
 	 escaped_value_string );
 
@@ -1852,6 +1728,76 @@ on_error:
 	return( -1 );
 }
 
+/* Prints a file entry or data stream name to a bodyfile
+ * Returns 1 if successful or -1 on error
+ */
+int info_handle_bodyfile_name_value_fprint(
+     info_handle_t *info_handle,
+     const system_character_t *value_string,
+     size_t value_string_length,
+     libcerror_error_t **error )
+{
+	system_character_t *escaped_value_string = NULL;
+	static char *function                    = "info_handle_bodyfile_name_value_fprint";
+	size_t escaped_value_string_size         = 0;
+
+	if( info_handle == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( bodyfile_path_string_copy_from_file_entry_path(
+	     &escaped_value_string,
+	     &escaped_value_string_size,
+	     value_string,
+	     value_string_length,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy path from file entry path.",
+		 function );
+
+		goto on_error;
+	}
+	if( escaped_value_string == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing escaped value string.",
+		 function );
+
+		goto on_error;
+	}
+	fprintf(
+	 info_handle->bodyfile_stream,
+	 "%" PRIs_SYSTEM "",
+	 escaped_value_string );
+
+	memory_free(
+	 escaped_value_string );
+
+	return( 1 );
+
+on_error:
+	if( escaped_value_string != NULL )
+	{
+		memory_free(
+		 escaped_value_string );
+	}
+	return( -1 );
+}
+
 /* Prints a file entry value with name
  * Returns 1 if successful, 0 if not or -1 on error
  */
@@ -2195,7 +2141,7 @@ int info_handle_file_entry_value_with_name_fprint(
 
 		if( path != NULL )
 		{
-			if( info_handle_name_value_fprint(
+			if( info_handle_bodyfile_name_value_fprint(
 			     info_handle,
 			     path,
 			     path_length,
@@ -2214,7 +2160,7 @@ int info_handle_file_entry_value_with_name_fprint(
 		if( ( file_entry_name != NULL )
 		 && ( file_entry_identifier != 2 ) )
 		{
-			if( info_handle_name_value_fprint(
+			if( info_handle_bodyfile_name_value_fprint(
 			     info_handle,
 			     file_entry_name,
 			     file_entry_name_length,
@@ -3441,13 +3387,16 @@ int info_handle_file_entry_fprint_by_path(
      const system_character_t *path,
      libcerror_error_t **error )
 {
-	libfsapfs_file_entry_t *file_entry = NULL;
-	libfsapfs_volume_t *volume         = NULL;
-	static char *function              = "info_handle_file_entry_fprint_by_path";
-	size_t path_length                 = 0;
-	int number_of_volumes              = 0;
-	int result                         = 0;
-	int volume_index                   = 0;
+	libfsapfs_file_entry_t *file_entry  = NULL;
+	libfsapfs_volume_t *volume          = NULL;
+	system_character_t *file_entry_path = NULL;
+	static char *function               = "info_handle_file_entry_fprint_by_path";
+	size_t file_entry_path_length       = 0;
+	size_t file_entry_path_size         = 0;
+	size_t path_length                  = 0;
+	int number_of_volumes               = 0;
+	int result                          = 0;
+	int volume_index                    = 0;
 
 	if( info_handle == NULL )
 	{
@@ -3456,6 +3405,17 @@ int info_handle_file_entry_fprint_by_path(
 		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
 		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
 		 "%s: invalid info handle.",
+		 function );
+
+		return( -1 );
+	}
+	if( path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid path.",
 		 function );
 
 		return( -1 );
@@ -3514,18 +3474,51 @@ int info_handle_file_entry_fprint_by_path(
 	path_length = system_string_length(
 	               path );
 
+	if( path_string_copy_to_file_entry_path(
+	     path,
+	     path_length,
+	     LIBFSAPFS_SEPARATOR,
+	     &file_entry_path,
+	     &file_entry_path_size,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_COPY_FAILED,
+		 "%s: unable to copy path to file entry path.",
+		 function );
+
+		goto on_error;
+	}
+	if( file_entry_path == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: missing file entry path.",
+		 function );
+
+		goto on_error;
+	}
+	/* Need to determine length here since size is based on the worst case
+	 */
+	file_entry_path_length = system_string_length(
+	                          file_entry_path );
+
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = libfsapfs_volume_get_file_entry_by_utf16_path(
 	          volume,
-	          (uint16_t *) path,
-	          path_length,
+	          (uint16_t *) file_entry_path,
+	          file_entry_path_length,
 	          &file_entry,
 	          error );
 #else
 	result = libfsapfs_volume_get_file_entry_by_utf8_path(
 	          volume,
-	          (uint8_t *) path,
-	          path_length,
+	          (uint8_t *) file_entry_path,
+	          file_entry_path_length,
 	          &file_entry,
 	          error );
 #endif
@@ -3551,6 +3544,11 @@ int info_handle_file_entry_fprint_by_path(
 
 		goto on_error;
 	}
+	memory_free(
+	 file_entry_path );
+
+	file_entry_path = NULL;
+
 	if( info_handle->bodyfile_stream == NULL )
 	{
 		fprintf(
@@ -3640,6 +3638,11 @@ on_error:
 		libfsapfs_file_entry_free(
 		 &file_entry,
 		 NULL );
+	}
+	if( file_entry_path != NULL )
+	{
+		memory_free(
+		 file_entry_path );
 	}
 	if( volume != NULL )
 	{
