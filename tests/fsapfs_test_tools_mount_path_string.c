@@ -35,6 +35,12 @@
 
 #include "../fsapfstools/mount_path_string.h"
 
+#if defined( WINAPI )
+#define ESCAPE_CHARACTER (system_character_t) '^'
+#else
+#define ESCAPE_CHARACTER (system_character_t) '\\'
+#endif
+
 /* Tests the mount_path_string_copy_hexadecimal_to_integer_32_bit function
  * Returns 1 if successful or 0 if not
  */
@@ -178,22 +184,26 @@ on_error:
 int fsapfs_test_tools_mount_path_string_copy_from_file_entry_path(
      void )
 {
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	system_character_t file_entry_path3[ 5 ] = { 't', 'e', 0x2028, 't', 0 };
 	system_character_t file_entry_path4[ 5 ] = { 't', 'e', '\\', 't', 0 };
-	system_character_t file_entry_path5[ 5 ] = { 't', 'e', '^', 't', 0 };
-	system_character_t expected_path2[ 8 ]   = { 't', 'e', '^', 'x', '0', '3', 't', 0 };
-	system_character_t expected_path3[ 14 ]  = { 't', 'e', '^', 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
-	system_character_t expected_path4[ 8 ]   = { 't', 'e', '^', 'x', '5', 'c', 't', 0 };
-	system_character_t expected_path5[ 6 ]   = { 't', 'e', '^', '^', 't', 0 };
+	system_character_t file_entry_path5[ 5 ] = { 't', 'e', ESCAPE_CHARACTER, 't', 0 };
+	system_character_t expected_path2[ 8 ]   = { 't', 'e', ESCAPE_CHARACTER, 'x', '0', '3', 't', 0 };
+	system_character_t expected_path3[ 14 ]  = { 't', 'e', ESCAPE_CHARACTER, 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
+	system_character_t expected_path4[ 8 ]   = { 't', 'e', ESCAPE_CHARACTER, 'x', '5', 'c', 't', 0 };
+	system_character_t expected_path5[ 6 ]   = { 't', 'e', ESCAPE_CHARACTER, ESCAPE_CHARACTER, 't', 0 };
 #else
 	system_character_t file_entry_path3[ 7 ] = { 't', 'e', 0xe2, 0x80, 0xa8, 't', 0 };
-	system_character_t file_entry_path4[ 5 ] = { 't', 'e', '/', 't', 0 };
-	system_character_t file_entry_path5[ 5 ] = { 't', 'e', '\\', 't', 0 };
-	system_character_t expected_path2[ 8 ]   = { 't', 'e', '\\', 'x', '0', '3', 't', 0 };
-	system_character_t expected_path3[ 14 ]  = { 't', 'e', '\\', 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
-	system_character_t expected_path4[ 8 ]   = { 't', 'e', '\\', 'x', '2', 'f', 't', 0 };
-	system_character_t expected_path5[ 6 ]   = { 't', 'e', '\\', '\\', 't', 0 };
+	system_character_t file_entry_path4[ 5 ] = { 't', 'e', LIBCPATH_SEPARATOR, 't', 0 };
+	system_character_t file_entry_path5[ 5 ] = { 't', 'e', ESCAPE_CHARACTER, 't', 0 };
+	system_character_t expected_path2[ 8 ]   = { 't', 'e', ESCAPE_CHARACTER, 'x', '0', '3', 't', 0 };
+	system_character_t expected_path3[ 14 ]  = { 't', 'e', ESCAPE_CHARACTER, 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
+#if defined( WINAPI )
+	system_character_t expected_path4[ 8 ]   = { 't', 'e', ESCAPE_CHARACTER, 'x', '5', 'c', 't', 0 };
+#else
+	system_character_t expected_path4[ 8 ]   = { 't', 'e', ESCAPE_CHARACTER, 'x', '2', 'f', 't', 0 };
+#endif
+	system_character_t expected_path5[ 6 ]   = { 't', 'e', ESCAPE_CHARACTER, ESCAPE_CHARACTER, 't', 0 };
 #endif
 
 	system_character_t file_entry_path1[ 5 ] = { 't', 'e', 's', 't', 0 };
@@ -286,7 +296,7 @@ int fsapfs_test_tools_mount_path_string_copy_from_file_entry_path(
 
 	path = NULL;
 
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = mount_path_string_copy_from_file_entry_path(
 	          &path,
 	          &path_size,
@@ -310,7 +320,7 @@ int fsapfs_test_tools_mount_path_string_copy_from_file_entry_path(
 	 "path",
 	 path );
 
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	FSAPFS_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
@@ -539,18 +549,18 @@ on_error:
 int fsapfs_test_tools_mount_path_string_copy_to_file_entry_path(
      void )
 {
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	system_character_t expected_file_entry_path3[ 6 ] = { LIBFSAPFS_SEPARATOR, 't', 'e', 0x2028, 't', 0 };
-	system_character_t expected_file_entry_path4[ 6 ] = { LIBFSAPFS_SEPARATOR, 't', 'e', '^', 't', 0 };
-	system_character_t path2[ 9 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', '^', 'x', '0', '3', 't', 0 };
-	system_character_t path3[ 15 ]                    = { LIBCPATH_SEPARATOR, 't', 'e', '^', 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
-	system_character_t path4[ 7 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', '^', '^', 't', 0 };
+	system_character_t expected_file_entry_path4[ 6 ] = { LIBFSAPFS_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, 't', 0 };
+	system_character_t path2[ 9 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, 'x', '0', '3', 't', 0 };
+	system_character_t path3[ 15 ]                    = { LIBCPATH_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
+	system_character_t path4[ 7 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, ESCAPE_CHARACTER, 't', 0 };
 #else
 	system_character_t expected_file_entry_path3[ 8 ] = { LIBFSAPFS_SEPARATOR, 't', 'e', 0xe2, 0x80, 0xa8, 't', 0 };
-	system_character_t expected_file_entry_path4[ 6 ] = { LIBFSAPFS_SEPARATOR, 't', 'e', '\\', 't', 0 };
-	system_character_t path2[ 9 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', '\\', 'x', '0', '3', 't', 0 };
-	system_character_t path3[ 15 ]                    = { LIBCPATH_SEPARATOR, 't', 'e', '\\', 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
-	system_character_t path4[ 7 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', '\\', '\\', 't', 0 };
+	system_character_t expected_file_entry_path4[ 6 ] = { LIBFSAPFS_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, 't', 0 };
+	system_character_t path2[ 9 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, 'x', '0', '3', 't', 0 };
+	system_character_t path3[ 15 ]                    = { LIBCPATH_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, 'U', '0', '0', '0', '0', '2', '0', '2', '8', 't', 0 };
+	system_character_t path4[ 7 ]                     = { LIBCPATH_SEPARATOR, 't', 'e', ESCAPE_CHARACTER, ESCAPE_CHARACTER, 't', 0 };
 #endif
 
 	system_character_t expected_file_entry_path1[ 6 ] = { LIBFSAPFS_SEPARATOR, 't', 'e', 's', 't', 0 };
@@ -670,7 +680,7 @@ int fsapfs_test_tools_mount_path_string_copy_to_file_entry_path(
 	 "error",
 	 error );
 
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = memory_compare(
 	          file_entry_path,
 	          expected_file_entry_path3,

@@ -177,7 +177,7 @@ on_error:
 int fsapfs_test_tools_path_string_copy_from_file_entry_path(
      void )
 {
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	system_character_t file_entry_path3[ 5 ] = { 't', 'e', 0x2028, 't', 0 };
 #else
 	system_character_t file_entry_path3[ 7 ] = { 't', 'e', 0xe2, 0x80, 0xa8, 't', 0 };
@@ -276,7 +276,7 @@ int fsapfs_test_tools_path_string_copy_from_file_entry_path(
 
 	path = NULL;
 
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	result = path_string_copy_from_file_entry_path(
 	          &path,
 	          &path_size,
@@ -300,7 +300,7 @@ int fsapfs_test_tools_path_string_copy_from_file_entry_path(
 	 "path",
 	 path );
 
-#if defined( WINAPI )
+#if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 	FSAPFS_TEST_ASSERT_EQUAL_SIZE(
 	 "path_size",
 	 path_size,
