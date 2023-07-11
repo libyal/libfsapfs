@@ -542,7 +542,11 @@ int mount_path_string_copy_to_file_entry_path(
 
 			goto on_error;
 		}
-		if( unicode_character == (libuna_unicode_character_t) ESCAPE_CHARACTER )
+		if( unicode_character == (libuna_unicode_character_t) LIBCPATH_SEPARATOR )
+		{
+			unicode_character = (libuna_unicode_character_t) LIBFSAPFS_SEPARATOR;
+		}
+		else if( unicode_character == (libuna_unicode_character_t) ESCAPE_CHARACTER )
 		{
 			if( ( path_index + 1 ) > path_length )
 			{
@@ -719,10 +723,6 @@ int mount_path_string_copy_to_file_entry_path(
 				goto on_error;
 			}
 			unicode_character = (libuna_unicode_character_t) escaped_value;
-		}
-		if( unicode_character == (libuna_unicode_character_t) LIBCPATH_SEPARATOR )
-		{
-			unicode_character = (libuna_unicode_character_t) LIBFSAPFS_SEPARATOR;
 		}
 #if defined( HAVE_WIDE_SYSTEM_CHARACTER )
 		result = libuna_unicode_character_copy_to_utf16(
