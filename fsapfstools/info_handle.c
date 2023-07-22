@@ -4327,7 +4327,7 @@ int info_handle_container_fprint(
 	{
 		fprintf(
 		 info_handle->notify_stream,
-		 "\tIs locked (requires T2)\n" );
+		 "\tIs locked (uses hardware encryption)\n" );
 	}
 	info_handle->container_is_locked = (uint8_t) result;
 

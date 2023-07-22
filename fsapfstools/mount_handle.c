@@ -645,8 +645,25 @@ int mount_handle_open(
 		 "%s: unable to retrieve number of volumes from container.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
+	result = libfsapfs_container_is_locked(
+	          fsapfs_container,
+	          error );
+
+	if( result == -1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+		 "%s: unable to determine if container is locked.",
+		 function );
+
+		goto on_error;
+	}
+	mount_handle->container_is_locked = (uint8_t) result;
+
 	volume_index = mount_handle->file_system_index;
 
 	if( ( volume_index == 0 )
@@ -664,7 +681,7 @@ int mount_handle_open(
 		 "%s: invalid volume index value out of bounds.",
 		 function );
 
-		return( -1 );
+		goto on_error;
 	}
 	volume_index -= 1;
 
@@ -683,7 +700,7 @@ int mount_handle_open(
 		 function,
 		 volume_index );
 
-		return( -1 );
+		goto on_error;
 	}
 	result = libfsapfs_volume_is_locked(
 	          fsapfs_volume,
@@ -700,7 +717,7 @@ int mount_handle_open(
 
 		goto on_error;
 	}
-	mount_handle->is_locked = result;
+	mount_handle->is_locked = (uint8_t) result;
 
 	if( mount_file_system_set_volume(
 	     mount_handle->file_system,
@@ -1011,8 +1028,9 @@ int mount_handle_get_volume_by_index(
 
 			goto on_error;
 		}
-		mount_handle->is_locked = result;
 	}
+	mount_handle->is_locked = result;
+
 	return( 1 );
 
 on_error:

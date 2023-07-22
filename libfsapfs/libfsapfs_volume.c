@@ -1146,7 +1146,11 @@ int libfsapfs_internal_volume_unlock(
 
 		return( -1 );
 	}
-	if( internal_volume->key_bag != NULL )
+	if( internal_volume->key_bag == NULL )
+	{
+		result = 1;
+	}
+	else
 	{
 		result = libfsapfs_volume_key_bag_get_volume_key(
 		          internal_volume->key_bag,

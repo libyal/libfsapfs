@@ -72,6 +72,10 @@ struct mount_handle
 	 */
 	size_t recovery_password_length;
 
+	/* Value to indicate the container is locked
+	 */
+	uint8_t container_is_locked;
+
 	/* Value to indicate the mount handle is locked
 	 */
 	int is_locked;

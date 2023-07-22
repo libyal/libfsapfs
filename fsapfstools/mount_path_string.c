@@ -260,12 +260,23 @@ int mount_path_string_copy_from_file_entry_path(
 		 *
 		 * On Windows replace:
 		 *   \ by ^x5c
+		 *   <, >, :, ", /, |, ?, * by ^x##
 		 *
 		 * On other platforms replace:
 		 *   / by \x2f
 		 */
 		if( ( unicode_character <= 0x1f )
 		 || ( unicode_character == (libuna_unicode_character_t) LIBCPATH_SEPARATOR )
+#if defined( WINAPI )
+		 || ( unicode_character == (libuna_unicode_character_t) '<' )
+		 || ( unicode_character == (libuna_unicode_character_t) '>' )
+		 || ( unicode_character == (libuna_unicode_character_t) ':' )
+		 || ( unicode_character == (libuna_unicode_character_t) '"' )
+		 || ( unicode_character == (libuna_unicode_character_t) '/' )
+		 || ( unicode_character == (libuna_unicode_character_t) '|' )
+		 || ( unicode_character == (libuna_unicode_character_t) '?' )
+		 || ( unicode_character == (libuna_unicode_character_t) '*' )
+#endif
 		 || ( ( unicode_character >= 0x7f )
 		  &&  ( unicode_character <= 0x9f ) ) )
 		{
@@ -567,6 +578,7 @@ int mount_path_string_copy_to_file_entry_path(
 			 * On Windows replace:
 			 *   ^^ by ^
 			 *   ^x5c by \
+			 *   ^x## by <, >, :, ", /, |, ?, *
 			 *
 			 * On other platforms replace:
 			 *   \\ by \
@@ -614,7 +626,17 @@ int mount_path_string_copy_to_file_entry_path(
 
 				if( ( ( escaped_value >= 0x01 )
 				  &&  ( escaped_value <= 0x1f ) )
-				 || ( escaped_value == LIBCPATH_SEPARATOR )
+				 || ( escaped_value == (uint32_t) LIBCPATH_SEPARATOR )
+#if defined( WINAPI )
+				 || ( escaped_value == (uint32_t) '<' )
+				 || ( escaped_value == (uint32_t) '>' )
+				 || ( escaped_value == (uint32_t) ':' )
+				 || ( escaped_value == (uint32_t) '"' )
+				 || ( escaped_value == (uint32_t) '/' )
+				 || ( escaped_value == (uint32_t) '|' )
+				 || ( escaped_value == (uint32_t) '?' )
+				 || ( escaped_value == (uint32_t) '*' )
+#endif
 				 || ( ( escaped_value >= 0x7f )
 				  &&  ( escaped_value <= 0x9f ) ) )
 				{

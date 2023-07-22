@@ -363,7 +363,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to open source container\n" );
+		 "Unable to open source volume\n" );
 
 		goto on_error;
 	}
@@ -373,7 +373,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to unlock source container\n" );
+		 "Unable to unlock source volume\n" );
 
 		goto on_error;
 	}

@@ -584,9 +584,10 @@ int mount_fuse_getxattr(
 	if( libcnotify_verbose != 0 )
 	{
 		libcnotify_printf(
-		 "%s: %s\n",
+		 "%s: %s (%s)\n",
 		 function,
-		 path );
+		 path,
+		 name );
 	}
 #endif
 	if( path == NULL )
@@ -781,7 +782,7 @@ int mount_fuse_getxattr(
 	}
 	if( result == 0 )
 	{
-		return( -ENOENT );
+		return( -ENODATA );
 	}
 	return( (int) read_count );
 

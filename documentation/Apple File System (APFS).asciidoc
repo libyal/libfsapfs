@@ -59,6 +59,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.12 | J.B. Metz | April 2022 | Additional format information.
 | 0.0.13 | J.B. Metz | July 2022 | Additional information about device identifier.
 | 0.0.14 | J.B. Metz | June 2023 | Corrected typo.
+| 0.0.15 | J.B. Metz | July 2023 | Additional information about volume flags.
 |===
 
 :numbered:
@@ -1470,6 +1471,8 @@ Contains 0 if not set
 | 0x0000000000000001 | APFS_FEATURE_DEFRAG_PRERELEASE | [yellow-background]*Unknown*
 | 0x0000000000000002 | APFS_FEATURE_HARDLINK_MAP_RECORDS | [yellow-background]*Unknown*
 | 0x0000000000000004 | APFS_FEATURE_DEFRAG | [yellow-background]*Unknown*
+| 0x0000000000000008 | APFS_FEATURE_STRICTATIME | [yellow-background]*Unknown*
+| 0x0000000000000010 | APFS_FEATURE_VOLGRP_SYSTEM_INO_SPACE | [yellow-background]*Unknown*
 |===
 
 ==== [[volume_read_only_feature_flags]]Volume read-only feature flags
@@ -1485,6 +1488,8 @@ Current no read-only feature flags are defined
 | 0x0000000000000002 | APFS_INCOMPAT_DATALESS_SNAPS | Volume contains one or more snapshots without data
 | 0x0000000000000004 | APFS_INCOMPAT_ENC_ROLLED | Encryption keys of the volume have been changed
 | 0x0000000000000008 | APFS_INCOMPAT_NORMALIZATION_INSENSITIVE | Filenames are normalization insensitive
+| 0x0000000000000010 | APFS_INCOMPAT_INCOMPLETE_RESTORE | [yellow-background]*Unknown*
+| 0x0000000000000020 | APFS_INCOMPAT_SEALED_VOLUME | [yellow-background]*Unknown*
 |===
 
 == [[file_system]]File system
@@ -2697,6 +2702,14 @@ See section: <<object_types,Object types>>
 4+| _Object values_
 | ... | ... | | [yellow-background]*Unknown*
 |===
+
+== Corruption scenarios
+
+=== Container key bag is hardware encrypted but volume is not encrypted
+
+Seen in APFS containers created by certain digital forensics tools. The
+container key bag is either hardware encrypted or contains random data but
+the volume is not encrypted.
 
 == Notes
 

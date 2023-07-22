@@ -417,6 +417,16 @@ void libfsapfs_debug_print_volume_compatible_features_flags(
 		libcnotify_printf(
 		 "\t(APFS_FEATURE_DEFRAG)\n" );
 	}
+	if( ( compatible_features_flags & 0x0000000000000008 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FEATURE_STRICTATIME)\n" );
+	}
+	if( ( compatible_features_flags & 0x0000000000000010 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_FEATURE_VOLGRP_SYSTEM_INO_SPACE)\n" );
+	}
 }
 
 /* Prints the volume flags
@@ -480,6 +490,16 @@ void libfsapfs_debug_print_volume_incompatible_features_flags(
 	{
 		libcnotify_printf(
 		 "\t(APFS_INCOMPAT_NORMALIZATION_INSENSITIVE)\n" );
+	}
+	if( ( incompatible_features_flags & 0x0000000000000010 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_INCOMPAT_INCOMPLETE_RESTORE)\n" );
+	}
+	if( ( incompatible_features_flags & 0x0000000000000020 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(APFS_INCOMPAT_SEALED_VOLUME)\n" );
 	}
 }
 
