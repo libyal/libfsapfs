@@ -1694,7 +1694,6 @@ PyObject *pyfsapfs_file_entry_get_name(
 {
 	PyObject *string_object  = NULL;
 	libcerror_error_t *error = NULL;
-	const char *errors       = NULL;
 	static char *function    = "pyfsapfs_file_entry_get_name";
 	char *utf8_string        = NULL;
 	size_t utf8_string_size  = 0;
@@ -1782,7 +1781,7 @@ PyObject *pyfsapfs_file_entry_get_name(
 	string_object = PyUnicode_DecodeUTF8(
 	                 utf8_string,
 	                 (Py_ssize_t) utf8_string_size - 1,
-	                 errors );
+	                 NULL );
 
 	if( string_object == NULL )
 	{
@@ -1816,7 +1815,6 @@ PyObject *pyfsapfs_file_entry_get_symbolic_link_target(
 {
 	libcerror_error_t *error = NULL;
 	PyObject *string_object  = NULL;
-	const char *errors       = NULL;
 	uint8_t *target          = NULL;
 	static char *function    = "pyfsapfs_file_entry_get_symbolic_link_target";
 	size_t target_size       = 0;
@@ -1869,7 +1867,7 @@ PyObject *pyfsapfs_file_entry_get_symbolic_link_target(
 	if( target == NULL )
 	{
 		PyErr_Format(
-		 PyExc_IOError,
+		 PyExc_MemoryError,
 		 "%s: unable to create target.",
 		 function );
 
@@ -1905,7 +1903,7 @@ PyObject *pyfsapfs_file_entry_get_symbolic_link_target(
 	string_object = PyUnicode_DecodeUTF8(
 			 (char *) target,
 			 (Py_ssize_t) target_size - 1,
-			 errors );
+			 NULL );
 
 	PyMem_Free(
 	 target );

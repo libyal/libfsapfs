@@ -46,6 +46,10 @@ extern mount_handle_t *fsapfsmount_mount_handle;
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
 
+#if !defined( ENODATA )
+#define ENODATA ENOATTR
+#endif
+
 #if ( SIZEOF_OFF_T != 8 ) && ( SIZEOF_OFF_T != 4 )
 #error Size of off_t not supported
 #endif

@@ -578,7 +578,7 @@ ssize_t pyfsapfs_file_object_read_buffer(
 			 error,
 			 LIBCERROR_ERROR_DOMAIN_MEMORY,
 			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-			 "%s: unable to data to buffer.",
+			 "%s: unable to copy data to buffer.",
 			 function );
 
 			goto on_error;

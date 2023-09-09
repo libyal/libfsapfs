@@ -39,7 +39,6 @@ PyObject *pyfsapfs_string_new_from_guid(
 	libcerror_error_t *error    = NULL;
 	libfguid_identifier_t *guid = NULL;
 	PyObject *string_object     = NULL;
-	const char *errors          = NULL;
 	static char *function       = "pyfsapfs_string_new_from_guid";
 
 	if( libfguid_identifier_initialize(
@@ -115,7 +114,7 @@ PyObject *pyfsapfs_string_new_from_guid(
 	string_object = PyUnicode_DecodeUTF8(
 			 guid_string,
 			 (Py_ssize_t) 36,
-			 errors );
+			 NULL );
 
 	return( string_object );
 

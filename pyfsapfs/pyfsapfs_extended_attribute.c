@@ -464,7 +464,6 @@ PyObject *pyfsapfs_extended_attribute_get_name(
 {
 	PyObject *string_object  = NULL;
 	libcerror_error_t *error = NULL;
-	const char *errors       = NULL;
 	static char *function    = "pyfsapfs_extended_attribute_get_name";
 	char *utf8_string        = NULL;
 	size_t utf8_string_size  = 0;
@@ -552,7 +551,7 @@ PyObject *pyfsapfs_extended_attribute_get_name(
 	string_object = PyUnicode_DecodeUTF8(
 	                 utf8_string,
 	                 (Py_ssize_t) utf8_string_size - 1,
-	                 errors );
+	                 NULL );
 
 	if( string_object == NULL )
 	{
