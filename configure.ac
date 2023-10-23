@@ -2,13 +2,14 @@ AC_PREREQ([2.71])
 
 AC_INIT(
  [libfsapfs],
- [20230909],
+ [20231023],
  [joachim.metz@gmail.com])
 
 AC_CONFIG_SRCDIR(
  [include/libfsapfs.h.in])
 
 AM_INIT_AUTOMAKE([gnu 1.6 tar-ustar])
+AM_EXTRA_RECURSIVE_TARGETS([sources splint])
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -225,6 +226,7 @@ AC_CONFIG_FILES([dpkg/changelog])
 AC_CONFIG_FILES([libfsapfs/libfsapfs.rc])
 AC_CONFIG_FILES([libfsapfs.pc])
 AC_CONFIG_FILES([libfsapfs.spec])
+AC_CONFIG_FILES([setup.cfg])
 dnl Generate a source configuration file
 AC_CONFIG_HEADERS([common/config.h])
 

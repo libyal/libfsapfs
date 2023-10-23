@@ -40,3 +40,6 @@ MSGID_BUGS_ADDRESS = @PACKAGE_BUGREPORT@
 # message catalogs shall be used.  It is usually empty.
 EXTRA_LOCALE_CATEGORIES =
 
+# Additional make targets.
+sources splint:
+

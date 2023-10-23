@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20230405
+# Version: 20230926
 
 # Generic auto-generated build files
 *~
@@ -25,10 +25,13 @@
 *.swp
 *.Tpo
 *.trs
+*.whl
 /*.egg-info/
+__pycache__
 .deps
 .dirstamp
 .libs
+.tox
 INSTALL
 Makefile
 Makefile.bcc
@@ -125,6 +128,7 @@ stamp-h[1-9]
 /libfsapfs/libfsapfs.rc
 /libfsapfs/libfsapfs_definitions.h
 /pyfsapfs-python[23]/*.[ch]
+/setup.cfg
 /fsapfstools/*.exe
 /fsapfstools/fsapfsinfo
 /fsapfstools/fsapfsmount

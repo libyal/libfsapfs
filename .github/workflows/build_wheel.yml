@@ -1,0 +1,42 @@
+# Build wheel from source using tox.
+name: build_wheel
+on: [push, pull_request]
+permissions: read-all
+jobs:
+  build_wheel:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+        - python-version: '3.7'
+          toxenv: 'py37'
+        - python-version: '3.8'
+          toxenv: 'py38'
+        - python-version: '3.9'
+          toxenv: 'py39'
+        - python-version: '3.10'
+          toxenv: 'py310'
+        - python-version: '3.11'
+          toxenv: 'py311'
+        - python-version: '3.12'
+          toxenv: 'py312'
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install build dependencies
+      run: |
+        sudo add-apt-repository universe &&
+        sudo add-apt-repository -y ppa:deadsnakes/ppa &&
+        sudo apt-get update &&
+        sudo apt-get install -y autoconf automake autopoint build-essential git libtool pkg-config python${{ matrix.python-version }} python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-venv python3-distutils python3-pip python3-setuptools
+    - name: Install tox
+      run: |
+        python3 -m pip install tox
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Prepare build
+      run: |
+        ./synclibs.sh --use-head && ./autogen.sh && ./configure && make sources >/dev/null
+    - name: Build Python wheel
+      run: |
+        tox -e${{ matrix.toxenv }}

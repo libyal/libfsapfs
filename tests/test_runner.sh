@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20230410
+# Version: 20231013
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -406,9 +406,12 @@ read_test_data_option_file()
 		TEST_DATA_OPTION_FILE=$(get_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
 	fi
 
-	local OPTIONS=()
-	local OPTIONS_STRING=`cat "${TEST_DATA_OPTION_FILE}" | head -n 1 | sed 's/[\r\n]*$//'`;
+	local OPTIONS_STRING=`head -n 1 "${TEST_DATA_OPTION_FILE}" | sed 's/[\r\n]*$//'`;
 
+	if test "${OPTIONS_STRING}" = "# libyal test data options";
+	then
+		OPTIONS_STRING=`tail -n +2 "${TEST_DATA_OPTION_FILE}" | sed 's/^offset=/-o/;s/^password=/-p/;s/^recovery_password=/-r/;s/^startup_key=/-s/;s/virtual_address=/-v/' | tr '\n' ' '`;
+	fi
 	echo "${OPTIONS_STRING}";
 }
 
@@ -1073,14 +1076,10 @@ run_test_on_input_file()
 	local ARGUMENTS=("$@");
 
 	local INPUT_NAME=`basename "${INPUT_FILE}"`;
-	local OPTIONS=();
 	local TEST_OUTPUT="${INPUT_NAME}";
 
 	if test -n "${OPTION_SET}";
 	then
-		OPTIONS_STRING=$(read_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
-		IFS=" " read -a OPTIONS <<< "${OPTIONS_STRING}";
-
 		TEST_OUTPUT="${INPUT_NAME}-${OPTION_SET}";
 	fi
 
@@ -1092,7 +1091,7 @@ run_test_on_input_file()
 
 	if test "${TEST_MODE}" = "with_callback";
 	then
-		test_callback "${TMPDIR}" "${TEST_SET_DIRECTORY}" "${TEST_OUTPUT}" "${TEST_EXECUTABLE}" "${TEST_INPUT}" ${ARGUMENTS[@]} "${OPTIONS[@]}";
+		test_callback "${TMPDIR}" "${TEST_SET_DIRECTORY}" "${TEST_OUTPUT}" "${TEST_EXECUTABLE}" "${TEST_INPUT}" ${ARGUMENTS[@]};
 		RESULT=$?;
 
 	elif test "${TEST_MODE}" = "with_stdout_reference";
@@ -1109,7 +1108,7 @@ run_test_on_input_file()
 		local INPUT_FILE_FULL_PATH=$( readlink_f "${INPUT_FILE}" );
 		local TEST_LOG="${TEST_OUTPUT}.log";
 
-		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} "${OPTIONS[@]}" > "${TEST_LOG}");
+		(cd ${TMPDIR} && run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE_FULL_PATH}" ${ARGUMENTS[@]} > "${TEST_LOG}");
 		RESULT=$?;
 
 		# Compare output if test ran successfully.
@@ -1135,7 +1134,7 @@ run_test_on_input_file()
 		fi
 
 	else
-		run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]} "${OPTIONS[@]}";
+		run_test_with_input_and_arguments "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
 		RESULT=$?;
 	fi
 
@@ -1144,22 +1143,12 @@ run_test_on_input_file()
 	if test -n "${TEST_DESCRIPTION}";
 	then
 		ARGUMENTS=`echo "${ARGUMENTS[*]}" | tr '\n' ' ' | sed 's/[ ]\$//'`;
-		OPTIONS=`echo "${OPTIONS[*]}" | tr '\n' ' ' | sed 's/[ ]\$//'`;
 
-		if test -z "${ARGUMENTS}" && test -z "${OPTIONS}";
+		if test -z "${ARGUMENTS}";
 		then
 			echo -n "${TEST_DESCRIPTION} with input: ${INPUT_FILE}";
-
-		elif test -z "${ARGUMENTS}";
-		then
-			echo -n "${TEST_DESCRIPTION} with options: '${OPTIONS}' and input: ${INPUT_FILE}";
-
-		elif test -z "${OPTIONS}";
-		then
-			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS}' and input: ${INPUT_FILE}";
-
 		else
-			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS} ${OPTIONS}' and input: ${INPUT_FILE}";
+			echo -n "${TEST_DESCRIPTION} with options: '${ARGUMENTS}' and input: ${INPUT_FILE}";
 		fi
 
 		if test ${RESULT} -ne ${EXIT_SUCCESS};
@@ -1169,125 +1158,6 @@ run_test_on_input_file()
 			echo " (PASS)";
 		fi
 	fi
-	return ${RESULT};
-}
-
-# Runs the test with options on the input file.
-#
-# Note that this function is not intended to be directly invoked
-# from outside the test runner script.
-#
-# Arguments:
-#   a string containing the path of the test set directory
-#   a string containing the description of the test
-#   a string containing the test mode
-#   a string containing the name of the test data option sets
-#   a string containing the path of the test executable
-#   a string containing the path of the test input file
-#   an array containing the arguments for the test executable
-#
-# Returns:
-#   an integer containg the exit status of the test executable
-#
-run_test_on_input_file_with_options()
-{
-	local TEST_SET_DIRECTORY=$1;
-	local TEST_DESCRIPTION=$2;
-	local TEST_MODE=$3;
-	local OPTION_SETS=$4;
-	local TEST_EXECUTABLE=$5;
-	local INPUT_FILE=$6;
-	shift 6;
-	local ARGUMENTS=("$@");
-
-	local RESULT=${EXIT_SUCCESS};
-	local TESTED_WITH_OPTIONS=0;
-
-	for OPTION_SET in `echo ${OPTION_SETS} | tr ' ' '\n'`;
-	do
-		local TEST_DATA_OPTION_FILE=$(get_test_data_option_file "${TEST_SET_DIRECTORY}" "${INPUT_FILE}" "${OPTION_SET}");
-
-		if ! test -f ${TEST_DATA_OPTION_FILE};
-		then
-			continue
-		fi
-
-		run_test_on_input_file "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SET}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
-		RESULT=$?;
-
-		if test ${RESULT} -ne ${EXIT_SUCCESS};
-		then
-			break;
-		fi
-		TESTED_WITH_OPTIONS=1;
-	done
-
-	if test ${RESULT} -eq ${EXIT_SUCCESS} && test ${TESTED_WITH_OPTIONS} -eq 0;
-	then
-		run_test_on_input_file "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
-		RESULT=$?;
-	fi
-	return ${RESULT};
-}
-
-# Runs the test with options on the file entries in the test set directory.
-#
-# Note that this function is not intended to be directly invoked
-# from outside the test runner script.
-#
-# Arguments:
-#   a string containing the path of the test set directory
-#   a string containing the description of the test
-#   a string containing the test mode
-#   a string containing the name of the test data option sets
-#   a string containing the path of the test executable
-#   an array containing the arguments for the test executable
-#
-# Returns:
-#   an integer containg the exit status of the test executable
-#
-run_test_on_test_set_with_options()
-{
-	local TEST_SET_DIRECTORY=$1;
-	local TEST_DESCRIPTION=$2;
-	local TEST_MODE=$3;
-	local OPTION_SETS=$4;
-	local TEST_EXECUTABLE=$5;
-	shift 5;
-	local ARGUMENTS=("$@");
-
-	local RESULT=${EXIT_SUCCESS};
-
-	# IFS="\n"; is not supported by all platforms.
-	IFS="
-";
-
-	if test -f "${TEST_SET_DIRECTORY}/files";
-	then
-		for INPUT_FILE in `cat ${TEST_SET_DIRECTORY}/files | sed "s?^?${TEST_SET_INPUT_DIRECTORY}/?"`;
-		do
-			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
-			RESULT=$?;
-
-			if test ${RESULT} -ne ${EXIT_SUCCESS};
-			then
-				break;
-			fi
-		done
-	else
-		for INPUT_FILE in `ls -1d ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB}`;
-		do
-			run_test_on_input_file_with_options "${TEST_SET_DIRECTORY}" "${TEST_DESCRIPTION}" "${TEST_MODE}" "${OPTION_SETS}" "${TEST_EXECUTABLE}" "${INPUT_FILE}" ${ARGUMENTS[@]};
-			RESULT=$?;
-
-			if test ${RESULT} -ne ${EXIT_SUCCESS};
-			then
-				break;
-			fi
-		done
-	fi
-	IFS=${OLDIFS};
-
 	return ${RESULT};
 }
 

@@ -19,7 +19,7 @@ MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
-	/bin/rm -f config.h
-	/bin/rm -f types.h
-	/bin/rm -f Makefile
+	-rm -f config.h
+	-rm -f types.h
+	-rm -f Makefile
 

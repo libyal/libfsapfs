@@ -19,9 +19,9 @@ MAINTAINERCLEANFILES = \
 	Makefile.in
 
 distclean: clean
-	/bin/rm -f libfsapfs.h
-	/bin/rm -f libfsapfs/definitions.h
-	/bin/rm -f libfsapfs/features.h
-	/bin/rm -f libfsapfs/types.h
-	/bin/rm -f Makefile
+	-rm -f libfsapfs.h
+	-rm -f libfsapfs/definitions.h
+	-rm -f libfsapfs/features.h
+	-rm -f libfsapfs/types.h
+	-rm -f Makefile
 
