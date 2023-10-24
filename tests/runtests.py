@@ -2,7 +2,7 @@
 #
 # Script to run Python test scripts.
 #
-# Version: 20231009
+# Version: 20231024
 
 import glob
 import os
@@ -70,6 +70,9 @@ if __name__ == "__main__":
           if lines[0] == "# libyal test data options":
             for line in lines[1:]:
               key, value = line.split("=", maxsplit=1)
+              if key == 'offset':
+                value = int(value)
+
               setattr(unittest, key, value)
 
   test_results = test_runner.run(test_scripts)

@@ -8,7 +8,7 @@ EXIT_FAILURE=1;
 EXIT_IGNORE=77;
 
 TEST_FUNCTIONS="support";
-TEST_FUNCTIONS_WITH_INPUT="container";
+TEST_FUNCTIONS_WITH_INPUT="container volume";
 OPTION_SETS=("offset" "password");
 
 TEST_TOOL_DIRECTORY=".";

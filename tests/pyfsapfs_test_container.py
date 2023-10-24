@@ -157,11 +157,12 @@ class ContainerTypeTests(unittest.TestCase):
 
   def test_open(self):
     """Tests the open function."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 
-    if unittest.offset:
+    test_offset = getattr(unittest, "offset", None)
+    if test_offset:
       raise unittest.SkipTest("source defines offset")
 
     fsapfs_container = pyfsapfs.container()
@@ -180,15 +181,17 @@ class ContainerTypeTests(unittest.TestCase):
 
   def test_open_file_object(self):
     """Tests the open_file_object function."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 
     if not os.path.isfile(test_source):
       raise unittest.SkipTest("source not a regular file")
 
+    test_offset = getattr(unittest, "offset", None)
+
     with DataRangeFileObject(
-        test_source, unittest.offset or 0, None) as file_object:
+        test_source, test_offset or 0, None) as file_object:
 
       fsapfs_container = pyfsapfs.container()
       fsapfs_container.open_file_object(file_object)
@@ -206,7 +209,7 @@ class ContainerTypeTests(unittest.TestCase):
 
   def test_close(self):
     """Tests the close function."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 
@@ -217,11 +220,12 @@ class ContainerTypeTests(unittest.TestCase):
 
   def test_open_close(self):
     """Tests the open and close functions."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       return
 
-    if unittest.offset:
+    test_offset = getattr(unittest, "offset", None)
+    if test_offset:
       raise unittest.SkipTest("source defines offset")
 
     fsapfs_container = pyfsapfs.container()
@@ -252,12 +256,14 @@ class ContainerTypeTests(unittest.TestCase):
 
   def test_is_locked(self):
     """Tests the is_locked function."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 
+    test_offset = getattr(unittest, "offset", None)
+
     with DataRangeFileObject(
-        test_source, unittest.offset or 0, None) as file_object:
+        test_source, test_offset or 0, None) as file_object:
 
       fsapfs_container = pyfsapfs.container()
       fsapfs_container.open_file_object(file_object)
@@ -266,9 +272,10 @@ class ContainerTypeTests(unittest.TestCase):
 
       fsapfs_container.close()
 
-    if unittest.password:
+    test_password = getattr(unittest, "password", None)
+    if test_password:
       with DataRangeFileObject(
-          test_source, unittest.offset or 0, None) as file_object:
+          test_source, test_offset or 0, None) as file_object:
 
         fsapfs_container = pyfsapfs.container()
         fsapfs_container.open_file_object(file_object)
@@ -279,12 +286,14 @@ class ContainerTypeTests(unittest.TestCase):
 
   def test_get_size(self):
     """Tests the get_size function and size property."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 
+    test_offset = getattr(unittest, "offset", None)
+
     with DataRangeFileObject(
-        test_source, unittest.offset or 0, None) as file_object:
+        test_source, test_offset or 0, None) as file_object:
 
       fsapfs_container = pyfsapfs.container()
       fsapfs_container.open_file_object(file_object)
@@ -298,22 +307,26 @@ class ContainerTypeTests(unittest.TestCase):
 
   def test_get_number_of_volumes(self):
     """Tests the get_number_of_volumes function and number_of_volumes property."""
-    test_source = unittest.source
+    test_source = getattr(unittest, "source", None)
     if not test_source:
       raise unittest.SkipTest("missing source")
 
+    test_offset = getattr(unittest, "offset", None)
+
     with DataRangeFileObject(
-        test_source, unittest.offset or 0, None) as file_object:
+        test_source, test_offset or 0, None) as file_object:
 
       fsapfs_container = pyfsapfs.container()
       fsapfs_container.open_file_object(file_object)
 
-      number_of_volumes = fsapfs_container.get_number_of_volumes()
-      self.assertIsNotNone(number_of_volumes)
+      try:
+        number_of_volumes = fsapfs_container.get_number_of_volumes()
+        self.assertIsNotNone(number_of_volumes)
 
-      self.assertIsNotNone(fsapfs_container.number_of_volumes)
+        self.assertIsNotNone(fsapfs_container.number_of_volumes)
 
-      fsapfs_container.close()
+      finally:
+        fsapfs_container.close()
 
 
 if __name__ == "__main__":
