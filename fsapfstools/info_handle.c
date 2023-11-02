@@ -1532,9 +1532,9 @@ on_error:
 	return( -1 );
 }
 
-/* Prints the compatible features flags to the notify stream
+/* Prints the volume compatible features flags to the notify stream
  */
-void info_handle_compatible_features_flags_fprint(
+void info_handle_volume_compatible_features_flags_fprint(
       uint64_t compatible_features_flags,
       FILE *notify_stream )
 {
@@ -1542,22 +1542,40 @@ void info_handle_compatible_features_flags_fprint(
 	{
 		fprintf(
 		 notify_stream,
-		 "\t\t(NX_FEATURE_DEFRAG)\n" );
+		 "\t\t(APFS_FEATURE_DEFRAG_PRERELEASE)\n" );
 	}
 	if( ( compatible_features_flags & 0x0000000000000002 ) != 0 )
 	{
 		fprintf(
 		 notify_stream,
-		 "\t\t(NX_FEATURE_LCFD)\n" );
+		 "\t\t(APFS_FEATURE_HARDLINK_MAP_RECORDS)\n" );
+	}
+	if( ( compatible_features_flags & 0x0000000000000004 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(APFS_FEATURE_DEFRAG)\n" );
+	}
+	if( ( compatible_features_flags & 0x0000000000000008 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(APFS_FEATURE_STRICTATIME)\n" );
+	}
+	if( ( compatible_features_flags & 0x0000000000000010 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(APFS_FEATURE_VOLGRP_SYSTEM_INO_SPACE)\n" );
 	}
 	fprintf(
 	 notify_stream,
 	 "\n" );
 }
 
-/* Prints the incompatible features flags to the notify stream
+/* Prints the volume incompatible features flags to the notify stream
  */
-void info_handle_incompatible_features_flags_fprint(
+void info_handle_volume_incompatible_features_flags_fprint(
       uint64_t incompatible_features_flags,
       FILE *notify_stream )
 {
@@ -1565,35 +1583,52 @@ void info_handle_incompatible_features_flags_fprint(
 	{
 		fprintf(
 		 notify_stream,
-		 "\t\t(NX_INCOMPAT_VERSION1)\n" );
+		 "\t\t(APFS_INCOMPAT_CASE_INSENSITIVE)\n" );
 	}
 	if( ( incompatible_features_flags & 0x0000000000000002 ) != 0 )
 	{
 		fprintf(
 		 notify_stream,
-		 "\t\t(NX_INCOMPAT_VERSION2)\n" );
+		 "\t\t(APFS_INCOMPAT_DATALESS_SNAPS)\n" );
 	}
-
-	if( ( incompatible_features_flags & 0x0000000000000100 ) != 0 )
+	if( ( incompatible_features_flags & 0x0000000000000004 ) != 0 )
 	{
 		fprintf(
 		 notify_stream,
-		 "\t\t(NX_INCOMPAT_FUSION)\n" );
+		 "\t\t(APFS_INCOMPAT_ENC_ROLLED)\n" );
+	}
+	if( ( incompatible_features_flags & 0x0000000000000008 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(APFS_INCOMPAT_NORMALIZATION_INSENSITIVE)\n" );
+	}
+	if( ( incompatible_features_flags & 0x0000000000000010 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(APFS_INCOMPAT_INCOMPLETE_RESTORE)\n" );
+	}
+	if( ( incompatible_features_flags & 0x0000000000000020 ) != 0 )
+	{
+		fprintf(
+		 notify_stream,
+		 "\t\t(APFS_INCOMPAT_SEALED_VOLUME)\n" );
 	}
 	fprintf(
 	 notify_stream,
 	 "\n" );
 }
 
-/* Prints the read-only compatible features flags to the notify stream
+/* Prints the volume read-only compatible features flags to the notify stream
  */
-void info_handle_read_only_compatible_features_flags_fprint(
+void info_handle_volume_read_only_compatible_features_flags_fprint(
       uint64_t read_only_compatible_features_flags FSAPFSTOOLS_ATTRIBUTE_UNUSED,
       FILE *notify_stream )
 {
 	FSAPFSTOOLS_UNREFERENCED_PARAMETER( read_only_compatible_features_flags )
 
-	/* Currently there are no container read-only compatible feature flags defined */
+	/* Currently there are no volume read-only compatible feature flags defined */
 
 	fprintf(
 	 notify_stream,
@@ -4019,7 +4054,7 @@ int info_handle_volume_fprint(
 	 "\tCompatible features\t\t: 0x%08" PRIx64 "\n",
 	 compatible_features_flags );
 
-	info_handle_compatible_features_flags_fprint(
+	info_handle_volume_compatible_features_flags_fprint(
 	 compatible_features_flags,
 	 info_handle->notify_stream );
 
@@ -4028,7 +4063,7 @@ int info_handle_volume_fprint(
 	 "\tIncompatible features\t\t: 0x%08" PRIx64 "\n",
 	 incompatible_features_flags );
 
-	info_handle_incompatible_features_flags_fprint(
+	info_handle_volume_incompatible_features_flags_fprint(
 	 incompatible_features_flags,
 	 info_handle->notify_stream );
 
@@ -4037,7 +4072,7 @@ int info_handle_volume_fprint(
 	 "\tRead-only compatible features\t: 0x%08" PRIx64 "\n",
 	 read_only_compatible_features_flags );
 
-	info_handle_read_only_compatible_features_flags_fprint(
+	info_handle_volume_read_only_compatible_features_flags_fprint(
 	 read_only_compatible_features_flags,
 	 info_handle->notify_stream );
 

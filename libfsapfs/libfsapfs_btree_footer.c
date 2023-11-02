@@ -147,7 +147,6 @@ int libfsapfs_btree_footer_read_data(
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit  = 0;
-	uint32_t value_32bit  = 0;
 #endif
 
 	if( btree_footer == NULL )
@@ -197,6 +196,10 @@ int libfsapfs_btree_footer_read_data(
 	}
 #endif
 	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_btree_footer_t *) data )->flags,
+	 btree_footer->flags );
+
+	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_btree_footer_t *) data )->node_size,
 	 btree_footer->node_size );
 
@@ -219,15 +222,12 @@ int libfsapfs_btree_footer_read_data(
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_btree_footer_t *) data )->flags,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: flags\t\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 value_32bit );
+		 btree_footer->flags );
 		libfsapfs_debug_print_btree_flags(
-		 value_32bit );
+		 btree_footer->flags );
 		libcnotify_printf(
 		 "\n" );
 

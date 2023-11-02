@@ -74,6 +74,16 @@ void libfsapfs_debug_print_btree_flags(
 		libcnotify_printf(
 		 "\t(BTREE_KV_NONALIGNED)\n" );
 	}
+	if( ( btree_flags & 0x00000080 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTREE_HASHED)\n" );
+	}
+	if( ( btree_flags & 0x00000100 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\tHas no object header (BTREE_NOHEADER)\n" );
+	}
 }
 
 /* Prints the B-tree node flags
@@ -95,6 +105,16 @@ void libfsapfs_debug_print_btree_node_flags(
 	{
 		libcnotify_printf(
 		 "\tHas fixed-size entry (BTNODE_FIXED_KV_SIZE)\n" );
+	}
+	if( ( btree_node_flags & 0x0008 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTNODE_HASHED)\n" );
+	}
+	if( ( btree_node_flags & 0x0010 ) != 0 )
+	{
+		libcnotify_printf(
+		 "\t(BTNODE_NOHEADER)\n" );
 	}
 
 	if( ( btree_node_flags & 0x8000 ) != 0 )

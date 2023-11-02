@@ -175,15 +175,15 @@ int info_handle_uuid_value_fprint(
      const uint8_t *uuid_data,
      libcerror_error_t **error );
 
-void info_handle_compatible_features_flags_fprint(
+void info_handle_volume_compatible_features_flags_fprint(
       uint64_t compatible_features_flags,
       FILE *notify_stream );
 
-void info_handle_incompatible_features_flags_fprint(
+void info_handle_volume_incompatible_features_flags_fprint(
       uint64_t incompatible_features_flags,
       FILE *notify_stream );
 
-void info_handle_read_only_compatible_features_flags_fprint(
+void info_handle_volume_read_only_compatible_features_flags_fprint(
       uint64_t read_only_compatible_features_flags,
       FILE *notify_stream );
 

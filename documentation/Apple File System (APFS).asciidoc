@@ -168,7 +168,7 @@ number, relative to the start of the container, is used as the tweak value.
 
 APFS uses the "object" data type to distinguish between different data types.
 
-=== Object header
+=== [[object_header]]Object header
 
 The object header (obj_phys_t) is 32 bytes of size and consists of:
 
@@ -388,6 +388,9 @@ Contains an offset relative to ??? or -1 (0xffff) if not set (invalid)
 | 0x0001 | BTNODE_ROOT | Is root
 | 0x0002 | BTNODE_LEAF | Is leaf
 | 0x0004 | BTNODE_FIXED_KV_SIZE | Has a fixed-size entry (key and value)
+| 0x0008 | BTNODE_HASHED | B-tree branch nodes contain a hash of their sub nodes
+| 0x0010 | BTNODE_NOHEADER | The B-tree node are stored without <<object_header,object header>> +
+The object header contains 0-byte values
 | | |
 | 0x8000 | BTNODE_CHECK_KOFF_INVAL | In transient state +
 This flag is used for in-memory purposes only
@@ -462,6 +465,9 @@ Set to 0 if value has a variable size
 | 0x00000010 | BTREE_PHYSICAL | [yellow-background]*Unknown*
 | 0x00000020 | BTREE_NONPERSISTENT | [yellow-background]*Unknown*
 | 0x00000040 | BTREE_KV_NONALIGNED | [yellow-background]*Unknown*
+| 0x00000080 | BTREE_HASHED | B-tree branch nodes contain a hash of their sub nodes
+| 0x00000100 | BTREE_NOHEADER | The B-tree node are stored without <<object_header,object header>> +
+The object header contains 0-byte values
 |===
 
 == The container

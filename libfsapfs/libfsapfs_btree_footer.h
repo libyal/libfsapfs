@@ -35,6 +35,10 @@ typedef struct libfsapfs_btree_footer libfsapfs_btree_footer_t;
 
 struct libfsapfs_btree_footer
 {
+	/* The flags
+	 */
+	uint32_t flags;
+
 	/* The node size
 	 */
 	uint32_t node_size;
