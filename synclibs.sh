@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20230510
+# Version: 20231023
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -111,12 +111,12 @@ endif
 	if test ${LOCAL_LIB} = "libfplist";
 	then
 		# TODO: make this more generic to strip the last \\
-		sed -i'~' 's/libfplist_xml_scanner.c \\/libfplist_xml_scanner.c/' ${LOCAL_LIB_MAKEFILE_AM};
+		sed -i'~' '/EXTRA_DIST = /,/^$/s/libfplist_xml_scanner.c \\/libfplist_xml_scanner.c/' ${LOCAL_LIB_MAKEFILE_AM};
 
 	elif test ${LOCAL_LIB} = "libodraw";
 	then
 		# TODO: make this more generic to strip the last \\
-		sed -i'~' 's/libodraw_cue_scanner.c \\/libodraw_cue_scanner.c/' ${LOCAL_LIB_MAKEFILE_AM};
+		sed -i'~' '/EXTRA_DIST = /,/^$/s/libodraw_cue_scanner.c \\/libodraw_cue_scanner.c/' ${LOCAL_LIB_MAKEFILE_AM};
 
 	else
 		sed -i'~' '/EXTRA_DIST = /,/^$/d' ${LOCAL_LIB_MAKEFILE_AM};
