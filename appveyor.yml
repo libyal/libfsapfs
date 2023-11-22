@@ -168,11 +168,6 @@ environment:
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-python"
-  - TARGET: cygwin64-gcc-python3
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-python3"
-    PYTHON_VERSION: 3
   - TARGET: cygwin64-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022

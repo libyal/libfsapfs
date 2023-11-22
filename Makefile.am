@@ -22,8 +22,6 @@ SUBDIRS = \
 	libcaes \
 	libfsapfs \
 	pyfsapfs \
-	pyfsapfs-python2 \
-	pyfsapfs-python3 \
 	fsapfstools \
 	po \
 	manuals \

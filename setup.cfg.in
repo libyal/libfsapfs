@@ -3,12 +3,13 @@ name = libfsapfs-python
 version = @VERSION@
 description = Python bindings module for libfsapfs
 long_description = Python bindings module for libfsapfs
+long_description_content_type = text/plain
 author = Joachim Metz
 author_email = joachim.metz@gmail.com
 license = GNU Lesser General Public License v3 or later (LGPLv3+)
 license_files = COPYING COPYING.LESSER
 classifiers =
-  Development Status :: 3 - Alpha
+  Development Status :: 2 - Pre-Alpha
   Programming Language :: Python
 
 [options]

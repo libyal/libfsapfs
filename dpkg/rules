@@ -11,7 +11,7 @@ export SKIP_PYTHON_TESTS=1
 
 .PHONY: override_dh_auto_configure
 override_dh_auto_configure:
-	dh_auto_configure -- --enable-python3 CFLAGS="-g"
+	dh_auto_configure -- --enable-python CFLAGS="-g"
 
 .PHONY: override_dh_install
 override_dh_install:

@@ -3,24 +3,6 @@ name: build
 on: [push, pull_request]
 permissions: read-all
 jobs:
-  build_freebsd:
-    # FreeBSD support is provided via virtualization on MacOS 12
-    # See https://github.com/vmactions/freebsd-vm#under-the-hood.
-    runs-on: macos-12
-    steps:
-    - uses: actions/checkout@v3
-    - name: Building from source
-      id: build_freebsd
-      uses: vmactions/freebsd-vm@v0
-      with:
-        usesh: true
-        mem: 4096
-        # Note that the test scripts require bash
-        prepare: |
-          pkg install -y autoconf automake bash fusefs-libs gettext git libtool openssl pkgconf
-        run: |
-          tests/build.sh
-          tests/runtests.sh
   build_ubuntu:
     runs-on: ubuntu-22.04
     strategy:
@@ -81,10 +63,6 @@ jobs:
           compiler: 'gcc'
           configure_options: '--enable-python'
           python_version: ''
-        - architecture: 'x64'
-          compiler: 'gcc'
-          configure_options: '--enable-python3'
-          python_version: '3'
     steps:
     - uses: actions/checkout@v3
     - name: Install build dependencies

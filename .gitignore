@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20230926
+# Version: 20231119
 
 # Generic auto-generated build files
 *~
@@ -127,7 +127,6 @@ stamp-h[1-9]
 /libfsapfs.spec
 /libfsapfs/libfsapfs.rc
 /libfsapfs/libfsapfs_definitions.h
-/pyfsapfs-python[23]/*.[ch]
 /setup.cfg
 /fsapfstools/*.exe
 /fsapfstools/fsapfsinfo

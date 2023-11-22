@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Bash functions to run an executable for testing.
 #
-# Version: 20231013
+# Version: 20231119
 #
 # When CHECK_WITH_ASAN is set to a non-empty value the test executable
 # is run with asan, otherwise it is run without.
@@ -15,7 +15,7 @@
 # When CHECK_WITH_VALGRIND is set to a non-empty value the test executable
 # is run with valgrind, otherwise it is run without.
 #
-# PYTHON and PYTHON_VERSION are used to determine the Python interpreter.
+# PYTHON is used to determine the Python interpreter.
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -227,9 +227,6 @@ find_binary_library_path()
 
 # Searches for the path to the binary variant of the Python module
 #
-# Globals:
-#   PYTHON_VERSION
-#
 # Arguments:
 #   a string containing the path of the test executable
 #
@@ -246,18 +243,8 @@ find_binary_python_module_path()
 	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
 	TEST_EXECUTABLE=`dirname ${TEST_EXECUTABLE}`;
 
-	PYTHON_VERSION=`echo ${PYTHON_VERSION} | cut -c1`;
+	local PYTHON_MODULE_PATH="${TEST_EXECUTABLE}/${PYTHON_MODULE_NAME}/.libs";
 
-	local PYTHON_MODULE_PATH="${TEST_EXECUTABLE}/${PYTHON_MODULE_NAME}-python${PYTHON_VERSION}/.libs";
-
-	if ! test -d "${PYTHON_MODULE_PATH}";
-	then
-		PYTHON_MODULE_PATH="../${PYTHON_MODULE_NAME}-python${PYTHON_VERSION}/.libs";
-	fi
-	if ! test -d "${PYTHON_MODULE_PATH}";
-	then
-		PYTHON_MODULE_PATH="${TEST_EXECUTABLE}/${PYTHON_MODULE_NAME}/.libs";
-	fi
 	if ! test -d "${PYTHON_MODULE_PATH}";
 	then
 		PYTHON_MODULE_PATH="../${PYTHON_MODULE_NAME}/.libs";
@@ -422,7 +409,6 @@ read_test_data_option_file()
 #   CHECK_WITH_GDB
 #   CHECK_WITH_STDERR
 #   CHECK_WITH_VALGRIND
-#   PYTHON_VERSION
 #
 # Arguments:
 #   a string containing the test description
@@ -459,7 +445,7 @@ run_test_with_arguments()
 
 	if test ${IS_PYTHON_SCRIPT} -eq 0 && test -z ${PYTHON};
 	then
-		local PYTHON=`which python${PYTHON_VERSION} 2> /dev/null`;
+		local PYTHON=`which python 2> /dev/null`;
 
 		if ! test -x ${PYTHON};
 		then
@@ -743,7 +729,6 @@ run_test_with_arguments()
 #   CHECK_WITH_GDB
 #   CHECK_WITH_STDERR
 #   CHECK_WITH_VALGRIND
-#   PYTHON_VERSION
 #
 # Arguments:
 #   a string containing the path of the test executable
@@ -780,7 +765,7 @@ run_test_with_input_and_arguments()
 
 	if test ${IS_PYTHON_SCRIPT} -eq 0 && test -z ${PYTHON};
 	then
-		local PYTHON=`which python${PYTHON_VERSION} 2> /dev/null`;
+		local PYTHON=`which python 2> /dev/null`;
 
 		if ! test -x ${PYTHON};
 		then
