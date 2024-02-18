@@ -1,7 +1,7 @@
 /*
  * Python object wrapper of libfsapfs_extended_attribute_t
  *
- * Copyright (C) 2018-2023, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2024, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
