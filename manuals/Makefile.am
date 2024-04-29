@@ -8,9 +8,7 @@ EXTRA_DIST = \
 	fsapfsmount.1 \
 	libfsapfs.3
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f Makefile
 

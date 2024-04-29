@@ -1,4 +1,5 @@
-AM_CPPFLAGS = -I$(top_srcdir)/include
+AM_CPPFLAGS = \
+	-I../include -I$(top_srcdir)/include
 
 EXTRA_DIST = \
 	byte_stream.h \
@@ -15,11 +16,9 @@ EXTRA_DIST = \
 	types.h.in \
 	wide_string.h
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	config.h \
+	types.h \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f config.h
-	-rm -f types.h
-	-rm -f Makefile
 

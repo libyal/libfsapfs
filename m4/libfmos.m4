@@ -1,6 +1,6 @@
 dnl Checks for libfmos required headers and functions
 dnl
-dnl Version: 20220804
+dnl Version: 20240413
 
 dnl Function to detect if libfmos is available
 dnl ac_libfmos_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -10,8 +10,10 @@ AC_DEFUN([AX_LIBFMOS_CHECK_LIB],
     [ac_cv_libfmos=no],
     [ac_cv_libfmos=check
     dnl Check if the directory provided as parameter exists
+    dnl For both --with-libfmos which returns "yes" and --with-libfmos= which returns ""
+    dnl treat them as auto-detection.
     AS_IF(
-      [test "x$ac_cv_with_libfmos" != x && test "x$ac_cv_with_libfmos" != xauto-detect],
+      [test "x$ac_cv_with_libfmos" != x && test "x$ac_cv_with_libfmos" != xauto-detect && test "x$ac_cv_with_libfmos" != xyes],
       [AS_IF(
         [test -d "$ac_cv_with_libfmos"],
         [CFLAGS="$CFLAGS -I${ac_cv_with_libfmos}/include"
@@ -76,8 +78,9 @@ AC_DEFUN([AX_LIBFMOS_CHECK_LIB],
 
         ac_cv_libfmos_LIBADD="-lfmos"])
       ])
+
     AS_IF(
-      [test "x$ac_cv_with_libfmos" != x && test "x$ac_cv_with_libfmos" != xauto-detect && test "x$ac_cv_libfmos" != xyes],
+      [test "x$ac_cv_libfmos" != xyes && test "x$ac_cv_with_libfmos" != x && test "x$ac_cv_with_libfmos" != xauto-detect && test "x$ac_cv_with_libfmos" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported libfmos in directory: $ac_cv_with_libfmos],
         [1])
@@ -107,7 +110,7 @@ dnl Function to detect if libfmos dependencies are available
 AC_DEFUN([AX_LIBFMOS_CHECK_LOCAL],
   [dnl No additional checks.
 
-  ac_cv_libfmos_CPPFLAGS="-I../libfmos";
+  ac_cv_libfmos_CPPFLAGS="-I../libfmos -I\$(top_srcdir)/libfmos";
   ac_cv_libfmos_LIBADD="../libfmos/libfmos.la";
 
   ac_cv_libfmos=local

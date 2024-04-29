@@ -226,14 +226,14 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	{ "read_buffer",
 	  (PyCFunction) pyfsapfs_file_entry_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read_buffer(size) -> Binary string\n"
+	  "read_buffer(size)-> Bytes\n"
 	  "\n"
 	  "Reads a buffer of data." },
 
 	{ "read_buffer_at_offset",
 	  (PyCFunction) pyfsapfs_file_entry_read_buffer_at_offset,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read_buffer_at_offset(size, offset) -> Binary string\n"
+	  "read_buffer_at_offset(size, offset)-> Bytes\n"
 	  "\n"
 	  "Reads a buffer of data at a specific offset." },
 
@@ -254,7 +254,7 @@ PyMethodDef pyfsapfs_file_entry_object_methods[] = {
 	{ "read",
 	  (PyCFunction) pyfsapfs_file_entry_read_buffer,
 	  METH_VARARGS | METH_KEYWORDS,
-	  "read(size) -> Binary string\n"
+	  "read(size)-> Bytes\n"
 	  "\n"
 	  "Reads a buffer of data." },
 

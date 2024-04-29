@@ -6,7 +6,7 @@ jobs:
   build_freebsd:
     runs-on: ubuntu-22.04
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Building from source
       id: build_freebsd
       uses: vmactions/freebsd-vm@v1

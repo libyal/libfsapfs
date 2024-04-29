@@ -21,7 +21,7 @@ jobs:
         - python-version: '3.12'
           toxenv: 'py312'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install build dependencies
       run: |
         sudo add-apt-repository universe &&

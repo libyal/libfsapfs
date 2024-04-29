@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20231023
+# Version: 20240414
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -95,10 +95,11 @@ endif
 	d
 }
 
-/distclean: clean/ {
+/DISTCLEANFILES = / {
 	n
-	N
-	d
+	/${LOCAL_LIB}_definitions.h/ {
+		d
+	}
 }";
 	echo "${SED_SCRIPT}" >> ${LOCAL_LIB}-$$.sed;
 	sed -i'~' -f ${LOCAL_LIB}-$$.sed ${LOCAL_LIB_MAKEFILE_AM};
@@ -140,7 +141,7 @@ SED_SCRIPT="/^$/ {
 	then
 		if ! test -f "m4/libuna.m4";
 		then
-			sed -i'~' 's?@LIBUNA_CPPFLAGS@?-I$(top_srcdir)/libuna?' ${LOCAL_LIB_MAKEFILE_AM};
+			sed -i'~' 's?@LIBUNA_CPPFLAGS@?-I../libuna -I$(top_srcdir)/libuna?' ${LOCAL_LIB_MAKEFILE_AM};
 		fi
 	fi
 

@@ -17,10 +17,10 @@ jobs:
           compiler: 'gcc'
           configure_options: '--enable-wide-character-type'
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install build dependencies
       run: |
-        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse-dev libssl-dev libtool pkg-config zlib1g-dev
+        sudo apt-get -y install autoconf automake autopoint build-essential git libssl-dev libtool pkg-config zlib1g-dev
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi

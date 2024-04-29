@@ -15,13 +15,11 @@ EXTRA_DIST = \
 	libfsapfs/features.h.in \
 	libfsapfs/types.h.in
 
-MAINTAINERCLEANFILES = \
+DISTCLEANFILES = \
+	libfsapfs.h \
+	libfsapfs/definitions.h \
+	libfsapfs/features.h \
+	libfsapfs/types.h \
+	Makefile \
 	Makefile.in
-
-distclean: clean
-	-rm -f libfsapfs.h
-	-rm -f libfsapfs/definitions.h
-	-rm -f libfsapfs/features.h
-	-rm -f libfsapfs/types.h
-	-rm -f Makefile
 

@@ -1,6 +1,6 @@
 # Script to generate the necessary files for a msvscpp build
 #
-# Version: 20230118
+# Version: 20240306
 
 $WinFlex = "..\win_flex_bison\win_flex.exe"
 $WinBison = "..\win_flex_bison\win_bison.exe"
@@ -29,33 +29,36 @@ If (Test-Path "${Prefix}.net")
 
 $NamePrefix = ""
 
-ForEach (${DirectoryElement} in Get-ChildItem -Path "${Library}\*.l")
+ForEach (${Library} in Get-ChildItem -Directory -Path "lib*")
 {
-	$OutputFile = ${DirectoryElement} -Replace ".l$",".c"
+	ForEach (${DirectoryElement} in Get-ChildItem -Path "${Library}\*.l")
+	{
+		$OutputFile = ${DirectoryElement} -Replace ".l$",".c"
 
-	$NamePrefix = Split-Path -path ${DirectoryElement} -leaf
-	$NamePrefix = ${NamePrefix} -Replace ".l$","_"
+		$NamePrefix = Split-Path -path ${DirectoryElement} -leaf
+		$NamePrefix = ${NamePrefix} -Replace ".l$","_"
 
-	Write-Host "Running: ${WinFlex} -Cf ${DirectoryElement}"
+		Write-Host "Running: ${WinFlex} -Cf ${DirectoryElement}"
 
-	# PowerShell will raise NativeCommandError if win_flex writes to stdout or stderr
-	# therefore 2>&1 is added and the output is stored in a variable.
-	$Output = Invoke-Expression -Command "& '${WinFlex}' -Cf ${DirectoryElement} 2>&1"
-	Write-Host ${Output}
+		# PowerShell will raise NativeCommandError if win_flex writes to stdout or stderr
+		# therefore 2>&1 is added and the output is stored in a variable.
+		$Output = Invoke-Expression -Command "& '${WinFlex}' -Cf ${DirectoryElement} 2>&1"
+		Write-Host ${Output}
 
-	# Moving manually since `win_flex -o filename' does not provide the expected behavior.
-	Move-Item "lex.yy.c" ${OutputFile} -force
-}
+		# Moving manually since `win_flex -o filename' does not provide the expected behavior.
+		Move-Item "lex.yy.c" ${OutputFile} -force
+	}
 
-ForEach (${DirectoryElement} in Get-ChildItem -Path "${Library}\*.y")
-{
-	$OutputFile = ${DirectoryElement} -Replace ".y$",".c"
+	ForEach (${DirectoryElement} in Get-ChildItem -Path "${Library}\*.y")
+	{
+		$OutputFile = ${DirectoryElement} -Replace ".y$",".c"
 
-	Write-Host "Running: ${WinBison} -d -v -l -p ${NamePrefix} -o ${OutputFile} ${DirectoryElement}"
+		Write-Host "Running: ${WinBison} -d -v -l -p ${NamePrefix} -o ${OutputFile} ${DirectoryElement}"
 
-	# PowerShell will raise NativeCommandError if win_bison writes to stdout or stderr
-	# therefore 2>&1 is added and the output is stored in a variable.
-	$Output = Invoke-Expression -Command "& '${WinBison}' -d -v -l -p ${NamePrefix} -o ${OutputFile} ${DirectoryElement} 2>&1"
-	Write-Host ${Output}
+		# PowerShell will raise NativeCommandError if win_bison writes to stdout or stderr
+		# therefore 2>&1 is added and the output is stored in a variable.
+		$Output = Invoke-Expression -Command "& '${WinBison}' -d -v -l -p ${NamePrefix} -o ${OutputFile} ${DirectoryElement} 2>&1"
+		Write-Host ${Output}
+	}
 }
 

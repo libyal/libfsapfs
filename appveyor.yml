@@ -229,7 +229,7 @@ environment:
   - TARGET: cygwin64-gcc-static-executables
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-static-executables"
+    CONFIGURE_OPTIONS: "--enable-static-executables --with-libfuse=no"
   - TARGET: mingw-w64-gcc
     BUILD_ENVIRONMENT: mingw-w64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -241,10 +241,18 @@ environment:
     CFLAGS: "--coverage -O0"
     CPPFLAGS: "-DOPTIMIZATION_DISABLED"
     LDFLAGS: "--coverage"
+  - TARGET: mingw-w64-gcc-python
+    BUILD_ENVIRONMENT: mingw-w64
+    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+    CONFIGURE_OPTIONS: "--enable-python"
   - TARGET: mingw-w64-gcc-static-executables
     BUILD_ENVIRONMENT: mingw-w64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
     CONFIGURE_OPTIONS: "--enable-static-executables"
+
+matrix:
+  allow_failures:
+  - TARGET: mingw-w64-gcc-python
 
 install:
 - cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
@@ -300,13 +308,13 @@ install:
 - cmd: if [%BUILD_ENVIRONMENT%]==[python-tox] (
     "%PYTHON%" -m pip install -U tox twine )
 - sh: if test `uname -s` = "Darwin" && test ${BUILD_ENVIRONMENT} = "python-tox"; then brew install -q python@${PYTHON_VERSION} tox twine-pypi || true; fi
-- sh: if test `uname -s` = "Linux" && test ${BUILD_ENVIRONMENT} = "python-tox"; then sudo apt-get update && sudo apt-get -y install autoconf automake autopoint build-essential git libtool patchelf pkg-config python3 python3-dev python3-distutils python3-pip python3-setuptools tox twine; fi
+- sh: if test `uname -s` = "Linux" && test ${BUILD_ENVIRONMENT} = "python-tox"; then sudo apt-get update && sudo apt-get -y install autoconf automake autopoint build-essential flex git libtool patchelf pkg-config python3 python3-dev python3-distutils python3-pip python3-setuptools tox twine; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "cygwin64") {
     (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P gettext-devel -P wget -P zlib-devel -P libssl-devel -P python3-devel )
+    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P cygfuse -P gettext-devel -P libssl-devel -P python3-devel -P wget -P zlib-devel )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\pacman -S --noconfirm --needed autoconf automake gettext-devel libtool make mingw-w64-x86_64-gcc msys/zlib-devel )
+    C:\msys64\usr\bin\pacman -S --noconfirm --needed autoconf automake gettext-devel libtool make mingw-w64-x86_64-gcc msys/zlib-devel mingw-w64-x86_64-python3 )
 - ps: If ( ( "cygwin64-gcc-no-optimization", "mingw-w64-gcc-no-optimization" ).Contains( $env:TARGET ) ) {
     $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile ..\codecov.exe }
 

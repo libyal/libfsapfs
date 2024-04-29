@@ -195,6 +195,7 @@ stamp-h[1-9]
 /tests/fsapfs_test_volume_key_bag
 /tests/fsapfs_test_volume_superblock
 /tests/input
+/tests/notify_stream.log
 /tests/tmp*
 
 # Local library dependencies specific files
