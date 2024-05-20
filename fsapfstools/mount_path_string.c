@@ -583,7 +583,6 @@ int mount_path_string_copy_to_file_entry_path(
 			 * On other platforms replace:
 			 *   \\ by \
 			 *   \x2f by /
-			 *   / by \
 			 */
 			if( character == ESCAPE_CHARACTER )
 			{

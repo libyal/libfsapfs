@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from an Apple File System (APFS)
+ * Shows information obtained from an Apple File System (APFS).
  *
  * Copyright (C) 2018-2024, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -168,7 +168,7 @@ int main( int argc, char * const argv[] )
 	 1 );
 
 	if( libclocale_initialize(
-             "fsapfstools",
+	     "fsapfstools",
 	     &error ) != 1 )
 	{
 		fprintf(
@@ -178,8 +178,8 @@ int main( int argc, char * const argv[] )
 		goto on_error;
 	}
         if( fsapfstools_output_initialize(
-             _IONBF,
-             &error ) != 1 )
+	     _IONBF,
+	     &error ) != 1 )
 	{
 		fprintf(
 		 stderr,

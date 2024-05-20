@@ -25,17 +25,27 @@
 #include <common.h>
 #include <types.h>
 
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
+
+#if !defined( FUSE_USE_VERSION ) && !defined( CYGFUSE )
+
+/* Ensure FUSE_USE_VERSION is defined before including fuse.h
+ */
+#if defined( HAVE_LIBFUSE3 )
+#define FUSE_USE_VERSION	30
+#else
 #define FUSE_USE_VERSION	26
+#endif
 
-#if defined( HAVE_LIBFUSE )
+#endif /* !defined( FUSE_USE_VERSION ) && !defined( CYGFUSE ) */
+
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 )
 #include <fuse.h>
-
 #elif defined( HAVE_LIBOSXFUSE )
 #include <osxfuse/fuse.h>
 #endif
 
-#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE ) */
 
 #include "fsapfstools_libcerror.h"
 #include "fsapfstools_libfsapfs.h"
@@ -46,7 +56,7 @@
 extern "C" {
 #endif
 
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 
 int mount_fuse_set_stat_info(
      struct stat *stat_info,
@@ -95,20 +105,37 @@ int mount_fuse_opendir(
      const char *path,
      struct fuse_file_info *file_info );
 
+#if defined( HAVE_LIBFUSE3 )
+int mount_fuse_readdir(
+     const char *path,
+     void *buffer,
+     fuse_fill_dir_t filler,
+     off_t offset,
+     struct fuse_file_info *file_info,
+     enum fuse_readdir_flags flags );
+#else
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
      off_t offset,
      struct fuse_file_info *file_info );
+#endif
 
 int mount_fuse_releasedir(
      const char *path,
      struct fuse_file_info *file_info );
 
+#if defined( HAVE_LIBFUSE3 )
+int mount_fuse_getattr(
+     const char *path,
+     struct stat *stat_info,
+     struct fuse_file_info *file_info );
+#else
 int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info );
+#endif
 
 int mount_fuse_readlink(
      const char *path,
@@ -118,7 +145,7 @@ int mount_fuse_readlink(
 void mount_fuse_destroy(
       void *private_data );
 
-#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE ) */
+#endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE ) */
 
 #if defined( __cplusplus )
 }
