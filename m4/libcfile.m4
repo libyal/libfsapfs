@@ -1,6 +1,6 @@
 dnl Checks for libcfile required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240514
 
 dnl Function to detect if libcfile is available
 dnl ac_libcfile_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBCFILE_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libcfile" != x && test "x$ac_cv_with_libcfile" != xauto-detect && test "x$ac_cv_with_libcfile" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libcfile"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libcfile}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcfile}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libcfile],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libcfile])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -67,151 +59,47 @@ AC_DEFUN([AX_LIBCFILE_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libcfile_h" = xno],
         [ac_cv_libcfile=no],
-        [dnl Check for the individual functions
-        ac_cv_libcfile=yes
+        [ac_cv_libcfile=yes
 
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_get_version,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-
-        dnl File functions
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_initialize,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_free,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_open,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_open_with_error_code,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_close,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_read_buffer,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_read_buffer_with_error_code,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_write_buffer,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_write_buffer_with_error_code,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_seek_offset,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_resize,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_is_open,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_get_offset,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_get_size,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_is_device,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_io_control_read,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_io_control_read_with_error_code,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libcfile],
+          [cfile],
+          [[libcfile_get_version],
+           [libcfile_file_initialize],
+           [libcfile_file_free],
+           [libcfile_file_open],
+           [libcfile_file_open_with_error_code],
+           [libcfile_file_close],
+           [libcfile_file_read_buffer],
+           [libcfile_file_read_buffer_with_error_code],
+           [libcfile_file_write_buffer],
+           [libcfile_file_write_buffer_with_error_code],
+           [libcfile_file_seek_offset],
+           [libcfile_file_resize],
+           [libcfile_file_is_open],
+           [libcfile_file_get_offset],
+           [libcfile_file_get_size],
+           [libcfile_file_is_device],
+           [libcfile_file_io_control_read],
+           [libcfile_file_io_control_read_with_error_code],
+           [libcfile_file_exists],
+           [libcfile_file_remove]])
 
         AS_IF(
           [test "x$ac_cv_enable_wide_character_type" != xno],
-          [AC_CHECK_LIB(
-            cfile,
-            libcfile_file_open_wide,
-            [ac_cv_libcfile_dummy=yes],
-            [ac_cv_libcfile=no])
-          AC_CHECK_LIB(
-            cfile,
-            libcfile_file_open_wide_with_error_code,
-            [ac_cv_libcfile_dummy=yes],
-            [ac_cv_libcfile=no])
-          ])
-
-        dnl Support functions
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_exists,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-        AC_CHECK_LIB(
-          cfile,
-          libcfile_file_remove,
-          [ac_cv_libcfile_dummy=yes],
-          [ac_cv_libcfile=no])
-
-        AS_IF(
-          [test "x$ac_cv_enable_wide_character_type" != xno],
-          [AC_CHECK_LIB(
-            cfile,
-            libcfile_file_exists_wide,
-            [ac_cv_libcfile_dummy=yes],
-            [ac_cv_libcfile=no])
-          AC_CHECK_LIB(
-            cfile,
-            libcfile_file_remove_wide,
-            [ac_cv_libcfile_dummy=yes],
-            [ac_cv_libcfile=no])
+          [AX_CHECK_LIB_FUNCTIONS(
+            [libcfile],
+            [cfile],
+            [[libcfile_file_open_wide],
+             [libcfile_file_open_wide_with_error_code],
+             [libcfile_file_exists_wide],
+             [libcfile_file_remove_wide]])
           ])
 
         ac_cv_libcfile_LIBADD="-lcfile"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libcfile" != xyes && test "x$ac_cv_with_libcfile" != x && test "x$ac_cv_with_libcfile" != xauto-detect && test "x$ac_cv_with_libcfile" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libcfile in directory: $ac_cv_with_libcfile],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libcfile])
     ])
 
   AS_IF(

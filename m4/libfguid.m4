@@ -1,6 +1,6 @@
 dnl Checks for libfguid required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240519
 
 dnl Function to detect if libfguid is available
 dnl ac_libfguid_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBFGUID_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libfguid" != x && test "x$ac_cv_with_libfguid" != xauto-detect && test "x$ac_cv_with_libfguid" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libfguid"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libfguid}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfguid}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libfguid],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libfguid])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -46,76 +38,27 @@ AC_DEFUN([AX_LIBFGUID_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libfguid_h" = xno],
         [ac_cv_libfguid=no],
-        [dnl Check for the individual functions
-        ac_cv_libfguid=yes
+        [ac_cv_libfguid=yes
 
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_get_version,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-
-        dnl Identifier functions
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_initialize,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_free,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_copy_from_byte_stream,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_get_string_size,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_copy_to_utf8_string,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_copy_to_utf8_string_with_index,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_copy_to_utf16_string,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_copy_to_utf16_string_with_index,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_copy_to_utf32_string,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
-        AC_CHECK_LIB(
-          fguid,
-          libfguid_identifier_copy_to_utf32_string_with_index,
-          [ac_cv_libfguid_dummy=yes],
-          [ac_cv_libfguid=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libfguid],
+          [fguid],
+          [[libfguid_get_version],
+           [libfguid_identifier_initialize],
+           [libfguid_identifier_free],
+           [libfguid_identifier_copy_from_byte_stream],
+           [libfguid_identifier_get_string_size],
+           [libfguid_identifier_copy_to_utf8_string],
+           [libfguid_identifier_copy_to_utf8_string_with_index],
+           [libfguid_identifier_copy_to_utf16_string],
+           [libfguid_identifier_copy_to_utf16_string_with_index],
+           [libfguid_identifier_copy_to_utf32_string],
+           [libfguid_identifier_copy_to_utf32_string_with_index]])
 
         ac_cv_libfguid_LIBADD="-lfguid"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libfguid" != xyes && test "x$ac_cv_with_libfguid" != x && test "x$ac_cv_with_libfguid" != xauto-detect && test "x$ac_cv_with_libfguid" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libfguid in directory: $ac_cv_with_libfguid],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libfguid])
     ])
 
   AS_IF(

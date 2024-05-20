@@ -1,6 +1,6 @@
 dnl Checks for libfmos required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240520
 
 dnl Function to detect if libfmos is available
 dnl ac_libfmos_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBFMOS_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libfmos" != x && test "x$ac_cv_with_libfmos" != xauto-detect && test "x$ac_cv_with_libfmos" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libfmos"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libfmos}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfmos}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libfmos],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libfmos])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -46,45 +38,20 @@ AC_DEFUN([AX_LIBFMOS_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libfmos_h" = xno],
         [ac_cv_libfmos=no],
-        [dnl Check for the individual functions
-        ac_cv_libfmos=yes
+        [ac_cv_libfmos=yes
 
-        AC_CHECK_LIB(
-          fmos,
-          libfmos_get_version,
-          [ac_cv_libfmos_dummy=yes],
-          [ac_cv_libfmos=no])
-
-        dnl ADC functions
-        AC_CHECK_LIB(
-          fmos,
-          libfmos_adc_decompress,
-          [ac_cv_libfmos_dummy=yes],
-          [ac_cv_libfmos=no])
-
-        dnl LZFSE functions
-        AC_CHECK_LIB(
-          fmos,
-          libfmos_lzfse_decompress,
-          [ac_cv_libfmos_dummy=yes],
-          [ac_cv_libfmos=no])
-
-        dnl LZVN functions
-        AC_CHECK_LIB(
-          fmos,
-          libfmos_lzvn_decompress,
-          [ac_cv_libfmos_dummy=yes],
-          [ac_cv_libfmos=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libfmos],
+          [fmos],
+          [[libfmos_get_version],
+           [libfmos_adc_decompress],
+           [libfmos_lzfse_decompress],
+           [libfmos_lzvn_decompress]])
 
         ac_cv_libfmos_LIBADD="-lfmos"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libfmos" != xyes && test "x$ac_cv_with_libfmos" != x && test "x$ac_cv_with_libfmos" != xauto-detect && test "x$ac_cv_with_libfmos" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libfmos in directory: $ac_cv_with_libfmos],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libfmos])
     ])
 
   AS_IF(

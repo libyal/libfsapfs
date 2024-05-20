@@ -1,6 +1,6 @@
 dnl Functions for libfdata
 dnl
-dnl Version: 20240413
+dnl Version: 20240520
 
 dnl Function to detect if libfdata is available
 dnl ac_libfdata_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBFDATA_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libfdata" != x && test "x$ac_cv_with_libfdata" != xauto-detect && test "x$ac_cv_with_libfdata" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libfdata"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libfdata}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libfdata}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libfdata],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libfdata])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -46,423 +38,117 @@ AC_DEFUN([AX_LIBFDATA_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libfdata_h" = xno],
         [ac_cv_libfdata=no],
-        [dnl Check for the individual functions
-        ac_cv_libfdata=yes
+        [ac_cv_libfdata=yes
 
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_get_version,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        dnl Area functions
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_initialize,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_free,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_clone,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_empty,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_resize,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_get_number_of_segments,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_get_segment_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_set_segment_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_prepend_segment,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_append_segment,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_get_element_data_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_get_element_value_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_set_element_value_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_area_get_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        dnl List functions
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_initialize,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_free,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_clone,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_empty,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_resize,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_reverse,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_number_of_elements,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_list_element_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_element_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_set_element_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_prepend_element,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_append_element,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_append_list,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_is_element_set,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_element_mapped_range,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_mapped_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_set_mapped_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_mapped_size_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_set_mapped_size_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_element_by_index_with_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_set_element_by_index_with_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_append_element_with_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_element_index_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_list_element_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_element_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_cache_element_value,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_element_value_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_element_value_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_set_element_value_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_set_element_value_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_get_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_get_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_set_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_get_element_value,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_set_element_value,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        dnl List element functions
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_get_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_set_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_get_element_value,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_list_element_set_element_value,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        dnl Range list functions
-        dnl TODO: add functions
-
-        dnl Stream functions
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_initialize,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_free,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_clone,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_empty,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_resize,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_reverse,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_get_number_of_segments,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_get_segment_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_set_segment_by_index,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_prepend_segment,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_append_segment,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_set_mapped_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_get_segment_mapped_range,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_get_segment_index_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_get_segment_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_read_buffer,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_read_buffer_at_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_write_buffer,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_seek_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_get_offset,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-        AC_CHECK_LIB(
-          fdata,
-          libfdata_stream_get_size,
-          [ac_cv_libfdata_dummy=yes],
-          [ac_cv_libfdata=no])
-
-        dnl Tree list functions
-        dnl TODO: add functions
-
-        dnl Vector list functions
-        dnl TODO: add functions
+        AX_CHECK_LIB_FUNCTIONS(
+          [libfdata],
+          [fdata],
+          [[libfdata_get_version],
+           [libfdata_area_initialize],
+           [libfdata_area_free],
+           [libfdata_area_clone],
+           [libfdata_area_empty],
+           [libfdata_area_resize],
+           [libfdata_area_get_number_of_segments],
+           [libfdata_area_get_segment_by_index],
+           [libfdata_area_set_segment_by_index],
+           [libfdata_area_prepend_segment],
+           [libfdata_area_append_segment],
+           [libfdata_area_get_element_data_size],
+           [libfdata_area_get_element_value_at_offset],
+           [libfdata_area_set_element_value_at_offset],
+           [libfdata_area_get_size],
+           [libfdata_list_initialize],
+           [libfdata_list_free],
+           [libfdata_list_clone],
+           [libfdata_list_empty],
+           [libfdata_list_resize],
+           [libfdata_list_reverse],
+           [libfdata_list_get_number_of_elements],
+           [libfdata_list_get_list_element_by_index],
+           [libfdata_list_get_element_by_index],
+           [libfdata_list_set_element_by_index],
+           [libfdata_list_prepend_element],
+           [libfdata_list_append_element],
+           [libfdata_list_append_list],
+           [libfdata_list_is_element_set],
+           [libfdata_list_get_element_mapped_range],
+           [libfdata_list_get_mapped_offset],
+           [libfdata_list_set_mapped_offset],
+           [libfdata_list_get_mapped_size_by_index],
+           [libfdata_list_set_mapped_size_by_index],
+           [libfdata_list_get_element_by_index_with_mapped_size],
+           [libfdata_list_set_element_by_index_with_mapped_size],
+           [libfdata_list_append_element_with_mapped_size],
+           [libfdata_list_get_element_index_at_offset],
+           [libfdata_list_get_list_element_at_offset],
+           [libfdata_list_get_element_at_offset],
+           [libfdata_list_cache_element_value],
+           [libfdata_list_get_element_value_by_index],
+           [libfdata_list_get_element_value_at_offset],
+           [libfdata_list_set_element_value_by_index],
+           [libfdata_list_set_element_value_at_offset],
+           [libfdata_list_get_size],
+           [libfdata_list_element_get_mapped_size],
+           [libfdata_list_element_set_mapped_size],
+           [libfdata_list_element_get_element_value],
+           [libfdata_list_element_set_element_value],
+           [libfdata_list_element_get_mapped_size],
+           [libfdata_list_element_set_mapped_size],
+           [libfdata_list_element_get_element_value],
+           [libfdata_list_element_set_element_value],
+           [libfdata_stream_initialize],
+           [libfdata_stream_free],
+           [libfdata_stream_clone],
+           [libfdata_stream_empty],
+           [libfdata_stream_resize],
+           [libfdata_stream_reverse],
+           [libfdata_stream_get_number_of_segments],
+           [libfdata_stream_get_segment_by_index],
+           [libfdata_stream_set_segment_by_index],
+           [libfdata_stream_prepend_segment],
+           [libfdata_stream_append_segment],
+           [libfdata_stream_set_mapped_size],
+           [libfdata_stream_get_segment_mapped_range],
+           [libfdata_stream_get_segment_index_at_offset],
+           [libfdata_stream_get_segment_at_offset],
+           [libfdata_stream_read_buffer],
+           [libfdata_stream_read_buffer_at_offset],
+           [libfdata_stream_write_buffer],
+           [libfdata_stream_seek_offset],
+           [libfdata_stream_get_offset],
+           [libfdata_stream_get_size],
+           [libfdata_range_list_initialize],
+           [libfdata_range_list_free],
+           [libfdata_range_list_clone],
+           [libfdata_range_list_empty],
+           [libfdata_range_list_get_list_element_at_offset],
+           [libfdata_range_list_get_element_at_offset],
+           [libfdata_range_list_insert_element],
+           [libfdata_range_list_get_element_value_at_offset],
+           [libfdata_range_list_set_element_value_at_offset],
+           [libfdata_vector_initialize],
+           [libfdata_vector_free],
+           [libfdata_vector_clone],
+           [libfdata_vector_empty],
+           [libfdata_vector_resize],
+           [libfdata_vector_get_number_of_segments],
+           [libfdata_vector_get_segment_by_index],
+           [libfdata_vector_set_segment_by_index],
+           [libfdata_vector_prepend_segment],
+           [libfdata_vector_append_segment],
+           [libfdata_vector_get_element_data_size],
+           [libfdata_vector_get_number_of_elements],
+           [libfdata_vector_get_element_index_at_offset],
+           [libfdata_vector_get_element_value_by_index],
+           [libfdata_vector_get_element_value_at_offset],
+           [libfdata_vector_set_element_value_by_index],
+           [libfdata_vector_get_size]])
 
         ac_cv_libfdata_LIBADD="-lfdata"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libfdata" != xyes && test "x$ac_cv_with_libfdata" != x && test "x$ac_cv_with_libfdata" != xauto-detect && test "x$ac_cv_with_libfdata" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libfdata in directory: $ac_cv_with_libfdata],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libfdata])
     ])
 
   AS_IF(

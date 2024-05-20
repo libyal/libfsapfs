@@ -1,6 +1,6 @@
 dnl Functions for pthread
 dnl
-dnl Version: 20240308
+dnl Version: 20240513
 
 dnl Function to detect if pthread is available
 AC_DEFUN([AX_PTHREAD_CHECK_LIB],
@@ -13,13 +13,7 @@ AC_DEFUN([AX_PTHREAD_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_pthread" != x && test "x$ac_cv_with_pthread" != xauto-detect && test "x$ac_cv_with_pthread" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_pthread"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_pthread}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_pthread}/lib"],
-        [AC_MSG_WARN([no such directory: $ac_cv_with_pthread])
-        ])
-      ])
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([pthread])])
     ])
 
     AS_IF(
@@ -30,116 +24,34 @@ AC_DEFUN([AX_PTHREAD_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_pthread_h" = xno],
         [ac_cv_pthread=no],
-        [dnl Check for the individual functions
-        ac_cv_pthread=pthread
+        [ac_cv_pthread=yes
 
-        dnl Thread functions
-        AC_CHECK_LIB(
-          pthread,
-          pthread_create,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_exit,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_join,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [pthread],
+          [pthread],
+          [[pthread_create],
+          [pthread_exit],
+          [pthread_join],
+          [pthread_cond_init],
+          [pthread_cond_destroy],
+          [pthread_cond_broadcast],
+          [pthread_cond_signal],
+          [pthread_cond_wait],
+          [pthread_mutex_init],
+          [pthread_mutex_destroy],
+          [pthread_mutex_lock],
+          [pthread_mutex_trylock],
+          [pthread_mutex_unlock],
+          [pthread_rwlock_init],
+          [pthread_rwlock_destroy],
+          [pthread_rwlock_rdlock],
+          [pthread_rwlock_wrlock],
+          [pthread_rwlock_unlock]])
 
-        dnl Condition functions
-        AC_CHECK_LIB(
-          pthread,
-          pthread_cond_init,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_cond_destroy,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_cond_broadcast,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_cond_signal,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_cond_wait,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-
-        dnl Mutex functions
-        AC_CHECK_LIB(
-          pthread,
-          pthread_mutex_init,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_mutex_destroy,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_mutex_lock,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_mutex_trylock,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_mutex_unlock,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-
-        dnl Read/Write lock functions
-        AC_CHECK_LIB(
-          pthread,
-          pthread_rwlock_init,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_rwlock_destroy,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_rwlock_rdlock,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_rwlock_wrlock,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-        AC_CHECK_LIB(
-          pthread,
-          pthread_rwlock_unlock,
-          [ac_pthread_dummy=yes],
-          [ac_cv_pthread=no])
-
-        ac_cv_pthread_LIBADD="-lpthread";
+        ac_cv_pthread_LIBADD="-lpthread"
       ])
 
-    AS_IF(
-      [test "x$ac_cv_with_pthread" != x && test "x$ac_cv_with_pthread" != xauto-detect && test "x$ac_cv_with_pthread" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported pthread in directory: $ac_cv_with_pthread],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([pthread])
     ])
 
   AS_IF(

@@ -1,6 +1,6 @@
 dnl Checks for libcthreads required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240513
 
 dnl Function to detect if libcthreads is available
 dnl ac_libcthreads_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBCTHREADS_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libcthreads" != x && test "x$ac_cv_with_libcthreads" != xauto-detect && test "x$ac_cv_with_libcthreads" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libcthreads"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libcthreads}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcthreads}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libcthreads],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libcthreads])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -46,215 +38,52 @@ AC_DEFUN([AX_LIBCTHREADS_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libcthreads_h" = xno],
         [ac_cv_libcthreads=no],
-        [dnl Check for the individual functions
-        ac_cv_libcthreads=yes
+        [ac_cv_libcthreads=yes
 
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_get_version,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Thread functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_create,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_join,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Thread attributes functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_attributes_initialize,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_attributes_free,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Condition functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_condition_initialize,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_condition_free,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_condition_broadcast,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_condition_signal,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_condition_wait,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Lock functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_lock_initialize,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_lock_free,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_lock_grab,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_lock_release,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Mutex functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_mutex_initialize,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_mutex_free,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_mutex_grab,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_mutex_try_grab,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_mutex_release,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Read/Write lock functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_read_write_lock_initialize,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_read_write_lock_free,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_read_write_lock_grab_for_read,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_read_write_lock_grab_for_write,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_read_write_lock_release_for_read,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_read_write_lock_release_for_write,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Queue functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_queue_initialize,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_queue_free,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_queue_type_pop,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_queue_pop,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_queue_try_push,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_queue_push,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_queue_push_sorted,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-
-        dnl Thread pool functions
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_pool_create,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_pool_push,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_pool_push_sorted,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
-        AC_CHECK_LIB(
-          cthreads,
-          libcthreads_thread_pool_join,
-          [ac_cv_libcthreads_dummy=yes],
-          [ac_cv_libcthreads=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libcthreads],
+          [cthreads],
+          [[libcthreads_get_version],
+           [libcthreads_thread_create],
+           [libcthreads_thread_join],
+           [libcthreads_thread_attributes_initialize],
+           [libcthreads_thread_attributes_free],
+           [libcthreads_condition_initialize],
+           [libcthreads_condition_free],
+           [libcthreads_condition_broadcast],
+           [libcthreads_condition_signal],
+           [libcthreads_condition_wait],
+           [libcthreads_lock_initialize],
+           [libcthreads_lock_free],
+           [libcthreads_lock_grab],
+           [libcthreads_lock_release],
+           [libcthreads_mutex_initialize],
+           [libcthreads_mutex_free],
+           [libcthreads_mutex_grab],
+           [libcthreads_mutex_try_grab],
+           [libcthreads_mutex_release],
+           [libcthreads_read_write_lock_initialize],
+           [libcthreads_read_write_lock_free],
+           [libcthreads_read_write_lock_grab_for_read],
+           [libcthreads_read_write_lock_grab_for_write],
+           [libcthreads_read_write_lock_release_for_read],
+           [libcthreads_read_write_lock_release_for_write],
+           [libcthreads_queue_initialize],
+           [libcthreads_queue_free],
+           [libcthreads_queue_type_pop],
+           [libcthreads_queue_pop],
+           [libcthreads_queue_try_push],
+           [libcthreads_queue_push],
+           [libcthreads_queue_push_sorted],
+           [libcthreads_thread_pool_create],
+           [libcthreads_thread_pool_push],
+           [libcthreads_thread_pool_push_sorted],
+           [libcthreads_thread_pool_join]])
 
         ac_cv_libcthreads_LIBADD="-lcthreads"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libcthreads" != xyes && test "x$ac_cv_with_libcthreads" != x && test "x$ac_cv_with_libcthreads" != xauto-detect && test "x$ac_cv_with_libcthreads" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libcthreads in directory: $ac_cv_with_libcthreads],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libcthreads])
     ])
 
   AS_IF(

@@ -1,6 +1,6 @@
 dnl Checks for libcpath required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240518
 
 dnl Function to detect if libcpath is available
 dnl ac_libcpath_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBCPATH_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libcpath" != x && test "x$ac_cv_with_libcpath" != xauto-detect && test "x$ac_cv_with_libcpath" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libcpath"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libcpath}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcpath}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libcpath],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libcpath])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -67,100 +59,38 @@ AC_DEFUN([AX_LIBCPATH_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libcpath_h" = xno],
         [ac_cv_libcpath=no],
-        [dnl Check for the individual functions
-        ac_cv_libcpath=yes
+        [ac_cv_libcpath=yes
 
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_get_version,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
-
-        dnl Path functions
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_path_change_directory,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_path_get_current_working_directory,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_path_get_full_path,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_path_get_sanitized_filename,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_path_get_sanitized_path,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_path_join,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
-        AC_CHECK_LIB(
-          cpath,
-          libcpath_path_make_directory,
-          [ac_cv_libcpath_dummy=yes],
-          [ac_cv_libcpath=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libcpath],
+          [cpath],
+          [[libcpath_get_version],
+           [libcpath_path_change_directory],
+           [libcpath_path_get_current_working_directory],
+           [libcpath_path_get_full_path],
+           [libcpath_path_get_sanitized_filename],
+           [libcpath_path_get_sanitized_path],
+           [libcpath_path_join],
+           [libcpath_path_make_directory]])
 
         AS_IF(
           [test "x$ac_cv_enable_wide_character_type" != xno],
-          [AC_CHECK_LIB(
-            cpath,
-            libcpath_path_change_directory_wide,
-            [ac_cv_libcpath_dummy=yes],
-            [ac_cv_libcpath=no])
-          AC_CHECK_LIB(
-            cpath,
-            libcpath_path_get_current_working_directory_wide,
-            [ac_cv_libcpath_dummy=yes],
-            [ac_cv_libcpath=no])
-          AC_CHECK_LIB(
-            cpath,
-            libcpath_path_get_full_path_wide,
-            [ac_cv_libcpath_dummy=yes],
-            [ac_cv_libcpath=no])
-          AC_CHECK_LIB(
-            cpath,
-            libcpath_path_get_sanitized_filename_wide,
-            [ac_cv_libcpath_dummy=yes],
-            [ac_cv_libcpath=no])
-          AC_CHECK_LIB(
-            cpath,
-            libcpath_path_get_sanitized_path_wide,
-            [ac_cv_libcpath_dummy=yes],
-            [ac_cv_libcpath=no])
-          AC_CHECK_LIB(
-            cpath,
-            libcpath_path_join_wide,
-            [ac_cv_libcpath_dummy=yes],
-            [ac_cv_libcpath=no])
-          AC_CHECK_LIB(
-            cpath,
-            libcpath_path_make_directory_wide,
-            [ac_cv_libcpath_dummy=yes],
-            [ac_cv_libcpath=no])
+          [AX_CHECK_LIB_FUNCTIONS(
+            [libcpath],
+            [cpath],
+            [[libcpath_path_change_directory_wide],
+             [libcpath_path_get_current_working_directory_wide],
+             [libcpath_path_get_full_path_wide],
+             [libcpath_path_get_sanitized_filename_wide],
+             [libcpath_path_get_sanitized_path_wide],
+             [libcpath_path_join_wide],
+             [libcpath_path_make_directory_wide]])
           ])
 
         ac_cv_libcpath_LIBADD="-lcpath"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libcpath" != xyes && test "x$ac_cv_with_libcpath" != x && test "x$ac_cv_with_libcpath" != xauto-detect && test "x$ac_cv_with_libcpath" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libcpath in directory: $ac_cv_with_libcpath],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libcpath])
     ])
 
   AS_IF(

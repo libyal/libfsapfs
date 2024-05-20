@@ -1,6 +1,6 @@
 dnl Checks for libcsplit required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240513
 
 dnl Function to detect if libcsplit is available
 dnl ac_libcsplit_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBCSPLIT_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libcsplit" != x && test "x$ac_cv_with_libcsplit" != xauto-detect && test "x$ac_cv_with_libcsplit" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libcsplit"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libcsplit}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcsplit}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libcsplit],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libcsplit])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -67,95 +59,37 @@ AC_DEFUN([AX_LIBCSPLIT_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libcsplit_h" = xno],
         [ac_cv_libcsplit=no],
-        [dnl Check for the individual functions
-        ac_cv_libcsplit=yes
+        [ac_cv_libcsplit=yes
 
-        AC_CHECK_LIB(
-          csplit,
-          libcsplit_get_version,
-          [ac_cv_libcsplit_dummy=yes],
-          [ac_cv_libcsplit=no])
-
-        dnl Narrow string functions
-        AC_CHECK_LIB(
-          csplit,
-          libcsplit_narrow_string_split,
-          [ac_cv_libcsplit_dummy=yes],
-          [ac_cv_libcsplit=no])
-
-        dnl Narrow split string functions
-        AC_CHECK_LIB(
-          csplit,
-          libcsplit_narrow_split_string_free,
-          [ac_cv_libcsplit_dummy=yes],
-          [ac_cv_libcsplit=no])
-        AC_CHECK_LIB(
-          csplit,
-          libcsplit_narrow_split_string_get_string,
-          [ac_cv_libcsplit_dummy=yes],
-          [ac_cv_libcsplit=no])
-        AC_CHECK_LIB(
-          csplit,
-          libcsplit_narrow_split_string_get_number_of_segments,
-          [ac_cv_libcsplit_dummy=yes],
-          [ac_cv_libcsplit=no])
-        AC_CHECK_LIB(
-          csplit,
-          libcsplit_narrow_split_string_get_segment_by_index,
-          [ac_cv_libcsplit_dummy=yes],
-          [ac_cv_libcsplit=no])
-        AC_CHECK_LIB(
-          csplit,
-          libcsplit_narrow_split_string_set_segment_by_index,
-          [ac_cv_libcsplit_dummy=yes],
-          [ac_cv_libcsplit=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libcsplit],
+          [csplit],
+          [[libcsplit_get_version],
+           [libcsplit_narrow_string_split],
+           [libcsplit_narrow_split_string_free],
+           [libcsplit_narrow_split_string_get_string],
+           [libcsplit_narrow_split_string_get_number_of_segments],
+           [libcsplit_narrow_split_string_get_segment_by_index],
+           [libcsplit_narrow_split_string_set_segment_by_index]])
 
         dnl Wide string functions
         AS_IF(
           [test "x$ac_cv_enable_wide_character_type" != xno],
-          [AC_CHECK_LIB(
-            csplit,
-            libcsplit_wide_string_split,
-            [ac_cv_libcsplit_dummy=yes],
-            [ac_cv_libcsplit=no])
-
-        dnl Wide split string functions
-          AC_CHECK_LIB(
-            csplit,
-            libcsplit_wide_split_string_free,
-            [ac_cv_libcsplit_dummy=yes],
-            [ac_cv_libcsplit=no])
-          AC_CHECK_LIB(
-            csplit,
-            libcsplit_wide_split_string_get_string,
-            [ac_cv_libcsplit_dummy=yes],
-            [ac_cv_libcsplit=no])
-          AC_CHECK_LIB(
-            csplit,
-            libcsplit_wide_split_string_get_number_of_segments,
-            [ac_cv_libcsplit_dummy=yes],
-            [ac_cv_libcsplit=no])
-          AC_CHECK_LIB(
-            csplit,
-            libcsplit_wide_split_string_get_segment_by_index,
-            [ac_cv_libcsplit_dummy=yes],
-            [ac_cv_libcsplit=no])
-          AC_CHECK_LIB(
-            csplit,
-            libcsplit_wide_split_string_set_segment_by_index,
-            [ac_cv_libcsplit_dummy=yes],
-            [ac_cv_libcsplit=no])
+          [AX_CHECK_LIB_FUNCTIONS(
+            [libcsplit],
+            [csplit],
+            [[libcsplit_wide_string_split],
+             [libcsplit_wide_split_string_free],
+             [libcsplit_wide_split_string_get_string],
+             [libcsplit_wide_split_string_get_number_of_segments],
+             [libcsplit_wide_split_string_get_segment_by_index],
+             [libcsplit_wide_split_string_set_segment_by_index]])
           ])
 
         ac_cv_libcsplit_LIBADD="-lcsplit"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libcsplit" != xyes && test "x$ac_cv_with_libcsplit" != x && test "x$ac_cv_with_libcsplit" != xauto-detect && test "x$ac_cv_with_libcsplit" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libcsplit in directory: $ac_cv_with_libcsplit],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libcsplit])
     ])
 
   AS_IF(

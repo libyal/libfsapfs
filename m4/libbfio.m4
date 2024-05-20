@@ -1,6 +1,6 @@
 dnl Checks for libbfio required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240518
 
 dnl Function to detect if libbfio is available
 dnl ac_libbfio_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBBFIO_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libbfio" != x && test "x$ac_cv_with_libbfio" != xauto-detect && test "x$ac_cv_with_libbfio" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libbfio"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libbfio}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libbfio}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libbfio],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libbfio])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -67,268 +59,69 @@ AC_DEFUN([AX_LIBBFIO_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libbfio_h" = xno],
         [ac_cv_libbfio=no],
-        [dnl Check for the individual functions
-        ac_cv_libbfio=yes
+        [ac_cv_libbfio=yes
 
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_get_version,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-
-        dnl Handle functions
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_free,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_open,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_close,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_exists,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_read_buffer,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_read_buffer_at_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_write_buffer,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_write_buffer_at_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_seek_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_is_open,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_get_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_get_size,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_set_track_offsets_read,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_get_number_of_offsets_read,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_handle_get_offset_read,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-
-        dnl File functions
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_file_initialize,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_file_get_name_size,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_file_get_name,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_file_set_name,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libbfio],
+          [bfio],
+          [[libbfio_get_version],
+           [libbfio_handle_free],
+           [libbfio_handle_open],
+           [libbfio_handle_close],
+           [libbfio_handle_exists],
+           [libbfio_handle_read_buffer],
+           [libbfio_handle_read_buffer_at_offset],
+           [libbfio_handle_write_buffer],
+           [libbfio_handle_write_buffer_at_offset],
+           [libbfio_handle_seek_offset],
+           [libbfio_handle_is_open],
+           [libbfio_handle_get_offset],
+           [libbfio_handle_get_size],
+           [libbfio_handle_set_track_offsets_read],
+           [libbfio_handle_get_number_of_offsets_read],
+           [libbfio_handle_get_offset_read],
+           [libbfio_file_initialize],
+           [libbfio_file_get_name_size],
+           [libbfio_file_get_name],
+           [libbfio_file_set_name],
+           [libbfio_pool_initialize],
+           [libbfio_pool_free],
+           [libbfio_pool_clone],
+           [libbfio_pool_get_number_of_handles],
+           [libbfio_pool_get_handle],
+           [libbfio_pool_set_handle],
+           [libbfio_pool_append_handle],
+           [libbfio_pool_remove_handle],
+           [libbfio_pool_get_maximum_number_of_open_handles],
+           [libbfio_pool_set_maximum_number_of_open_handles],
+           [libbfio_pool_open],
+           [libbfio_pool_reopen],
+           [libbfio_pool_close],
+           [libbfio_pool_close_all],
+           [libbfio_pool_read_buffer],
+           [libbfio_pool_read_buffer_at_offset],
+           [libbfio_pool_write_buffer],
+           [libbfio_pool_write_buffer_at_offset],
+           [libbfio_pool_seek_offset],
+           [libbfio_pool_get_offset],
+           [libbfio_pool_get_size],
+           [libbfio_file_pool_open]])
 
         AS_IF(
           [test "x$ac_cv_enable_wide_character_type" != xno],
-          [AC_CHECK_LIB(
-            bfio,
-            libbfio_file_get_name_size_wide,
-            [ac_cv_libbfio_dummy=yes],
-            [ac_cv_libbfio=no])
-          AC_CHECK_LIB(
-            bfio,
-            libbfio_file_get_name_wide,
-            [ac_cv_libbfio_dummy=yes],
-            [ac_cv_libbfio=no])
-          AC_CHECK_LIB(
-            bfio,
-            libbfio_file_set_name_wide,
-            [ac_cv_libbfio_dummy=yes],
-            [ac_cv_libbfio=no])
-          ])
-
-        dnl Pool functions
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_initialize,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_free,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_clone,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_get_number_of_handles,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_get_handle,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_set_handle,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_append_handle,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_remove_handle,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_get_maximum_number_of_open_handles,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_set_maximum_number_of_open_handles,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_open,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_reopen,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_close,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_close_all,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_read_buffer,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_read_buffer_at_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_write_buffer,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_write_buffer_at_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_seek_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_get_offset,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_pool_get_size,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-
-        dnl File pool functions
-        AC_CHECK_LIB(
-          bfio,
-          libbfio_file_pool_open,
-          [ac_cv_libbfio_dummy=yes],
-          [ac_cv_libbfio=no])
-
-        AS_IF(
-          [test "x$ac_cv_enable_wide_character_type" != xno],
-          [AC_CHECK_LIB(
-            bfio,
-            libbfio_file_pool_open_wide,
-            [ac_cv_libbfio_dummy=yes],
-            [ac_cv_libbfio=no])
+          [AX_CHECK_LIB_FUNCTIONS(
+            [libbfio],
+            [bfio],
+            [[libbfio_file_get_name_size_wide],
+             [libbfio_file_get_name_wide],
+             [libbfio_file_set_name_wide],
+             [libbfio_file_pool_open_wide]])
           ])
 
         ac_cv_libbfio_LIBADD="-lbfio"])
       ])
 
-    AS_IF(
-      [test "x$ac_cv_libbfio" != xyes && test "x$ac_cv_with_libbfio" != x && test "x$ac_cv_with_libbfio" != xauto-detect && test "x$ac_cv_with_libbfio" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libbfio in directory: $ac_cv_with_libbfio],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libbfio])
     ])
 
   AS_IF(

@@ -1,6 +1,6 @@
 dnl Checks for libcnotify required headers and functions
 dnl
-dnl Version: 20240413
+dnl Version: 20240513
 
 dnl Function to detect if libcnotify is available
 dnl ac_libcnotify_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -14,15 +14,7 @@ AC_DEFUN([AX_LIBCNOTIFY_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_libcnotify" != x && test "x$ac_cv_with_libcnotify" != xauto-detect && test "x$ac_cv_with_libcnotify" != xyes],
-      [AS_IF(
-        [test -d "$ac_cv_with_libcnotify"],
-        [CFLAGS="$CFLAGS -I${ac_cv_with_libcnotify}/include"
-        LDFLAGS="$LDFLAGS -L${ac_cv_with_libcnotify}/lib"],
-        [AC_MSG_FAILURE(
-          [no such directory: $ac_cv_with_libcnotify],
-          [1])
-        ])
-      ],
+      [AX_CHECK_LIB_DIRECTORY_EXISTS([libcnotify])],
       [dnl Check for a pkg-config file
       AS_IF(
         [test "x$cross_compiling" != "xyes" && test "x$PKGCONFIG" != "x"],
@@ -46,65 +38,24 @@ AC_DEFUN([AX_LIBCNOTIFY_CHECK_LIB],
       AS_IF(
         [test "x$ac_cv_header_libcnotify_h" = xno],
         [ac_cv_libcnotify=no],
-        [dnl Check for the individual functions
-        ac_cv_libcnotify=yes
+        [ac_cv_libcnotify=yes
 
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_get_version,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
-
-        dnl Print functions
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_printf,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_print_data,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_print_error_backtrace,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
-
-        dnl Stream functions
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_stream_set,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_stream_open,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_stream_close,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
-
-        dnl Verbose functions
-        AC_CHECK_LIB(
-          cnotify,
-          libcnotify_verbose_set,
-          [ac_cv_libcnotify_dummy=yes],
-          [ac_cv_libcnotify=no])
+        AX_CHECK_LIB_FUNCTIONS(
+          [libcnotify],
+          [cnotify],
+          [[libcnotify_get_version],
+           [libcnotify_printf],
+           [libcnotify_print_data],
+           [libcnotify_print_error_backtrace],
+           [libcnotify_stream_set],
+           [libcnotify_stream_open],
+           [libcnotify_stream_close],
+           [libcnotify_verbose_set]])
 
         ac_cv_libcnotify_LIBADD="-lcnotify"])
       ])
 
-    AS_IF(
-      [test "x$ac_with_libcnotify" != xyes && test "x$ac_cv_with_libcnotify" != x && test "x$ac_cv_with_libcnotify" != xauto-detect && test "x$ac_cv_with_libcnotify" != xyes],
-      [AC_MSG_FAILURE(
-        [unable to find supported libcnotify in directory: $ac_cv_with_libcnotify],
-        [1])
-      ])
+    AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([libcnotify])
     ])
 
   AS_IF(

@@ -1,11 +1,10 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20240308
+dnl Version: 20240513
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
-[
-  AC_ARG_ENABLE(
+  [AC_ARG_ENABLE(
     [$1],
     [AS_HELP_STRING(
       [--disable-$1],
@@ -17,12 +16,11 @@ AC_DEFUN([AX_COMMON_ARG_DISABLE],
       [whether to disable $3],
       [ac_cv_enable_$2],
       [ac_cv_enable_$2="yes"])dnl
-])
+  ])
 
 dnl Function to test if a certain feature was enabled
 AC_DEFUN([AX_COMMON_ARG_ENABLE],
-[
-  AC_ARG_ENABLE(
+  [AC_ARG_ENABLE(
     [$1],
     [AS_HELP_STRING(
       [--enable-$1],
@@ -34,12 +32,11 @@ AC_DEFUN([AX_COMMON_ARG_ENABLE],
       [whether to enable $3],
       [ac_cv_enable_$2],
       [ac_cv_enable_$2=$4])dnl
-])
+  ])
 
 dnl Function to test if the location of a certain feature was provided
 AC_DEFUN([AX_COMMON_ARG_WITH],
-[
-  AC_ARG_WITH(
+  [AC_ARG_WITH(
     [$1],
     [AS_HELP_STRING(
       [--with-$1[[=$5]]],
@@ -51,21 +48,19 @@ AC_DEFUN([AX_COMMON_ARG_WITH],
       [whether to use $3],
       [ac_cv_with_$2],
       [ac_cv_with_$2=$4])dnl
-])
+  ])
 
-dnl Function to detect whether shared libary support should be disabled
+dnl Function to detect whether shared library support should be disabled
 AC_DEFUN([AX_COMMON_CHECK_DISABLE_SHARED_LIBS],
-[
-  AX_COMMON_ARG_DISABLE(
+  [AX_COMMON_ARG_DISABLE(
     [shared-libs],
     [shared_libs],
     [disable shared library support])
-])
+  ])
 
 dnl Function to detect whether debug output should be enabled
 AC_DEFUN([AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT],
-[
-  AX_COMMON_ARG_ENABLE(
+  [AX_COMMON_ARG_ENABLE(
     [debug-output],
     [debug_output],
     [enable debug output],
@@ -79,12 +74,11 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_DEBUG_OUTPUT],
       [Define to 1 if debug output should be used.])
 
     ac_cv_enable_debug_output=yes])
-])
+  ])
 
 dnl Function to detect whether static executables support should be enabled
 AC_DEFUN([AX_COMMON_CHECK_ENABLE_STATIC_EXECUTABLES],
-[
-  AX_COMMON_ARG_ENABLE(
+  [AX_COMMON_ARG_ENABLE(
     [static-executables],
     [static_executables],
     [build static executables (binaries)],
@@ -99,12 +93,11 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_STATIC_EXECUTABLES],
 
     ac_cv_enable_static_executables=yes
     enable_shared=no])
-])
+  ])
 
 dnl Function to detect whether verbose output should be enabled
 AC_DEFUN([AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT],
-[
-  AX_COMMON_ARG_ENABLE(
+  [AX_COMMON_ARG_ENABLE(
     [verbose-output],
     [verbose_output],
     [enable verbose output],
@@ -118,22 +111,20 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT],
       [Define to 1 if verbose output should be used.])
 
     ac_cv_enable_verbose_output=yes])
-])
+  ])
 
 dnl Function to detect whether static executables support should be enabled
 AC_DEFUN([AX_COMMON_CHECK_ENABLE_WIDE_CHARACTER_TYPE],
-[
-  AX_COMMON_ARG_ENABLE(
+  [AX_COMMON_ARG_ENABLE(
     [wide-character-type],
     [wide_character_type],
     [enable wide character type support],
     [no])
-])
+  ])
 
 dnl Function to detect whether WINAPI support should be enabled
 AC_DEFUN([AX_COMMON_CHECK_ENABLE_WINAPI],
-[
-  AX_COMMON_ARG_ENABLE(
+  [AX_COMMON_ARG_ENABLE(
     [winapi],
     [winapi],
     [enable WINAPI support for cross-compilation],
@@ -156,13 +147,12 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_WINAPI],
         [detected MSYS enabling WINAPI support for cross-compilation])
         ac_cv_enable_winapi=yes],
       [*],[ac_cv_enable_winapi=no])
+    ])
   ])
-])
 
 dnl Function to detect whether printf conversion specifier "%jd" is available
 AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_JD],
-[
-  AC_MSG_CHECKING(
+  [AC_MSG_CHECKING(
     [whether printf supports the conversion specifier "%jd"])
 
   SAVE_CFLAGS="$CFLAGS"
@@ -187,7 +177,7 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_JD],
         [[printf( "%jd", (off_t) 10 ); ]] )],
       [ac_cv_cv_have_printf_jd=yes],
       [ac_cv_cv_have_printf_jd=no])
-  ])
+    ])
 
   dnl Third try to see if the program runs correctly
   AS_IF(
@@ -202,7 +192,7 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
       [ac_cv_cv_have_printf_jd=yes],
       [ac_cv_cv_have_printf_jd=no],
       [ac_cv_cv_have_printf_jd=undetermined])
-  ])
+    ])
 
   AC_LANG_POP(C)
   CFLAGS="$SAVE_CFLAGS"
@@ -217,13 +207,12 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
       [Define to 1 whether printf supports the conversion specifier "%jd".]) ],
     [AC_MSG_RESULT(
       [$ac_cv_cv_have_printf_jd])
+    ])
   ])
-])
 
 dnl Function to detect whether printf conversion specifier "%zd" is available
 AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_ZD],
-[
-  AC_MSG_CHECKING(
+  [AC_MSG_CHECKING(
     [whether printf supports the conversion specifier "%zd"])
 
   SAVE_CFLAGS="$CFLAGS"
@@ -248,7 +237,7 @@ AC_DEFUN([AX_COMMON_CHECK_FUNC_PRINTF_ZD],
         [[printf( "%zd", (size_t) 10 ); ]] )],
       [ac_cv_cv_have_printf_zd=yes],
       [ac_cv_cv_have_printf_zd=no])
-  ])
+    ])
 
   dnl Third try to see if the program runs correctly
   AS_IF(
@@ -263,7 +252,7 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
       [ac_cv_cv_have_printf_zd=yes],
       [ac_cv_cv_have_printf_zd=no],
       [ac_cv_cv_have_printf_zd=undetermined])
-  ])
+    ])
 
   AC_LANG_POP(C)
   CFLAGS="$SAVE_CFLAGS"
@@ -278,13 +267,12 @@ if( ( string[ 0 ] != '1' ) || ( string[ 1 ] != '0' ) ) return( 1 ); ]] )],
       [Define to 1 whether printf supports the conversion specifier "%zd".]) ],
     [AC_MSG_RESULT(
       [$ac_cv_cv_have_printf_zd])
+    ])
   ])
-])
 
 dnl Function to detect if common dependencies are available
 AC_DEFUN([AX_COMMON_CHECK_LOCAL],
-[
-  dnl Headers included in common/common.h
+  [dnl Headers included in common/common.h
   AS_IF(
     [test "x$ac_cv_enable_winapi" = xyes],
     [AC_CHECK_HEADERS([windows.h])
@@ -294,13 +282,13 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
       [AC_MSG_FAILURE(
         [Missing header: windows.h header is required to compile with winapi support],
         [1])
+      ])
     ])
-  ])
 
   AS_IF(
     [test "x$ac_cv_enable_winapi" = xno],
     [AC_CHECK_HEADERS([libintl.h])
-  ])
+    ])
 
   dnl Headers included in common/types.h
   AC_CHECK_HEADERS([limits.h])
@@ -319,56 +307,56 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
     [AC_MSG_FAILURE(
       [Missing function: fclose],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_feof" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: feof],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_fgets" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: fgets],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_fopen" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: fopen],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_fread" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: fread],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_fseeko" != xyes && test "x$ac_cv_func_fseeko64" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: fseeko and fseeko64],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_fwrite" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: fwrite],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_vfprintf" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: vfprintf],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_enable_wide_character_type" != xno],
@@ -379,8 +367,8 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
       [AC_MSG_FAILURE(
         [Missing function: fgetws],
         [1])
+      ])
     ])
-  ])
 
   dnl Memory functions used in common/memory.h
   AC_CHECK_FUNCS([free malloc memcmp memcpy memset realloc])
@@ -390,42 +378,42 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
     [AC_MSG_FAILURE(
       [Missing function: free],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_malloc" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: malloc],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_memcmp" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: memcmp],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_memcpy" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: memcpy],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_memset" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: memset],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_realloc" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: realloc],
       [1])
-  ])
+    ])
 
   dnl Narrow character string functions used in common/narrow_string.h
   AC_CHECK_FUNCS([memchr memrchr snprintf sscanf strcasecmp strchr strlen strncasecmp strncmp strncpy strnicmp strrchr strstr vsnprintf])
@@ -435,21 +423,21 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
     [AC_MSG_FAILURE(
       [Missing functions: memchr and strchr],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_memcmp" != xyes && test "x$ac_cv_func_strncmp" != xyes],
     [AC_MSG_FAILURE(
       [Missing functions: memcmp and strncmp],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_memcpy" != xyes && test "x$ac_cv_func_strncpy" != xyes],
     [AC_MSG_FAILURE(
       [Missing functions: memcpy and strncpy],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_memrchr" = xyes],
@@ -458,56 +446,56 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
     AS_IF(
       [test "x$ac_cv_decl_memrchr" != xyes],
       [ac_cv_func_memrchr=no])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_memrchr" != xyes && test "x$ac_cv_func_strrchr" != xyes],
     [AC_MSG_FAILURE(
       [Missing functions: strrchr and memrchr],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_snprintf" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: snprintf],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_sscanf" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: sscanf],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_strlen" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: strlen],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_strcasecmp" != xyes && test "x$ac_cv_func_strncasecmp" != xyes && test "x$ac_cv_func_strnicmp" != xyes],
     [AC_MSG_FAILURE(
       [Missing functions: strncasecmp, strcasecmp and strnicmp],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_strstr" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: strstr],
       [1])
-  ])
+    ])
 
   AS_IF(
     [test "x$ac_cv_func_vsnprintf" != xyes],
     [AC_MSG_FAILURE(
       [Missing function: vsnprintf],
       [1])
-  ])
+    ])
 
   dnl Wide character string functions used in common/wide_string.h
   AS_IF(
@@ -519,60 +507,128 @@ AC_DEFUN([AX_COMMON_CHECK_LOCAL],
       [AC_MSG_FAILURE(
         [Missing function: swprintf],
         [1])
-    ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_func_wmemchr" != xyes && test "x$ac_cv_func_wcschr" != xyes],
       [AC_MSG_FAILURE(
         [Missing functions: wmemchr and wcschr],
         [1])
-    ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_func_wmemcmp" != xyes && test "x$ac_cv_func_wcsncmp" != xyes],
       [AC_MSG_FAILURE(
         [Missing functions: wmemcmp and wcsncmp],
         [1])
-    ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_func_wmemcpy" != xyes && test "x$ac_cv_func_wcsncpy" != xyes],
       [AC_MSG_FAILURE(
         [Missing functions: wmemcpy and wcsncpy],
         [1])
-    ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_func_wmemrchr" != xyes && test "x$ac_cv_func_wcsrchr" != xyes],
       [AC_MSG_FAILURE(
         [Missing functions: wmemrchr and wcsrchr],
         [1])
-    ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_func_wcslen" != xyes],
       [AC_MSG_FAILURE(
         [Missing function: wcslen],
         [1])
-    ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_func_wcsncasecmp" != xyes && test "x$ac_cv_func_wcscasecmp" != xyes && test "x$ac_cv_func_wcsnicmp" != xyes && test "x$ac_cv_func_towlower" != xyes],
       [AC_MSG_FAILURE(
         [Missing functions: wcsncasecmp, wcscasecmp, wcsnicmp and towlower],
         [1])
-    ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_func_wcsstr" != xyes],
       [AC_MSG_FAILURE(
         [Missing function: wcsstr],
         [1])
+      ])
     ])
-  ])
 
   dnl Check for printf conversion specifier support
   AX_COMMON_CHECK_FUNC_PRINTF_JD
   AX_COMMON_CHECK_FUNC_PRINTF_ZD
-])
+  ])
+
+dnl Function to test if a library with a specific definition is available
+AC_DEFUN([AX_CHECK_LIB_DEFINITION],
+  [AC_CACHE_CHECK(
+    [if `$2' is defined],
+    [ac_cv_$1_definition_$2],
+    [AC_LANG_PUSH(C)
+    AC_LINK_IFELSE(
+      [AC_LANG_PROGRAM(
+        [[#include <$1.h>]],
+        [[int test = $2;
+
+return( 0 ); ]]
+      )],
+      [ac_cv_$1_definition_$2=yes],
+      [ac_cv_$1_definition_$2=no])
+    AC_LANG_POP(C)])
+
+  AS_IF(
+    [test "x$ac_cv_$1_definition_$2" != xyes],
+    [ac_cv_$1=no])
+  ])
+
+dnl Function to test if a library with specific definitions is available
+AC_DEFUN([AX_CHECK_LIB_DEFINITIONS],
+  [m4_foreach(
+    [definition],
+    [$2],
+    [AX_CHECK_LIB_DEFINITION(
+      [$1],
+      [definition])
+    ])
+  ])
+
+dnl Function to test if a library with specific functions is available
+AC_DEFUN([AX_CHECK_LIB_FUNCTIONS],
+  [m4_foreach(
+    [function],
+    [$3],
+    [AC_CHECK_LIB(
+      [$2],
+      [function],
+      [ac_cv_$1_dummy=yes],
+      [ac_cv_$1=no])
+    ])
+  ])
+
+dnl Function to check if an user specified library directory exists
+AC_DEFUN([AX_CHECK_LIB_DIRECTORY_EXISTS],
+  [AS_IF(
+    [test -d "$ac_cv_with_$1"],
+    [CFLAGS="$CFLAGS -I${ac_cv_with_$1}/include"
+    LDFLAGS="$LDFLAGS -L${ac_cv_with_$1}/lib"],
+    [AC_MSG_FAILURE(
+      [no such directory: $ac_cv_with_$1],
+      [1])
+    ])
+  ])
+
+dnl Function to warn if no supported library was found in an user specified directory
+AC_DEFUN([AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE],
+  [AS_IF(
+    [test "x$ac_cv_$1" != xyes && test "x$ac_cv_with_$1" != x && test "x$ac_cv_with_$1" != xauto-detect && test "x$ac_cv_with_$1" != xyes],
+    [AC_MSG_FAILURE(
+      [unable to find supported $1 in directory: $ac_cv_with_$1],
+      [1])
+    ])
+  ])
 
