@@ -73,7 +73,7 @@ void usage_fprint(
 	fprintf( stream, "\tcontainer:   an Apple File System (APFS) container\n\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
 
-	fprintf( stream, "\t-f:          mounts a specific file system or \"all\"\n" );
+	fprintf( stream, "\t-f:          specify a specific file system or \"all\"\n" );
 	fprintf( stream, "\t-h:          shows this help\n" );
 	fprintf( stream, "\t-o:          specify the container offset in bytes\n" );
 	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
@@ -561,7 +561,7 @@ int main( int argc, char * const argv[] )
 #if DOKAN_MINIMUM_COMPATIBLE_VERSION >= 200
 	fsapfsmount_dokan_options.SingleThread = TRUE;
 #else
-	fsapfsmount_dokan_options.ThreadCount = 0;
+	fsapfsmount_dokan_options.ThreadCount  = 0;
 #endif
 	if( verbose != 0 )
 	{

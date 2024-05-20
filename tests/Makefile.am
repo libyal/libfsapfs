@@ -940,6 +940,7 @@ fsapfs_test_tools_info_handle_LDADD = \
 fsapfs_test_tools_mount_path_string_SOURCES = \
 	../fsapfstools/mount_path_string.c ../fsapfstools/mount_path_string.h \
 	fsapfs_test_libcerror.h \
+	fsapfs_test_libcpath.h \
 	fsapfs_test_macros.h \
 	fsapfs_test_tools_mount_path_string.c \
 	fsapfs_test_unused.h

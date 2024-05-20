@@ -1,5 +1,5 @@
 /*
- * Shows information obtained from an Apple File System (APFS).
+ * Shows information obtained from an Apple File System (APFS) container.
  *
  * Copyright (C) 2018-2024, Joachim Metz <joachim.metz@gmail.com>
  *
@@ -24,6 +24,8 @@
 #include <memory.h>
 #include <system_string.h>
 #include <types.h>
+
+#include <stdio.h>
 
 #if defined( HAVE_IO_H ) || defined( WINAPI )
 #include <io.h>
@@ -59,7 +61,7 @@ enum FSAPFSINFO_MODES
 info_handle_t *fsapfsinfo_info_handle = NULL;
 int fsapfsinfo_abort                  = 0;
 
-/* Prints the executable usage information
+/* Prints usage information
  */
 void usage_fprint(
       FILE *stream )
@@ -177,7 +179,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
-        if( fsapfstools_output_initialize(
+	if( fsapfstools_output_initialize(
 	     _IONBF,
 	     &error ) != 1 )
 	{

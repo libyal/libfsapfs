@@ -198,6 +198,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\tests\fsapfs_test_libcpath.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\tests\fsapfs_test_macros.h"
 				>
 			</File>
