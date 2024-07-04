@@ -1,0 +1,35 @@
+# Build OSSFuzz fuzz targets from source.
+name: build_ossfuzz
+on:
+  push:
+    branches: [main]
+permissions: read-all
+jobs:
+  build_ossfuzz:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        include:
+        - architecture: 'x64'
+          compiler: 'gcc'
+          configure_options: ''
+    steps:
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install git
+    - uses: actions/checkout@v4
+      with:
+        repository: google/oss-fuzz
+        path: oss-fuzz
+    - name: Build OSSFuzz fuzz targets
+      working-directory: oss-fuzz
+      run: |
+        mkdir -p projects/libfsapfs
+        cp projects/libyal/build.sh projects/libfsapfs/
+        cp projects/libyal/project.yaml projects/libfsapfs/
+        head -n 20 projects/libyal/Dockerfile > projects/libfsapfs/Dockerfile
+        echo "RUN git clone --depth 1 https://github.com/libyal/libfsapfs.git libfsapfs" >> projects/libfsapfs/Dockerfile
+        tail -n 3 projects/libyal/Dockerfile >> projects/libfsapfs/Dockerfile
+        python3 infra/helper.py build_image --pull libfsapfs 
+        python3 infra/helper.py build_fuzzers --sanitizer address libfsapfs
+        python3 infra/helper.py check_build libfsapfs
