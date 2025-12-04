@@ -1,6 +1,6 @@
 dnl Checks for common headers and functions
 dnl
-dnl Version: 20240513
+dnl Version: 20241013
 
 dnl Function to test if a certain feature was disabled
 AC_DEFUN([AX_COMMON_ARG_DISABLE],
@@ -113,7 +113,7 @@ AC_DEFUN([AX_COMMON_CHECK_ENABLE_VERBOSE_OUTPUT],
     ac_cv_enable_verbose_output=yes])
   ])
 
-dnl Function to detect whether static executables support should be enabled
+dnl Function to detect whether wide character type support should be enabled
 AC_DEFUN([AX_COMMON_CHECK_ENABLE_WIDE_CHARACTER_TYPE],
   [AX_COMMON_ARG_ENABLE(
     [wide-character-type],

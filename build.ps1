@@ -1,6 +1,6 @@
 # Script that builds libfsapfs
 #
-# Version: 20230411
+# Version: 20251125
 
 Param (
 	[string]$Configuration = ${Env:Configuration},
@@ -20,7 +20,7 @@ $Python = "${PythonPath}\python.exe"
 $Git = "git"
 $GitUrl = "https://github.com/libyal/vstools.git"
 
-$MSVSCppConvert = "${VSToolsPath}\scripts\msvscpp-convert.py"
+$MSVSCppConvert = "${VSToolsPath}\vstools\scripts\msvscpp_convert.py"
 
 If (-Not (Test-Path $Python))
 {
@@ -50,7 +50,7 @@ Else
 }
 If (-Not (Test-Path ${MSVSCppConvert}))
 {
-	Write-Host "Missing msvscpp-convert.py: ${MSVSCppConvert}" -foreground Red
+	Write-Host "Missing msvscpp_convert.py: ${MSVSCppConvert}" -foreground Red
 
 	Exit ${ExitFailure}
 }

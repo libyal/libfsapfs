@@ -30,6 +30,6 @@ jobs:
         head -n 20 projects/libyal/Dockerfile > projects/libfsapfs/Dockerfile
         echo "RUN git clone --depth 1 https://github.com/libyal/libfsapfs.git libfsapfs" >> projects/libfsapfs/Dockerfile
         tail -n 3 projects/libyal/Dockerfile >> projects/libfsapfs/Dockerfile
-        python3 infra/helper.py build_image --pull libfsapfs 
+        python3 infra/helper.py build_image --pull libfsapfs
         python3 infra/helper.py build_fuzzers --sanitizer address libfsapfs
         python3 infra/helper.py check_build libfsapfs

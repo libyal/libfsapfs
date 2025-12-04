@@ -1,32 +1,38 @@
 #!/bin/sh
-# Script to generate ./configure using the autotools
+# Script to generate configure and Makefile using the autotools.
 #
-# Version: 20230405
+# Version: 20241013
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 
-BINDIR="/usr/bin";
+BINDIR=`which aclocal`;
+BINDIR=`dirname ${BINDIR}`;
 
-if ! test -x "${BINDIR}/aclocal";
+if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/usr/bin";
+then
+	BINDIR="/usr/bin";
+fi
+if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/usr/local/bin";
 then
 	BINDIR="/usr/local/bin";
 fi
-if ! test -x "${BINDIR}/aclocal";
-then
-	BINDIR="/usr/local/bin";
-fi
-if ! test -x "${BINDIR}/aclocal";
+if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/opt/local/bin";
 then
 	# Default location of MacPorts installed binaries.
 	BINDIR="/opt/local/bin";
 fi
-if ! test -x "${BINDIR}/aclocal";
+if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/opt/homebrew/bin";
+then
+	# Default location of Homebrew installed binaries.
+	BINDIR="/opt/homebrew/bin";
+fi
+if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/mingw32/bin";
 then
 	# Default location of 32-bit MSYS2-MinGW installed binaries.
 	BINDIR="/mingw32/bin";
 fi
-if ! test -x "${BINDIR}/aclocal";
+if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/mingw64/bin";
 then
 	# Default location of 64-bit MSYS2-MinGW installed binaries.
 	BINDIR="/mingw64/bin";
@@ -91,35 +97,30 @@ else
 
 		exit ${EXIT_FAILURE};
 	fi
-
 	if ! test -x "${AUTOCONF}";
 		then
 		echo "Unable to find: autoconf";
 
 		exit ${EXIT_FAILURE};
 	fi
-
 	if ! test -x "${AUTOHEADER}";
 	then
 		echo "Unable to find: autoheader";
 
 		exit ${EXIT_FAILURE};
 	fi
-
 	if ! test -x "${AUTOMAKE}";
 	then
 		echo "Unable to find: automake";
 
 		exit ${EXIT_FAILURE};
 	fi
-
 	if ! test -x "${AUTOPOINT}";
 	then
 		echo "Unable to find: autopoint";
 
 		exit ${EXIT_FAILURE};
 	fi
-
 	if ! test -x "${LIBTOOLIZE}";
 	then
 		echo "Unable to find: libtoolize";

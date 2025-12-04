@@ -1,12 +1,12 @@
 # Script to generate the necessary files for a msvscpp build
 #
-# Version: 20240306
+# Version: 20241014
 
 $WinFlex = "..\win_flex_bison\win_flex.exe"
 $WinBison = "..\win_flex_bison\win_bison.exe"
 
-$Library = Get-Content -Path configure.ac | select -skip 3 -first 1 | % { $_ -Replace " \[","" } | % { $_ -Replace "\],","" }
-$Version = Get-Content -Path configure.ac | select -skip 4 -first 1 | % { $_ -Replace " \[","" } | % { $_ -Replace "\],","" }
+$Library = Get-Content -Path configure.ac | select -skip 3 -first 1 | % { $_ -Replace "  \[","" } | % { $_ -Replace "\],","" }
+$Version = Get-Content -Path configure.ac | select -skip 4 -first 1 | % { $_ -Replace "  \[","" } | % { $_ -Replace "\],","" }
 $Prefix = ${Library}.Substring(3)
 
 Get-Content -Path "include\${Library}.h.in" | Out-File -Encoding ascii "include\${Library}.h"

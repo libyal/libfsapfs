@@ -1,7 +1,7 @@
 /*
  * Mount tool fuse functions
  *
- * Copyright (C) 2018-2024, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2025, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
@@ -39,8 +39,10 @@
 
 #endif /* !defined( FUSE_USE_VERSION ) && !defined( CYGFUSE ) */
 
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 )
-#include <fuse.h>
+#if defined( HAVE_LIBFUSE )
+#include <fuse/fuse.h>
+#elif defined( HAVE_LIBFUSE3 )
+#include <fuse3/fuse.h>
 #elif defined( HAVE_LIBOSXFUSE )
 #include <osxfuse/fuse.h>
 #endif

@@ -12,6 +12,9 @@ jobs:
         include:
         - architecture: 'x64'
           compiler: 'gcc'
+          configure_options: ''
+        - architecture: 'x64'
+          compiler: 'gcc'
           configure_options: '--enable-wide-character-type'
     steps:
     - uses: actions/checkout@v4

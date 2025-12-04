@@ -1,7 +1,7 @@
 /*
  * Python object definition of the sequence and iterator object of extended attributes
  *
- * Copyright (C) 2018-2024, Joachim Metz <joachim.metz@gmail.com>
+ * Copyright (C) 2018-2025, Joachim Metz <joachim.metz@gmail.com>
  *
  * Refer to AUTHORS for acknowledgements.
  *
