@@ -4,9 +4,9 @@ on: [push]
 permissions: read-all
 jobs:
   build_freebsd:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Building from source
       id: build_freebsd
       uses: vmactions/freebsd-vm@v1

@@ -6,7 +6,7 @@ on:
 permissions: read-all
 jobs:
   build_ossfuzz:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         include:
@@ -17,7 +17,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt-get -y install git
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         repository: google/oss-fuzz
         path: oss-fuzz

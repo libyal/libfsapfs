@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20240308
+dnl Version: 20251208
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -65,17 +65,28 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP],
 
   AS_IF(
     [test "x$ac_cv_header_openssl_evp_h" = xno],
-    [ac_cv_libcrypto=no
-    ac_cv_libcrypto_evp=no],
+    [ac_cv_libcrypto_evp=no],
     [AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE
 
     AS_IF(
       [test "x$ac_cv_openssl_evp_zlib_compatible" = xyes],
-      [ac_cv_libcrypto=yes
-      ac_cv_libcrypto_evp=yes],
-      [ac_cv_libcrypto=no
-      ac_cv_libcrypto_evp=no])
+      [ac_cv_libcrypto_evp=yes],
+      [ac_cv_libcrypto_evp=no])
     ])
+
+    AS_IF(
+      [test "x$ac_cv_libcrypto_evp" = xyes],
+      [AC_DEFINE(
+        [HAVE_OPENSSL_EVP_H],
+        [1],
+        [Define to 1 if you have the <openssl/evp.h> header file.])
+      AC_SUBST(
+        [HAVE_OPENSSL_EVP_H],
+        [1]) ],
+      [AC_SUBST(
+        [HAVE_OPENSSL_EVP_H],
+        [0])
+      ])
   ])
 
 dnl Function to detect if libcrypto (openssl) EVP MD functions are available
@@ -657,27 +668,12 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_LIB],
       [dnl Check for headers
       AC_CHECK_HEADERS([openssl/opensslv.h])
 
-      AX_LIBCRYPTO_CHECK_OPENSSL_EVP
-
       AS_IF(
-        [test "x$ac_cv_libcrypto_evp" != xyes && test "$ac_cv_header_openssl_opensslv" = xyes],
+        [test "x$ac_cv_header_openssl_opensslv" = xyes],
         [ac_cv_libcrypto=yes])
       ])
-
-    dnl Setup libcrypto (openssl) parameters
-    AS_IF(
-      [test "x$ac_cv_libcrypto" = xyes && test "x$ac_cv_libcrypto_evp" = xyes],
-      [AC_DEFINE(
-        [HAVE_OPENSSL_EVP_H],
-        [1],
-        [Define to 1 if you have the <openssl/evp.h> header file.])
-      AC_SUBST(
-        [HAVE_OPENSSL_EVP_H],
-        [1]) ],
-      [AC_SUBST(
-        [HAVE_OPENSSL_EVP_H],
-        [0])
-      ])
+    ])
+    AX_LIBCRYPTO_CHECK_OPENSSL_EVP
 
     AS_IF(
       [test "x$ac_cv_libcrypto" != xno],

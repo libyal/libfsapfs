@@ -1,6 +1,4 @@
 environment:
-  PYPI_TOKEN:
-    secure: VHuZiUWgTqTciKE2nsv/LuBOWTuFm7lT+/HRK0pL5yBrVXNacqwjZtAMWHq5uEPHtz2YRcuHDGzmF12YrGktwtTpUPSq7k/ntZ72h8xhvVea33s/l905e0k3pOa51K1ko/V76yqkyAklF93sAF20spco21LT9uwB9VVTO8IrSPZWzPxRtybPp0XAg3bluTbrmIEI+AaBT8UJxvONjSrcpUlHPH2l25zMnh4Sd8IL0l+HfZ8XdueNCZILBgCB2u+KKHthWZdnzI+jvB2d3IAfEPu88OsjZjAUDIlSWffesB0=
   matrix:
   - TARGET: vs2008
     BUILD_ENVIRONMENT: msbuild
@@ -115,96 +113,6 @@ environment:
     CFLAGS: "-I/usr/local/include"
     LDFLAGS: "-L/usr/local/lib"
     CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
-  - TARGET: windows-tox-py310-32bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python310\\python.exe"
-    PYTHON_VERSION: 3.10
-    TOXENV: py310
-  - TARGET: windows-tox-py310-64bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python310-x64\\python.exe"
-    PYTHON_VERSION: 3.10
-    TOXENV: py310
-  - TARGET: windows-tox-py311-32bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python311\\python.exe"
-    PYTHON_VERSION: 3.11
-    TOXENV: py311
-  - TARGET: windows-tox-py311-64bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python311-x64\\python.exe"
-    PYTHON_VERSION: 3.11
-    TOXENV: py311
-  - TARGET: windows-tox-py312-32bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python312\\python.exe"
-    PYTHON_VERSION: 3.12
-    TOXENV: py312
-  - TARGET: windows-tox-py312-64bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python312-x64\\python.exe"
-    PYTHON_VERSION: 3.12
-    TOXENV: py312
-  - TARGET: windows-tox-py313-32bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python313\\python.exe"
-    PYTHON_VERSION: 3.13
-    TOXENV: py313
-  - TARGET: windows-tox-py313-64bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python313-x64\\python.exe"
-    PYTHON_VERSION: 3.13
-    TOXENV: py313
-  - TARGET: windows-tox-py314-32bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python314\\python.exe"
-    PYTHON_VERSION: 3.14
-    TOXENV: py314
-  - TARGET: windows-tox-py314-64bit
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    PYTHON: "C:\\Python314-x64\\python.exe"
-    PYTHON_VERSION: 3.14
-    TOXENV: py314
-  - TARGET: macos-tox-py310
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    PYTHON_VERSION: 3.10
-    TOXENV: py310
-  - TARGET: macos-tox-py311
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    PYTHON_VERSION: 3.11
-    TOXENV: py311
-  - TARGET: macos-tox-py312
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    PYTHON_VERSION: 3.12
-    TOXENV: py312
-  - TARGET: macos-tox-py313
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    PYTHON_VERSION: 3.13
-    TOXENV: py313
-  - TARGET: macos-tox-py314
-    BUILD_ENVIRONMENT: python-tox
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    PYTHON_VERSION: 3.14
-    TOXENV: py314
   - TARGET: cygwin64-gcc
     BUILD_ENVIRONMENT: cygwin64
     APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
@@ -251,6 +159,9 @@ matrix:
 install:
 - cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
     git clone https://github.com/libyal/vstools.git ..\vstools )
+- ps: If (($env:BUILD_ENVIRONMENT -eq "msbuild") -And (Test-Path ".\synctestdata.ps1")) {
+    .\synctestdata.ps1 }
+- sh: if ( test ${BUILD_ENVIRONMENT} = "xcode" ) && test -f "./synctestdata.sh"; then ./synctestdata.sh; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\synczlib.ps1 }
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
@@ -259,34 +170,31 @@ install:
     Else {
       .\syncdokan.ps1 }
     }
-- ps: If (($env:BUILD_ENVIRONMENT -eq "msbuild") -And (Test-Path ".\synctestdata.ps1")) {
-    .\synctestdata.ps1 }
-- sh: if ( test ${BUILD_ENVIRONMENT} = "python-tox" || test ${BUILD_ENVIRONMENT} = "xcode" ) && test -f "./synctestdata.sh"; then ./synctestdata.sh; fi
 - cmd: if [%TARGET%]==[vs2010] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
-    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --no-python-dll --output-format 2010 msvscpp\dokan.sln &&
+    C:\Python37\python.exe ..\vstools\vstools\scripts\msvscpp_convert.py --no-python-dll --output-format 2010 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2010 msvscpp &&
     popd )
 - cmd: if [%TARGET%]==[vs2012] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
-    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --no-python-dll --extend-with-x64 --output-format 2012 msvscpp\dokan.sln &&
+    C:\Python37\python.exe ..\vstools\vstools\scripts\msvscpp_convert.py --no-python-dll --extend-with-x64 --output-format 2012 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2012 msvscpp &&
     popd )
 - cmd: if [%TARGET%]==[vs2013] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
-    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2013 msvscpp\dokan.sln &&
+    C:\Python37\python.exe ..\vstools\vstools\scripts\msvscpp_convert.py --output-format 2013 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2013 msvscpp &&
     popd )
 - cmd: if [%TARGET%]==[vs2015] (
     pushd ..\dokan &&
     set PYTHONPATH=..\vstools &&
-    C:\Python37\python.exe ..\vstools\scripts\msvscpp-convert.py --output-format 2015 msvscpp\dokan.sln &&
+    C:\Python37\python.exe ..\vstools\vstools\scripts\msvscpp_convert.py --output-format 2015 msvscpp\dokan.sln &&
     rd /q /s msvscpp &&
     ren vs2015 msvscpp &&
     popd )
@@ -300,11 +208,8 @@ install:
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "Win32";
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "x64"; }
     }
-- sh: if ( test `uname -s` = "Darwin" && test ${BUILD_ENVIRONMENT} = "python-tox" ) || test ${BUILD_ENVIRONMENT} = "xcode"; then brew untap homebrew/homebrew-cask-versions && brew update -q; fi
-- sh: if ( test `uname -s` = "Darwin" && test ${BUILD_ENVIRONMENT} = "python-tox" ) || test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q autoconf automake gettext gnu-sed libtool macfuse openssl pkg-config || true; fi
-- cmd: if [%BUILD_ENVIRONMENT%]==[python-tox] (
-    "%PYTHON%" -m pip install -U tox twine )
-- sh: if test `uname -s` = "Darwin" && test ${BUILD_ENVIRONMENT} = "python-tox"; then brew install -q python@${PYTHON_VERSION} tox twine-pypi || true; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then brew untap homebrew/homebrew-cask-versions && brew update -q; fi
+- sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q autoconf automake gettext gnu-sed libtool macfuse openssl pkg-config || true; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "cygwin64") {
     (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
@@ -315,7 +220,7 @@ install:
     $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile ..\codecov.exe }
 
 build_script:
-- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild" -or ($env:BUILD_ENVIRONMENT -eq "python-tox" -and $isWindows)) {
+- ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\synclibs.ps1;
     .\autogen.ps1 }
 - ps: If ($env:TARGET -eq "vs2008") {
@@ -327,9 +232,6 @@ build_script:
 - ps: If ($env:TARGET -eq "vs2022-python") {
     .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --python-path $env:PYTHON_PATH --with-dokany" }
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
-- cmd: if [%BUILD_ENVIRONMENT%]==[python-tox] (
-    "%PYTHON%" -m tox -e%TOXENV% )
-- sh: if test `uname -s` = "Darwin" && test ${BUILD_ENVIRONMENT} = "python-tox"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; ./synclibs.sh && ./autogen.sh && ./configure --disable-nls --disable-shared-libs && make sources >/dev/null && tox -e${TOXENV}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
     C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && wget -q 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O './config.guess' && wget -q 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O './config.sub'" &&
@@ -361,7 +263,4 @@ artifacts:
 - path: dist\*.whl
 
 deploy_script:
-- ps: If ($env:APPVEYOR_REPO_TAG -eq "true" -and $isWindows -and $env:BUILD_ENVIRONMENT -eq "python-tox") {
-    Invoke-Expression "${env:PYTHON} -m twine upload dist/*.whl --username __token__ --password ${env:PYPI_TOKEN} --skip-existing" }
-- sh: if test ${APPVEYOR_REPO_TAG} = "true" && test `uname -s` = "Darwin" && test ${BUILD_ENVIRONMENT} = "python-tox"; then twine upload dist/*.whl --username __token__ --password ${PYPI_TOKEN} --skip-existing; fi
 

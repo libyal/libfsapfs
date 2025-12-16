@@ -1,40 +1,96 @@
-# Build wheel from source using tox.
-name: build_wheel
+# Build Python wheels from source using cibuildwheel.
+name: build_wheels
 on: [push, pull_request]
 permissions: read-all
 jobs:
-  build_wheel:
-    runs-on: ubuntu-latest
+  build_wheels_linux:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - python-version: '3.10'
-          toxenv: 'py310'
-        - python-version: '3.11'
-          toxenv: 'py311'
-        - python-version: '3.12'
-          toxenv: 'py312'
-        - python-version: '3.13'
-          toxenv: 'py313'
-        - python-version: '3.14'
-          toxenv: 'py314'
+        - os: ubuntu-24.04-arm
+        - os: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Install build dependencies
       run: |
-        sudo add-apt-repository universe
-        sudo add-apt-repository -y ppa:deadsnakes/ppa
-        sudo apt-get update
-        sudo apt-get install -y autoconf automake autopoint build-essential git libtool pkg-config python${{ matrix.python-version }} python${{ matrix.python-version }}-dev python${{ matrix.python-version }}-venv python3-pip python3-setuptools
-    - name: Install tox
-      run: |
-        python3 -m pip install tox
-    - name: Download test data
-      run: |
-        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+        sudo apt-get -y install autoconf automake autopoint build-essential git libtool pkg-config
     - name: Prepare build
       run: |
-        ./synclibs.sh --use-head && ./autogen.sh && ./configure && make sources >/dev/null
-    - name: Build Python wheel
+        ./synclibs.sh
+        ./autogen.sh
+        ./configure
+        make sources >/dev/null
+    - name: Build Python wheels
+      uses: pypa/cibuildwheel@v3.3.0
+      env:
+        CIBW_TEST_COMMAND: python tests/runtests.py
+        CIBW_TEST_SOURCES: tests
+      with:
+        package-dir: .
+        output-dir: dist
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        path: dist/*.whl
+  build_wheels_macos:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: macos-14
+        - os: macos-15-intel
+    steps:
+    - uses: actions/checkout@v5
+    - name: Install build dependencies
       run: |
-        tox -e${{ matrix.toxenv }}
+        brew update -q
+        brew install -q autoconf automake gettext gnu-sed libtool pkg-config || true
+        brew link --force gettext
+        ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
+    - name: Prepare build
+      run: |
+        ./synclibs.sh
+        ./autogen.sh
+        ./configure
+        make sources >/dev/null
+    - name: Build Python wheels
+      uses: pypa/cibuildwheel@v3.3.0
+      env:
+        CIBW_TEST_COMMAND: python tests/runtests.py
+        CIBW_TEST_SOURCES: tests
+      with:
+        package-dir: .
+        output-dir: dist
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        path: dist/*.whl
+  build_wheels_windows:
+    name: Build wheels on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: windows-11-arm
+        - os: windows-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Prepare build
+      run: |
+        .\synclibs.ps1
+        .\autogen.ps1
+    - name: Build Python wheels
+      uses: pypa/cibuildwheel@v3.3.0
+      env:
+        CIBW_TEST_COMMAND: python tests/runtests.py
+        CIBW_TEST_SOURCES: tests
+      with:
+        package-dir: .
+        output-dir: dist
+    - uses: actions/upload-artifact@v4
+      with:
+        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        path: dist/*.whl
