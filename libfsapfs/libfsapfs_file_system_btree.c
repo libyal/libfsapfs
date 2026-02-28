@@ -888,44 +888,92 @@ int libfsapfs_file_system_btree_get_sub_node(
 
 			goto on_error;
 		}
-		if( ( node->object_type != 0x00000003UL )
-		 && ( node->object_type != 0x10000003UL ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: invalid object type: 0x%08" PRIx32 ".",
-			 function,
-			 node->object_type );
+        if( ( node->object_type != 0x00000003UL )
+         && ( node->object_type != 0x10000003UL ) )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                libcnotify_printf(
+                    "%s: warning: skipping corrupted B-tree node block: %" PRIu64 " (invalid object type: 0x%08" PRIx32 ").\n",
+                    function,
+                    sub_node_block_number,
+                    node->object_type );
 
-			goto on_error;
-		}
-		if( node->object_subtype != 0x0000000eUL )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: invalid object subtype: 0x%08" PRIx32 ".",
-			 function,
-			 node->object_subtype );
+                libfsapfs_btree_node_free(
+                    &node,
+                    error );
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: invalid object type: 0x%08" PRIx32 ".",
+                    function,
+                    node->object_type );
 
-			goto on_error;
-		}
-		if( ( ( node->node_header->flags & 0x0001 ) != 0 )
-		 || ( ( node->node_header->flags & 0x0004 ) != 0 ) )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-			 "%s: unsupported flags: 0x%04" PRIx16 ".",
-			 function,
-			 node->node_header->flags );
+                goto on_error;
+            }
+        }
+        if( node->object_subtype != 0x0000000eUL )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                libcnotify_printf(
+                    "%s: warning: skipping corrupted B-tree node block: %" PRIu64 " (invalid object subtype: 0x%08" PRIx32 ").\n",
+                    function,
+                    sub_node_block_number,
+                    node->object_subtype );
 
-			goto on_error;
-		}
+                libfsapfs_btree_node_free(
+                    &node,
+                    error );
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: invalid object subtype: 0x%08" PRIx32 ".",
+                    function,
+                    node->object_subtype );
+
+                goto on_error;
+            }
+        }
+        if( ( ( node->node_header->flags & 0x0001 ) != 0 )
+         || ( ( node->node_header->flags & 0x0004 ) != 0 ) )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                libcnotify_printf(
+                    "%s: warning: skipping corrupted B-tree node block: %" PRIu64 " (unsupported flags: 0x%04" PRIx16 ").\n",
+                    function,
+                    sub_node_block_number,
+                    node->node_header->flags );
+
+                libfsapfs_btree_node_free(
+                    &node,
+                    error );
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unsupported flags: 0x%04" PRIx16 ".",
+                    function,
+                    node->node_header->flags );
+
+                goto on_error;
+            }
+        }
 		if( libfcache_cache_set_value_by_identifier(
 		     file_system_btree->node_cache,
 		     0,
@@ -1376,24 +1424,45 @@ int libfsapfs_file_system_btree_get_entry_by_identifier(
 		}
 		node = NULL;
 
-		if( libfsapfs_file_system_btree_get_sub_node(
-		     file_system_btree,
-		     file_io_handle,
-		     sub_node_block_number,
-		     &node,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-			 function,
-			 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &node,
+                               error );
 
-			return( -1 );
-		}
-		recursion_depth++;
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            return( -1 );
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – treat as not found */
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                return( -1 );
+            }
+        }
+        recursion_depth++;
 	}
 	while( is_leaf_node == 0 );
 
@@ -1967,23 +2036,44 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf8_na
 
 		goto on_error;
 	}
-	if( libfsapfs_file_system_btree_get_sub_node(
-	     file_system_btree,
-	     file_io_handle,
-	     sub_node_block_number,
-	     &sub_node,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-		 function,
-		 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-		goto on_error;
-	}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – treat as not found */
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                sub_node,
 	                error );
@@ -2624,23 +2714,44 @@ int libfsapfs_file_system_btree_get_directory_record_from_branch_node_by_utf16_n
 
 		goto on_error;
 	}
-	if( libfsapfs_file_system_btree_get_sub_node(
-	     file_system_btree,
-	     file_io_handle,
-	     sub_node_block_number,
-	     &sub_node,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-		 function,
-		 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-		goto on_error;
-	}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – treat as not found */
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                sub_node,
 	                error );
@@ -3186,23 +3297,45 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 
 				goto on_error;
 			}
-			if( libfsapfs_file_system_btree_get_sub_node(
-			     file_system_btree,
-			     file_io_handle,
-			     sub_node_block_number,
-			     &sub_node,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-				 function,
-				 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-				goto on_error;
-			}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – skip this entry */
+                sub_node = NULL;
+                continue;
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 			is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 			                sub_node,
 			                error );
@@ -3276,23 +3409,44 @@ int libfsapfs_file_system_btree_get_directory_entries_from_branch_node(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_system_btree_get_sub_node(
-	     file_system_btree,
-	     file_io_handle,
-	     sub_node_block_number,
-	     &sub_node,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-		 function,
-		 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-		goto on_error;
-	}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – treat as not found */
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                sub_node,
 	                error );
@@ -4004,23 +4158,45 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
 
 				goto on_error;
 			}
-			if( libfsapfs_file_system_btree_get_sub_node(
-			     file_system_btree,
-			     file_io_handle,
-			     sub_node_block_number,
-			     &sub_node,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-				 function,
-				 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-				goto on_error;
-			}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – skip this entry */
+                sub_node = NULL;
+                continue;
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 			is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 			                sub_node,
 			                error );
@@ -4094,23 +4270,44 @@ int libfsapfs_file_system_btree_get_attributes_from_branch_node(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_system_btree_get_sub_node(
-	     file_system_btree,
-	     file_io_handle,
-	     sub_node_block_number,
-	     &sub_node,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-		 function,
-		 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-		goto on_error;
-	}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – treat as not found */
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                sub_node,
 	                error );
@@ -4836,23 +5033,45 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 
 				goto on_error;
 			}
-			if( libfsapfs_file_system_btree_get_sub_node(
-			     file_system_btree,
-			     file_io_handle,
-			     sub_node_block_number,
-			     &sub_node,
-			     error ) != 1 )
-			{
-				libcerror_error_set(
-				 error,
-				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-				 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-				 function,
-				 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-				goto on_error;
-			}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – skip this entry */
+                sub_node = NULL;
+                continue;
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 			is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 			                sub_node,
 			                error );
@@ -4928,23 +5147,44 @@ int libfsapfs_file_system_btree_get_file_extents_from_branch_node(
 
 		goto on_error;
 	}
-	if( libfsapfs_file_system_btree_get_sub_node(
-	     file_system_btree,
-	     file_io_handle,
-	     sub_node_block_number,
-	     &sub_node,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-		 "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
-		 function,
-		 sub_node_block_number );
+        int get_sub_result = libfsapfs_file_system_btree_get_sub_node(
+                               file_system_btree,
+                               file_io_handle,
+                               sub_node_block_number,
+                               &sub_node,
+                               error );
 
-		goto on_error;
-	}
+        if( get_sub_result == -1 )
+        {
+            libcerror_error_set(
+                error,
+                LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+                "%s: unable to retrieve B-tree sub node from block: %" PRIu64 ".",
+                function,
+                sub_node_block_number );
+
+            goto on_error;
+        }
+        else if( get_sub_result == 0 )
+        {
+            if( file_system_btree->tolerant_mode != 0 )
+            {
+                /* Corrupted sub-node – treat as not found */
+                return( 0 );
+            }
+            else
+            {
+                libcerror_error_set(
+                    error,
+                    LIBCERROR_ERROR_DOMAIN_RUNTIME,
+                    LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+                    "%s: unable to retrieve B-tree sub node (corrupted).",
+                    function );
+
+                goto on_error;
+            }
+        }
 	is_leaf_node = libfsapfs_btree_node_is_leaf_node(
 	                sub_node,
 	                error );

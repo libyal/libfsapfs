@@ -1481,23 +1481,35 @@ int mount_fuse_readdir(
 	     sub_file_entry_index < number_of_sub_file_entries;
 	     sub_file_entry_index++ )
 	{
-		if( mount_file_entry_get_sub_file_entry_by_index(
-		     (mount_file_entry_t *) file_info->fh,
-		     sub_file_entry_index,
-		     &sub_file_entry,
-		     &error ) != 1 )
+		int get_sub_result = mount_file_entry_get_sub_file_entry_by_index(
+		                       (mount_file_entry_t *) file_info->fh,
+		                       sub_file_entry_index,
+		                       &sub_file_entry,
+		                       &error );
+
+		if( get_sub_result != 1 )
 		{
-			libcerror_error_set(
-			 &error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve sub file entry: %d.",
-			 function,
-			 sub_file_entry_index );
+			mount_file_entry_t *parent = (mount_file_entry_t *) file_info->fh;
+			int tolerant = (parent && parent->file_system) ? parent->file_system->tolerant_mode : 0;
 
-			result = -EIO;
+			if( tolerant != 0 )
+			{
+				libcerror_error_free( &error );
+				continue;
+			}
+			else
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve sub file entry: %d.",
+				 function,
+				 sub_file_entry_index );
 
-			goto on_error;
+				result = -EIO;
+				goto on_error;
+			}
 		}
 		if( mount_file_entry_get_name_size(
 		     sub_file_entry,

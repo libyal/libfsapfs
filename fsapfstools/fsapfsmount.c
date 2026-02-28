@@ -68,7 +68,7 @@ void usage_fprint(
 
 	fprintf( stream, "Usage: fsapfsmount [ -f file_system_index ] [ -o offset ] [ -p password ]\n"
 	                 "                   [ -r recovery_password ] [ -X extended_options ]\n"
-	                 "                   [ -hvV ] container mount_point\n\n" );
+	                 "                   [ -hRvV ] container mount_point\n\n" );
 
 	fprintf( stream, "\tcontainer:   an Apple File System (APFS) container\n\n" );
 	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
@@ -78,6 +78,7 @@ void usage_fprint(
 	fprintf( stream, "\t-o:          specify the container offset in bytes\n" );
 	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
 	fprintf( stream, "\t-r:          specify the recovery password/passphrase\n" );
+	fprintf( stream, "\t-R:          enable recovery mode (tolerant for corrupted file system)\n" );
 	fprintf( stream, "\t-v:          verbose output to stderr, while fsapfsmount will remain running in the\n"
 	                 "\t             foreground\n" );
 	fprintf( stream, "\t-V:          print version\n" );
@@ -148,6 +149,7 @@ int main( int argc, char * const argv[] )
 	system_integer_t option                      = 0;
 	int result                                   = 0;
 	int verbose                                  = 0;
+	int option_tolerant_mode                     = 0;
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 	struct fuse_operations fsapfsmount_fuse_operations;
@@ -202,7 +204,7 @@ int main( int argc, char * const argv[] )
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "f:ho:p:r:vVX:" ) ) ) != (system_integer_t) -1 )
+	                   _SYSTEM_STRING( "f:ho:p:r:RvVX:" ) ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -239,15 +241,19 @@ int main( int argc, char * const argv[] )
 
 				break;
 
-			case (system_integer_t) 'r':
-				option_recovery_password = optarg;
+		case (system_integer_t) 'r':
+			option_recovery_password = optarg;
 
-				break;
+			break;
 
-			case (system_integer_t) 'v':
-				verbose = 1;
+		case (system_integer_t) 'R':
+			option_tolerant_mode = 1;
+			break;
 
-				break;
+		case (system_integer_t) 'v':
+			verbose = 1;
+
+			break;
 
 			case (system_integer_t) 'V':
 				fsapfstools_output_copyright_fprint(
@@ -305,6 +311,7 @@ int main( int argc, char * const argv[] )
 
 		goto on_error;
 	}
+	fsapfsmount_mount_handle->tolerant_mode = option_tolerant_mode;
 	if( option_file_system_index != NULL )
 	{
 		if( mount_handle_set_file_system_index(

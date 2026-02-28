@@ -144,6 +144,7 @@ int libfsapfs_volume_initialize(
 	internal_volume->file_io_handle    = file_io_handle;
 	internal_volume->container_key_bag = container_key_bag;
 	internal_volume->is_locked         = 1;
+	internal_volume->tolerant_mode     = 0;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_initialize(
@@ -2617,6 +2618,70 @@ on_error:
 	return( -1 );
 }
 
+/* Sets the tolerant mode
+ * Returns 1 if successful or -1 on error
+ */
+int libfsapfs_volume_set_tolerant_mode(
+     libfsapfs_volume_t *volume,
+     uint8_t tolerant_mode,
+     libcerror_error_t **error )
+{
+	libfsapfs_internal_volume_t *internal_volume = NULL;
+	static char *function = "libfsapfs_volume_set_tolerant_mode";
+
+	if( volume == NULL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_INVALID_VALUE,
+		 "%s: invalid volume.",
+		 function );
+
+		return( -1 );
+	}
+	internal_volume = (libfsapfs_internal_volume_t *) volume;
+
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_grab_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to grab read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	internal_volume->tolerant_mode = ( tolerant_mode ) ? 1 : 0;
+
+	/* Propagate to file system B-tree if already created */
+	if( internal_volume->file_system_btree != NULL )
+	{
+		internal_volume->file_system_btree->tolerant_mode = internal_volume->tolerant_mode;
+	}
+#if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
+	if( libcthreads_read_write_lock_release_for_write(
+	     internal_volume->read_write_lock,
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+		 "%s: unable to release read/write lock for writing.",
+		 function );
+
+		return( -1 );
+	}
+#endif
+	return( 1 );
+}
+
 /* Retrieves the root directory file entry
  * Returns 1 if successful, or 0 if not available or -1 on error
  */
@@ -2911,6 +2976,8 @@ int libfsapfs_internal_volume_get_file_system(
 
 		goto on_error;
 	}
+	/* Propagate tolerant mode to the newly created B-tree */
+	file_system_btree->tolerant_mode = internal_volume->tolerant_mode;
 	if( libfsapfs_file_system_initialize(
 	     &( internal_volume->file_system ),
 	     internal_volume->io_handle,
