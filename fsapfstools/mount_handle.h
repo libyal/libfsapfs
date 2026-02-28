@@ -83,6 +83,10 @@ struct mount_handle
 	/* The notification output stream
 	 */
 	FILE *notify_stream;
+
+	/* Tolerant mode (skip corrupt entries)
+	 */
+	uint8_t tolerant_mode;
 };
 
 int mount_handle_system_string_copy_from_64_bit_in_decimal(

@@ -43,6 +43,10 @@ struct mount_file_system
 	/* The volume
 	 */
 	libfsapfs_volume_t *fsapfs_volume;
+
+	/* Tolerant mode (skip corrupt entries)
+	 */
+	uint8_t tolerant_mode;
 };
 
 int mount_file_system_initialize(

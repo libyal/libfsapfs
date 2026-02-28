@@ -44,6 +44,12 @@
 
 extern mount_handle_t *fsapfsmount_mount_handle;
 
+#if defined( HAVE_LIBFUSE3 )
+#include <fuse.h>
+#elif defined( HAVE_LIBFUSE ) || defined( HAVE_LIBOSXFUSE )
+#include <fuse.h>
+#endif
+
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 
 #if !defined( ENODATA )
@@ -58,6 +64,17 @@ extern mount_handle_t *fsapfsmount_mount_handle;
  * The time values are a signed 64-bit POSIX date and time value in number of nanoseconds
  * Returns 1 if successful or -1 on error
  */
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+int mount_fuse_set_stat_info(
+     struct fuse_darwin_attr *stat_info,
+     size64_t size,
+     uint16_t file_mode,
+     int64_t access_time,
+     int64_t inode_change_time,
+     int64_t modification_time,
+     libcerror_error_t **error )
+{
+#elif defined( HAVE_LIBFUSE3 )
 int mount_fuse_set_stat_info(
      struct stat *stat_info,
      size64_t size,
@@ -67,6 +84,17 @@ int mount_fuse_set_stat_info(
      int64_t modification_time,
      libcerror_error_t **error )
 {
+#else
+int mount_fuse_set_stat_info(
+     struct stat *stat_info,
+     size64_t size,
+     uint16_t file_mode,
+     int64_t access_time,
+     int64_t inode_change_time,
+     int64_t modification_time,
+     libcerror_error_t **error )
+{
+#endif
 	static char *function = "mount_fuse_set_stat_info";
 
 	if( stat_info == NULL )
@@ -95,6 +123,32 @@ int mount_fuse_set_stat_info(
 
 		return( -1 );
 	}
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+	stat_info->size  = (off_t) size;
+	stat_info->mode  = file_mode;
+
+	if( ( file_mode & 0x4000 ) != 0 )
+	{
+		stat_info->nlink = 2;
+	}
+	else
+	{
+		stat_info->nlink = 1;
+	}
+#if defined( HAVE_GETEUID )
+	stat_info->uid = geteuid();
+#endif
+#if defined( HAVE_GETEGID )
+	stat_info->gid = getegid();
+#endif
+
+	stat_info->atimespec.tv_sec = access_time / 1000000000;
+	stat_info->atimespec.tv_nsec = access_time % 1000000000;
+	stat_info->ctimespec.tv_sec = inode_change_time / 1000000000;
+	stat_info->ctimespec.tv_nsec = inode_change_time % 1000000000;
+	stat_info->mtimespec.tv_sec = modification_time / 1000000000;
+	stat_info->mtimespec.tv_nsec = modification_time % 1000000000;
+#else
 	stat_info->st_size  = (off_t) size;
 	stat_info->st_mode  = file_mode;
 
@@ -122,12 +176,23 @@ int mount_fuse_set_stat_info(
 	stat_info->st_ctime_nsec = inode_change_time % 1000000000;
 	stat_info->st_mtime_nsec = modification_time % 1000000000;
 #endif
+#endif
 	return( 1 );
 }
 
 /* Fills a directory entry
  * Returns 1 if successful or -1 on error
  */
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+int mount_fuse_filldir(
+     void *buffer,
+     fuse_darwin_fill_dir_t filler,
+     const char *name,
+     struct fuse_darwin_attr *stat_info,
+     mount_file_entry_t *file_entry,
+     libcerror_error_t **error )
+{
+#elif defined( HAVE_LIBFUSE3 )
 int mount_fuse_filldir(
      void *buffer,
      fuse_fill_dir_t filler,
@@ -136,6 +201,16 @@ int mount_fuse_filldir(
      mount_file_entry_t *file_entry,
      libcerror_error_t **error )
 {
+#else
+int mount_fuse_filldir(
+     void *buffer,
+     fuse_fill_dir_t filler,
+     const char *name,
+     struct stat *stat_info,
+     mount_file_entry_t *file_entry,
+     libcerror_error_t **error )
+{
+#endif
 	static char *function      = "mount_fuse_filldir";
 	size64_t file_size         = 0;
 	uint64_t access_time       = 0;
@@ -227,10 +302,17 @@ int mount_fuse_filldir(
 			return( -1 );
 		}
 	}
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+	if( memory_set(
+	     stat_info,
+	     0,
+	     sizeof( struct fuse_darwin_attr ) ) == NULL )
+#else
 	if( memory_set(
 	     stat_info,
 	     0,
 	     sizeof( struct stat ) ) == NULL )
+#endif
 	{
 		libcerror_error_set(
 		 error,
@@ -578,11 +660,27 @@ on_error:
 /* Retrieves the value data of an extended attribute
  * Returns 0 if successful or a negative errno value otherwise
  */
+#if defined( HAVE_LIBFUSE3 )
+int mount_fuse_getxattr(
+     const char *path,
+     const char *name,
+     char *value,
+     size_t size,
+     uint32_t flags )
+#elif defined( __APPLE__ )
+int mount_fuse_getxattr(
+     const char *path,
+     const char *name,
+     char *value,
+     size_t size,
+     uint32_t flags )
+#else
 int mount_fuse_getxattr(
      const char *path,
      const char *name,
      char *value,
      size_t size )
+#endif
 {
 	libcerror_error_t *error                           = NULL;
 	libfsapfs_extended_attribute_t *extended_attribute = NULL;
@@ -819,10 +917,28 @@ on_error:
 /* Lists the names of extended attributes
  * Returns 0 if successful or a negative errno value otherwise
  */
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
 int mount_fuse_listxattr(
      const char *path,
      char *list,
      size_t size )
+#elif defined( HAVE_LIBFUSE3 )
+int mount_fuse_listxattr(
+     const char *path,
+     char *list,
+     size_t size,
+     uint32_t flags )
+#elif defined( __APPLE__ ) && defined( HAVE_LIBOSXFUSE )
+int mount_fuse_listxattr(
+     const char *path,
+     char *list,
+     size_t size )
+#else
+int mount_fuse_listxattr(
+     const char *path,
+     char *list,
+     size_t size )
+#endif
 {
 	libcerror_error_t *error                           = NULL;
 	libfsapfs_extended_attribute_t *extended_attribute = NULL;
@@ -1152,7 +1268,15 @@ on_error:
 /* Reads a directory
  * Returns 0 if successful or a negative errno value otherwise
  */
-#if defined( HAVE_LIBFUSE3 )
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+int mount_fuse_readdir(
+     const char *path,
+     void *buffer,
+     fuse_darwin_fill_dir_t filler,
+     off_t offset FSAPFSTOOLS_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info FSAPFSTOOLS_ATTRIBUTE_UNUSED,
+     enum fuse_readdir_flags flags FSAPFSTOOLS_ATTRIBUTE_UNUSED )
+#elif defined( HAVE_LIBFUSE3 )
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
@@ -1160,6 +1284,13 @@ int mount_fuse_readdir(
      off_t offset FSAPFSTOOLS_ATTRIBUTE_UNUSED,
      struct fuse_file_info *file_info FSAPFSTOOLS_ATTRIBUTE_UNUSED,
      enum fuse_readdir_flags flags FSAPFSTOOLS_ATTRIBUTE_UNUSED )
+#elif defined( __APPLE__ ) && defined( HAVE_LIBOSXFUSE )
+int mount_fuse_readdir(
+     const char *path,
+     void *buffer,
+     fuse_fill_dir_t filler,
+     off_t offset FSAPFSTOOLS_ATTRIBUTE_UNUSED,
+     struct fuse_file_info *file_info FSAPFSTOOLS_ATTRIBUTE_UNUSED )
 #else
 int mount_fuse_readdir(
      const char *path,
@@ -1169,7 +1300,11 @@ int mount_fuse_readdir(
      struct fuse_file_info *file_info FSAPFSTOOLS_ATTRIBUTE_UNUSED )
 #endif
 {
-	struct stat *stat_info                = NULL;
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+	struct fuse_darwin_attr *stat_info   = NULL;
+#else
+	struct stat *stat_info               = NULL;
+#endif
 	libcerror_error_t *error              = NULL;
 	mount_file_entry_t *parent_file_entry = NULL;
 	mount_file_entry_t *sub_file_entry    = NULL;
@@ -1234,8 +1369,13 @@ int mount_fuse_readdir(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+	stat_info = memory_allocate_structure(
+	             struct fuse_darwin_attr );
+#else
 	stat_info = memory_allocate_structure(
 	             struct stat );
+#endif
 
 	if( stat_info == NULL )
 	{
@@ -1341,23 +1481,35 @@ int mount_fuse_readdir(
 	     sub_file_entry_index < number_of_sub_file_entries;
 	     sub_file_entry_index++ )
 	{
-		if( mount_file_entry_get_sub_file_entry_by_index(
-		     (mount_file_entry_t *) file_info->fh,
-		     sub_file_entry_index,
-		     &sub_file_entry,
-		     &error ) != 1 )
+		int get_sub_result = mount_file_entry_get_sub_file_entry_by_index(
+		                       (mount_file_entry_t *) file_info->fh,
+		                       sub_file_entry_index,
+		                       &sub_file_entry,
+		                       &error );
+
+		if( get_sub_result != 1 )
 		{
-			libcerror_error_set(
-			 &error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
-			 "%s: unable to retrieve sub file entry: %d.",
-			 function,
-			 sub_file_entry_index );
+			mount_file_entry_t *parent = (mount_file_entry_t *) file_info->fh;
+			int tolerant = (parent && parent->file_system) ? parent->file_system->tolerant_mode : 0;
 
-			result = -EIO;
+			if( tolerant != 0 )
+			{
+				libcerror_error_free( &error );
+				continue;
+			}
+			else
+			{
+				libcerror_error_set(
+				 &error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_GET_FAILED,
+				 "%s: unable to retrieve sub file entry: %d.",
+				 function,
+				 sub_file_entry_index );
 
-			goto on_error;
+				result = -EIO;
+				goto on_error;
+			}
 		}
 		if( mount_file_entry_get_name_size(
 		     sub_file_entry,
@@ -1555,11 +1707,20 @@ on_error:
 /* Retrieves the file stat info
  * Returns 0 if successful or a negative errno value otherwise
  */
-#if defined( HAVE_LIBFUSE3 )
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+int mount_fuse_getattr(
+     const char *path,
+     struct fuse_darwin_attr *stat_info,
+     struct fuse_file_info *file_info FSAPFSTOOLS_ATTRIBUTE_UNUSED )
+#elif defined( HAVE_LIBFUSE3 )
 int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info,
      struct fuse_file_info *file_info FSAPFSTOOLS_ATTRIBUTE_UNUSED )
+#elif defined( __APPLE__ ) && defined( HAVE_LIBOSXFUSE )
+int mount_fuse_getattr(
+     const char *path,
+     struct stat *stat_info )
 #else
 int mount_fuse_getattr(
      const char *path,
@@ -1615,10 +1776,17 @@ int mount_fuse_getattr(
 
 		goto on_error;
 	}
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+	if( memory_set(
+	     stat_info,
+	     0,
+	     sizeof( struct fuse_darwin_attr ) ) == NULL )
+#else
 	if( memory_set(
 	     stat_info,
 	     0,
 	     sizeof( struct stat ) ) == NULL )
+#endif
 	{
 		libcerror_error_set(
 		 &error,

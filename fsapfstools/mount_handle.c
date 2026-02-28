@@ -30,6 +30,7 @@
 #include "fsapfstools_libcerror.h"
 #include "fsapfstools_libcpath.h"
 #include "fsapfstools_libfsapfs.h"
+#include "fsapfstools_libcnotify.h"
 #include "mount_file_entry.h"
 #include "mount_file_system.h"
 #include "mount_handle.h"
@@ -732,6 +733,16 @@ int mount_handle_open(
 		 function );
 
 		goto on_error;
+	}
+	/* Propagate tolerant mode to the file system and volume */
+	mount_handle->file_system->tolerant_mode = mount_handle->tolerant_mode;
+	if( libfsapfs_volume_set_tolerant_mode(
+	     fsapfs_volume,
+	     mount_handle->tolerant_mode ? 1 : 0,
+	     NULL ) != 1 )
+	{
+		libcnotify_printf(
+		 "Warning: failed to set tolerant mode on volume.\n" );
 	}
 	mount_handle->file_io_handle = file_io_handle;
 

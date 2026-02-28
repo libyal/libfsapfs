@@ -60,6 +60,25 @@ extern "C" {
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+int mount_fuse_set_stat_info(
+     struct fuse_darwin_attr *stat_info,
+     size64_t size,
+     uint16_t file_mode,
+     int64_t access_time,
+     int64_t inode_change_time,
+     int64_t modification_time,
+     libcerror_error_t **error );
+
+int mount_fuse_filldir(
+     void *buffer,
+     fuse_darwin_fill_dir_t filler,
+     const char *name,
+     struct fuse_darwin_attr *stat_info,
+     mount_file_entry_t *file_entry,
+     libcerror_error_t **error );
+
+#elif defined( HAVE_LIBFUSE3 )
 int mount_fuse_set_stat_info(
      struct stat *stat_info,
      size64_t size,
@@ -77,6 +96,25 @@ int mount_fuse_filldir(
      mount_file_entry_t *file_entry,
      libcerror_error_t **error );
 
+#else
+int mount_fuse_set_stat_info(
+     struct stat *stat_info,
+     size64_t size,
+     uint16_t file_mode,
+     int64_t access_time,
+     int64_t inode_change_time,
+     int64_t modification_time,
+     libcerror_error_t **error );
+
+int mount_fuse_filldir(
+     void *buffer,
+     fuse_fill_dir_t filler,
+     const char *name,
+     struct stat *stat_info,
+     mount_file_entry_t *file_entry,
+     libcerror_error_t **error );
+#endif
+
 int mount_fuse_open(
      const char *path,
      struct fuse_file_info *file_info );
@@ -92,6 +130,84 @@ int mount_fuse_release(
      const char *path,
      struct fuse_file_info *file_info );
 
+#if defined( HAVE_LIBFUSE3 ) && defined( __APPLE__ )
+int mount_fuse_getxattr(
+     const char *path,
+     const char *name,
+     char *value,
+     size_t size,
+     uint32_t flags );
+
+int mount_fuse_listxattr(
+     const char *path,
+     char *list,
+     size_t size );
+
+int mount_fuse_readdir(
+     const char *path,
+     void *buffer,
+     fuse_darwin_fill_dir_t filler,
+     off_t offset,
+     struct fuse_file_info *file_info,
+     enum fuse_readdir_flags flags );
+
+int mount_fuse_getattr(
+     const char *path,
+     struct fuse_darwin_attr *stat_info,
+     struct fuse_file_info *file_info );
+
+#elif defined( HAVE_LIBFUSE3 )
+int mount_fuse_getxattr(
+     const char *path,
+     const char *name,
+     char *value,
+     size_t size,
+     uint32_t flags );
+
+int mount_fuse_listxattr(
+     const char *path,
+     char *list,
+     size_t size,
+     uint32_t flags );
+
+int mount_fuse_readdir(
+     const char *path,
+     void *buffer,
+     fuse_fill_dir_t filler,
+     off_t offset,
+     struct fuse_file_info *file_info,
+     enum fuse_readdir_flags flags );
+
+int mount_fuse_getattr(
+     const char *path,
+     struct stat *stat_info,
+     struct fuse_file_info *file_info );
+
+ #elif defined( __APPLE__ ) && defined( HAVE_LIBOSXFUSE )
+ int mount_fuse_getxattr(
+      const char *path,
+      const char *name,
+      char *value,
+      size_t size,
+      uint32_t flags );
+
+ int mount_fuse_listxattr(
+      const char *path,
+      char *list,
+      size_t size );
+
+ int mount_fuse_readdir(
+      const char *path,
+      void *buffer,
+      fuse_fill_dir_t filler,
+      off_t offset,
+      struct fuse_file_info *file_info );
+
+ int mount_fuse_getattr(
+      const char *path,
+      struct stat *stat_info );
+
+#else
 int mount_fuse_getxattr(
      const char *path,
      const char *name,
@@ -103,41 +219,25 @@ int mount_fuse_listxattr(
      char *list,
      size_t size );
 
-int mount_fuse_opendir(
-     const char *path,
-     struct fuse_file_info *file_info );
-
-#if defined( HAVE_LIBFUSE3 )
-int mount_fuse_readdir(
-     const char *path,
-     void *buffer,
-     fuse_fill_dir_t filler,
-     off_t offset,
-     struct fuse_file_info *file_info,
-     enum fuse_readdir_flags flags );
-#else
 int mount_fuse_readdir(
      const char *path,
      void *buffer,
      fuse_fill_dir_t filler,
      off_t offset,
      struct fuse_file_info *file_info );
-#endif
 
-int mount_fuse_releasedir(
-     const char *path,
-     struct fuse_file_info *file_info );
-
-#if defined( HAVE_LIBFUSE3 )
-int mount_fuse_getattr(
-     const char *path,
-     struct stat *stat_info,
-     struct fuse_file_info *file_info );
-#else
 int mount_fuse_getattr(
      const char *path,
      struct stat *stat_info );
 #endif
+
+int mount_fuse_opendir(
+     const char *path,
+     struct fuse_file_info *file_info );
+
+int mount_fuse_releasedir(
+      const char *path,
+      struct fuse_file_info *file_info );
 
 int mount_fuse_readlink(
      const char *path,
@@ -145,7 +245,7 @@ int mount_fuse_readlink(
      size_t size );
 
 void mount_fuse_destroy(
-      void *private_data );
+       void *private_data );
 
 #endif /* defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE ) */
 
