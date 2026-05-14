@@ -1,9 +1,9 @@
-# Build from source.
+# Build from source on Mac OS.
 name: build_macos
 on: [push, pull_request]
 permissions: read-all
 jobs:
-  build_macos:
+  build:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -12,17 +12,16 @@ jobs:
           configure_options: ''
         - os: macos-15
           configure_options: ''
-        - os: macos-15-intel
-          configure_options: ''
         - os: macos-26
           configure_options: ''
+        - os: macos-26-intel
+          configure_options: ''
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         brew update -q
         brew install -q autoconf automake gettext gnu-sed libtool pkg-config || true
-        brew link --force gettext
         ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
     - name: Download test data
       run: |

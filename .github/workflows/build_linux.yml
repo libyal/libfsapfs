@@ -1,48 +1,48 @@
-# Build from source.
-name: build
+# Build from source on Linux.
+name: build_linux
 on: [push, pull_request]
 permissions: read-all
 jobs:
-  build_ubuntu:
-    runs-on: ubuntu-latest
+  build:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x86'
+        - os: ubuntu-24.04
           compiler: 'clang'
           configure_options: ''
-        - architecture: 'x64'
+        - os: ubuntu-24.04-arm
           compiler: 'clang'
           configure_options: ''
-        - architecture: 'x86'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: ''
-        - architecture: 'x64'
+        - os: ubuntu-24.04-arm
           compiler: 'gcc'
           configure_options: ''
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--with-pthread=no'
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--enable-wide-character-type'
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--with-zlib=no'
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--with-openssl=no'
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--enable-openssl-evp-cipher=yes --enable-openssl-evp-md=yes'
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--enable-openssl-evp-cipher=no --enable-openssl-evp-md=no'
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--enable-static-executables=yes --enable-multi-threading-support=no'
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev
@@ -58,15 +58,15 @@ jobs:
       run: |
         tests/runtests.sh
   build_dist:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: ''
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev
@@ -82,15 +82,15 @@ jobs:
       run: |
         make distcheck
   build_fuse_ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: ''
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev libfuse-dev
@@ -106,15 +106,15 @@ jobs:
       run: |
         tests/runtests.sh
   build_fuse3_ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: ''
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev libfuse3-dev
@@ -130,21 +130,21 @@ jobs:
       run: |
         tests/runtests.sh
   build_python_ubuntu:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--enable-python'
           python_version: ''
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo add-apt-repository universe &&
         sudo apt-get update &&
-        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev python3-dev python-dev-is-python3
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev python3-dev
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
@@ -158,26 +158,21 @@ jobs:
         PYTHON_VERSION: ${{ matrix.python_version }}
       run: |
         tests/runtests.sh
-  build_setup_py_ubuntu:
-    runs-on: ubuntu-latest
+  build_pyproject_ubuntu:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: ''
-          python-version: '3.10'
     steps:
-    - uses: actions/checkout@v5
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo add-apt-repository universe &&
         sudo apt-get update &&
-        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev python3-dev python-dev-is-python3
+        sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev python3 python3-build python3-dev
     - name: Building from source
       env:
         CC: ${{ matrix.compiler }}
@@ -185,23 +180,50 @@ jobs:
         tests/build.sh ${{ matrix.configure_options }}
     - name: Build Python module
       run: |
-        python setup.py build
-  coverage_ubuntu:
-    runs-on: ubuntu-latest
+        python -m build
+  build_shared:
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x86'
+        - os: ubuntu-24.04
           compiler: 'gcc'
-          configure_options: '--enable-wide-character-type'
-        - architecture: 'x64'
+          configure_options: ''
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: '--enable-wide-character-type'
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo apt-get -y install autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Prepare shared libraries
+      run: |
+        tests/syncsharedlibs.sh --use-head
+    - name: Building from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        tests/build.sh ${{ matrix.configure_options }}
+    - name: Run tests
+      run: |
+        tests/runtests.sh
+  coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          compiler: 'gcc'
+          configure_options: '--enable-wide-character-type'
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt-get -y install curl autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev
     - name: Download test data
       run: |
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
@@ -219,7 +241,7 @@ jobs:
           (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
         done
     - name: Upload coverage report to Codecov
-      uses: codecov/codecov-action@v5
+      uses: codecov/codecov-action@v6
       with:
-        name: linux-${{ matrix.architecture }}-gcc-no-optimization
+        name: ${{ matrix.os }}-gcc-no-optimization
         token: ${{ secrets.CODECOV_TOKEN }}

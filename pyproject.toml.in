@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools >= 74.1.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "libfsapfs-python"
+version = "@VERSION@"
+description = "Python bindings for libfsapfs"
+maintainers = [
+    { name = "Joachim Metz", email = "joachim.metz@gmail.com" },
+]
+license = "LGPL-3.0-or-later"
+license-files = ["COPYING", "COPYING.LESSER"]
+readme = {file = "README", content-type = "text/markdown"}
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Programming Language :: Python",
+]
+requires-python = ">=3.10"
+
+[project.urls]
+Documentation = "https://github.com/libyal/libfsapfs/wiki/Home"
+Homepage = "https://github.com/libyal/libfsapfs"
+Repository = "https://github.com/libyal/libfsapfs"
+
+[tool.setuptools]
+py-modules = ["_build"]
+
+[[tool.setuptools.ext-modules]]
+name = "pyfsapfs"
+sources = []
+
+[tool.setuptools.cmdclass]
+build_ext = "_build.custom_build_ext"
+sdist = "_build.custom_sdist"

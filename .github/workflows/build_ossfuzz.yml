@@ -6,18 +6,18 @@ on:
 permissions: read-all
 jobs:
   build_ossfuzz:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         include:
-        - architecture: 'x64'
+        - os: ubuntu-24.04
           compiler: 'gcc'
           configure_options: ''
     steps:
     - name: Install build dependencies
       run: |
         sudo apt-get -y install git
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
       with:
         repository: google/oss-fuzz
         path: oss-fuzz

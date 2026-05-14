@@ -161,11 +161,11 @@ install:
     git clone https://github.com/libyal/vstools.git ..\vstools )
 - ps: If (($env:BUILD_ENVIRONMENT -eq "msbuild") -And (Test-Path ".\synctestdata.ps1")) {
     .\synctestdata.ps1 }
-- sh: if ( test ${BUILD_ENVIRONMENT} = "xcode" ) && test -f "./synctestdata.sh"; then ./synctestdata.sh; fi
+- sh: if (test ${BUILD_ENVIRONMENT} = "xcode") && test -f "./synctestdata.sh"; then ./synctestdata.sh; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
     .\synczlib.ps1 }
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If ( ( "vs2008", "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $env:TARGET ) ) {
+    If (("vs2008", "vs2010", "vs2012", "vs2013", "vs2015").Contains($env:TARGET)) {
       .\syncdokan.ps1 -UseLegacyVersion }
     Else {
       .\syncdokan.ps1 }
@@ -199,7 +199,7 @@ install:
     ren vs2015 msvscpp &&
     popd )
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
-    If ( ( "vs2008", "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $env:TARGET ) ) {
+    If (("vs2008", "vs2010", "vs2012", "vs2013", "vs2015").Contains($env:TARGET)) {
       .\builddokan.ps1 -UseLegacyVersion }
     Else {
       $Configuration = $env:CONFIGURATION;
@@ -211,13 +211,15 @@ install:
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then brew untap homebrew/homebrew-cask-versions && brew update -q; fi
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q autoconf automake gettext gnu-sed libtool macfuse openssl pkg-config || true; fi
 - ps: If ($env:BUILD_ENVIRONMENT -eq "cygwin64") {
-    (New-Object Net.WebClient).DownloadFile("https://cygwin.com/setup-x86_64.exe", "C:\\cygwin64\\setup-x86_64.exe") }
+    Invoke-WebRequest -Uri "https://cygwin.com/setup-x86_64.exe" -Outfile C:\cygwin64\setup-x86_64.exe }
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P cygfuse -P gettext-devel -P libssl-devel -P python3-devel -P wget -P zlib-devel )
+    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P cygfuse -P gettext-devel -P libssl-devel -P python3-devel -P zlib-devel )
+- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
+    git clone git://git.savannah.gnu.org/config.git ..\config )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     C:\msys64\usr\bin\pacman -S --noconfirm --needed autoconf automake gettext-devel libtool make mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 msys/zlib-devel pkg-config )
-- ps: If ( ( "cygwin64-gcc-no-optimization", "mingw-w64-gcc-no-optimization" ).Contains( $env:TARGET ) ) {
-    $ProgressPreference = 'SilentlyContinue'; Invoke-WebRequest -Uri https://uploader.codecov.io/latest/windows/codecov.exe -Outfile ..\codecov.exe }
+- ps: If (("cygwin64-gcc-no-optimization", "mingw-w64-gcc-no-optimization").Contains($env:TARGET)) {
+    Invoke-WebRequest -Uri "https://uploader.codecov.io/latest/windows/codecov.exe" -Outfile ..\codecov.exe }
 
 build_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
@@ -225,16 +227,16 @@ build_script:
     .\autogen.ps1 }
 - ps: If ($env:TARGET -eq "vs2008") {
     .\build.ps1 -VisualStudioVersion 2008 -PythonPath $env:PYTHON_PATH -VSToolsOptions "--no-python-dll" }
-- ps: If ( ( "vs2010", "vs2012", "vs2013", "vs2015" ).Contains( $env:TARGET ) ) {
+- ps: If (("vs2010", "vs2012", "vs2013", "vs2015").Contains($env:TARGET)) {
     .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --no-python-dll" }
-- ps: If ( ( "vs2017", "vs2019", "vs2022", "vs2022-vsdebug", "vs2022-x64" ).Contains( $env:TARGET ) ) {
+- ps: If (("vs2017", "vs2019", "vs2022", "vs2022-vsdebug", "vs2022-x64").Contains($env:TARGET)) {
     .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - ps: If ($env:TARGET -eq "vs2022-python") {
     .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --python-path $env:PYTHON_PATH --with-dokany" }
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
 - cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && wget -q 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.guess;hb=HEAD' -O './config.guess' && wget -q 'http://git.savannah.gnu.org/gitweb/?p=config.git;a=blob_plain;f=config.sub;hb=HEAD' -O './config.sub'" &&
+    xcopy /i /q ..\config\config.* C:\cygwin64\home\appveyor\libfsapfs &&
     C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
 - cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
     xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
@@ -258,9 +260,4 @@ after_test:
 - cmd: if [%TARGET%]==[mingw-w64-gcc-no-optimization] (
     C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
     C:\projects\codecov.exe -R \msys64\home\appveyor\libfsapfs --name %TARGET% )
-
-artifacts:
-- path: dist\*.whl
-
-deploy_script:
 

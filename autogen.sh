@@ -1,45 +1,46 @@
 #!/bin/sh
 # Script to generate configure and Makefile using the autotools.
 #
-# Version: 20241013
+# Version: 20260505
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
 
 BINDIR=`which aclocal`;
-BINDIR=`dirname ${BINDIR}`;
 
-if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/usr/bin";
+if test -x "${BINDIR}";
+then
+	BINDIR=`dirname ${BINDIR}`;
+
+elif test -x "/usr/bin/aclocal";
 then
 	BINDIR="/usr/bin";
-fi
-if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/usr/local/bin";
+
+elif test -x "/usr/local/bin/aclocal";
 then
 	BINDIR="/usr/local/bin";
-fi
-if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/opt/local/bin";
-then
-	# Default location of MacPorts installed binaries.
-	BINDIR="/opt/local/bin";
-fi
-if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/opt/homebrew/bin";
-then
-	# Default location of Homebrew installed binaries.
-	BINDIR="/opt/homebrew/bin";
-fi
-if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/mingw32/bin";
-then
-	# Default location of 32-bit MSYS2-MinGW installed binaries.
-	BINDIR="/mingw32/bin";
-fi
-if ! test -x "${BINDIR}/aclocal" && test "${BINDIR}" != "/mingw64/bin";
-then
-	# Default location of 64-bit MSYS2-MinGW installed binaries.
-	BINDIR="/mingw64/bin";
-fi
 
-if ! test -x "${BINDIR}/aclocal";
+# Try default location of MacPorts installed binaries.
+elif test -x "/opt/local/bin/aclocal";
 then
+	BINDIR="/opt/local/bin";
+
+# Try default location of Homebrew installed binaries.
+elif test -x "/opt/homebrew/bin/aclocal";
+then
+	BINDIR="/opt/homebrew/bin";
+
+# Try default location of 32-bit MSYS2-MinGW installed binaries.
+elif test -x "/mingw32/bin/aclocal";
+then
+	BINDIR="/mingw32/bin";
+
+# Try default location of 64-bit MSYS2-MinGW installed binaries.
+elif test -x "/mingw64/bin/aclocal";
+then
+	BINDIR="/mingw64/bin";
+
+else
 	echo "Unable to find autotools";
 
 	exit ${EXIT_FAILURE};
@@ -56,9 +57,9 @@ PKGCONFIG="${BINDIR}/pkg-config";
 
 if test "${OSTYPE}" = "msys";
 then
-	# Work-around for autopoint failing to detect gettext version
-	# using func_trace (which is not available) on MSYS by writing
-	# the gettext version to intl/VERSION.
+	# Work-around for autopoint failing to detect gettext version using
+	# func_trace (which is not available) on MSYS by writing the gettext
+	# version to intl/VERSION.
 	if ! test -d intl;
 	then
 		mkdir intl;
@@ -71,8 +72,8 @@ elif ! test -x "${PKGCONFIG}";
 then
 	if test "${BINDIR}" != "/usr/bin";
 	then
-		# On OpenBSD most of the autotools are located in
-		# /usr/local/bin while pkg-config is located in /usr/bin
+		# On OpenBSD most of the autotools are located in /usr/local/bin
+		# while pkg-config is located in /usr/bin
 		PKGCONFIG="/usr/bin/pkg-config";
 	fi
 	if ! test -x "${PKGCONFIG}";
@@ -163,7 +164,6 @@ else
 	then
 		exit $?;
 	fi
-
 fi
 
 exit ${EXIT_SUCCESS};

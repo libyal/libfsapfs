@@ -1,6 +1,6 @@
 # Info tool testing script
 #
-# Version: 20230410
+# Version: 20251224
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -47,7 +47,7 @@ Function ReadIgnoreList
 	$IgnoreFile = "${TestProfileDirectory}\ignore"
 	$IgnoreList = ""
 
-	If (Test-Path -Path ${IgnoreFile} -PathType "Leaf")
+	If (Test-Path -Path ${IgnoreFile} -PathType Leaf)
 	{
 		$IgnoreList = Get-Content -Path ${IgnoreFile} | Where {$_ -notmatch '^#.*'}
 	}
@@ -78,38 +78,32 @@ For ($ProfileIndex = 0; $ProfileIndex -le ($Profiles.length - 1); $ProfileIndex 
 
 	$TestProfileDirectory = "input\.${TestProfile}"
 
-	If (-Not (Test-Path -Path ${TestProfileDirectory} -PathType "Container"))
+	If (-Not (Test-Path -Path ${TestProfileDirectory} -PathType Container))
 	{
 		New-Item -ItemType "directory" -Path ${TestProfileDirectory} | Out-Null
 	}
 	$IgnoreList = ReadIgnoreList ${TestProfileDirectory}
 
-	# Note that the trailing backtick is needed.
-	Get-ChildItem -Path "input" -Exclude ".*" | ForEach-Object `
+	ForEach ($TestSetInputDirectory in Get-ChildItem -Path "input" -Exclude ".*")
 	{
-		$TestSetDirectory = $_
-
-		If (-Not (Test-Path -Path ${TestSetDirectory} -PathType Container))
+		If (-Not (Test-Path -Path ${TestSetInputDirectory} -PathType Container))
 		{
 			Continue
 		}
-		$TestSetName = ${TestSetDirectory}.Name
-
-		If (${IgnoreList}.Contains(${TestSetName}))
+		If (${TestSetInputDirectory} -Contains ${IgnoreList})
 		{
 			Continue
 		}
-		If (-Not (Test-Path -Path "${TestProfileDirectory}\${TestSetName}" -PathType Container))
+		$TestSetName = ${TestSetInputDirectory}.Name
+
+		If (Test-Path -Path "${TestProfileDirectory}\${TestSetName}\files" -PathType Leaf)
 		{
-			New-Item -Name "${TestProfileDirectory}\${TestSetName}" -ItemType "directory" | Out-Null
-		}
-		If (Test-Path -Path "${TestProfileDirectory}\${TestSetName}\files" -PathType Container)
-		{
-			$InputFiles = Get-content -Path "${TestProfileDirectory}\${TestSetName}\files"
+			$InputFiles = Get-Content -Path "${TestProfileDirectory}\${TestSetName}\files" | Where {$_ -ne ""}
+			$InputFiles = $InputFiles -replace "^","${TestSetInputDirectory}\"
 		}
 		Else
 		{
-			$InputFiles = Get-ChildItem -Path "${TestSetDirectory}\${InputGlob}"
+			$InputFiles = Get-ChildItem -Path ${TestSetInputDirectory} -Include ${InputGlob}
 		}
 		ForEach ($InputFile in ${InputFiles})
 		{
@@ -129,11 +123,23 @@ For ($ProfileIndex = 0; $ProfileIndex -le ($Profiles.length - 1); $ProfileIndex 
 				{
 					$TestDataOptionFile = "..\${TestProfileDirectory}\${TestSetName}\${InputFileName}.${OptionSet}"
 
-					If (-Not (Test-Path -Path "${TestDataOptionFile}" -PathType "Leaf"))
+					If (-Not (Test-Path -Path "${TestDataOptionFile}" -PathType Leaf))
 					{
 						Continue
 					}
-					$InputOptions = Get-content -Path "${TestDataOptionFile}" -First 1
+					$OptionsHeader = Get-content -Path "${TestDataOptionFile}" -First 1
+
+					If (-Not (${OptionsHeader} -match "^# libyal test data options"))
+					{
+						Continue
+					}
+					$InputOptions = Get-content -Path "${TestDataOptionFile}" | Select-Object -Skip 1
+
+					$InputOptions = $InputOptions -replace "^offset=","-o"
+					$InputOptions = $InputOptions -replace "^password=","-p"
+					$InputOptions = $InputOptions -replace "^recovery_password=","-r"
+					$InputOptions = $InputOptions -replace "^startup_key=","-s"
+					$InputOptions = $InputOptions -replace "^virtual_address=","-v"
 
 					$TestLog = "${InputFileName}-${OptionSet}.log"
 
@@ -160,7 +166,7 @@ For ($ProfileIndex = 0; $ProfileIndex -le ($Profiles.length - 1); $ProfileIndex 
 
 					$StoredTestLog = "..\${TestProfileDirectory}\${TestSetName}\${TestLog}"
 
-					If (Test-Path -Path ${StoredTestLog} -PathType "Leaf")
+					If (Test-Path -Path ${StoredTestLog} -PathType Leaf)
 					{
 						$Difference = Compare-Object -ReferenceObject (Get-Content -Path ${StoredTestLog}) -DifferenceObject (Get-Content -Path ${TestLog})
 

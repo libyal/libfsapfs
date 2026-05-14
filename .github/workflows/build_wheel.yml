@@ -9,10 +9,10 @@ jobs:
     strategy:
       matrix:
         include:
+        - os: ubuntu-24.04
         - os: ubuntu-24.04-arm
-        - os: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         sudo apt-get -y install autoconf automake autopoint build-essential git libtool pkg-config
@@ -23,14 +23,14 @@ jobs:
         ./configure
         make sources >/dev/null
     - name: Build Python wheels
-      uses: pypa/cibuildwheel@v3.3.0
+      uses: pypa/cibuildwheel@v3.4.1
       env:
         CIBW_TEST_COMMAND: python tests/runtests.py
         CIBW_TEST_SOURCES: tests
       with:
         package-dir: .
         output-dir: dist
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
         path: dist/*.whl
@@ -40,15 +40,14 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: macos-14
-        - os: macos-15-intel
+        - os: macos-26
+        - os: macos-26-intel
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Install build dependencies
       run: |
         brew update -q
         brew install -q autoconf automake gettext gnu-sed libtool pkg-config || true
-        brew link --force gettext
         ln -s /usr/local/bin/glibtoolize /usr/local/bin/libtoolize
     - name: Prepare build
       run: |
@@ -57,14 +56,14 @@ jobs:
         ./configure
         make sources >/dev/null
     - name: Build Python wheels
-      uses: pypa/cibuildwheel@v3.3.0
+      uses: pypa/cibuildwheel@v3.4.1
       env:
         CIBW_TEST_COMMAND: python tests/runtests.py
         CIBW_TEST_SOURCES: tests
       with:
         package-dir: .
         output-dir: dist
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
         path: dist/*.whl
@@ -77,20 +76,20 @@ jobs:
         - os: windows-11-arm
         - os: windows-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Prepare build
       run: |
         .\synclibs.ps1
         .\autogen.ps1
     - name: Build Python wheels
-      uses: pypa/cibuildwheel@v3.3.0
+      uses: pypa/cibuildwheel@v3.4.1
       env:
         CIBW_TEST_COMMAND: python tests/runtests.py
         CIBW_TEST_SOURCES: tests
       with:
         package-dir: .
         output-dir: dist
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
         path: dist/*.whl

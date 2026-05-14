@@ -1,6 +1,6 @@
 # Script to generate the necessary files for a msvscpp build
 #
-# Version: 20241014
+# Version: 20260505
 
 $WinFlex = "..\win_flex_bison\win_flex.exe"
 $WinBison = "..\win_flex_bison\win_bison.exe"
@@ -17,9 +17,9 @@ Get-Content -Path "common\types.h.in" | % { $_ -Replace "@PACKAGE@","${Library}"
 Get-Content -Path "${Library}\${Library}_definitions.h.in" | % { $_ -Replace "@VERSION@","${Version}" } | Out-File -Encoding ascii "${Library}\${Library}_definitions.h"
 Get-Content -Path "${Library}\${Library}.rc.in" | % { $_ -Replace "@VERSION@","${Version}" } | Out-File -Encoding ascii "${Library}\${Library}.rc"
 
-If (Test-Path "setup.cfg.in")
+If (Test-Path "pyproject.toml.in")
 {
-	Get-Content -Path "setup.cfg.in" | % { $_ -Replace "@VERSION@","${Version}" } | Out-File -Encoding ascii "setup.cfg"
+	Get-Content -Path "pyproject.toml.in" | % { $_ -Replace "@VERSION@","${Version}" } | Out-File -Encoding ascii "pyproject.toml"
 }
 
 If (Test-Path "${Prefix}.net")

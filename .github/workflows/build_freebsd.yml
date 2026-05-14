@@ -3,10 +3,10 @@ name: build_freebsd
 on: [push]
 permissions: read-all
 jobs:
-  build_freebsd:
+  build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
     - name: Building from source
       id: build_freebsd
       uses: vmactions/freebsd-vm@v1
