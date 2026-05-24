@@ -128,9 +128,13 @@ struct libfsapfs_internal_volume
 	 */
 	uint8_t *recovery_password;
 
-        /* The recovery password size
+	/* The recovery password size
 	 */
 	size_t recovery_password_size;
+
+	/* Tolerant mode flag: 0 = strict, 1 = skip corrupt B-tree nodes
+	 */
+	uint8_t tolerant_mode;
 
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	/* The read/write lock
@@ -248,6 +252,12 @@ int libfsapfs_volume_set_utf16_recovery_password(
      libfsapfs_volume_t *volume,
      const uint16_t *utf16_string,
      size_t utf16_string_length,
+     libcerror_error_t **error );
+
+LIBFSAPFS_EXTERN \
+int libfsapfs_volume_set_tolerant_mode(
+     libfsapfs_volume_t *volume,
+     uint8_t tolerant_mode,
      libcerror_error_t **error );
 
 LIBFSAPFS_EXTERN \

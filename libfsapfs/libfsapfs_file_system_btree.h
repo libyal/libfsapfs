@@ -76,6 +76,10 @@ struct libfsapfs_file_system_btree
 	/* Flag to indicate case folding should be used
 	 */
 	uint8_t use_case_folding;
+
+	/* Tolerant mode flag (skip corrupt nodes)
+	 */
+	uint8_t tolerant_mode;
 };
 
 int libfsapfs_file_system_btree_initialize(

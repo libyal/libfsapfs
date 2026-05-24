@@ -10,6 +10,7 @@
 .Op Fl o Ar offset
 .Op Fl p Ar password
 .Op Fl r Ar password
+.Op Fl R
 .Op Fl hvV
 .Ar source
 .Sh DESCRIPTION
@@ -38,6 +39,8 @@ specify the container offset in bytes
 specify the password
 .It Fl r Ar password
 specify the recovery password
+.It Fl R
+enable recovery mode (tolerant for corrupted file system)
 .It Fl v
 verbose output to stderr
 .It Fl V
