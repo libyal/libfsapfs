@@ -32,7 +32,7 @@
 #include "fsapfstools_libuna.h"
 #include "mount_path_string.h"
 
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 #define ESCAPE_CHARACTER (system_character_t) '^'
 #else
 #define ESCAPE_CHARACTER (system_character_t) '\\'
@@ -99,7 +99,7 @@ int mount_path_string_copy_hexadecimal_to_integer_32_bit(
 		{
 			safe_value_32bit |= (uint8_t) ( character_value - (system_character_t) '0' );
 		}
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 		else if( ( character_value >= (system_character_t) 'A' )
 		      && ( character_value <= (system_character_t) 'F' ) )
 		{
@@ -267,7 +267,7 @@ int mount_path_string_copy_from_file_entry_path(
 		 */
 		if( ( unicode_character <= 0x1f )
 		 || ( unicode_character == (libuna_unicode_character_t) LIBCPATH_SEPARATOR )
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 		 || ( unicode_character == (libuna_unicode_character_t) '<' )
 		 || ( unicode_character == (libuna_unicode_character_t) '>' )
 		 || ( unicode_character == (libuna_unicode_character_t) ':' )
@@ -588,7 +588,7 @@ int mount_path_string_copy_to_file_entry_path(
 			{
 				escaped_value = (uint32_t) character;
 			}
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 			else if( ( character == (system_character_t) 'X' )
 			      || ( character == (system_character_t) 'x' ) )
 #else
@@ -626,7 +626,7 @@ int mount_path_string_copy_to_file_entry_path(
 				if( ( ( escaped_value >= 0x01 )
 				  &&  ( escaped_value <= 0x1f ) )
 				 || ( escaped_value == (uint32_t) LIBCPATH_SEPARATOR )
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 				 || ( escaped_value == (uint32_t) '<' )
 				 || ( escaped_value == (uint32_t) '>' )
 				 || ( escaped_value == (uint32_t) ':' )
@@ -665,7 +665,7 @@ int mount_path_string_copy_to_file_entry_path(
 			 *   Observed unprintable characters ([
 			 *       U+2028, U+2029, U+e000, U+f8ff, U+f0000, U+ffffd, U+100000, U+10fffd])
 			 */
-#if defined( WINAPI )
+#if defined( WINAPI ) || defined( __MINGW32__ )
 			else if( ( character == (system_character_t) 'U' )
 			      || ( character == (system_character_t) 'u' ) )
 #else

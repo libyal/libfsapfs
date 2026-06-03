@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20251208
+dnl Version: 20260527
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -54,7 +54,8 @@ if( result != 1 ) return( EXIT_FAILURE );
 
 return( EXIT_SUCCESS ); ]] )],
       [ac_cv_openssl_xts_duplicate_keys=yes],
-      [ac_cv_openssl_xts_duplicate_keys=no])
+      [ac_cv_openssl_xts_duplicate_keys=no],
+      [ac_cv_openssl_xts_duplicate_keys=undetermined])
     LIBS="$ac_cv_libcrypto_backup_LIBS"
     AC_LANG_POP(C)])
   ])
@@ -182,7 +183,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_MD],
     [AC_DEFINE(
       [HAVE_EVP_MD_CTX_INIT],
       [1],
-      [Define to 1 if you have the `EVP_MD_CTX_init' function".])
+      [Define to 1 if you have the `EVP_MD_CTX_init' function.])
     ])
 
   AS_IF(
@@ -190,7 +191,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_MD],
     [AC_DEFINE(
       [HAVE_EVP_MD_CTX_CLEANUP],
       [1],
-      [Define to 1 if you have the `EVP_MD_CTX_cleanup' function".])
+      [Define to 1 if you have the `EVP_MD_CTX_cleanup' function.])
     ])
 
   AS_IF(
@@ -198,7 +199,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_MD],
     [AC_DEFINE(
       [HAVE_EVP_DIGESTINIT_EX2],
       [1],
-      [Define to 1 if you have the `EVP_DigestInit_ex2' function".])
+      [Define to 1 if you have the `EVP_DigestInit_ex2' function.])
     ])
   ])
 
@@ -215,7 +216,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_MD5],
     [AC_DEFINE(
       [HAVE_EVP_MD5],
       [1],
-      [Define to 1 if you have the `EVP_md5' function".])
+      [Define to 1 if you have the `EVP_md5' function.])
     ])
   ])
 
@@ -232,7 +233,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_SHA1],
     [AC_DEFINE(
       [HAVE_EVP_SHA1],
       [1],
-      [Define to 1 if you have the `EVP_sha1' function".])
+      [Define to 1 if you have the `EVP_sha1' function.])
     ])
   ])
 
@@ -249,7 +250,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_SHA224],
     [AC_DEFINE(
       [HAVE_EVP_SHA224],
       [1],
-      [Define to 1 if you have the `EVP_sha224' function".])
+      [Define to 1 if you have the `EVP_sha224' function.])
     ])
   ])
 
@@ -266,7 +267,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_SHA256],
     [AC_DEFINE(
       [HAVE_EVP_SHA256],
       [1],
-      [Define to 1 if you have the `EVP_sha256' function".])
+      [Define to 1 if you have the `EVP_sha256' function.])
     ])
   ])
 
@@ -283,7 +284,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_SHA512],
     [AC_DEFINE(
       [HAVE_EVP_SHA512],
       [1],
-      [Define to 1 if you have the `EVP_sha512' function".])
+      [Define to 1 if you have the `EVP_sha512' function.])
     ])
   ])
 
@@ -541,7 +542,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
     [AC_DEFINE(
       [HAVE_EVP_CIPHER_CTX_INIT],
       [1],
-      [Define to 1 if you have the `EVP_CIPHER_CTX_init' function".])
+      [Define to 1 if you have the `EVP_CIPHER_CTX_init' function.])
     ])
 
   AS_IF(
@@ -549,7 +550,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
     [AC_DEFINE(
       [HAVE_EVP_CIPHER_CTX_CLEANUP],
       [1],
-      [Define to 1 if you have the `EVP_CIPHER_CTX_cleanup' function".])
+      [Define to 1 if you have the `EVP_CIPHER_CTX_cleanup' function.])
     ])
 
   AS_IF(
@@ -557,7 +558,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_CIPHER],
     [AC_DEFINE(
       [HAVE_EVP_CIPHERINIT_EX2],
       [1],
-      [Define to 1 if you have the `EVP_CipherInit_ex2' function".])
+      [Define to 1 if you have the `EVP_CipherInit_ex2' function.])
     ])
   ])
 
@@ -602,7 +603,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_AES],
       [AC_DEFINE(
         [HAVE_AES_CBC_ENCRYPT],
         [1],
-        [Define to 1 if you have the `AES_cbc_encrypt' function".])
+        [Define to 1 if you have the `AES_cbc_encrypt' function.])
       ])
 
     AS_IF(
@@ -610,7 +611,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_AES],
       [AC_DEFINE(
         [HAVE_AES_ECB_ENCRYPT],
         [1],
-        [Define to 1 if you have the `AES_ecb_encrypt' function".])
+        [Define to 1 if you have the `AES_ecb_encrypt' function.])
       ])
     ])
 
@@ -857,7 +858,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_AES_CBC],
       [AC_DEFINE(
         [HAVE_EVP_CRYPTO_AES_CBC],
         [1],
-        [Define to 1 if you have the `EVP_aes_128_cbc', `EVP_aes_192_cbc' and `EVP_aes_256_cbc' functions".])
+        [Define to 1 if you have the `EVP_aes_128_cbc', `EVP_aes_192_cbc' and `EVP_aes_256_cbc' functions.])
       ])
     ])
   ])
@@ -894,7 +895,7 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_AES_ECB],
       [AC_DEFINE(
         [HAVE_EVP_CRYPTO_AES_ECB],
         [1],
-        [Define to 1 if you have the `EVP_aes_128_ecb', `EVP_aes_192_ecb' and `EVP_aes_256_ecb' functions".])
+        [Define to 1 if you have the `EVP_aes_128_ecb', `EVP_aes_192_ecb' and `EVP_aes_256_ecb' functions.])
       ])
     ])
   ])
@@ -924,14 +925,14 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_AES_XTS],
     dnl OpenSSL 1.1.1c will error with "xts duplicated keys".
     AX_LIBCRYPTO_CHECK_XTS_DUPLICATE_KEYS_SUPPORT
     AS_IF(
-      [test "x$ac_cv_openssl_xts_duplicate_keys" = xno],
+      [test "x$ac_cv_openssl_xts_duplicate_keys" != xyes],
       [ac_cv_libcrypto_aes_xts=no],
       [AS_IF(
         [test "x$ac_cv_lib_crypto_EVP_aes_128_xts" = xyes && test "x$ac_cv_lib_crypto_EVP_aes_256_xts" = xyes],
         [AC_DEFINE(
           [HAVE_EVP_CRYPTO_AES_XTS],
           [1],
-          [Define to 1 if you have the `EVP_aes_128_xts' and `EVP_aes_256_xts' functions".])
+          [Define to 1 if you have the `EVP_aes_128_xts' and `EVP_aes_256_xts' functions.])
         ])
       ])
     ])

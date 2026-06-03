@@ -8,7 +8,7 @@ $ExitIgnore = 77
 
 $Profiles = @("fsapfsinfo", "fsapfsinfo_fs")
 $OptionsPerProfile = @("", "-H")
-$OptionSets = "offset password";
+$OptionSets = "offset password"
 
 $InputGlob = "*"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests tools functions and types.
 #
-# Version: 20240413
+# Version: 20260531
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -88,11 +88,6 @@ run_test_with_input()
 		do
 			OPTION_INPUT_FILE="${INPUT_FILE}";
 
-			if test "${OSTYPE}" = "msys";
-			then
-				# A test executable built with MinGW expects a Windows path.
-				INPUT_FILE=`echo ${INPUT_FILE} | sed 's?/?\\\\?g'`;
-			fi
 			local TESTED_WITH_OPTIONS=0;
 
 			for OPTION_SET in ${OPTION_SETS[@]};

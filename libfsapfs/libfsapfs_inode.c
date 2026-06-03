@@ -238,13 +238,13 @@ int libfsapfs_inode_read_value_data(
 	uint16_t extended_field_index      = 0;
 	uint16_t number_of_extended_fields = 0;
 	uint16_t value_data_size           = 0;
-	uint8_t extended_field_flags       = 0;
 	uint8_t extended_field_type        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit               = 0;
 	uint32_t value_32bit               = 0;
 	uint16_t value_16bit               = 0;
+	uint8_t extended_field_flags       = 0;
 #endif
 
 	if( inode == NULL )
@@ -572,8 +572,7 @@ int libfsapfs_inode_read_value_data(
 
 				goto on_error;
 			}
-			extended_field_type  = data[ data_offset ];
-			extended_field_flags = data[ data_offset + 1 ];
+			extended_field_type = data[ data_offset ];
 
 			byte_stream_copy_to_uint16_little_endian(
 			 &( data[ data_offset + 2 ] ),
@@ -589,6 +588,8 @@ int libfsapfs_inode_read_value_data(
 				 extended_field_type,
 				 libfsapfs_debug_print_inode_extended_field_type(
 				  extended_field_type ) );
+
+				extended_field_flags = data[ data_offset + 1 ];
 
 				libcnotify_printf(
 				 "%s: extended field: %" PRIu16 " flags\t\t: 0x%02" PRIx8 "\n",

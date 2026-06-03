@@ -1,6 +1,6 @@
 dnl Functions for pthread
 dnl
-dnl Version: 20240513
+dnl Version: 20260529
 
 dnl Function to detect if pthread is available
 AC_DEFUN([AX_PTHREAD_CHECK_LIB],
@@ -13,8 +13,15 @@ AC_DEFUN([AX_PTHREAD_CHECK_LIB],
     dnl treat them as auto-detection.
     AS_IF(
       [test "x$ac_cv_with_pthread" != x && test "x$ac_cv_with_pthread" != xauto-detect && test "x$ac_cv_with_pthread" != xyes],
-      [AX_CHECK_LIB_DIRECTORY_EXISTS([pthread])])
-    ])
+      [AS_IF(
+        [test -d "$ac_cv_with_pthread"],
+        [CFLAGS="$CFLAGS -I${ac_cv_with_pthread}/include"
+        LDFLAGS="$LDFLAGS -L${ac_cv_with_pthread}/lib"],
+        [AC_MSG_FAILURE(
+          [no such directory: $ac_cv_with_pthread],
+          [1])
+        ])
+      ])
 
     AS_IF(
       [test "x$ac_cv_pthread" = xcheck],
@@ -48,7 +55,18 @@ AC_DEFUN([AX_PTHREAD_CHECK_LIB],
           [pthread_rwlock_wrlock],
           [pthread_rwlock_unlock]])
 
-        ac_cv_pthread_LIBADD="-lpthread"
+        ac_cv_pthread_target_string="$target"
+
+        AS_IF(
+          [test "x$ac_cv_pthread_target_string" = x],
+          [ac_cv_pthread_target_string="$host"])
+
+        dnl prevent confusing libtool on Cygwin
+        AS_CASE(
+          [$ac_cv_pthread_target_string],
+          [*cygwin*],[ac_cv_pthread_LIBADD=""],
+          [*],[ac_cv_pthread_LIBADD="-lpthread"])
+        ])
       ])
 
     AX_CHECK_LIB_DIRECTORY_MSG_ON_FAILURE([pthread])

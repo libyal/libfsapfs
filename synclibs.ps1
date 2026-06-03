@@ -1,6 +1,6 @@
 # Script that synchronizes the local library dependencies
 #
-# Version: 20180125
+# Version: 20260602
 
 Param (
 	[switch]$UseHead = $false
@@ -33,7 +33,7 @@ ForEach (${LocalLib} in ${LocalLibs})
 	{
 		$Output = Invoke-Expression -Command "${Git} fetch --quiet --all --tags --prune 2>&1"
 
-		$LatestTag = Invoke-Expression -Command "${Git} describe --tags --abbrev=0 2>&1"
+		$LatestTag = Invoke-Expression -Command "${Git} tag --sort=-v:refname 2>&1" | Select-Object -First 1
 
 		If (${LatestTag} -and -not ${UseHead})
 		{

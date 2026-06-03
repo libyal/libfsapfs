@@ -58,10 +58,16 @@
 extern "C" {
 #endif
 
+#if defined( _WIN32 ) || defined( WINFSP_VERSION )
+typedef struct fuse_stat mount_fuse_stat_t;
+#else
+typedef struct stat mount_fuse_stat_t;
+#endif
+
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
 
 int mount_fuse_set_stat_info(
-     struct stat *stat_info,
+     mount_fuse_stat_t *stat_info,
      size64_t size,
      uint16_t file_mode,
      int64_t access_time,
@@ -73,7 +79,7 @@ int mount_fuse_filldir(
      void *buffer,
      fuse_fill_dir_t filler,
      const char *name,
-     struct stat *stat_info,
+     mount_fuse_stat_t *stat_info,
      mount_file_entry_t *file_entry,
      libcerror_error_t **error );
 
@@ -131,12 +137,12 @@ int mount_fuse_releasedir(
 #if defined( HAVE_LIBFUSE3 )
 int mount_fuse_getattr(
      const char *path,
-     struct stat *stat_info,
+     mount_fuse_stat_t *stat_info,
      struct fuse_file_info *file_info );
 #else
 int mount_fuse_getattr(
      const char *path,
-     struct stat *stat_info );
+     mount_fuse_stat_t *stat_info );
 #endif
 
 int mount_fuse_readlink(

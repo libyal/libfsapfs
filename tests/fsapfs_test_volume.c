@@ -336,7 +336,9 @@ int main(
 	libcerror_error_t *error            = NULL;
 	libfsapfs_volume_t *volume          = NULL;
 	system_character_t *option_offset   = NULL;
+/* TODO
 	system_character_t *option_password = NULL;
+*/
 	system_character_t *source          = NULL;
 	system_integer_t option             = 0;
 	size_t string_length                = 0;
@@ -365,8 +367,9 @@ int main(
 				break;
 
 			case (system_integer_t) 'p':
+/* TODO
 				option_password = optarg;
-
+*/
 				break;
 		}
 	}

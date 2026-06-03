@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Tests library functions and types.
 #
-# Version: 20260509
+# Version: 20260531
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -89,21 +89,16 @@ run_test_with_input()
 					INPUT_FILES+=("${TEST_SET_INPUT_DIRECTORY}/${FILENAME}")
 				fi
 			done < "${TEST_SET_DIRECTORY}/files"
-                else
+		else
 			for FILENAME in ${TEST_SET_INPUT_DIRECTORY}/${INPUT_GLOB};
 			do
 				INPUT_FILES+=("${FILENAME}")
 			done
-                fi
+		fi
 		for INPUT_FILE in "${INPUT_FILES[@]}";
 		do
 			OPTION_INPUT_FILE="${INPUT_FILE}";
 
-			if test "${OSTYPE}" = "msys";
-			then
-				# A test executable built with MinGW expects a Windows path.
-				INPUT_FILE=`echo ${INPUT_FILE} | sed 's?/?\\\\?g'`;
-			fi
 			local TESTED_WITH_OPTIONS=0;
 
 			for OPTION_SET in ${OPTION_SETS[@]};

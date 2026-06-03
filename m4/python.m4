@@ -1,6 +1,6 @@
 dnl Functions for Python bindings
 dnl
-dnl Version: 20251125
+dnl Version: 20260529
 
 dnl Function to check if the python binary is available
 dnl "python${PYTHON_VERSION} python python# python#.#"
@@ -8,7 +8,7 @@ AC_DEFUN([AX_PROG_PYTHON],
   [AS_IF(
     [test "x${PYTHON_VERSION}" != x],
     [ax_python_progs="python${PYTHON_VERSION}"],
-    [ax_python_progs="python python3 python3.15 python3.14 python3.14 python3.12 python3.11 python3.10 python3.9 python3.8 python3.7 python3.6 python3.5 python3.4 python3.3 python3.2 python3.1 python3.0 python2 python2.7 python2.6 python2.5"])
+    [ax_python_progs="python python3 python3.15 python3.14 python3.13 python3.12 python3.11 python3.10"])
   AC_CHECK_PROGS(
     [PYTHON],
     [$ax_python_progs])
@@ -41,7 +41,7 @@ AC_DEFUN([AX_PROG_PYTHON_CONFIG],
     [test "x${PYTHON_CONFIG}" = x],
     [AC_CHECK_PROGS(
       [PYTHON_CONFIG],
-      [python-config python3-config python3.12-config python3.11-config python3.10-config python3.9-config python3.8-config python3.7-config python3.6-config python3.5-config python3.4-config python3.3-config python3.2-config python3.1-config python3.0-config python2-config python2.7-config python2.6-config python2.5-config])
+      [python-config python3-config python3.15-config python3.14-config python3.13-config python3.12-config python3.11-config python3.10-config])
     ])
   AS_IF(
     [test "x${PYTHON_CONFIG}" = x],
@@ -60,7 +60,10 @@ AC_DEFUN([AX_PYTHON_CHECK],
 
   AS_IF(
     [test "x${PYTHON_CONFIG}" != x],
-    [dnl Check for Python includes
+    [dnl Check for ABI flags
+    PYTHON_ABI_FLAGS=`${PYTHON_CONFIG} --abiflags 2>/dev/null`;
+
+    dnl Check for Python includes
     PYTHON_INCLUDES=`${PYTHON_CONFIG} --includes 2>/dev/null`;
 
     AC_MSG_CHECKING(
@@ -75,6 +78,13 @@ AC_DEFUN([AX_PYTHON_CHECK],
       [for Python libraries])
     AC_MSG_RESULT(
       [$PYTHON_LDFLAGS])
+
+    dnl Check for Python extension suffix
+    ac_cv_python_exention_suffix=`${PYTHON_CONFIG} --extension-suffix 2>/dev/null`;
+
+    AS_IF(
+      [test "x${ac_cv_python_exention_suffix}" != x],
+      [PYTHON_LDFLAGS="${PYTHON_LDFLAGS} -shrext ${ac_cv_python_exention_suffix}"])
 
     dnl For CygWin and MinGW add the -no-undefined linker flag
     AS_CASE(
@@ -99,7 +109,11 @@ AC_DEFUN([AX_PYTHON_CHECK],
   AS_IF(
     [test "x${ac_cv_header_python_h}" != xyes],
     [ac_cv_enable_python=no],
-    [ac_cv_enable_python=${ax_prog_python_version}
+    [ac_cv_enable_python="${ax_prog_python_version}${PYTHON_ABI_FLAGS}"
+    AS_IF(
+      [test "x${PYTHON_ABI_FLAGS}" != x],
+      [PYTHON_INCLUDES="${PYTHON_INCLUDES} -DPy_GIL_DISABLED=1"])
+
     AC_SUBST(
       [PYTHON_CPPFLAGS],
       [$PYTHON_INCLUDES])

@@ -77,84 +77,6 @@ environment:
     platform: x64
     configuration: Release
     PYTHON_PATH: "C:\\Python311-x64"
-  - TARGET: macos-x64-clang
-    BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    CC: clang
-    CFLAGS: "-I/usr/local/include"
-    LDFLAGS: "-L/usr/local/lib"
-    CONFIGURE_OPTIONS: ""
-  - TARGET: macos-x64-gcc
-    BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    CC: gcc
-    CFLAGS: "-I/usr/local/include"
-    LDFLAGS: "-L/usr/local/lib"
-    CONFIGURE_OPTIONS: ""
-  - TARGET: macos-x64-gcc-python
-    BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    PYTHON: "/usr/local/opt/python@3.11/bin/python3"
-    PYTHON_CONFIG: "/usr/local/opt/python@3.11/bin/python3-config"
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    CC: gcc
-    CFLAGS: "-I/usr/local/include"
-    LDFLAGS: "-L/usr/local/lib"
-    CONFIGURE_OPTIONS: "--enable-python"
-  - TARGET: macos-pkgbuild
-    BUILD_ENVIRONMENT: xcode
-    APPVEYOR_BUILD_WORKER_IMAGE: macos-sonoma
-    PYTHON: "/usr/local/opt/python@3.11/bin/python3"
-    PYTHON_CONFIG: "/usr/local/opt/python@3.11/bin/python3-config"
-    HOMEBREW_NO_INSTALL_CLEANUP: 1
-    CC: gcc
-    CFLAGS: "-I/usr/local/include"
-    LDFLAGS: "-L/usr/local/lib"
-    CONFIGURE_OPTIONS: "--disable-dependency-tracking --prefix=/usr/local --enable-python --with-pyprefix"
-  - TARGET: cygwin64-gcc
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: ""
-  - TARGET: cygwin64-gcc-no-optimization
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-shared=no"
-    CFLAGS: "--coverage -O0"
-    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
-    LDFLAGS: "--coverage"
-  - TARGET: cygwin64-gcc-python
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-python"
-  - TARGET: cygwin64-gcc-static-executables
-    BUILD_ENVIRONMENT: cygwin64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-static-executables --with-libfuse=no"
-  - TARGET: mingw-w64-gcc
-    BUILD_ENVIRONMENT: mingw-w64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: ""
-  - TARGET: mingw-w64-gcc-no-optimization
-    BUILD_ENVIRONMENT: mingw-w64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-shared=no"
-    CFLAGS: "--coverage -O0"
-    CPPFLAGS: "-DOPTIMIZATION_DISABLED"
-    LDFLAGS: "--coverage"
-  - TARGET: mingw-w64-gcc-python
-    BUILD_ENVIRONMENT: mingw-w64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-python"
-  - TARGET: mingw-w64-gcc-static-executables
-    BUILD_ENVIRONMENT: mingw-w64
-    APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
-    CONFIGURE_OPTIONS: "--enable-static-executables"
-
-matrix:
-  allow_failures:
-  - TARGET: mingw-w64-gcc-python
 
 install:
 - cmd: if [%BUILD_ENVIRONMENT%]==[msbuild] (
@@ -208,18 +130,6 @@ install:
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "Win32";
       .\builddokan.ps1 -Configuration ${Configuration} -Platform "x64"; }
     }
-- sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then brew untap homebrew/homebrew-cask-versions && brew update -q; fi
-- sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then brew install -q autoconf automake gettext gnu-sed libtool macfuse openssl pkg-config || true; fi
-- ps: If ($env:BUILD_ENVIRONMENT -eq "cygwin64") {
-    Invoke-WebRequest -Uri "https://cygwin.com/setup-x86_64.exe" -Outfile C:\cygwin64\setup-x86_64.exe }
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\setup-x86_64.exe -qgnNdO -l C:\cygwin64\var\cache\setup -R c:\cygwin64 -s http://cygwin.mirror.constant.com -P cygfuse -P gettext-devel -P libssl-devel -P python3-devel -P zlib-devel )
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    git clone git://git.savannah.gnu.org/config.git ..\config )
-- cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\pacman -S --noconfirm --needed autoconf automake gettext-devel libtool make mingw-w64-x86_64-gcc mingw-w64-x86_64-python3 msys/zlib-devel pkg-config )
-- ps: If (("cygwin64-gcc-no-optimization", "mingw-w64-gcc-no-optimization").Contains($env:TARGET)) {
-    Invoke-WebRequest -Uri "https://uploader.codecov.io/latest/windows/codecov.exe" -Outfile ..\codecov.exe }
 
 build_script:
 - ps: If ($env:BUILD_ENVIRONMENT -eq "msbuild") {
@@ -233,14 +143,6 @@ build_script:
     .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --no-python-dll --with-dokany" }
 - ps: If ($env:TARGET -eq "vs2022-python") {
     .\build.ps1 -VisualStudioVersion $env:TARGET.Substring(2, 4) -Configuration $env:CONFIGURATION -Platform $env:PLATFORM -PythonPath $env:PYTHON_PATH -VSToolsOptions "--extend-with-x64 --python-path $env:PYTHON_PATH --with-dokany" }
-- sh: if test ${BUILD_ENVIRONMENT} = "xcode"; then export PATH="/usr/local/opt/gettext/bin:$PATH"; export SED="/usr/local/bin/gsed"; tests/build.sh ${CONFIGURE_OPTIONS}; fi
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    xcopy /i /q /s C:\projects\libfsapfs C:\cygwin64\home\appveyor\libfsapfs &&
-    xcopy /i /q ..\config\config.* C:\cygwin64\home\appveyor\libfsapfs &&
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
-- cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    xcopy /i /q /s C:\projects\libfsapfs C:\msys64\home\appveyor\libfsapfs &&
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && tests/build.sh ${CONFIGURE_OPTIONS}" )
 
 test_script:
 - cmd: rem Run tests
@@ -248,16 +150,4 @@ test_script:
     .\runtests.ps1 }
 - sh: if test ${BUILD_ENVIRONMENT} = "xcode" && test ${TARGET} != "macos-pkgbuild"; then tests/runtests.sh; fi
 - sh: if test ${TARGET} = "macos-pkgbuild"; then tests/pkgbuild.sh; fi
-- cmd: if [%BUILD_ENVIRONMENT%]==[cygwin64] (
-    C:\cygwin64\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
-- cmd: if [%BUILD_ENVIRONMENT%]==[mingw-w64] (
-    C:\msys64\usr\bin\bash -l -c "cd libfsapfs && tests/runtests.sh" )
-
-after_test:
-- cmd: if [%TARGET%]==[cygwin64-gcc-no-optimization] (
-    C:\cygwin64\bin\bash -e -l -c "cd libfsapfs && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
-    C:\projects\codecov.exe -R \cygwin64\home\appveyor\libfsapfs --name %TARGET% )
-- cmd: if [%TARGET%]==[mingw-w64-gcc-no-optimization] (
-    C:\msys64\usr\bin\bash -e -l -c "cd libfsapfs && for DIRECTORY in `find . -maxdepth 1 -type d`; do (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) done" &&
-    C:\projects\codecov.exe -R \msys64\home\appveyor\libfsapfs --name %TARGET% )
 

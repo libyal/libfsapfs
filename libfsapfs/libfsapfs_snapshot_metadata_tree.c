@@ -974,10 +974,13 @@ int libfsapfs_snapshot_metadata_tree_get_entry_from_node_by_identifier(
 	libfsapfs_btree_entry_t *previous_entry = NULL;
 	static char *function                   = "libfsapfs_snapshot_metadata_tree_get_entry_from_node_by_identifier";
 	uint64_t snapshot_metadata_identifier   = 0;
-	uint8_t snapshot_metadata_data_type     = 0;
 	int btree_entry_index                   = 0;
 	int is_leaf_node                        = 0;
 	int number_of_entries                   = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint8_t snapshot_metadata_data_type     = 0;
+#endif
 
 	if( snapshot_metadata_tree == NULL )
 	{
@@ -1098,11 +1101,11 @@ int libfsapfs_snapshot_metadata_tree_get_entry_from_node_by_identifier(
 		 entry->key_data,
 		 snapshot_metadata_identifier );
 
-		snapshot_metadata_data_type = (uint8_t) ( snapshot_metadata_identifier >> 60 );
-
 #if defined( HAVE_DEBUG_OUTPUT )
 		if( libcnotify_verbose != 0 )
 		{
+			snapshot_metadata_data_type = (uint8_t) ( snapshot_metadata_identifier >> 60 );
+
 			libcnotify_printf(
 			 "%s: B-tree entry: %d, identifier: %" PRIu64 ", data type: 0x%" PRIx8 " %s\n",
 			 function,

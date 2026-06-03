@@ -1,0 +1,127 @@
+# Run source checks.
+name: source_checks
+on:
+  pull_request:
+  push:
+permissions: read-all
+jobs:
+  asan:
+    name: Check source with asan
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          compiler: 'gcc'
+          configure_options: '--enable-asan'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt -y install autoconf automake autopoint build-essential git libasan8 libtool pkg-config
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${{ matrix.configure_options }}
+        make > /dev/null
+    - name: Run tests
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1
+  scan_build:
+    name: Check source with scan-build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          compiler: 'gcc'
+    permissions:
+      # Required to upload to GitHub Code Scanning
+      security-events: write
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt -y install autoconf automake autopoint build-essential clang clang-tools git jq libtool pkg-config
+    - name: Build from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure
+        scan-build -o scan-results -sarif make
+    - name: Combine individual SARIF files
+      env:
+        EMPTY_SARIF: |
+          {
+            "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.6.json",
+            "version": "2.1.0",
+            "runs": [
+              {
+                "tool": {
+                  "driver": {
+                    "name": "clang",
+                    "version": "Ubuntu clang version 18.1.3 (1ubuntu1)",
+                    "rules": [
+                      {
+                        "id": "unix.Malloc"
+                      },
+                      {
+                        "id": "core.BitwiseShift"
+                      }
+                    ]
+                  }
+                },
+                "results": []
+              }
+            ]
+          }
+      run: |
+        npx @microsoft/sarif-multitool merge scan-results/*/*.sarif --merge-runs --output-file=scan-build-report.sarif
+        NUMBER_OF_RESULTS=$( jq '.runs[0].results | length' scan-build-report.sarif )
+        if [ $NUMBER_OF_RESULTS -eq 0 ]; then
+          echo "$EMPTY_SARIF" > scan-build-report.sarif
+        fi
+    - name: Upload combined SARIF file
+      uses: github/codeql-action/upload-sarif@v4
+      with:
+        sarif_file: scan-build-report.sarif
+        category: scan-build
+  ubsan:
+    name: Check source with ubsan
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          compiler: 'gcc'
+          configure_options: '--enable-ubsan'
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt -y install autoconf automake autopoint build-essential git libtool libubsan1 pkg-config
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${{ matrix.configure_options }}
+        make > /dev/null
+    - name: Run tests
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1

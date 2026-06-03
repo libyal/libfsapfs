@@ -1,6 +1,6 @@
 dnl Checks for libcfile required headers and functions
 dnl
-dnl Version: 20240514
+dnl Version: 20260531
 
 dnl Function to detect if libcfile is available
 dnl ac_libcfile_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -154,7 +154,7 @@ posix_fadvise( 0, 0, 0, POSIX_FADV_SEQUENTIAL )]] )],
         AC_DEFINE(
           [HAVE_POSIX_FADVISE],
           [1],
-          [Define to 1 if you have the posix_fadvise function.]) ],
+          [Define to 1 if you have the `posix_fadvise' function.]) ],
         [AC_MSG_RESULT(
           [no]) ])
     ])
@@ -192,16 +192,6 @@ AC_DEFUN([AX_LIBCFILE_CHECK_LOCAL],
     [AC_MSG_FAILURE(
       [Missing function: ftruncate],
       [1])
-    ])
-
-  AS_IF(
-    [test x"$ac_cv_enable_winapi" = xno],
-    [AS_IF(
-      [test "x$ac_cv_func_ioctl" != xyes],
-      [AC_MSG_FAILURE(
-        [Missing function: ioctl],
-        [1])
-      ])
     ])
 
   AS_IF(

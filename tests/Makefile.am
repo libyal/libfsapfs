@@ -25,6 +25,10 @@ AM_CPPFLAGS = \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
+AM_TESTS_ENVIRONMENT = \
+	export PYTHON="@PYTHON@"; \
+	export TESTS_USE_WINAPI="@TESTS_USE_WINAPI@";
+
 if HAVE_PYTHON_TESTS
 TESTS_PYFSAPFS = \
 	test_python_module.sh
@@ -446,6 +450,7 @@ fsapfs_test_data_block_vector_SOURCES = \
 
 fsapfs_test_data_block_vector_LDADD = \
 	@LIBFDATA_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
 	@LIBCDATA_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
@@ -460,6 +465,7 @@ fsapfs_test_data_stream_SOURCES = \
 
 fsapfs_test_data_stream_LDADD = \
 	@LIBFDATA_LIBADD@ \
+	@LIBCNOTIFY_LIBADD@ \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
@@ -959,7 +965,8 @@ fsapfs_test_tools_output_SOURCES = \
 
 fsapfs_test_tools_output_LDADD = \
 	../libfsapfs/libfsapfs.la \
-	@LIBCERROR_LIBADD@
+	@LIBCERROR_LIBADD@ \
+	@LIBINTL@
 
 fsapfs_test_tools_path_string_SOURCES = \
 	../fsapfstools/path_string.c ../fsapfstools/path_string.h \

@@ -1,0 +1,152 @@
+# Generate code coverage report and upload to Codecov.
+name: coverage
+on:
+  pull_request:
+  push:
+permissions: read-all
+jobs:
+  coverage_cygwin:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+        - configure_options: '--enable-code-coverage --enable-wide-character-type --enable-winapi --with-openssl=no'
+          codecov_name: 'cygwin64-gcc-no-optimization'
+    steps:
+    - name: Configure git
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v6
+    - name: Install Cygwin and build dependencies
+      uses: cygwin/cygwin-install-action@v6
+      with:
+        packages: autoconf, automake, binutils, curl, cygfuse, gcc-core, gettext-devel, git, libssl-devel, libtool, make, pkg-config, python312, python312-devel, zlib-devel
+        platform: x86_64
+        add-to-path: true
+    - name: Download test data
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: ${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: ${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+        CONFIGURE_OPTIONS: ${{ matrix.configure_options }}
+        LD: ld
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${CONFIGURE_OPTIONS}
+        make > /dev/null
+    - name: Run tests
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: ${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1
+    - name: Generate coverage data
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: ${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        for DIRECTORY in `find . -maxdepth 1 -type d`; do \
+          (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
+        done
+    # Cannot use codecov/codecov-action@v6 given it tries to use cygwin sh and fails.
+    - name: Upload coverage report to Codecov
+      shell: pwsh
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      run: |
+        Invoke-WebRequest -Uri "https://cli.codecov.io/latest/windows/codecov.exe" -OutFile "codecov.exe"
+        Unblock-File -Path "./codecov.exe"
+        ./codecov.exe --verbose upload-coverage --git-service github --gcov-executable gcov --name "${{ matrix.codecov_name }}"
+  coverage_linux:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+        - os: ubuntu-24.04
+          compiler: 'gcc'
+          configure_options: '--enable-code-coverage --enable-wide-character-type --with-openssl=no CPPFLAGS=-DHAVE_MEMORY_TESTS=1'
+          codecov_name: 'ubuntu-24.04-gcc-no-optimization'
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install build dependencies
+      run: |
+        sudo apt -y update
+        sudo apt -y install curl autoconf automake autopoint build-essential git libfuse3-dev libssl-dev libtool pkg-config zlib1g-dev
+    - name: Download test data
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${{ matrix.configure_options }}
+        make > /dev/null
+    - name: Run tests
+      run: |
+        make check CHECK_WITH_STDERR=1 SKIP_TOOLS_END_TO_END_TESTS=1
+    - name: Generate coverage data
+      run: |
+        for DIRECTORY in `find . -maxdepth 1 -type d`; do \
+          (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
+        done
+    - name: Upload coverage report to Codecov
+      uses: codecov/codecov-action@v6
+      with:
+        name: ${{ matrix.codecov_name }}
+        token: ${{ secrets.CODECOV_TOKEN }}
+        verbose: true
+  coverage_msys2_mingw:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+        - configure_options: '--enable-code-coverage --enable-wide-character-type --enable-winapi --with-openssl=no'
+          codecov_name: 'mingw-w64-gcc-no-optimization'
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up MSYS2 with MinGW-w64
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: autoconf automake curl git libtool make mingw-w64-x86_64-gcc mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools mingw-w64-x86_64-python3 mingw-w64-x86_64-zlib pkg-config
+    - name: Download test data
+      shell: msys2 {0}
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      shell: msys2 {0}
+      env:
+        CONFIGURE_OPTIONS: ${{ matrix.configure_options }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${CONFIGURE_OPTIONS}
+        make > /dev/null
+    - name: Run tests
+      shell: msys2 {0}
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1
+    - name: Generate coverage data
+      shell: msys2 {0}
+      run: |
+        for DIRECTORY in `find . -maxdepth 1 -type d`; do \
+          (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
+        done
+    - name: Upload coverage report to Codecov
+      uses: codecov/codecov-action@v6
+      with:
+        name: ${{ matrix.codecov_name }}
+        token: ${{ secrets.CODECOV_TOKEN }}
+        verbose: true

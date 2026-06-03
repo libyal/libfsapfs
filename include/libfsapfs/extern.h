@@ -31,14 +31,17 @@
  */
 #if defined( LIBFSAPFS_DLL_EXPORT )
 #define LIBFSAPFS_EXTERN __declspec(dllexport)
+#define LIBFSAPFS_EXTERN_VARIABLE extern __declspec(dllexport)
 
 #elif defined( LIBFSAPFS_DLL_IMPORT )
-#define LIBFSAPFS_EXTERN extern __declspec(dllimport)
+#define LIBFSAPFS_EXTERN __declspec(dllimport)
+#define LIBFSAPFS_EXTERN_VARIABLE extern __declspec(dllimport)
 
 #else
 #define LIBFSAPFS_EXTERN extern
+#define LIBFSAPFS_EXTERN_VARIABLE extern
 
-#endif
+#endif /* defined( LIBFSAPFS_DLL_EXPORT ) */
 
 #endif /* !defined( _LIBFSAPFS_EXTERN_H ) */
 

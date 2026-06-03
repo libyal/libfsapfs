@@ -1,6 +1,8 @@
 # Build from source on Windows.
 name: build_windows
-on: [push, pull_request]
+on:
+  pull_request:
+  push:
 permissions: read-all
 jobs:
   build:
@@ -22,7 +24,7 @@ jobs:
     - name: Download test data
       run: |
         if (Test-Path .\synctestdata.ps1) { .\synctestdata.ps1 }
-    - name: Building from source
+    - name: Build from source
       run: |
         .\synclibs.ps1 -UseHead
         .\autogen.ps1
@@ -30,3 +32,79 @@ jobs:
     - name: Run tests
       run: |
         .\runtests.ps1
+  build_cygwin:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+        - configure_options: ''
+        - configure_options: '--enable-python'
+    steps:
+    - name: Configure git
+      run: git config --global core.autocrlf false
+    - uses: actions/checkout@v6
+    - name: Install Cygwin and build dependencies
+      uses: cygwin/cygwin-install-action@v6
+      with:
+        packages: autoconf, automake, binutils, curl, cygfuse, gcc-core, gettext-devel, git, libssl-devel, libtool, make, pkg-config, python312, python312-devel, zlib-devel
+        platform: x86_64
+        add-to-path: true
+    - name: Download test data
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: ${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: ${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+        CONFIGURE_OPTIONS: ${{ matrix.configure_options }}
+        LD: ld
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${CONFIGURE_OPTIONS}
+        make > /dev/null
+    - name: Run tests
+      shell: bash --login -e -o pipefail -o igncr {0}
+      working-directory: ${{ github.workspace }}
+      env:
+        CHERE_INVOKING: 1
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1
+  build_msys2_mingw:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        include:
+        - configure_options: '--disable-winapi --enable-wide-character-type'
+        - configure_options: '--enable-winapi --enable-wide-character-type'
+        - configure_options: '--disable-nls --disable-shared-libs --enable-python'
+    steps:
+    - uses: actions/checkout@v6
+    - name: Set up MSYS2 with MinGW-w64
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW64
+        update: true
+        install: autoconf automake curl git libtool make mingw-w64-x86_64-gcc mingw-w64-x86_64-gettext-runtime mingw-w64-x86_64-gettext-tools mingw-w64-x86_64-python3 mingw-w64-x86_64-zlib pkg-config
+    - name: Download test data
+      shell: msys2 {0}
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      shell: msys2 {0}
+      env:
+        CONFIGURE_OPTIONS: ${{ matrix.configure_options }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${CONFIGURE_OPTIONS}
+        make > /dev/null
+    - name: Run tests
+      shell: msys2 {0}
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1

@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script that synchronizes the local library dependencies
 #
-# Version: 20240414
+# Version: 20260602
 
 EXIT_SUCCESS=0;
 EXIT_FAILURE=1;
@@ -28,7 +28,7 @@ do
 	fi
 	(cd ${LOCAL_LIB}-$$ && git fetch --quiet --all --tags --prune)
 
-	LATEST_TAG=`cd ${LOCAL_LIB}-$$ && git describe --tags --abbrev=0`;
+	LATEST_TAG=`cd ${LOCAL_LIB}-$$ && git tag --sort=-v:refname | head -n 1`;
 
 	if test -n ${LATEST_TAG} && test "$1" != "--use-head";
 	then

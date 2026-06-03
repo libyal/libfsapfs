@@ -24,21 +24,28 @@
 
 #include <common.h>
 
+#if !defined( __CYGWIN__ ) && !defined( _WIN32 ) && defined( __has_attribute )
+#if __has_attribute( visibility )
+#define LIBFSAPFS_INTERNAL	__attribute__((visibility("hidden"))) extern
+
+#else
+#define LIBFSAPFS_INTERNAL	extern
+
+#endif /* __has_attribute( visibility ) */
+#else
+#define LIBFSAPFS_INTERNAL	extern
+
+#endif /* !defined( __CYGWIN__ ) && !defined( _WIN32 ) && defined( __has_attribute ) */
+
 /* Define HAVE_LOCAL_LIBFSAPFS for local use of libfsapfs
  */
 #if !defined( HAVE_LOCAL_LIBFSAPFS )
 
 #include <libfsapfs/extern.h>
 
-#if defined( __CYGWIN__ ) || defined( __MINGW32__ )
-#define LIBFSAPFS_EXTERN_VARIABLE	extern
-#else
-#define LIBFSAPFS_EXTERN_VARIABLE	LIBFSAPFS_EXTERN
-#endif
-
 #else
 #define LIBFSAPFS_EXTERN		/* extern */
-#define LIBFSAPFS_EXTERN_VARIABLE	extern
+#define LIBFSAPFS_EXTERN_VARIABLE	LIBFSAPFS_INTERNAL
 
 #endif /* !defined( HAVE_LOCAL_LIBFSAPFS ) */
 

@@ -495,18 +495,17 @@ int libfsapfs_directory_record_read_value_data(
      libcerror_error_t **error )
 {
 	static char *function              = "libfsapfs_directory_record_read_value_data";
-	const uint8_t *value_data          = NULL;
 	size_t data_offset                 = 0;
 	size_t trailing_data_size          = 0;
 	size_t value_data_offset           = 0;
 	size_t value_data_size             = 0;
 	uint16_t extended_field_index      = 0;
 	uint16_t number_of_extended_fields = 0;
-	uint8_t extended_field_flags       = 0;
 	uint8_t extended_field_type        = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint16_t value_16bit               = 0;
+	uint8_t extended_field_flags       = 0;
 #endif
 
 	if( directory_record == NULL )
@@ -659,8 +658,7 @@ int libfsapfs_directory_record_read_value_data(
 
 				return( -1 );
 			}
-			extended_field_type  = data[ data_offset ];
-			extended_field_flags = data[ data_offset + 1 ];
+			extended_field_type = data[ data_offset ];
 
 			byte_stream_copy_to_uint16_little_endian(
 			 &( data[ data_offset + 2 ] ),
@@ -676,6 +674,8 @@ int libfsapfs_directory_record_read_value_data(
 				 extended_field_type,
 				 libfsapfs_debug_print_directory_record_extended_field_type(
 				  extended_field_type ) );
+
+				extended_field_flags = data[ data_offset + 1 ];
 
 				libcnotify_printf(
 				 "%s: extended field: %" PRIu16 " flags\t\t: 0x%04" PRIx16 "\n",
@@ -719,8 +719,6 @@ int libfsapfs_directory_record_read_value_data(
 
 				return( -1 );
 			}
-			value_data = &( data[ value_data_offset ] );
-
 #if defined( HAVE_DEBUG_OUTPUT )
 			if( libcnotify_verbose != 0 )
 			{
@@ -729,7 +727,7 @@ int libfsapfs_directory_record_read_value_data(
 				 function,
 				 extended_field_index );
 				libcnotify_print_data(
-				 value_data,
+				 &( data[ value_data_offset ] ),
 				 value_data_size,
 				 0 );
 			}

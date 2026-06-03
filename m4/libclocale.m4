@@ -1,6 +1,6 @@
 dnl Checks for libclocale required headers and functions
 dnl
-dnl Version: 20240513
+dnl Version: 20260527
 
 dnl Function to detect if libclocale is available
 dnl ac_libclocale_dummy is used to prevent AC_CHECK_LIB adding unnecessary -l<library> arguments
@@ -115,23 +115,23 @@ AC_DEFUN([AX_LIBCLOCALE_CHECK_FUNC_LANGINFO_CODESET],
     [test "x$ac_cv_func_nl_langinfo" = xyes],
     [AC_CACHE_CHECK(
       [for nl_langinfo CODESET support],
-      [ac_cv_cv_langinfo_codeset],
+      [ac_cv_langinfo_codeset],
       [AC_LANG_PUSH(C)
       AC_LINK_IFELSE(
         [AC_LANG_PROGRAM(
           [[#include <langinfo.h>]],
           [[char* charset = nl_langinfo( CODESET );]] )],
-        [ac_cv_cv_langinfo_codeset=yes],
-        [ac_cv_cv_langinfo_codeset=no])
+        [ac_cv_langinfo_codeset=yes],
+        [ac_cv_langinfo_codeset=no])
       AC_LANG_POP(C) ]) ],
-    [ac_cv_cv_langinfo_codeset=no])
+    [ac_cv_langinfo_codeset=no])
 
   AS_IF(
-    [test "x$ac_cv_cv_langinfo_codeset" = xyes],
+    [test "x$ac_cv_langinfo_codeset" = xyes],
     [AC_DEFINE(
       [HAVE_LANGINFO_CODESET],
       [1],
-      [Define if nl_langinfo has CODESET support.])
+      [Define if nl_langinfo has CODESET support])
     ])
   ])
 

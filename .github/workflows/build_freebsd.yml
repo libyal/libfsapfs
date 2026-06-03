@@ -1,21 +1,39 @@
 # Build from source on FreeBSD.
 name: build_freebsd
-on: [push]
+on:
+  pull_request:
+  push:
 permissions: read-all
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+        - configure_options: ''
     steps:
     - uses: actions/checkout@v6
-    - name: Building from source
-      id: build_freebsd
+    - name: Start VM
       uses: vmactions/freebsd-vm@v1
       with:
         usesh: true
         mem: 4096
-        # Note that the test scripts require bash
         prepare: |
-          pkg install -y autoconf automake bash fusefs-libs gettext git libtool openssl pkgconf
-        run: |
-          tests/build.sh
-          tests/runtests.sh
+          pkg install -y autoconf automake bash curl fusefs-libs gettext git libtool openssl pkgconf
+    - name: Download test data
+      shell: freebsd {0}
+      run: |
+        if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
+    - name: Build from source
+      shell: freebsd {0}
+      env:
+        CC: ${{ matrix.compiler }}
+      run: |
+        ./synclibs.sh --use-head
+        ./autogen.sh
+        ./configure ${{ matrix.configure_options }}
+        make > /dev/null
+    - name: Run tests
+      shell: freebsd {0}
+      run: |
+        tests/runtests.sh CHECK_WITH_STDERR=1

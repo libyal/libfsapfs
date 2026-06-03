@@ -375,9 +375,10 @@ int libfsapfs_btree_node_read_data(
 
 		goto on_error;
 	}
-	remaining_data_size -= btree_node->node_header->unused_data_offset;
 
 /* TODO this check fails on some container
+	remaining_data_size -= btree_node->node_header->unused_data_offset;
+
 	if( btree_node->node_header->unused_data_size > remaining_data_size )
 	{
 		libcerror_error_set(
