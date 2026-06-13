@@ -35,24 +35,13 @@
 
 #include "fsapfs_test_rwlock.h"
 
-#if defined( HAVE_FSAPFS_TEST_RWLOCK )
-
-static int (*fsapfs_test_real_pthread_rwlock_destroy)(pthread_rwlock_t *) = NULL;
-static int (*fsapfs_test_real_pthread_rwlock_rdlock)(pthread_rwlock_t *)  = NULL;
-static int (*fsapfs_test_real_pthread_rwlock_wrlock)(pthread_rwlock_t *)  = NULL;
-static int (*fsapfs_test_real_pthread_rwlock_unlock)(pthread_rwlock_t *)  = NULL;
-
-int fsapfs_test_pthread_rwlock_destroy_attempts_before_fail               = -1;
-int fsapfs_test_pthread_rwlock_rdlock_attempts_before_fail                = -1;
-int fsapfs_test_pthread_rwlock_wrlock_attempts_before_fail                = -1;
-int fsapfs_test_pthread_rwlock_unlock_attempts_before_fail                = -1;
+#if defined( HAVE_FSAPFS_TEST_RWLOCK_HOOK )
 
 #if defined( TODO )
 
 /* TODO currently disabled since this causes the tests to segfault on Ubuntu 14.04
  */
 static int (*fsapfs_test_real_pthread_rwlock_init)(pthread_rwlock_t *, const pthread_rwlockattr_t *) = NULL;
-
 int fsapfs_test_pthread_rwlock_init_attempts_before_fail                                             = -1;
 
 /* Custom pthread_rwlock_init for testing error cases
@@ -69,6 +58,11 @@ int pthread_rwlock_init(
 		fsapfs_test_real_pthread_rwlock_init = dlsym(
 		                                        RTLD_NEXT,
 		                                        "pthread_rwlock_init" );
+
+		if( fsapfs_test_real_pthread_rwlock_init == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( fsapfs_test_pthread_rwlock_init_attempts_before_fail == 0 )
 	{
@@ -89,6 +83,9 @@ int pthread_rwlock_init(
 
 #endif /* defined( TODO ) */
 
+static int (*fsapfs_test_real_pthread_rwlock_destroy)(pthread_rwlock_t *) = NULL;
+int fsapfs_test_pthread_rwlock_destroy_attempts_before_fail               = -1;
+
 /* Custom pthread_rwlock_destroy for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -102,6 +99,11 @@ int pthread_rwlock_destroy(
 		fsapfs_test_real_pthread_rwlock_destroy = dlsym(
 		                                           RTLD_NEXT,
 		                                           "pthread_rwlock_destroy" );
+
+		if( fsapfs_test_real_pthread_rwlock_destroy == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( fsapfs_test_pthread_rwlock_destroy_attempts_before_fail == 0 )
 	{
@@ -119,6 +121,9 @@ int pthread_rwlock_destroy(
 	return( result );
 }
 
+static int (*fsapfs_test_real_pthread_rwlock_rdlock)(pthread_rwlock_t *) = NULL;
+int fsapfs_test_pthread_rwlock_rdlock_attempts_before_fail               = -1;
+
 /* Custom pthread_rwlock_rdlock for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -132,6 +137,11 @@ int pthread_rwlock_rdlock(
 		fsapfs_test_real_pthread_rwlock_rdlock = dlsym(
 		                                          RTLD_NEXT,
 		                                          "pthread_rwlock_rdlock" );
+
+		if( fsapfs_test_real_pthread_rwlock_rdlock == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( fsapfs_test_pthread_rwlock_rdlock_attempts_before_fail == 0 )
 	{
@@ -149,6 +159,9 @@ int pthread_rwlock_rdlock(
 	return( result );
 }
 
+static int (*fsapfs_test_real_pthread_rwlock_wrlock)(pthread_rwlock_t *) = NULL;
+int fsapfs_test_pthread_rwlock_wrlock_attempts_before_fail               = -1;
+
 /* Custom pthread_rwlock_wrlock for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -162,6 +175,11 @@ int pthread_rwlock_wrlock(
 		fsapfs_test_real_pthread_rwlock_wrlock = dlsym(
 		                                          RTLD_NEXT,
 		                                          "pthread_rwlock_wrlock" );
+
+		if( fsapfs_test_real_pthread_rwlock_wrlock == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( fsapfs_test_pthread_rwlock_wrlock_attempts_before_fail == 0 )
 	{
@@ -179,6 +197,11 @@ int pthread_rwlock_wrlock(
 	return( result );
 }
 
+#if defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK )
+
+static int (*fsapfs_test_real_pthread_rwlock_unlock)(pthread_rwlock_t *) = NULL;
+int fsapfs_test_pthread_rwlock_unlock_attempts_before_fail               = -1;
+
 /* Custom pthread_rwlock_unlock for testing error cases
  * Returns 0 if successful or an error value otherwise
  */
@@ -192,6 +215,11 @@ int pthread_rwlock_unlock(
 		fsapfs_test_real_pthread_rwlock_unlock = dlsym(
 		                                          RTLD_NEXT,
 		                                          "pthread_rwlock_unlock" );
+
+		if( fsapfs_test_real_pthread_rwlock_unlock == NULL )
+		{
+			return( EBUSY );
+		}
 	}
 	if( fsapfs_test_pthread_rwlock_unlock_attempts_before_fail == 0 )
 	{
@@ -214,5 +242,7 @@ int pthread_rwlock_unlock(
 	return( result );
 }
 
-#endif /* defined( HAVE_FSAPFS_TEST_RWLOCK ) */
+#endif /* defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK ) */
+
+#endif /* defined( HAVE_FSAPFS_TEST_RWLOCK_HOOK ) */
 

@@ -24,29 +24,41 @@
 
 #include <common.h>
 
+#include "fsapfs_test_extern.h"
 #include "fsapfs_test_libfsapfs.h"
 
 #if defined( __cplusplus )
 extern "C" {
 #endif
 
-#if defined( LIBFSAPFS_HAVE_MULTI_THREAD_SUPPORT ) && defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
-#define HAVE_FSAPFS_TEST_RWLOCK		1
+#if defined( LIBFSAPFS_HAVE_MULTI_THREAD_SUPPORT )
+#if defined( HAVE_GNU_DL_DLSYM ) && defined( __GNUC__ ) && !defined( __clang__ ) && !defined( __CYGWIN__ )
+#define HAVE_FSAPFS_TEST_RWLOCK_HOOK	1
+#endif
 #endif
 
-#if defined( HAVE_FSAPFS_TEST_RWLOCK )
+#if defined( HAVE_FSAPFS_TEST_RWLOCK_HOOK )
 
-extern int fsapfs_test_pthread_rwlock_init_attempts_before_fail;
+FSAPFS_TEST_INTERNAL \
+int fsapfs_test_pthread_rwlock_init_attempts_before_fail;
 
-extern int fsapfs_test_pthread_rwlock_destroy_attempts_before_fail;
+FSAPFS_TEST_INTERNAL \
+int fsapfs_test_pthread_rwlock_destroy_attempts_before_fail;
 
-extern int fsapfs_test_pthread_rwlock_rdlock_attempts_before_fail;
+FSAPFS_TEST_INTERNAL \
+int fsapfs_test_pthread_rwlock_rdlock_attempts_before_fail;
 
-extern int fsapfs_test_pthread_rwlock_wrlock_attempts_before_fail;
+FSAPFS_TEST_INTERNAL \
+int fsapfs_test_pthread_rwlock_wrlock_attempts_before_fail;
 
-extern int fsapfs_test_pthread_rwlock_unlock_attempts_before_fail;
+#if defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK )
 
-#endif /* defined( HAVE_FSAPFS_TEST_RWLOCK ) */
+FSAPFS_TEST_INTERNAL \
+int fsapfs_test_pthread_rwlock_unlock_attempts_before_fail;
+
+#endif /* defined( HAVE_PTHREAD_RWLOCK_UNLOCK_HOOK ) */
+
+#endif /* defined( HAVE_FSAPFS_TEST_RWLOCK_HOOK ) */
 
 #if defined( __cplusplus )
 }

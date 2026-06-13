@@ -67,14 +67,14 @@ jobs:
         ./synclibs.sh --use-head
         ./autogen.sh
         ./configure ${CONFIGURE_OPTIONS}
-        make > /dev/null
+        make -j4 > /dev/null
     - name: Run tests
       shell: bash --login -e -o pipefail -o igncr {0}
       working-directory: ${{ github.workspace }}
       env:
         CHERE_INVOKING: 1
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh -j4 VERBOSE=1
   build_msys2_mingw:
     runs-on: windows-latest
     strategy:
@@ -84,6 +84,8 @@ jobs:
         - configure_options: '--enable-winapi --enable-wide-character-type'
         - configure_options: '--disable-nls --disable-shared-libs --enable-python'
     steps:
+    - name: Configure git
+      run: git config --global core.autocrlf false
     - uses: actions/checkout@v6
     - name: Set up MSYS2 with MinGW-w64
       uses: msys2/setup-msys2@v2
@@ -103,8 +105,8 @@ jobs:
         ./synclibs.sh --use-head
         ./autogen.sh
         ./configure ${CONFIGURE_OPTIONS}
-        make > /dev/null
+        make -j4 > /dev/null
     - name: Run tests
       shell: msys2 {0}
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh -j4 VERBOSE=1

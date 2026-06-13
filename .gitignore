@@ -1,6 +1,6 @@
 # Files to ignore by git
 #
-# Version: 20251129
+# Version: 20260604
 
 # Generic auto-generated build files
 *~
@@ -131,7 +131,12 @@ stamp-h[1-9]
 /fsapfstools/*.exe
 /fsapfstools/fsapfsinfo
 /fsapfstools/fsapfsmount
+/tests/*.dir
 /tests/*.exe
+/tests/*.log
+/tests/*.tmp
+/tests/atconfig
+/tests/atlocal
 /tests/fsapfs_test_bit_stream
 /tests/fsapfs_test_btree_entry
 /tests/fsapfs_test_btree_footer
@@ -196,6 +201,12 @@ stamp-h[1-9]
 /tests/fsapfs_test_volume_superblock
 /tests/input
 /tests/notify_stream.log
+/tests/package.m4
+/tests/test_inputs_*.at
+/tests/test_library
+/tests/test_manpages
+/tests/test_python_module
+/tests/test_tools
 /tests/tmp*
 
 # Local library dependencies specific files

@@ -1,6 +1,6 @@
 # Tests tools functions and types.
 #
-# Version: 20230410
+# Version: 20260608
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -10,6 +10,29 @@ $ToolsTests = "bodyfile digest_hash info_handle mount_path_string output path_st
 $ToolsTestsWithInput = ""
 
 $InputGlob = "*"
+
+$VSDirectories = @(
+	"msvscpp",
+	"vs2008",
+	"vs2010",
+	"vs2012",
+	"vs2013",
+	"vs2015",
+	"vs2017",
+	"vs2019",
+	"vs2022",
+	"vs2026"
+)
+
+$VSConfigurations = @(
+	"Release",
+	"VSDebug"
+)
+
+$VSPlatforms = @(
+	"Win32",
+	"x64"
+)
 
 Function GetTestProfileDirectory
 {
@@ -41,11 +64,11 @@ Function GetTestExecutablesDirectory
 {
 	$TestExecutablesDirectory = ""
 
-	ForEach (${VSDirectory} in ("msvscpp", "vs2008", "vs2010", "vs2012", "vs2013", "vs2015", "vs2017", "vs2019", "vs2022"))
+	ForEach (${VSDirectory} in $VSDirectories)
 	{
-		ForEach (${VSConfiguration} in ("Release", "VSDebug"))
+		ForEach (${VSConfiguration} in $VSConfigurations)
 		{
-			ForEach (${VSPlatform} in ("Win32", "x64"))
+			ForEach (${VSPlatform} in $VSPlatforms)
 			{
 				$TestExecutablesDirectory = "..\${VSDirectory}\${VSConfiguration}\${VSPlatform}"
 
@@ -74,7 +97,8 @@ Function ReadIgnoreList
 
 	If (Test-Path -Path ${IgnoreFile} -PathType "Leaf")
 	{
-		$IgnoreList = Get-Content -Path ${IgnoreFile} | Where {$_ -notmatch '^#.*'}
+		$IgnoreList = Get-Content -Path ${IgnoreFile} |
+			Where {$_ -notmatch '^#.*'}
 	}
 	Return $IgnoreList
 }
@@ -133,7 +157,8 @@ Function RunTestWithInput
 
 		If (Test-Path -Path "${TestSetDirectory}\files" -PathType "Leaf")
 		{
-			$InputFiles = Get-Content -Path "${TestSetDirectory}\files" | Where {$_ -ne ""}
+			$InputFiles = Get-Content -Path "${TestSetDirectory}\files" |
+				Where {$_ -ne ""}
 		}
 		Else
 		{

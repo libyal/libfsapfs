@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - configure_options: '--enable-code-coverage --enable-wide-character-type --enable-winapi --with-openssl=no'
+        - configure_options: '--enable-code-coverage --enable-wide-character-type --enable-winapi --with-openssl=no --with-zlib=no'
           codecov_name: 'cygwin64-gcc-no-optimization'
     steps:
     - name: Configure git
@@ -47,7 +47,7 @@ jobs:
       env:
         CHERE_INVOKING: 1
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1
     - name: Generate coverage data
       shell: bash --login -e -o pipefail -o igncr {0}
       working-directory: ${{ github.workspace }}
@@ -63,6 +63,7 @@ jobs:
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       run: |
+        $ProgressPreference = 'SilentlyContinue'
         Invoke-WebRequest -Uri "https://cli.codecov.io/latest/windows/codecov.exe" -OutFile "codecov.exe"
         Unblock-File -Path "./codecov.exe"
         ./codecov.exe --verbose upload-coverage --git-service github --gcov-executable gcov --name "${{ matrix.codecov_name }}"
@@ -94,7 +95,7 @@ jobs:
         make > /dev/null
     - name: Run tests
       run: |
-        make check CHECK_WITH_STDERR=1 SKIP_TOOLS_END_TO_END_TESTS=1
+        make check SKIP_TOOLS_END_TO_END_TESTS=1 VERBOSE=1
     - name: Generate coverage data
       run: |
         for DIRECTORY in `find . -maxdepth 1 -type d`; do \
@@ -111,9 +112,11 @@ jobs:
     strategy:
       matrix:
         include:
-        - configure_options: '--enable-code-coverage --enable-wide-character-type --enable-winapi --with-openssl=no'
+        - configure_options: '--enable-code-coverage --enable-wide-character-type --enable-winapi --with-openssl=no --with-zlib=no'
           codecov_name: 'mingw-w64-gcc-no-optimization'
     steps:
+    - name: Configure git
+      run: git config --global core.autocrlf false
     - uses: actions/checkout@v6
     - name: Set up MSYS2 with MinGW-w64
       uses: msys2/setup-msys2@v2
@@ -137,7 +140,7 @@ jobs:
     - name: Run tests
       shell: msys2 {0}
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1
     - name: Generate coverage data
       shell: msys2 {0}
       run: |

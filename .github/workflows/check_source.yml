@@ -33,7 +33,7 @@ jobs:
         make > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1
   scan_build:
     name: Check source with scan-build
     runs-on: ${{ matrix.os }}
@@ -86,7 +86,7 @@ jobs:
             ]
           }
       run: |
-        npx @microsoft/sarif-multitool merge scan-results/*/*.sarif --merge-runs --output-file=scan-build-report.sarif
+        npx @microsoft/sarif-multitool merge scan-results/*/*.sarif --output-file=scan-build-report.sarif
         NUMBER_OF_RESULTS=$( jq '.runs[0].results | length' scan-build-report.sarif )
         if [ $NUMBER_OF_RESULTS -eq 0 ]; then
           echo "$EMPTY_SARIF" > scan-build-report.sarif
@@ -124,4 +124,4 @@ jobs:
         make > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh VERBOSE=1

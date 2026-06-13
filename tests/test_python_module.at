@@ -1,0 +1,151 @@
+m4_include([package.m4])
+m4_include([test_macros.at])
+
+include_test_inputs([pyfsapfs])
+
+dnl Determines the test prefix based on the package name.
+m4_define([test_prefix],
+  [m4_expand(m4_substr(AT_PACKAGE_NAME, 3))])dnl
+
+dnl Sets up helper functions.
+m4_define([SETUP_HELPER_FUNCTIONS],
+  [AT_TEST_HELPER_FN(
+    [run_test_script],
+    [path arguments],
+    [Runs the test script],
+    [PLATFORM=`uname -s | sed 's/-.*$//'`
+
+    if test "${PLATFORM}" = "Darwin"; then
+      DYLD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "$[]@"
+
+    elif test "${PLATFORM}" = "CYGWIN_NT"; then
+      PATH="${LIBRARY_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "$[]@"
+
+    elif test "${PLATFORM}" = "MINGW32_NT" || test "${PLATFORM}" = "MINGW64_NT" || test "${PLATFORM}" = "MSYS_NT"; then
+      # Copy the library DLL to the Python module directory so Python can load it.
+      cp -f "${LIBRARY_PATH}"/*.dll "${PYTHON_MODULE_PATH}"/
+
+      PATH="${PYTHON_MODULE_PATH}:${PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "$[]@"
+    else
+      LD_LIBRARY_PATH="${LIBRARY_PATH}" PYTHONPATH="${PYTHON_MODULE_PATH}" "${PYTHON}" "$[]@"
+    fi
+    ])
+  ])
+
+dnl Runs one or more test scripts.
+dnl Arguments:
+dnl   test_names
+m4_define([RUN_TEST_SCRIPTS],
+  [m4_ifblank([$1], [m4_fatal([Missing test names])])
+
+  m4_foreach_w(
+    [test_name],
+    [$1],
+    [m4_define(
+      [test_script],
+      [m4_expand(py[]test_prefix[]_test_[]test_name[].py)])dnl
+
+    AT_SETUP(test_script)
+
+    AT_SKIP_IF(
+      [test -n "${SKIP_PYTHON_TESTS}"])
+
+    AT_CHECK(
+      [ath_fn_run_test_script $abs_srcdir/test_script],
+      [0],
+      [ignore],
+      [ignore])
+
+    AT_CLEANUP]
+  )]
+)
+
+dnl Runs one or more test scripts with input.
+dnl Arguments:
+dnl   test_names
+dnl   test_inputs
+m4_define([RUN_TEST_SCRIPTS_WITH_INPUT],
+  [m4_ifblank([$1], [m4_fatal([Missing test names])])
+
+  m4_foreach_w(
+    [test_name],
+    [$1],
+    [m4_foreach_w(
+      [test_input],
+      [$2],
+      [m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
+      m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
+
+      m4_define(
+        [test_script],
+        [m4_expand(py[]test_prefix[]_test_[]test_name[].py)])dnl
+
+      m4_define([sanitized_test_file],
+        [m4_translit([test_file], [[],[],[]"'`\], [______])])
+
+      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+
+      m4_ifblank(
+        test_options,
+        [AT_SETUP(test_script with input: 'sanitized_test_file')
+
+        AT_SKIP_IF(
+          [test -n "${SKIP_PYTHON_TESTS}"])
+
+        AT_CHECK(
+          [ath_fn_run_test_script $abs_srcdir/test_script "${TEST_FILE}"],
+          [0],
+          [ignore],
+          [ignore])
+
+        AT_CLEANUP],
+        [AT_SETUP(test_script with options: 'test_options' and input: 'sanitized_test_file')
+
+        AT_SKIP_IF(
+          [test -n "${SKIP_PYTHON_TESTS}"])
+
+        AT_CHECK(
+          [ath_fn_run_test_script $abs_srcdir/test_script test_options "${TEST_FILE}"],
+          [0],
+          [ignore],
+          [ignore])
+
+        AT_CLEANUP])]
+    )]
+  )]
+)
+
+dnl Wrap m4_define to overwrite AT_TESTSUITE_NAME
+m4_define([_M4_DEFINE_HOOK], m4_defn([m4_define]))
+m4_define([m4_define],
+  [m4_if(
+    [$1],
+    [AT_TESTSUITE_NAME],
+    [_M4_DEFINE_HOOK([$1], [Running Python module tests])],
+    [_M4_DEFINE_HOOK([$1], [$2])])])
+
+dnl Redefine AS_BOX to remove the "box"
+m4_undefine([AS_BOX])
+m4_define([AS_BOX], [echo "$1"])
+
+AT_INIT([Python module])
+AT_COLOR_TESTS
+
+dnl Rewrite AT_SETUP to change the minimum line length
+m4_define([AT_SETUP],
+  m4_unquote(
+    [m4_bpatsubst(
+      m4_dquote(m4_defn([AT_SETUP])),
+      [47],
+      [72])
+    ])
+  )
+
+SETUP_HELPER_FUNCTIONS
+
+RUN_TEST_SCRIPTS(
+  [support])
+
+RUN_TEST_SCRIPTS_WITH_INPUT(
+  [container volume],
+  test_inputs_pyfsapfs)

@@ -1,0 +1,29 @@
+# Settings used in test_macros.at
+CYGPATH="@CYGPATH@"
+USE_MINGW="@TESTS_USE_MINGW@"
+USE_WINAPI="@TESTS_USE_WINAPI@"
+WINEPATH="@WINEPATH@"
+
+export CYGPATH USE_MINGW USE_WINAPI WINEPATH
+
+# Settings used in test_manpages.at
+MAN="@MAN@"
+MANDOC="@MANDOC@"
+MANPAGE_LINTER="@TESTS_MANPAGE_LINTER@"
+
+export MAN MANDOC MANPAGE_LINTER
+
+# Settings used in test_python_module.at
+LIBRARY_PATH="@abs_top_builddir@/libfsapfs/.libs"
+PYTHON="@PYTHON@"
+PYTHON_MODULE_PATH="@abs_top_builddir@/pyfsapfs/.libs"
+
+export LIBRARY_PATH PYTHON PYTHONPATH
+
+# Settings used in test_tools.at
+GZIP_COMMAND="@GZIP_COMMAND@"
+MD5SUM="@MD5SUM@"
+SED="@SED@"
+ZCAT="@ZCAT@"
+
+export GZIP_COMMAND MD5SUM SED ZCAT

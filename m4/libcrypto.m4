@@ -1,6 +1,6 @@
 dnl Checks for libcrypto required headers and functions
 dnl
-dnl Version: 20260527
+dnl Version: 20260606
 
 dnl Function to detect whether openssl/evp.h can be used in combination with zlib.h
 AC_DEFUN([AX_LIBCRYPTO_CHECK_OPENSSL_EVP_ZLIB_COMPATIBILE],
@@ -23,9 +23,10 @@ AC_DEFUN([AX_LIBCRYPTO_CHECK_XTS_DUPLICATE_KEYS_SUPPORT],
   [AC_CACHE_CHECK(
     [if `EVP_CipherInit_ex' can be used with duplicate keys],
     [ac_cv_openssl_xts_duplicate_keys],
-    [AC_LANG_PUSH(C)
-    ac_cv_libcrypto_backup_LIBS="$LIBS"
+    [BACKUP_LIBS="$LIBS"
     LIBS="$LIBS $ac_cv_libcrypto_LIBADD"
+    AC_LANG_PUSH(C)
+
     AC_RUN_IFELSE(
       [AC_LANG_PROGRAM(
         [[#include <stdlib.h>
@@ -56,8 +57,9 @@ return( EXIT_SUCCESS ); ]] )],
       [ac_cv_openssl_xts_duplicate_keys=yes],
       [ac_cv_openssl_xts_duplicate_keys=no],
       [ac_cv_openssl_xts_duplicate_keys=undetermined])
-    LIBS="$ac_cv_libcrypto_backup_LIBS"
+
     AC_LANG_POP(C)])
+    LIBS="$BACKUP_LIBS"
   ])
 
 dnl Function to detect if libcrypto (openssl) EVP functions are available

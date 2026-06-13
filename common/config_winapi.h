@@ -36,7 +36,9 @@
 
 /* Define to the address where bug reports for this package should be sent.
  */
-#define PACKAGE_BUGREPORT		"joachim.metz@gmail.com"
+#if !defined( PACKAGE_BUGREPORT )
+#define PACKAGE_BUGREPORT "https://github.com/libyal/libfsapfs/issues"
+#endif
 
 /* Define the size of the integer for WINAPI
  */

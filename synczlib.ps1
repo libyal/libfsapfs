@@ -1,6 +1,6 @@
 # Script that synchronizes zlib.
 #
-# Version: 20260511
+# Version: 20260607
 
 Function ExtractZip($Filename)
 {
@@ -36,6 +36,7 @@ If (Test-Path ${Filename})
 {
 	Remove-Item -Path ${Filename} -Force
 }
+$ProgressPreference = 'SilentlyContinue'
 Invoke-WebRequest -Uri ${Url} -OutFile ${Filename}
 
 If (Test-Path ${ExtractedPath})

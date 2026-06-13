@@ -25,36 +25,23 @@ AM_CPPFLAGS = \
 	@PTHREAD_CPPFLAGS@ \
 	@LIBFSAPFS_DLL_IMPORT@
 
-AM_TESTS_ENVIRONMENT = \
-	export PYTHON="@PYTHON@"; \
-	export TESTS_USE_WINAPI="@TESTS_USE_WINAPI@";
+check_PYTHONdir = $(abs_top_builddir)
+
+BUILT_SOURCES = package.m4
+
+check_AUTOTESTS = \
+	test_library \
+	test_manpages \
+	test_tools
 
 if HAVE_PYTHON_TESTS
-TESTS_PYFSAPFS = \
-	test_python_module.sh
+check_AUTOTESTS += test_python_module
 endif
 
-TESTS = \
-	test_library.sh \
-	test_tools.sh \
-	test_fsapfsinfo.sh \
-	test_fsapfsinfo_bodyfile.sh \
-	$(TESTS_PYFSAPFS)
-
-check_SCRIPTS = \
+check_PYTHON_SCRIPTS = \
 	pyfsapfs_test_container.py \
 	pyfsapfs_test_support.py \
-	pyfsapfs_test_volume.py \
-	test_tools.sh \
-	test_fsapfsinfo.sh \
-	test_fsapfsinfo_bodyfile.sh \
-	test_library.sh \
-	test_manpage.sh \
-	test_python_module.sh \
-	test_runner.sh
-
-EXTRA_DIST = \
-	$(check_SCRIPTS)
+	pyfsapfs_test_volume.py
 
 check_PROGRAMS = \
 	fsapfs_test_bit_stream \
@@ -288,6 +275,7 @@ fsapfs_test_compression_LDADD = \
 
 fsapfs_test_container_SOURCES = \
 	fsapfs_test_container.c \
+	fsapfs_test_extern.h \
 	fsapfs_test_functions.c fsapfs_test_functions.h \
 	fsapfs_test_getopt.c fsapfs_test_getopt.h \
 	fsapfs_test_libbfio.h \
@@ -993,6 +981,7 @@ fsapfs_test_tools_signal_LDADD = \
 	@LIBCERROR_LIBADD@
 
 fsapfs_test_volume_SOURCES = \
+	fsapfs_test_extern.h \
 	fsapfs_test_functions.c fsapfs_test_functions.h \
 	fsapfs_test_getopt.c fsapfs_test_getopt.h \
 	fsapfs_test_libbfio.h \
@@ -1065,8 +1054,84 @@ fsapfs_test_volume_superblock_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
+AUTOM4TE = autom4te
+AUTOTEST = $(AUTOM4TE) --language=autotest
+
+SUFFIXES = .at
+
+.at:
+	$(AM_V_GEN)rm -f $@ $@.tmp; \
+	$(AUTOTEST) -I '$(srcdir)' -o $@.tmp $< && \
+	mv $@.tmp $@
+
+atconfig: $(top_builddir)/config.status
+	cd $(top_builddir) && $(SHELL) ./config.status tests/$@
+
+check-build: $(check_PROGRAMS)
+
+check-local: $(check_AUTOTESTS)
+	@fail=0; \
+	for test_suite in $(check_AUTOTESTS); do \
+		$(AM_TESTS_ENVIRONMENT) $(SHELL) "./$$test_suite" $(TESTSUITEFLAGS) || fail=1; \
+		echo ""; \
+	done; \
+	exit $$fail
+
+clean-local:
+	for test_suite in $(check_AUTOTESTS); do \
+		test ! -f "$$test_suite" || $(SHELL) "./$$test_suite" --clean; \
+	done
+
+package.m4: $(top_srcdir)/configure.ac
+	$(AM_V_GEN):; \
+	{ \
+	  echo 'm4_define([AT_PACKAGE_NAME], [$(PACKAGE_NAME)])' ; \
+	  echo 'm4_define([AT_PACKAGE_TARNAME], [$(PACKAGE_TARNAME)])' ; \
+	  echo 'm4_define([AT_PACKAGE_VERSION], [$(PACKAGE_VERSION)])' ; \
+	  echo 'm4_define([AT_PACKAGE_STRING], [$(PACKAGE_STRING)])' ; \
+	  echo 'm4_define([AT_PACKAGE_BUGREPORT], [$(PACKAGE_BUGREPORT)])' ; \
+	} > $@
+
+test_inputs_libfsapfs.at: generate_test_inputs.sh
+	$(SHELL) $(srcdir)/generate_test_inputs.sh $(PACKAGE_NAME) libfsapfs
+
+test_inputs_pyfsapfs.at: generate_test_inputs.sh
+	$(SHELL) $(srcdir)/generate_test_inputs.sh $(PACKAGE_NAME) pyfsapfs
+
+test_inputs_fsapfsinfo.at: generate_test_inputs.sh
+	$(SHELL) $(srcdir)/generate_test_inputs.sh $(PACKAGE_NAME) fsapfsinfo
+
+test_inputs_fsapfsinfo_fs.at: generate_test_inputs.sh
+	$(SHELL) $(srcdir)/generate_test_inputs.sh $(PACKAGE_NAME) fsapfsinfo_fs
+
+test_inputs_fsapfsinfo_bodyfile_fs.at: generate_test_inputs.sh
+	$(SHELL) $(srcdir)/generate_test_inputs.sh $(PACKAGE_NAME) fsapfsinfo_bodyfile_fs
+
+test_library: package.m4 test_inputs_libfsapfs.at test_library.at test_macros.at
+
+test_manpages: package.m4 test_manpages.at
+
+test_python_module: package.m4 test_inputs_pyfsapfs.at test_python_module.at
+
+test_tools: package.m4 test_inputs_fsapfsinfo.at test_inputs_fsapfsinfo_bodyfile_fs.at test_inputs_fsapfsinfo_fs.at test_macros.at test_tools.at
+
+EXTRA_DIST = \
+	$(check_AUTOTESTS:=.at) \
+	$(check_PYTHON_SCRIPTS) \
+	generate_test_inputs.sh \
+	package.m4 \
+	test_macros.at
+
+CLEANFILES = \
+	$(check_AUTOTESTS) \
+	*.exe \
+	*.tmp \
+	notify_stream.log \
+	test_inputs_*.at
+
 DISTCLEANFILES = \
+	*.log \
+	atconfig \
 	Makefile \
-	Makefile.in \
-	notify_stream.log
+	Makefile.in
 

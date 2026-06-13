@@ -1,0 +1,70 @@
+m4_include([package.m4])
+
+dnl Lints a manpage
+m4_define([LINT_MANPAGE],
+  [AT_SETUP([$1])
+
+  AT_SKIP_IF(
+    [test -n "${SKIP_MANPAGES_TESTS}"])
+
+  case "${MANPAGE_LINTER}" in
+    "man-db")
+      AT_SKIP_IF(
+        [! command -v "${MAN}" >/dev/null 2>&1])
+
+      AT_CHECK(
+        [LC_ALL="en_US.UTF-8" MANROFFSEQ="" MANWIDTH="80" "${MAN}" --warnings -E UTF-8 -l -Tutf8 -Z "$abs_srcdir/../manuals/$1" > /dev/null])
+      ;;
+
+    "mandoc")
+      AT_SKIP_IF(
+        [! command -v "${MANDOC}" >/dev/null 2>&1])
+
+      AT_CHECK(
+        [LC_ALL="en_US.UTF-8" "${MANDOC}" -O width=80 -T lint -W all "$abs_srcdir/../manuals/$1"])
+      ;;
+
+    *)
+      AT_SKIP_IF([true])
+      ;;
+
+  esac
+
+  AT_CLEANUP]
+)
+
+dnl Lints one or more manpages
+m4_define([LINT_MANPAGES],
+  [m4_foreach_w(
+    [manpage_name],
+    [$1],
+    [LINT_MANPAGE(manpage_name)])]
+)
+
+dnl Wrap m4_define to overwrite AT_TESTSUITE_NAME
+m4_define([_M4_DEFINE_HOOK], m4_defn([m4_define]))
+m4_define([m4_define],
+  [m4_if(
+    [$1],
+    [AT_TESTSUITE_NAME],
+    [_M4_DEFINE_HOOK([$1], [Running manpages tests])],
+    [_M4_DEFINE_HOOK([$1], [$2])])])
+
+dnl Redefine AS_BOX to remove the "box"
+m4_undefine([AS_BOX])
+m4_define([AS_BOX], [echo "$1"])
+
+AT_INIT([manpages])
+AT_COLOR_TESTS
+
+dnl Rewrite AT_SETUP to change the minimum line length
+m4_define([AT_SETUP],
+  m4_unquote(
+    [m4_bpatsubst(
+      m4_dquote(m4_defn([AT_SETUP])),
+      [47],
+      [72])
+    ])
+  )
+
+LINT_MANPAGES([libfsapfs.3])

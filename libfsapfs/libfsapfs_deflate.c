@@ -900,12 +900,15 @@ int libfsapfs_deflate_read_data_header(
 	static char *function                 = "libfsapfs_deflate_read_data_header";
 	size_t safe_offset                    = 0;
 	uint32_t compression_window_size      = 0;
-	uint32_t preset_dictionary_identifier = 0;
 	uint8_t flags                         = 0;
 	uint8_t compression_data              = 0;
 	uint8_t compression_information       = 0;
 	uint8_t compression_method            = 0;
 	uint8_t compression_window_bits       = 0;
+
+#if defined( HAVE_DEBUG_OUTPUT )
+	uint32_t preset_dictionary_identifier = 0;
+#endif
 
 	if( compressed_data == NULL )
 	{
@@ -975,10 +978,11 @@ int libfsapfs_deflate_read_data_header(
 
 			return( -1 );
 		}
+#if defined( HAVE_DEBUG_OUTPUT )
 		byte_stream_copy_to_uint32_big_endian(
 		 &( compressed_data[ 2 ] ),
 		 preset_dictionary_identifier );
-
+#endif
 		safe_offset += 4;
 	}
 	if( compression_method != 8 )

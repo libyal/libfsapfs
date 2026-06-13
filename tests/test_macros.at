@@ -1,0 +1,178 @@
+dnl Determines the test prefix based on the package name.
+m4_define([test_prefix],
+  [m4_expand(m4_substr(AT_PACKAGE_NAME, 3))])dnl
+
+dnl Includes test inputs
+dnl Arguments:
+dnl   test_profile
+m4_define(
+  [include_test_inputs],
+  [m4_include([test_inputs_$1.at])])
+
+dnl Sets up helper functions.
+m4_define([SETUP_HELPER_FUNCTIONS],
+  [AT_TEST_HELPER_FN(
+    [run_test_binary],
+    [path arguments],
+    [Resolves and runs the test binary],
+    [if test -x "$abs_builddir/$[]1"; then
+      BINARY="$abs_builddir/$[]1"
+    elif test -x "$abs_builddir/$[]1.exe"; then
+      # Prevent wine debug messages failing the test.
+      export WINEDEBUG=-all
+
+      BINARY="$abs_builddir/$[]1.exe"
+    else
+      echo "Missing binary: $[]1"
+      exit 127
+    fi
+    shift
+
+    $BINARY "$[]@"
+    ])
+
+  AT_TEST_HELPER_FN(
+    [resolve_test_file],
+    [path],
+    [Resolves a path of a test file],
+    [TEST_FILE="$[]1"
+
+    OSTYPE_LOWER=`echo "$OSTYPE" | tr '[A-Z]' '[a-z]'`
+    case "${OSTYPE_LOWER}" in
+      cygwin*|msys*)
+        if test "${USE_MINGW}" = "yes" || test "${USE_WINAPI}" = "yes"; then
+          if ! test -x ${CYGPATH}; then
+            echo "Missing cygpath"
+
+            exit 77
+          fi
+          TEST_FILE=`${CYGPATH} -w "${TEST_FILE}"`
+        fi
+        ;;
+
+      linux-gnu*)
+        if test "${USE_MINGW}" = "yes" || test "${USE_WINAPI}" = "yes"; then
+          if test -n "${WSL_DISTRO_NAME}" || grep -i "microsoft" /proc/version >/dev/null &>2; then
+            echo "Tests with WSL not supported"
+
+            exit 77
+          fi
+          if ! test -x ${WINEPATH}; then
+            echo "Missing winepath"
+
+            exit 77
+          fi
+          TEST_FILE=`${WINEPATH} -w "${TEST_FILE}" 2>/dev/null`
+        fi
+        ;;
+
+      *)
+        if test "${USE_MINGW}" = "yes"; then
+          echo "Tests with MinGW not supported on ${OSTYPE}"
+
+          exit 77
+        fi
+        if test "${USE_WINAPI}" = "yes"; then
+          echo "Tests with WINAPI not supported on ${OSTYPE}"
+
+          exit 77
+        fi
+        ;;
+    esac
+
+    echo "${TEST_FILE}"
+    ])
+  ])
+
+dnl Runs one or more test binaries.
+dnl Arguments:
+dnl   skip_condition
+dnl   test_names
+m4_define([RUN_TEST_BINARIES],
+  [m4_ifblank([$2], [m4_fatal([Missing test names])])
+
+  m4_foreach_w(
+    [test_name],
+    [$2],
+    [m4_define(
+      [test_binary],
+      [m4_expand(test_prefix[]_test_[]test_name)])dnl
+
+    AT_SETUP(test_binary)
+
+    AT_SKIP_IF(
+      [test -n "${]$1[}"])
+
+    AT_CHECK([ath_fn_run_test_binary test_binary])
+    AT_CLEANUP]
+  )]
+)
+
+m4_define([get_test_result_value], [
+  m4_argn([$2], m4_unquote(m4_translit(m4_defn([$1]), [[[]]])))
+])
+
+m4_define([_strip_leading],
+  [m4_bpatsubst([$1], [^\s*])])
+
+m4_define([_strip_trailing],
+  [m4_bpatsubst([$1], [\s*$])])
+
+m4_define([_strip_newline],
+  [m4_translit([$1], [
+])])
+
+m4_define([_strip],
+  [_strip_newline([_strip_trailing([_strip_leading([$1])])])])
+
+dnl Runs one or more test binaries with input.
+dnl Arguments:
+dnl   skip_condition
+dnl   test_names
+dnl   test_inputs
+m4_define([RUN_TEST_BINARIES_WITH_INPUT],
+  [m4_ifblank([$2], [m4_fatal([Missing test names])])
+
+  m4_foreach_w(
+    [test_name],
+    [$2],
+    [m4_foreach_w(
+      [test_input],
+      [$3],
+      [m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
+      m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
+
+      m4_define(
+        [test_binary],
+        [m4_expand(test_prefix[]_test_[]test_name)])dnl
+
+      m4_define([sanitized_test_file],
+        [m4_translit([test_file], [[],[],[]"'`\], [______])])
+
+      m4_ifblank(
+        test_options,
+        [AT_SETUP(test_binary with input: 'sanitized_test_file')
+
+        AT_SKIP_IF(
+          [test -n "${]$1[}"])
+
+        TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+
+        AT_CHECK(
+	  [ath_fn_run_test_binary test_binary "${TEST_FILE}"])
+
+	AT_CLEANUP],
+        [AT_SETUP(test_binary with options: 'test_options' and input: 'sanitized_test_file')
+
+        AT_SKIP_IF(
+          [test -n "${]$1[}"])
+
+        TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+
+        AT_CHECK(
+	  [ath_fn_run_test_binary test_binary test_options "${TEST_FILE}"])
+
+        AT_CLEANUP])]
+    )]
+  )]
+)

@@ -19,7 +19,7 @@ jobs:
         usesh: true
         mem: 4096
         prepare: |
-          pkg install -y autoconf automake bash curl fusefs-libs gettext git libtool openssl pkgconf
+          pkg install -y autoconf automake curl fusefs-libs gettext git libtool openssl pkgconf
     - name: Download test data
       shell: freebsd {0}
       run: |
@@ -32,8 +32,8 @@ jobs:
         ./synclibs.sh --use-head
         ./autogen.sh
         ./configure ${{ matrix.configure_options }}
-        make > /dev/null
+        make -j4 > /dev/null
     - name: Run tests
       shell: freebsd {0}
       run: |
-        tests/runtests.sh CHECK_WITH_STDERR=1
+        tests/runtests.sh -j4 VERBOSE=1
