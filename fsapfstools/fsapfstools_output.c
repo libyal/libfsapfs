@@ -101,8 +101,6 @@ void fsapfstools_output_copyright_fprint(
 	{
 		return;
 	}
-	/* TRANSLATORS: This is a proper name.
-	 */
 	fprintf(
 	 stream,
 	 _( "Copyright (C) 2018-2026, %s.\n" ),
@@ -113,14 +111,9 @@ void fsapfstools_output_copyright_fprint(
 	 _( "This is free software; see the source for copying conditions. There is NO\n"
 	    "warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n" ) );
 
-	/* TRANSLATORS: The placeholder indicates the bug-reporting address
-	 * for this package.  Please add _another line_ saying
-	 * "Report translation bugs to <...>\n" with the address for translation
-	 * bugs (typically your translation team's web or email address).
-	 */
 	fprintf(
 	 stream,
-	 _( "Report bugs to <%s>.\n" ),
+	 _( "Report issues via: %s\n" ),
 	 PACKAGE_BUGREPORT );
 }
 

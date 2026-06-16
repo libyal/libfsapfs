@@ -1,6 +1,6 @@
 # Script that runs the tests
 #
-# Version: 20260609
+# Version: 20260615
 
 $ExitSuccess = 0
 $ExitFailure = 1
@@ -34,17 +34,18 @@ Foreach (${Line} in ${Lines})
 		Try
 		{
 			Invoke-Expression ${Line}
+			$LastResult = $global:LastExitCode
 		}
 		Catch
 		{
-			$LastExitCode = ${ExitIgnore}
+			$LastResult = ${ExitIgnore}
 		}
-		If (${LastExitCode} -eq ${ExitFailure})
+		If (${LastResult} -eq ${ExitFailure})
 		{
 			$Result = ${ExitFailure}
 			Write-Host "FAIL" -foreground Red -nonewline
 		}
-		ElseIf (${LastExitCode} -eq ${ExitIgnore})
+		ElseIf (${LastResult} -eq ${ExitIgnore})
 		{
 			Write-Host "SKIP" -foreground Cyan -nonewline
 		}

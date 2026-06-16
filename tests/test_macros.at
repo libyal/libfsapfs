@@ -9,6 +9,39 @@ m4_define(
   [include_test_inputs],
   [m4_include([test_inputs_$1.at])])
 
+dnl Retrieves a values from a test input
+dnl Arguments:
+dnl   test_input
+dnl   value_index
+m4_define([get_test_input_value], [
+  m4_argn([$2], m4_unquote(m4_translit(m4_defn([$1]), [[[]]])))
+])
+
+dnl Strips leading whitespace
+dnl Arguments
+dnl   string
+m4_define([_strip_leading],
+  [m4_bpatsubst([$1], [^\s*])])
+
+dnl Strips trailing whitespace
+dnl Arguments
+dnl   string
+m4_define([_strip_trailing],
+  [m4_bpatsubst([$1], [\s*$])])
+
+dnl Strips a trailing newline
+dnl Arguments
+dnl   string
+m4_define([_strip_newline],
+  [m4_translit([$1], [
+])])
+
+dnl Strips a leading and trailing whitespace and trailing newline
+dnl Arguments
+dnl   string
+m4_define([_strip],
+  [_strip_newline([_strip_trailing([_strip_leading([$1])])])])
+
 dnl Sets up helper functions.
 m4_define([SETUP_HELPER_FUNCTIONS],
   [AT_TEST_HELPER_FN(
@@ -104,26 +137,8 @@ m4_define([RUN_TEST_BINARIES],
       [test -n "${]$1[}"])
 
     AT_CHECK([ath_fn_run_test_binary test_binary])
-    AT_CLEANUP]
-  )]
-)
-
-m4_define([get_test_result_value], [
-  m4_argn([$2], m4_unquote(m4_translit(m4_defn([$1]), [[[]]])))
-])
-
-m4_define([_strip_leading],
-  [m4_bpatsubst([$1], [^\s*])])
-
-m4_define([_strip_trailing],
-  [m4_bpatsubst([$1], [\s*$])])
-
-m4_define([_strip_newline],
-  [m4_translit([$1], [
-])])
-
-m4_define([_strip],
-  [_strip_newline([_strip_trailing([_strip_leading([$1])])])])
+    AT_CLEANUP])
+  ])
 
 dnl Runs one or more test binaries with input.
 dnl Arguments:
@@ -139,8 +154,8 @@ m4_define([RUN_TEST_BINARIES_WITH_INPUT],
     [m4_foreach_w(
       [test_input],
       [$3],
-      [m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
-      m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
+      [m4_define([test_options], m4_normalize(get_test_input_value([test_input], 2)))
+      m4_define([test_file], [_strip(get_test_input_value([test_input], 3))])
 
       m4_define(
         [test_binary],
@@ -151,28 +166,23 @@ m4_define([RUN_TEST_BINARIES_WITH_INPUT],
 
       m4_ifblank(
         test_options,
-        [AT_SETUP(test_binary with input: 'sanitized_test_file')
+        [m4_define(
+          [test_description],
+          [test_binary with input: 'sanitized_test_file'])],
+        [m4_define(
+          [test_description],
+          [test_binary with options: ']test_options[' and input: 'sanitized_test_file'])])
 
-        AT_SKIP_IF(
-          [test -n "${]$1[}"])
+      AT_SETUP(test_description)
 
-        TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+      AT_SKIP_IF(
+        [test -n "${]$1[}"])
 
-        AT_CHECK(
-	  [ath_fn_run_test_binary test_binary "${TEST_FILE}"])
+      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
 
-	AT_CLEANUP],
-        [AT_SETUP(test_binary with options: 'test_options' and input: 'sanitized_test_file')
+      AT_CHECK(
+        [ath_fn_run_test_binary test_binary test_options "${TEST_FILE}"])
 
-        AT_SKIP_IF(
-          [test -n "${]$1[}"])
-
-        TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
-
-        AT_CHECK(
-	  [ath_fn_run_test_binary test_binary test_options "${TEST_FILE}"])
-
-        AT_CLEANUP])]
-    )]
-  )]
-)
+      AT_CLEANUP])
+    ])
+  ])

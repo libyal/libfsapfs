@@ -56,9 +56,8 @@ m4_define([RUN_TEST_SCRIPTS],
       [ignore],
       [ignore])
 
-    AT_CLEANUP]
-  )]
-)
+    AT_CLEANUP])
+  ])
 
 dnl Runs one or more test scripts with input.
 dnl Arguments:
@@ -73,8 +72,8 @@ m4_define([RUN_TEST_SCRIPTS_WITH_INPUT],
     [m4_foreach_w(
       [test_input],
       [$2],
-      [m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
-      m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
+      [m4_define([test_options], m4_normalize(get_test_input_value([test_input], 2)))
+      m4_define([test_file], [_strip(get_test_input_value([test_input], 3))])
 
       m4_define(
         [test_script],
@@ -83,37 +82,31 @@ m4_define([RUN_TEST_SCRIPTS_WITH_INPUT],
       m4_define([sanitized_test_file],
         [m4_translit([test_file], [[],[],[]"'`\], [______])])
 
-      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
-
       m4_ifblank(
         test_options,
-        [AT_SETUP(test_script with input: 'sanitized_test_file')
+        [m4_define(
+          [test_description],
+          [$1 with input: 'sanitized_test_file'])],
+        [m4_define(
+          [test_description],
+          [$1 with options: ']test_options[' and input: 'sanitized_test_file'])])
 
-        AT_SKIP_IF(
-          [test -n "${SKIP_PYTHON_TESTS}"])
+      AT_SETUP(test_description)
 
-        AT_CHECK(
-          [ath_fn_run_test_script $abs_srcdir/test_script "${TEST_FILE}"],
-          [0],
-          [ignore],
-          [ignore])
+      AT_SKIP_IF(
+        [test -n "${SKIP_PYTHON_TESTS}"])
 
-        AT_CLEANUP],
-        [AT_SETUP(test_script with options: 'test_options' and input: 'sanitized_test_file')
+      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
 
-        AT_SKIP_IF(
-          [test -n "${SKIP_PYTHON_TESTS}"])
+      AT_CHECK(
+        [ath_fn_run_test_script $abs_srcdir/test_script test_options "${TEST_FILE}"],
+        [0],
+        [ignore],
+        [ignore])
 
-        AT_CHECK(
-          [ath_fn_run_test_script $abs_srcdir/test_script test_options "${TEST_FILE}"],
-          [0],
-          [ignore],
-          [ignore])
-
-        AT_CLEANUP])]
-    )]
-  )]
-)
+      AT_CLEANUP])
+    ])
+  ])
 
 dnl Wrap m4_define to overwrite AT_TESTSUITE_NAME
 m4_define([_M4_DEFINE_HOOK], m4_defn([m4_define]))

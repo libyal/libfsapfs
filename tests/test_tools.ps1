@@ -1,199 +1,69 @@
 # Tests tools functions and types.
 #
-# Version: 20260608
-
-$ExitSuccess = 0
-$ExitFailure = 1
-$ExitIgnore = 77
+# Version: 20260615
 
 $ToolsTests = "bodyfile digest_hash info_handle mount_path_string output path_string signal"
 $ToolsTestsWithInput = ""
+$OptionSets = "offset password" -split " "
 
-$InputGlob = "*"
-
-$VSDirectories = @(
-	"msvscpp",
-	"vs2008",
-	"vs2010",
-	"vs2012",
-	"vs2013",
-	"vs2015",
-	"vs2017",
-	"vs2019",
-	"vs2022",
-	"vs2026"
-)
-
-$VSConfigurations = @(
-	"Release",
-	"VSDebug"
-)
-
-$VSPlatforms = @(
-	"Win32",
-	"x64"
-)
-
-Function GetTestProfileDirectory
-{
-	param( [string]$TestInputDirectory, [string]$TestProfile )
-
-	$TestProfileDirectory = "${TestInputDirectory}\.${TestProfile}"
-
-	If (-Not (Test-Path -Path ${TestProfileDirectory} -PathType "Container"))
-	{
-		New-Item -ItemType "directory" -Path ${TestProfileDirectory}
-	}
-	Return ${TestProfileDirectory}
-}
-
-Function GetTestSetDirectory
-{
-	param( [string]$TestProfileDirectory, [string]$TestSetInputDirectory )
-
-	$TestSetDirectory = "${TestProfileDirectory}\${TestSetInputDirectory.Basename}"
-
-	If (-Not (Test-Path -Path ${TestSetDirectory} -PathType "Container"))
-	{
-		New-Item -ItemType "directory" -Path ${TestSetDirectory}
-	}
-	Return ${TestSetDirectory}
-}
-
-Function GetTestExecutablesDirectory
-{
-	$TestExecutablesDirectory = ""
-
-	ForEach (${VSDirectory} in $VSDirectories)
-	{
-		ForEach (${VSConfiguration} in $VSConfigurations)
-		{
-			ForEach (${VSPlatform} in $VSPlatforms)
-			{
-				$TestExecutablesDirectory = "..\${VSDirectory}\${VSConfiguration}\${VSPlatform}"
-
-				If (Test-Path ${TestExecutablesDirectory})
-				{
-					Return ${TestExecutablesDirectory}
-				}
-			}
-			$TestExecutablesDirectory = "..\${VSDirectory}\${VSConfiguration}"
-
-			If (Test-Path ${TestExecutablesDirectory})
-			{
-				Return ${TestExecutablesDirectory}
-			}
-		}
-	}
-	Return ${TestExecutablesDirectory}
-}
-
-Function ReadIgnoreList
-{
-	param( [string]$TestProfileDirectory )
-
-	$IgnoreFile = "${TestProfileDirectory}\ignore"
-	$IgnoreList = ""
-
-	If (Test-Path -Path ${IgnoreFile} -PathType "Leaf")
-	{
-		$IgnoreList = Get-Content -Path ${IgnoreFile} |
-			Where {$_ -notmatch '^#.*'}
-	}
-	Return $IgnoreList
-}
+. .\test_functions.ps1
 
 Function RunTest
 {
-	param( [string]$TestType )
+	param( [string]$TestName )
 
-	$TestDescription = "Testing: ${TestName}"
-	$TestExecutable = "${TestExecutablesDirectory}\fsapfs_test_tools_${TestName}.exe"
+	$TestBinary = "fsapfs_test_tools_${TestName}"
 
+	$TestDescription = "${TestBinary}"
+	$TestExecutable = "${TestExecutablesDirectory}\${TestBinary}.exe"
+
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType Leaf))
+	{
+		WriteTestResult ${TestDescription} ${ExitIgnore}
+
+		Return ${ExitIgnore}
+	}
 	$Output = Invoke-Expression ${TestExecutable}
-	$Result = ${LastExitCode}
+	$Result = $global:LastExitCode
 
 	If (${Result} -ne ${ExitSuccess})
 	{
 		Write-Host ${Output} -foreground Red
 	}
-	Write-Host "${TestDescription} " -nonewline
+	WriteTestResult ${TestDescription} ${Result}
 
-	If (${Result} -ne ${ExitSuccess})
-	{
-		Write-Host " (FAIL)"
-	}
-	Else
-	{
-		Write-Host " (PASS)"
-	}
 	Return ${Result}
 }
 
 Function RunTestWithInput
 {
-	param( [string]$TestType )
+	param( [string]$TestName, [string[]]$TestInput )
 
-	$TestDescription = "Testing: ${TestName}"
-	$TestExecutable = "${TestExecutablesDirectory}\fsapfs_test_tools_${TestName}.exe"
+	$OptionSet = $TestInput[0]
+	$Options = $TestInput[1]
+	$TestFile = $TestInput[2]
 
-	$TestProfileDirectory = GetTestProfileDirectory "input" "fsapfstools"
+	$TestBinary = "fsapfs_test_tools_${TestName}"
+	$TestFileName = (${TestFile} -split '\\')[-2..-1] -join '\'
 
-	$IgnoreList = ReadIgnoreList ${TestProfileDirectory}
+	$TestDescription = "${TestBinary} with input: '${TestFileName}"
+	$TestExecutable = "${TestExecutablesDirectory}\${TestBinary}.exe"
 
-	$Result = ${ExitSuccess}
-
-	ForEach ($TestSetInputDirectory in Get-ChildItem -Path "input" -Exclude ".*")
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType Leaf))
 	{
-		If (-Not (Test-Path -Path ${TestSetInputDirectory} -PathType "Container"))
-		{
-			Continue
-		}
-		If (${TestSetInputDirectory} -Contains ${IgnoreList})
-		{
-			Continue
-		}
-		$TestSetDirectory = GetTestSetDirectory ${TestProfileDirectory} ${TestSetInputDirectory}
+		WriteTestResult ${TestDescription} ${ExitIgnore}
 
-		If (Test-Path -Path "${TestSetDirectory}\files" -PathType "Leaf")
-		{
-			$InputFiles = Get-Content -Path "${TestSetDirectory}\files" |
-				Where {$_ -ne ""}
-		}
-		Else
-		{
-			$InputFiles = Get-ChildItem -Path ${TestSetInputDirectory} -Include ${InputGlob}
-		}
-		ForEach ($InputFile in ${InputFiles})
-		{
-			# TODO: add test option support
-			$Output = Invoke-Expression ${TestExecutable}
-			$Result = ${LastExitCode}
-
-			If (${Result} -ne ${ExitSuccess})
-			{
-				Break
-			}
-		}
-		If (${Result} -ne ${ExitSuccess})
-		{
-			Break
-		}
+		Return ${ExitIgnore}
 	}
+	$Output = Invoke-Expression "${TestExecutable} ${Options} ${TestFile}"
+	$Result = $global:LastExitCode
+
 	If (${Result} -ne ${ExitSuccess})
 	{
 		Write-Host ${Output} -foreground Red
 	}
-	Write-Host "${TestDescription} " -nonewline
+	WriteTestResult ${TestDescription} ${Result}
 
-	If (${Result} -ne ${ExitSuccess})
-	{
-		Write-Host " (FAIL)"
-	}
-	Else
-	{
-		Write-Host " (PASS)"
-	}
 	Return ${Result}
 }
 
@@ -201,7 +71,7 @@ $TestExecutablesDirectory = GetTestExecutablesDirectory
 
 If (-Not (Test-Path ${TestExecutablesDirectory}))
 {
-	Write-Host "Missing test executables directory." -foreground Red
+	Write-Error "Missing test executables directory"
 
 	Exit ${ExitFailure}
 }
@@ -217,11 +87,13 @@ Foreach (${TestName} in ${ToolsTests} -split " ")
 	}
 	$Result = RunTest ${TestName}
 
-	If (${Result} -ne ${ExitSuccess})
+	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 	{
 		Break
 	}
 }
+
+$TestInputs = GenerateTestInputs "fsapfstools" ${OptionSets}
 
 Foreach (${TestName} in ${ToolsTestsWithInput} -split " ")
 {
@@ -230,19 +102,19 @@ Foreach (${TestName} in ${ToolsTestsWithInput} -split " ")
 	{
 		Continue
 	}
-	If (Test-Path -Path "input" -PathType "Container")
+	ForEach ($TestInput in ${TestInputs})
 	{
-		$Result = RunTestWithInput ${TestName}
+		$Result = RunTestWithInput ${TestName} ${TestInput}
+
+		If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
+		{
+			Break
+		}
 	}
-	Else
-	{
-		$Result = RunTest ${TestName}
-	}
-	If (${Result} -ne ${ExitSuccess})
+	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 	{
 		Break
 	}
 }
 
 Exit ${Result}
-

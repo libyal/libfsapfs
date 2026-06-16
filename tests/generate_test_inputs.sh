@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to generate test_inputs.at
 #
-# Version: 20260615
+# Version: 20260617
 
 ignore_list_add() {
     if ! ignore_list_contains "$1"; then
@@ -38,9 +38,14 @@ options_add() {
 }
 
 read_options() {
+    INPUT=$1
+    TEST_PROFILE=$2
+    TEST_SET=$3
+    TEST_FILENAME=$4
+    OPTION_SET=$5
     OPTIONS=""
 
-    FILE="$1/$2.$3"
+    FILE="${INPUT}/.${TEST_PROFILE}/${TEST_SET}/${TEST_FILENAME}.${OPTION_SET}"
     if test -f "${FILE}"; then
         # The original format of the options file contains all options on the first line.
         OPTIONS=`head -n 1 "${FILE}" | sed 's/[\r\n]*$//'`
@@ -53,7 +58,7 @@ read_options() {
                     offset=*)            OPTION="-o${LINE#offset=}" ;;
                     password=*)          OPTION="-p${LINE#password=}" ;;
                     recovery_password=*) OPTION="-r${LINE#recovery_password=}" ;;
-                    startup_key=*)       OPTION="-s${LINE#startup_key=}" ;;
+                    startup_key=*)       OPTION="-s\$abs_srcdir/${INPUT}/${TEST_SET}/${LINE#startup_key=}" ;;
                     virtual_address=*)   OPTION="-v${LINE#virtual_address=}" ;;
                     *)                   OPTION= ;;
                 esac
@@ -87,9 +92,10 @@ test_files_pop() {
 }
 
 glob_test_files() {
+    TEST_FILES_GLOB=$2
     TEST_FILES=""
 
-    for LINE in "$1"/${INPUT_GLOB}; do
+    for LINE in "$1"/${TEST_FILES_GLOB}; do
         if test -e "${LINE}"; then
             test_files_push "${LINE}"
         fi
@@ -216,7 +222,13 @@ if test -d "${INPUT}"; then
         if test ${GLOB_FILES} -eq 0; then
             read_test_files "${INPUT}/.${TEST_PROFILE}/${TEST_SET}" "${INPUT}/${TEST_SET}"
         else
-            glob_test_files "${INPUT}/${TEST_SET}"
+            GLOB_FILE="${INPUT}/.${TEST_PROFILE}/glob"
+            if test -f "${GLOB_FILE}"; then
+                TEST_FILES_GLOB=`head -n 1 "${GLOB_FILE}" | sed 's/[\r\n]*$//'`
+            else
+                TEST_FILES_GLOB="${INPUT_GLOB}"
+            fi
+            glob_test_files "${INPUT}/${TEST_SET}" "${TEST_FILES_GLOB}"
         fi
         if test -z "${TEST_FILES}"; then
             echo "Skipping '${TEST_SET}' no test files"
@@ -243,7 +255,7 @@ if test -d "${INPUT}"; then
 
             OPTION_SETS="${BACKUP_OPTION_SETS}"
             while option_sets_pop; test -n "${OPTION_SET}"; do
-                read_options "${INPUT}/.${TEST_PROFILE}/${TEST_SET}" "${TEST_FILENAME}" "${OPTION_SET}"
+                read_options "${INPUT}" "${TEST_PROFILE}" "${TEST_SET}" "${TEST_FILENAME}" "${OPTION_SET}"
 
                 if test -n "${OPTIONS}"; then
                     if test -n "${OPTIONS_PER_PROFILE}"; then

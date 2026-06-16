@@ -47,7 +47,6 @@
 int fsapfs_test_data_block_vector_initialize(
      void )
 {
-	libcdata_array_t *file_extents       = NULL;
 	libcerror_error_t *error             = NULL;
 	libfdata_vector_t *data_block_vector = NULL;
 	libfsapfs_io_handle_t *io_handle     = NULL;

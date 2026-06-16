@@ -51,7 +51,7 @@ AT_TEST_HELPER_FN(
 AT_TEST_HELPER_FN(
   [run_fsapfstools_binary_and_compare_bodyfile],
   [tool_name test_profile options_set arguments test_file],
-  [Runs a fsapfstools binary and compares a bodyfile against a reference],
+  [Runs a fsapfstools binary and compares a resulting bodyfile against a reference],
   [FSAPFSTOOL="$[]1"
   shift
   TEST_PROFILE="$[]1"
@@ -84,12 +84,12 @@ AT_TEST_HELPER_FN(
 AT_TEST_HELPER_FN(
   [run_fsapfstools_binary_and_compare_files],
   [tool_name test_profile options_set arguments test_file],
-  [Runs a fsapfstools binary and compares files against a reference],
+  [Runs a fsapfstools binary and compares resulting files against a reference],
   [FSAPFSTOOL="$[]1"
   shift
   TEST_PROFILE="$[]1"
   shift
-  OPTION_SET="$[]1"
+  OPTIONS_SET="$[]1"
   shift
   # Get the last argument.
   for TEST_FILE do :; done
@@ -98,10 +98,10 @@ AT_TEST_HELPER_FN(
   TEST_SET=`dirname "${TEST_FILE}"`
   TEST_SET=`basename "${TEST_SET}"`
 
-  if test "${OPTION_SET}" = "."; then
+  if test "${OPTIONS_SET}" = "."; then
     OUTPUT_FILE="${FILENAME}.log"
   else
-    OUTPUT_FILE="${FILENAME}-${OPTION_SET}.log"
+    OUTPUT_FILE="${FILENAME}-${OPTIONS_SET}.log"
   fi
   OUTPUT_DIRECTORY="${FILENAME}.export"
 
@@ -115,7 +115,7 @@ AT_TEST_HELPER_FN(
     ath_fn_compare_with_reference "${TEST_PROFILE}" "${TEST_SET}" "${FILENAME}" "${OUTPUT_FILE}"
     STATUS=$?
   fi
-  exit $STATUS
+  return $STATUS
   ])
 
 AT_TEST_HELPER_FN(
@@ -126,7 +126,7 @@ AT_TEST_HELPER_FN(
   shift
   TEST_PROFILE="$[]1"
   shift
-  OPTION_SET="$[]1"
+  OPTIONS_SET="$[]1"
   shift
   # Get the last argument.
   for TEST_FILE do :; done
@@ -135,10 +135,10 @@ AT_TEST_HELPER_FN(
   TEST_SET=`dirname "${TEST_FILE}"`
   TEST_SET=`basename "${TEST_SET}"`
 
-  if test "${OPTION_SET}" = "."; then
+  if test "${OPTIONS_SET}" = "."; then
     OUTPUT_FILE="${FILENAME}.log"
   else
-    OUTPUT_FILE="${FILENAME}-${OPTION_SET}.log"
+    OUTPUT_FILE="${FILENAME}-${OPTIONS_SET}.log"
   fi
   ath_fn_run_fsapfstools_binary "${FSAPFSTOOL}" "$[]@" > "${OUTPUT_FILE}"
   STATUS=$?
@@ -150,10 +150,10 @@ AT_TEST_HELPER_FN(
     ath_fn_compare_with_reference "${TEST_PROFILE}" "${TEST_SET}" "${FILENAME}" "${OUTPUT_FILE}"
     STATUS=$?
   fi
-  exit $STATUS
+  return $STATUS
   ])
 
-dnl Runs a fsapfstool and compares a bodyfile against a reference
+dnl Runs a fsapfstool and compares a resulting bodyfile against a reference
 dnl Arguments:
 dnl   tool_name
 dnl   test_profile
@@ -162,49 +162,41 @@ m4_define([RUN_TEST_FSAPFSTOOL_AND_COMPARE_BODYFILE],
   [m4_foreach_w(
     [test_input],
     [$3],
-    [m4_define([option_set], m4_normalize(get_test_result_value([test_input], 1)))
-    m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
-    m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
+    [m4_define([option_set], m4_normalize(get_test_input_value([test_input], 1)))
+    m4_define([test_options], m4_normalize(get_test_input_value([test_input], 2)))
+    m4_define([test_file], [_strip(get_test_input_value([test_input], 3))])
+
+    m4_ifblank(options_set, m4_define([options_set], [.]))
 
     m4_define([sanitized_test_file],
       [m4_translit([test_file], [[],[],[]"'`\], [______])])
 
     m4_ifblank(
       test_options,
-      [AT_SETUP($1 with input: 'sanitized_test_file')
+      [m4_define(
+        [test_description],
+        [$1 with input: 'sanitized_test_file'])],
+      [m4_define(
+        [test_description],
+        [$1 with options: ']test_options[' and input: 'sanitized_test_file'])])
 
-      AT_SKIP_IF(
-        [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
+    AT_SETUP(test_description)
 
-      AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
-      AT_SKIP_IF([test -z "${MD5SUM}"])
-      AT_SKIP_IF([test -z "${SED}"])
-      AT_SKIP_IF([test -z "${ZCAT}"])
+    AT_SKIP_IF(
+      [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
 
-      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+    AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
+    AT_SKIP_IF([test -z "${SED}"])
+    AT_SKIP_IF([test -z "${ZCAT}"])
 
-      AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_bodyfile $1 $2 "." "${TEST_FILE}")
+    TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
 
-      AT_CLEANUP],
-      [AT_SETUP($1 with options: 'test_options' and input: 'sanitized_test_file')
+    AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_bodyfile $1 $2 "option_set" test_options "${TEST_FILE}")
 
-      AT_SKIP_IF(
-        [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
+    AT_CLEANUP])
+  ])
 
-      AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
-      AT_SKIP_IF([test -z "${SED}"])
-      AT_SKIP_IF([test -z "${ZCAT}"])
-
-      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
-
-      AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_bodyfile $1 $2 "option_set" test_options "${TEST_FILE}")
-
-      AT_CLEANUP])]
-    )]
-  )]
-)
-
-dnl Runs a fsapfstool and compares files against a reference
+dnl Runs a fsapfstool and compares resulting files against a reference
 dnl Arguments:
 dnl   tool_name
 dnl   test_profile
@@ -213,47 +205,39 @@ m4_define([RUN_TEST_FSAPFSTOOL_AND_COMPARE_FILES],
   [m4_foreach_w(
     [test_input],
     [$3],
-    [m4_define([option_set], m4_normalize(get_test_result_value([test_input], 1)))
-    m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
-    m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
+    [m4_define([options_set], m4_normalize(get_test_input_value([test_input], 1)))
+    m4_define([test_options], m4_normalize(get_test_input_value([test_input], 2)))
+    m4_define([test_file], [_strip(get_test_input_value([test_input], 3))])
+
+    m4_ifblank(options_set, m4_define([options_set], [.]))
 
     m4_define([sanitized_test_file],
       [m4_translit([test_file], [[],[],[]"'`\], [______])])
 
     m4_ifblank(
       test_options,
-      [AT_SETUP($1 with input: 'sanitized_test_file')
+      [m4_define(
+        [test_description],
+        [$1 with input: 'sanitized_test_file'])],
+      [m4_define(
+        [test_description],
+        [$1 with options: ']test_options[' and input: 'sanitized_test_file'])])
 
-      AT_SKIP_IF(
-        [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
+    AT_SETUP(test_description)
 
-      AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
-      AT_SKIP_IF([test -z "${MD5SUM}"])
-      AT_SKIP_IF([test -z "${SED}"])
-      AT_SKIP_IF([test -z "${ZCAT}"])
+    AT_SKIP_IF(
+      [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
 
-      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+    AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
+    AT_SKIP_IF([test -z "${SED}"])
+    AT_SKIP_IF([test -z "${ZCAT}"])
 
-      AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_files $1 $2 "." "${TEST_FILE}")
+    TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
 
-      AT_CLEANUP],
-      [AT_SETUP($1 with options: 'test_options' and input: 'sanitized_test_file')
+    AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_files $1 $2 "options_set" test_options "${TEST_FILE}")
 
-      AT_SKIP_IF(
-        [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
-
-      AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
-      AT_SKIP_IF([test -z "${SED}"])
-      AT_SKIP_IF([test -z "${ZCAT}"])
-
-      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
-
-      AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_files $1 $2 "option_set" test_options "${TEST_FILE}")
-
-      AT_CLEANUP])]
-    )]
-  )]
-)
+    AT_CLEANUP])
+  ])
 
 dnl Runs a fsapfstool and compares stdout against a reference
 dnl Arguments:
@@ -264,46 +248,39 @@ m4_define([RUN_TEST_FSAPFSTOOL_AND_COMPARE_STDOUT],
   [m4_foreach_w(
     [test_input],
     [$3],
-    [m4_define([option_set], m4_normalize(get_test_result_value([test_input], 1)))
-    m4_define([test_options], m4_normalize(get_test_result_value([test_input], 2)))
-    m4_define([test_file], [_strip(get_test_result_value([test_input], 3))])
+    [m4_define([options_set], m4_normalize(get_test_input_value([test_input], 1)))
+    m4_define([test_options], m4_normalize(get_test_input_value([test_input], 2)))
+    m4_define([test_file], [_strip(get_test_input_value([test_input], 3))])
+
+    m4_ifblank(options_set, m4_define([options_set], [.]))
 
     m4_define([sanitized_test_file],
       [m4_translit([test_file], [[],[],[]"'`\], [______])])
 
     m4_ifblank(
       test_options,
-      [AT_SETUP($1 with input: 'sanitized_test_file')
+      [m4_define(
+        [test_description],
+        [$1 with input: 'sanitized_test_file'])],
+      [m4_define(
+        [test_description],
+        [$1 with options: ']test_options[' and input: 'sanitized_test_file'])])
 
-      AT_SKIP_IF(
-        [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
+    AT_SETUP(test_description)
 
-      AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
-      AT_SKIP_IF([test -z "${SED}"])
-      AT_SKIP_IF([test -z "${ZCAT}"])
+    AT_SKIP_IF(
+      [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
 
-      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
+    AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
+    AT_SKIP_IF([test -z "${SED}"])
+    AT_SKIP_IF([test -z "${ZCAT}"])
 
-      AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_stdout $1 $2 "." "${TEST_FILE}")
+    TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
 
-      AT_CLEANUP],
-      [AT_SETUP($1 with options: 'test_options' and input: 'sanitized_test_file')
+    AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_stdout $1 $2 "options_set" test_options "${TEST_FILE}")
 
-      AT_SKIP_IF(
-        [test -n "${SKIP_TOOLS_TESTS}" || test -n "${SKIP_TOOLS_END_TO_END_TESTS}"])
-
-      AT_SKIP_IF([test -z "${GZIP_COMMAND}"])
-      AT_SKIP_IF([test -z "${SED}"])
-      AT_SKIP_IF([test -z "${ZCAT}"])
-
-      TEST_FILE=`ath_fn_resolve_test_file "$abs_srcdir/input/test_file"`
-
-      AT_CHECK(ath_fn_run_fsapfstools_binary_and_compare_stdout $1 $2 "option_set" test_options "${TEST_FILE}")
-
-      AT_CLEANUP])]
-    )]
-  )]
-)
+    AT_CLEANUP])
+  ])
 
 dnl Wrap m4_define to overwrite AT_TESTSUITE_NAME
 m4_define([_M4_DEFINE_HOOK], m4_defn([m4_define]))
