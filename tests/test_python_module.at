@@ -86,10 +86,10 @@ m4_define([RUN_TEST_SCRIPTS_WITH_INPUT],
         test_options,
         [m4_define(
           [test_description],
-          [$1 with input: 'sanitized_test_file'])],
+          [test_script with input: 'sanitized_test_file'])],
         [m4_define(
           [test_description],
-          [$1 with options: ']test_options[' and input: 'sanitized_test_file'])])
+          [test_script with options: ']test_options[' and input: 'sanitized_test_file'])])
 
       AT_SETUP(test_description)
 

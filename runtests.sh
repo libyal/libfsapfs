@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Script that runs tests.
 #
-# Version: 20260611
+# Version: 20260617
 
 initialize_configure_options()
 {
@@ -9,6 +9,9 @@ initialize_configure_options()
 
 	echo "${CONFIGURE_HELP}" | grep -- '--enable-wide-character-type' > /dev/null
 	HAVE_ENABLE_WIDE_CHARACTER_TYPE=$?
+
+	echo "${CONFIGURE_HELP}" | grep -- '--enable-multi-threading-support' > /dev/null
+	HAVE_ENABLE_MULTI_THREADING_SUPPORT=$?
 
 	echo "${CONFIGURE_HELP}" | grep -- '--enable-verbose-output' > /dev/null
 	HAVE_ENABLE_VERBOSE_OUTPUT=$?
@@ -185,8 +188,12 @@ run_configure_make_check_python()
 
 run_configure_make_check_static_executables()
 {
-	CONFIGURE_OPTIONS="--disable-multi-threading-support --enable-static-executables"
+	CONFIGURE_OPTIONS="--enable-static-executables"
 
+	if test ${HAVE_ENABLE_MULTI_THREADING_SUPPORT} -eq 0
+	then
+		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --disable-multi-threading-support"
+	fi
 	if test ${HAVE_WITH_BZIP2} -eq 0
 	then
 		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --with-bzip2=no"

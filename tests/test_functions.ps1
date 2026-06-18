@@ -1,10 +1,11 @@
 # Tests functions.
 #
-# Version: 20260615
+# Version: 20260617
 
 $ExitSuccess = 0
 $ExitFailure = 1
 $ExitIgnore = 77
+$ExitCommandNotFound = 127
 
 $VSDirectories = @(
 	"msvscpp",
@@ -28,6 +29,123 @@ $VSPlatforms = @(
 	"Win32",
 	"x64"
 )
+
+Function GenerateTestInputs
+{
+	param( [string]$TestProfile, [string[]]$OptionSets )
+
+	$TestInputs = [System.Collections.Generic.List[string[]]]::new()
+
+	If (Test-Path -Path "input")
+	{
+		$TestProfileDirectory = "input\.${TestProfile}"
+
+		$IgnoreList = ReadIgnoreList "input\.${TestProfile}"
+
+		ForEach ($DirectoryEntry in Get-ChildItem -Path "input" -Exclude ".*")
+		{
+			$TestSet = ${DirectoryEntry}.Name
+
+			If (-Not (Test-Path -Path ${DirectoryEntry} -PathType Container))
+			{
+				Write-Host "Skipping '${TestSet}' not a directory"
+
+				Continue
+			}
+			If (${TestSet} -Contains ${IgnoreList})
+			{
+				Write-Host "Skipping '${TestSet}' defined in ignore list"
+
+				Continue
+			}
+			If (Test-Path -Path "input\.${TestProfile}\${TestSet}\files" -PathType Leaf)
+			{
+				$GlobFiles=$False
+			}
+			Else
+			{
+				$GlobFiles=$True
+			}
+			If (-Not ($GlobFiles))
+			{
+				$TestFiles = ReadTestFiles "input\.${TestProfile}" ${TestSet} "input\${TestSet}"
+			}
+			Else
+			{
+				$GlobFile = "input\.${TestProfile}\glob"
+
+				If (Test-Path -Path "${GlobFile}" -PathType Leaf)
+				{
+					$TestFilesGlob = Get-content -Path "${GlobFile}" -First 1
+				}
+				Else
+				{
+					$TestFilesGlob = ${InputGlob}
+				}
+				# Note FullName is necessary otherwise TestFiles will contain objects.
+				$TestFiles = Get-ChildItem -Path "input\${TestSet}" -Include ${TestFilesGlob} | ForEach-Object -MemberName FullName
+			}
+			If (-Not (${TestFiles}))
+			{
+				Write-Host "Skipping '${TestSet}' no test files"
+
+				Continue
+			}
+			ForEach ($TestFile in ${TestFiles})
+			{
+				$TestFileName = Split-Path -Path ${TestFile} -Leaf
+
+				If (-Not ($GlobFiles) -And -Not (Test-Path -Path "${GlobFile}" -PathType Leaf))
+				{
+					Write-Host "Skipping missing file '${TestFile}' defined in '${TestSet}\files'"
+
+					Continue
+				}
+				$OptionsPerProfile = ""
+				$OptionsFile = "input\.${TestProfile}\options"
+
+				If (Test-Path -Path "${OptionsFile}" -PathType Leaf)
+				{
+					$OptionsPerProfile = Get-content -Path "${OptionsFile}" -First 1
+				}
+				$TestedWithOptions = $False
+
+				ForEach ($OptionSet in ${OptionSets})
+				{
+					# Split will return an array of a single empty string when OptionSets is empty.
+					If (-Not (${OptionSets}))
+					{
+						Continue
+					}
+					$Options = ReadOptions "input" ${TestProfile} ${TestSet} ${TestFileName} ${OptionSet}
+
+					If ($Options)
+					{
+						if (${OptionsPerProfile})
+						{
+							$Options = "${OptionsPerProfile} ${Options}"
+						}
+						$TestInput = @(${OptionSet}, $Options, ${TestFile})
+						$TestInputs.Add(${TestInput})
+
+						$TestedWithOptions = $True
+					}
+				}
+				If (-Not (${TestedWithOptions}))
+				{
+					$TestInput = @("", ${OptionsPerProfile}, ${TestFile})
+					$TestInputs.Add(${TestInput})
+				}
+			}
+			If (${Result} -ne ${ExitSuccess})
+			{
+				Break
+			}
+		}
+	}
+	# Note the leading comma here is deliberate.
+	Return ,${TestInputs}
+}
 
 Function GetTestExecutablesDirectory
 {
@@ -55,27 +173,6 @@ Function GetTestExecutablesDirectory
 		}
 	}
 	Return ${TestExecutablesDirectory}
-}
-
-Function WriteTestResult
-{
-        param( [string]$Description, [int]$Result )
-
-        Write-Host "${Description} (" -nonewline
-
-        If (${Result} -eq ${ExitSuccess})
-        {
-                Write-Host "PASS" -foreground Green -nonewline
-        }
-        ElseIf (${Result} -eq ${ExitIgnore})
-        {
-		Write-Host "SKIP" -foreground Cyan -nonewline
-        }
-        Else
-        {
-                Write-Host "FAIL" -foreground Red -nonewline
-        }
-        Write-Host ")"
 }
 
 Function ReadIgnoreList
@@ -130,137 +227,81 @@ Function ReadTestFiles
 	Return $TestFiles
 }
 
-Function GenerateTestInputs
+Function RunTestBinary
 {
-	param( [string]$TestProfile, [string[]]$OptionSets )
+	param( [string]$TestExecutablesDirectory, [string]$TestName )
 
-	$TestInputs = [System.Collections.Generic.List[string[]]]::new()
+	$TestExecutable = "${TestExecutablesDirectory}\${TestName}.exe"
 
-	If (Test-Path -Path "input")
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType Leaf))
 	{
-		$TestProfileDirectory = "input\.${TestProfile}"
+		$TestDescription = "Missing binary: ${TestName}"
+		WriteTestResult ${TestDescription} ${ExitCommandNotFound}
 
-		$IgnoreList = ReadIgnoreList "input\.${TestProfile}"
-
-		ForEach ($DirectoryEntry in Get-ChildItem -Path "input" -Exclude ".*")
-		{
-			$TestSet = ${DirectoryEntry}.Name
-
-			If (-Not (Test-Path -Path ${DirectoryEntry} -PathType Container))
-			{
-				Write-Host "Skipping '${TestSet}' not a directory"
-
-				Continue
-			}
-			If (${TestSet} -Contains ${IgnoreList})
-			{
-				Write-Host "Skipping '${TestSet}' defined in ignore list"
-
-				Continue
-			}
-			If (Test-Path -Path "input\.${TestProfile}\${TestSet}\files" -PathType Leaf)
-			{
-				$GlobFiles=$False
-			}
-			Else
-			{
-				$GlobFiles=$True
-			}
-			If (-Not ($GlobFiles))
-			{
-				$TestFiles = ReadTestFiles "input\.${TestProfile}" ${TestSet} "input\${TestSet}"
-			}
-			Else
-			{
-				$GlobFile = "input\.${TestProfile}\glob"
-
-				If (Test-Path -Path "${GlobFile}" -PathType Leaf)
-				{
-					$TestFilesGlob = Get-content -Path "${GlobFile}" -First 1
-				}
-				Else
-				{
-					$TestFilesGlob = ${InputGlob}
-				}
-				# Note that we need FullName otherwise child items are objects.
-				$TestFiles = Get-ChildItem -Path "input\${TestSet}" -Include ${TestFilesGlob} | ForEach-Object -MemberName FullName
-			}
-			If (-Not (${TestFiles}))
-			{
-				Write-Host "Skipping '${TestSet}' no test files"
-
-				Continue
-			}
-			ForEach ($TestFile in ${TestFiles})
-			{
-				$TestFileName = ${TestFile}.Name
-
-				If (-Not ($GlobFiles) -And -Not (Test-Path -Path "${GlobFile}" -PathType Leaf))
-				{
-					Write-Host "Skipping missing file '${TestFile}' defined in '${TestSet}\files'"
-
-					Continue
-				}
-				$OptionsPerProfile = ""
-				$OptionsFile = "input\.${TestProfile}\options"
-
-				If (Test-Path -Path "${OptionsFile}" -PathType Leaf)
-				{
-					$OptionsPerProfile = Get-content -Path "${OptionsFile}" -First 1
-				}
-				$TestedWithOptions = $False
-
-				ForEach ($OptionSet in ${OptionSets})
-				{
-					$Options = ReadOptions "input" ${TestProfile} ${TestSet} ${TestFileName} ${OptionSet}
-
-					If ($Options)
-					{
-						if (${OptionsPerProfile})
-						{
-							$Options = "${OptionsPerProfile} ${Options}"
-						}
-						$TestInput = @(${OptionSet}, $Options, ${TestFile})
-						$TestInputs.Add(${TestInput})
-
-						$TestedWithOptions = $True
-					}
-				}
-				If (-Not (${TestedWithOptions}))
-				{
-					$TestInput = @("", ${OptionsPerProfile}, ${TestFile})
-					$TestInputs.Add(${TestInput})
-				}
-			}
-			If (${Result} -ne ${ExitSuccess})
-			{
-				Break
-			}
-		}
+		Return ${ExitCommandNotFound}
 	}
-	# Note the leading comma here is deliberate.
-	Return ,${TestInputs}
+	$Output = Invoke-Expression ${TestExecutable}
+	$Result = $global:LastExitCode
+
+	If (${Result} -ne ${ExitSuccess})
+	{
+		Write-Host ${Output} -foreground Red
+	}
+	$TestDescription = "${TestName}"
+	WriteTestResult ${TestDescription} ${Result}
+
+	Return ${Result}
 }
 
-Function CompareWithReference
+Function RunTestBinaryWithInput
 {
-	param( [string]$TestProfileDirectory, [string]$TestSet, [string]$TestFileName, [string]$TestResults )
+	param( [string]$TestExecutablesDirectory, [string]$TestName, [string[]]$TestInput )
 
-	$ExpectedTestResults = "${TestProfileDirectory}\${TestSet}\${TestFileName}"
+	$OptionSet = $TestInput[0]
+	$Options = $TestInput[1]
+	$TestFile = $TestInput[2]
 
-	If (Test-Path -Path ${ExpectedTestResults} -PathType Leaf)
+	$TestFileName = (${TestFile} -split '\\')[-2..-1] -join '\'
+
+	$TestExecutable = "${TestExecutablesDirectory}\${TestName}.exe"
+
+	If (-Not (Test-Path -Path ${TestExecutable} -PathType Leaf))
 	{
-		$Difference = Compare-Object -ReferenceObject (Get-Content -Path ${ExpectedTestResults}) -DifferenceObject (Get-Content -Path ${TestResults})
+		$TestDescription = "Missing binary: ${TestName}"
+		WriteTestResult ${TestDescription} ${ExitCommandNotFound}
 
-		If (${Difference})
-		{
-			Return ${ExitFailure}
-		}
+		Return ${ExitCommandNotFound}
 	}
-	Else
+	$Output = Invoke-Expression "${TestExecutable} ${Options} ${TestFile}"
+	$Result = $global:LastExitCode
+
+	If (${Result} -ne ${ExitSuccess})
 	{
-		New-Item -Force -ItemType Directory -Path "${TestProfileDirectory}\${TestSet}" | Out-Null
-		Move-Item -Path ${TestResults} -Destination ${ExpectedTestResults}
+		Write-Host ${Output} -foreground Red
 	}
-	Return ${ExitSuccess}
+	$TestDescription = "${TestName} with input: '${TestFileName}"
+	WriteTestResult ${TestDescription} ${Result}
+
+	Return ${Result}
+}
+
+Function WriteTestResult
+{
+        param( [string]$Description, [int]$Result )
+
+        Write-Host "${Description} (" -nonewline
+
+        If (${Result} -eq ${ExitSuccess})
+        {
+                Write-Host "PASS" -foreground Green -nonewline
+        }
+        ElseIf (${Result} -eq ${ExitIgnore})
+        {
+		Write-Host "SKIP" -foreground Cyan -nonewline
+        }
+        Else
+        {
+                Write-Host "FAIL" -foreground Red -nonewline
+        }
+        Write-Host ")"
 }

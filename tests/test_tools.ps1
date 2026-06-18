@@ -1,67 +1,88 @@
 # Tests tools functions and types.
-#
-# Version: 20260615
 
 $ToolsTests = "bodyfile digest_hash info_handle mount_path_string output path_string signal"
-$ToolsTestsWithInput = ""
 $OptionSets = "offset password" -split " "
 
 . .\test_functions.ps1
 
-Function RunTest
+Function CompareWithReference
 {
-	param( [string]$TestName )
+	param( [string]$TestProfileDirectory, [string]$TestSet, [string]$TestFileName, [string]$TestResults )
 
-	$TestBinary = "fsapfs_test_tools_${TestName}"
+	$ExpectedTestResults = "${TestProfileDirectory}\${TestSet}\${TestFileName}"
 
-	$TestDescription = "${TestBinary}"
-	$TestExecutable = "${TestExecutablesDirectory}\${TestBinary}.exe"
+	If (Test-Path -Path ${ExpectedTestResults} -PathType Leaf)
+	{
+		$Difference = Compare-Object -ReferenceObject (Get-Content -Path ${ExpectedTestResults}) -DifferenceObject (Get-Content -Path ${TestResults})
+
+		If (${Difference})
+		{
+			Return ${ExitFailure}
+		}
+	}
+	Else
+	{
+		New-Item -Force -ItemType Directory -Path "${TestProfileDirectory}\${TestSet}" | Out-Null
+		Move-Item -Path ${TestResults} -Destination ${ExpectedTestResults}
+	}
+	Return ${ExitSuccess}
+}
+
+Function RunToolsBinaryAndCompareStdout
+{
+	param( [string]$TestExecutablesDirectory, [string]$ToolName, [string]$TestProfile, [string]$TestOptions, [string[]]$TestInput )
+
+	$TestExecutable = "${TestExecutablesDirectory}\${ToolName}.exe"
 
 	If (-Not (Test-Path -Path ${TestExecutable} -PathType Leaf))
 	{
-		WriteTestResult ${TestDescription} ${ExitIgnore}
+		$TestDescription = "Missing binary: ${ToolName}"
+		WriteTestResult ${TestDescription} ${ExitCommandNotFound}
 
-		Return ${ExitIgnore}
+		Return ${ExitCommandNotFound}
 	}
-	$Output = Invoke-Expression ${TestExecutable}
-	$Result = $global:LastExitCode
-
-	If (${Result} -ne ${ExitSuccess})
-	{
-		Write-Host ${Output} -foreground Red
-	}
-	WriteTestResult ${TestDescription} ${Result}
-
-	Return ${Result}
-}
-
-Function RunTestWithInput
-{
-	param( [string]$TestName, [string[]]$TestInput )
-
 	$OptionSet = $TestInput[0]
 	$Options = $TestInput[1]
 	$TestFile = $TestInput[2]
 
-	$TestBinary = "fsapfs_test_tools_${TestName}"
-	$TestFileName = (${TestFile} -split '\\')[-2..-1] -join '\'
+	$TestProfileDirectory = "input\.${TestProfile}"
+	$TestSet = Split-Path (Split-Path -Path ${TestFile} -Parent) -Leaf
+	$TestFileName = Split-Path -Path ${TestFile} -Leaf
 
-	$TestDescription = "${TestBinary} with input: '${TestFileName}"
-	$TestExecutable = "${TestExecutablesDirectory}\${TestBinary}.exe"
-
-	If (-Not (Test-Path -Path ${TestExecutable} -PathType Leaf))
+	If ($OptionSet)
 	{
-		WriteTestResult ${TestDescription} ${ExitIgnore}
-
-		Return ${ExitIgnore}
+		$OutputFile = "${TestFileName}-${OptionSet}.log"
 	}
-	$Output = Invoke-Expression "${TestExecutable} ${Options} ${TestFile}"
-	$Result = $global:LastExitCode
-
-	If (${Result} -ne ${ExitSuccess})
+	Else
 	{
-		Write-Host ${Output} -foreground Red
+		$OutputFile = "${TestFileName}.log"
 	}
+	$TmpDir = "tmp${PID}"
+
+	New-Item -Name ${TmpDir} -ItemType "directory" | Out-Null
+
+	Push-Location ${TmpDir}
+
+	Try
+	{
+		Invoke-Expression "..\${TestExecutable} ${Options} ${TestFile} > ${OutputFile}"
+		$Result = $global:LastExitCode
+
+		If (${Result} -eq ${ExitSuccess})
+		{
+			# Strip header with version.
+			(Get-Content ${OutputFile} | Select-Object -Skip 2) | Set-Content ${OutputFile}
+
+			$Result = CompareWithReference "..\${TestProfileDirectory}" ${TestSet} ${TestFileName} ${OutputFile}
+		}
+	}
+	Finally
+	{
+		Pop-Location
+
+		Remove-Item ${TmpDir} -Force -Recurse
+	}
+	$TestDescription = "${ToolName} with input: '${TestSet}\${TestFileName}"
 	WriteTestResult ${TestDescription} ${Result}
 
 	Return ${Result}
@@ -85,7 +106,7 @@ Foreach (${TestName} in ${ToolsTests} -split " ")
 	{
 		Continue
 	}
-	$Result = RunTest ${TestName}
+	$Result = RunTestBinary ${TestExecutablesDirectory} "fsapfs_test_tools_${TestName}"
 
 	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 	{
@@ -93,18 +114,17 @@ Foreach (${TestName} in ${ToolsTests} -split " ")
 	}
 }
 
-$TestInputs = GenerateTestInputs "fsapfstools" ${OptionSets}
+$Profiles = @("fsapfsinfo", "fsapfsinfo_fs", "fsapfsinfo_bodyfile_fs")
 
-Foreach (${TestName} in ${ToolsTestsWithInput} -split " ")
+For ($ProfileIndex = 0; $ProfileIndex -le ($Profiles.length - 1); $ProfileIndex += 1)
 {
-	# Split will return an array of a single empty string when ToolsTestsWithInput is empty.
-	If (-Not (${TestName}))
-	{
-		Continue
-	}
+	$TestProfile = $Profiles[$ProfileIndex]
+
+	$TestInputs = GenerateTestInputs ${TestProfile} ${OptionSets}
+
 	ForEach ($TestInput in ${TestInputs})
 	{
-		$Result = RunTestWithInput ${TestName} ${TestInput}
+		$Result = RunToolsBinaryAndCompareStdout ${TestExecutablesDirectory} "fsapfsinfo" ${TestProfile} "" ${TestInput}
 
 		If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
 		{
