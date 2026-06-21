@@ -26,6 +26,7 @@ MSVSCPP_FILES = \
 	fsapfs_test_error/fsapfs_test_error.vcproj \
 	fsapfs_test_extended_attribute/fsapfs_test_extended_attribute.vcproj \
 	fsapfs_test_extent_reference_tree/fsapfs_test_extent_reference_tree.vcproj \
+	fsapfs_test_file_entry/fsapfs_test_file_entry.vcproj \
 	fsapfs_test_file_extent/fsapfs_test_file_extent.vcproj \
 	fsapfs_test_file_system/fsapfs_test_file_system.vcproj \
 	fsapfs_test_file_system_btree/fsapfs_test_file_system_btree.vcproj \

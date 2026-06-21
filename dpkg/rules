@@ -15,7 +15,7 @@ override_dh_auto_configure:
 
 .PHONY: override_dh_install
 override_dh_install:
-	dh_install --fail-missing -X.la -X/pyfsapfs.a
+	dh_install -X.la -X/pyfsapfs.a
 
 .PHONY: override_dh_missing
 override_dh_missing:

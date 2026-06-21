@@ -39,7 +39,7 @@ static void *(*fsapfs_test_real_malloc)(size_t) = NULL;
 int fsapfs_test_malloc_attempts_before_fail     = -1;
 
 /* Custom malloc for testing memory error cases
- * Note this function might fail if compiled with optimation
+ * Note this function might fail if compiled with optimization
  * Returns a pointer to newly allocated data or NULL
  */
 void *malloc(
@@ -78,7 +78,7 @@ static void *(*fsapfs_test_real_memcpy)(void *, const void *, size_t) = NULL;
 int fsapfs_test_memcpy_attempts_before_fail                           = -1;
 
 /* Custom memcpy for testing memory error cases
- * Note this function might fail if compiled with optimation and as a shared libary
+ * Note this function might fail if compiled with optimization and as a shared library
  * Returns a pointer to newly allocated data or NULL
  */
 void *memcpy(
@@ -119,7 +119,7 @@ static void *(*fsapfs_test_real_memset)(void *, int, size_t) = NULL;
 int fsapfs_test_memset_attempts_before_fail                  = -1;
 
 /* Custom memset for testing memory error cases
- * Note this function might fail if compiled with optimation and as a shared libary
+ * Note this function might fail if compiled with optimization and as a shared library
  * Returns a pointer to newly allocated data or NULL
  */
 void *memset(
@@ -160,7 +160,7 @@ static void *(*fsapfs_test_real_realloc)(void *, size_t) = NULL;
 int fsapfs_test_realloc_attempts_before_fail             = -1;
 
 /* Custom realloc for testing memory error cases
- * Note this function might fail if compiled with optimation
+ * Note this function might fail if compiled with optimization
  * Returns a pointer to reallocated data or NULL
  */
 void *realloc(

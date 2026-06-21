@@ -69,6 +69,7 @@ check_PROGRAMS = \
 	fsapfs_test_error \
 	fsapfs_test_extended_attribute \
 	fsapfs_test_extent_reference_tree \
+	fsapfs_test_file_entry \
 	fsapfs_test_file_extent \
 	fsapfs_test_file_system \
 	fsapfs_test_file_system_btree \
@@ -522,6 +523,18 @@ fsapfs_test_extent_reference_tree_SOURCES = \
 	fsapfs_test_unused.h
 
 fsapfs_test_extent_reference_tree_LDADD = \
+	../libfsapfs/libfsapfs.la \
+	@LIBCERROR_LIBADD@
+
+fsapfs_test_file_entry_SOURCES = \
+	fsapfs_test_file_entry.c \
+	fsapfs_test_libcerror.h \
+	fsapfs_test_libfsapfs.h \
+	fsapfs_test_macros.h \
+	fsapfs_test_memory.c fsapfs_test_memory.h \
+	fsapfs_test_unused.h
+
+fsapfs_test_file_entry_LDADD = \
 	../libfsapfs/libfsapfs.la \
 	@LIBCERROR_LIBADD@
 
@@ -1118,6 +1131,7 @@ test_manpages: \
 test_python_module: \
 	package.m4 \
 	test_inputs_pyfsapfs.at \
+	test_macros.at \
 	test_python_module.at
 
 test_tools: \

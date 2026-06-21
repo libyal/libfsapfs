@@ -11,7 +11,11 @@ jobs:
       matrix:
         include:
         - os: windows-11-arm
+          visual_studio_version: 2022
         - os: windows-2022
+          visual_studio_version: 2022
+        - os: windows-2025
+          visual_studio_version: 2026
     steps:
     - uses: actions/checkout@v6
     - uses: actions/setup-python@v6
@@ -28,7 +32,7 @@ jobs:
       run: |
         .\synclibs.ps1 -UseHead
         .\autogen.ps1
-        .\build.ps1 -VisualStudioVersion 2022 -Configuration Release -Platform x64 -PythonPath ${{ env.pythonLocation }} -VSToolsOptions "--extend-with-x64 --no-python-dll"
+        .\build.ps1 -VisualStudioVersion ${{ matrix.visual_studio_version }} -Configuration Release -Platform x64 -PythonPath ${{ env.pythonLocation }} -VSToolsOptions "--extend-with-x64 --no-python-dll"
     - name: Run tests
       run: |
         .\runtests.ps1

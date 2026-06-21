@@ -205,7 +205,7 @@ on_error:
 }
 
 /* Frees a file object IO handle
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int pyfsapfs_file_object_io_handle_free(
      pyfsapfs_file_object_io_handle_t **file_object_io_handle,
@@ -244,7 +244,7 @@ int pyfsapfs_file_object_io_handle_free(
 }
 
 /* Clones (duplicates) the file object IO handle and its attributes
- * Returns 1 if succesful or -1 on error
+ * Returns 1 if successful or -1 on error
  */
 int pyfsapfs_file_object_io_handle_clone(
      pyfsapfs_file_object_io_handle_t **destination_file_object_io_handle,

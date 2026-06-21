@@ -108,7 +108,7 @@ AT_TEST_HELPER_FN(
   ath_fn_run_fsapfstools_binary "${FSAPFSTOOL}" "$[]@" > /dev/null
   STATUS=$?
 
-  if test ${STATUS} -eq 0; then
+  if test ${STATUS} -eq 0 && test -d "${OUTPUT_DIRECTORY}"; then
     # md5sum prefixes the output of a filename that contains an escape character with "\"
     find "${OUTPUT_DIRECTORY}" -type f -exec ${MD5SUM} {} \; | sed 's/^\\//' | LC_ALL=C sort -k2,2 -k1,1 > "${OUTPUT_FILE}"
 

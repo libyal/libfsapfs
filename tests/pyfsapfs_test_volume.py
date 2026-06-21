@@ -169,6 +169,11 @@ class VolumeTypeTests(unittest.TestCase):
 
         fsapfs_volume = fsapfs_container.get_volume(0)
 
+        password = getattr(unittest, "password", None)
+        if password:
+          fsapfs_volume.set_password(password)
+          fsapfs_volume.unlock()
+
         result = fsapfs_volume.is_locked()
         self.assertFalse(result)
 
@@ -280,6 +285,11 @@ class VolumeTypeTests(unittest.TestCase):
           raise unittest.SkipTest("missing volumes")
 
         fsapfs_volume = fsapfs_container.get_volume(0)
+
+        password = getattr(unittest, "password", None)
+        if password:
+          fsapfs_volume.set_password(password)
+          fsapfs_volume.unlock()
 
         root_directory = fsapfs_volume.get_root_directory()
         self.assertIsNotNone(root_directory)

@@ -82,7 +82,7 @@ ForEach (${LocalLib} in ${LocalLibs})
 			$Output = Invoke-Expression -Command "& '${WinFlex}' -Cf ${DirectoryElement} 2>&1"
 			Write-Host ${Output}
 
-			# Moving manually sicne win_flex -o <filename> does not provide the expected behavior.
+			# Moving manually since win_flex -o <filename> does not provide the expected behavior.
 			Move-Item "lex.yy.c" ${OutputFile} -force
 		}
 

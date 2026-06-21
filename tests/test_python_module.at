@@ -7,8 +7,8 @@ dnl Determines the test prefix based on the package name.
 m4_define([test_prefix],
   [m4_expand(m4_substr(AT_PACKAGE_NAME, 3))])dnl
 
-dnl Sets up helper functions.
-m4_define([SETUP_HELPER_FUNCTIONS],
+dnl Sets up Python helper functions.
+m4_define([SETUP_PYTHON_HELPER_FUNCTIONS],
   [AT_TEST_HELPER_FN(
     [run_test_script],
     [path arguments],
@@ -134,6 +134,7 @@ m4_define([AT_SETUP],
     ])
   )
 
+SETUP_PYTHON_HELPER_FUNCTIONS
 SETUP_HELPER_FUNCTIONS
 
 RUN_TEST_SCRIPTS(
