@@ -4357,6 +4357,11 @@ int libfsapfs_internal_file_entry_get_data_stream(
 				compression_method = LIBFSAPFS_COMPRESSION_METHOD_LZVN;
 				break;
 
+			case 9:
+			case 10:
+				compression_method = LIBFSAPFS_COMPRESSION_METHOD_STORED;
+				break;
+
 			case 11:
 			case 12:
 				compression_method = LIBFSAPFS_COMPRESSION_METHOD_LZFSE;
@@ -4374,7 +4379,8 @@ int libfsapfs_internal_file_entry_get_data_stream(
 				goto on_error;
 		}
 		if( ( internal_file_entry->compressed_data_header->compression_method == 4 )
-		 || ( internal_file_entry->compressed_data_header->compression_method == 8 ) )
+		 || ( internal_file_entry->compressed_data_header->compression_method == 8 )
+		 || ( internal_file_entry->compressed_data_header->compression_method == 10 ) )
 		{
 			if( libfsapfs_attributes_get_data_stream(
 			     internal_file_entry->resource_fork_attribute_values,
