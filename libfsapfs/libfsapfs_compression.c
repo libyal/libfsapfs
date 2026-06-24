@@ -274,6 +274,72 @@ int libfsapfs_decompress_data(
 #endif /* ( defined( HAVE_ZLIB ) && defined( HAVE_ZLIB_UNCOMPRESS ) ) || defined( ZLIB_DLL ) */
 		}
 	}
+	else if( compression_method == LIBFSAPFS_COMPRESSION_METHOD_STORED )
+	{
+		/* Types 9 and 10 store data verbatim after a 0xCC sentinel byte */
+		if( ( compressed_data_size < 1 )
+		 || ( compressed_data[ 0 ] != 0xcc ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
+			 "%s: invalid stored data: missing 0xCC sentinel byte.",
+			 function );
+
+			return( -1 );
+		}
+		if( compressed_data_size > (size_t) SSIZE_MAX )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid compressed data size value exceeds maximum.",
+			 function );
+
+			return( -1 );
+		}
+		if( *uncompressed_data_size > (size_t) SSIZE_MAX )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+			 LIBCERROR_ARGUMENT_ERROR_VALUE_EXCEEDS_MAXIMUM,
+			 "%s: invalid uncompressed data size value exceeds maximum.",
+			 function );
+
+			return( -1 );
+		}
+		if( ( compressed_data_size - 1 ) > *uncompressed_data_size )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: compressed data size value exceeds uncompressed data size.",
+			 function );
+
+			return( -1 );
+		}
+		*uncompressed_data_size = compressed_data_size - 1;
+
+		if( memory_copy(
+		     uncompressed_data,
+		     &( compressed_data[ 1 ] ),
+		     *uncompressed_data_size ) == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+			 "%s: unable to copy stored data.",
+			 function );
+
+			return( -1 );
+		}
+		result = 1;
+	}
 #ifdef TODO
 /* TODO need sample data */
 	else if( compression_method == LIBFSAPFS_COMPRESSION_METHOD_LZFSE )
