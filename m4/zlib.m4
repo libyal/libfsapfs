@@ -1,6 +1,6 @@
 dnl Checks for zlib required headers and functions
 dnl
-dnl Version: 20240314
+dnl Version: 20260622
 
 dnl Function to detect if zlib is available
 AC_DEFUN([AX_ZLIB_CHECK_LIB],
@@ -66,7 +66,7 @@ AC_DEFUN([AX_ZLIB_CHECK_LIB],
       ])
 
     AS_IF(
-      [test "x$ac_cv_zlib" != xyes && test "x$ac_cv_with_zlib" != x && test "x$ac_cv_with_zlib" != xauto-detect && test "x$ac_cv_with_zlib" != xyes],
+      [test "x$ac_cv_zlib" != xzlib && test "x$ac_cv_with_zlib" != x && test "x$ac_cv_with_zlib" != xauto-detect && test "x$ac_cv_with_zlib" != xyes],
       [AC_MSG_FAILURE(
         [unable to find supported zlib in directory: $ac_cv_with_zlib],
         [1])

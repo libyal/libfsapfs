@@ -21,11 +21,8 @@
 
 #include <common.h>
 #include <file_stream.h>
-#include <memory.h>
 #include <system_string.h>
 #include <types.h>
-
-#include <stdio.h>
 
 #if defined( HAVE_FCNTL_H ) || defined( WINAPI )
 #include <fcntl.h>
@@ -64,39 +61,6 @@ enum FSAPFSINFO_MODES
 
 info_handle_t *fsapfsinfo_info_handle = NULL;
 int fsapfsinfo_abort                  = 0;
-
-/* Prints usage information
- */
-void usage_fprint(
-      FILE *stream )
-{
-	if( stream == NULL )
-	{
-		return;
-	}
-	fprintf( stream, "Use fsapfsinfo to determine information about an Apple\n"
-	                 " File System (APFS).\n\n" );
-
-	fprintf( stream, "Usage: fsapfsinfo [ -B bodyfile ] [ -E identifier ]\n"
-	                 "                  [ -f file_system_index ] [ -F path ]\n"
-	                 "                  [ -o offset ] [ -p password ]\n"
-	                 "                  [ -r password ] [ -dhHvV ] source\n\n" );
-
-	fprintf( stream, "\tsource: the source file or device\n\n" );
-
-	fprintf( stream, "\t-B:     output file system information as a bodyfile\n" );
-	fprintf( stream, "\t-d:     calculate a MD5 hash of a file entry to include in the bodyfile\n" );
-	fprintf( stream, "\t-E:     show information about a specific file system entry or \"all\"\n" );
-	fprintf( stream, "\t-f:     show information about a specific file system or \"all\"\n" );
-	fprintf( stream, "\t-F:     show information about a specific file entry path\n" );
-	fprintf( stream, "\t-h:     shows this help\n" );
-	fprintf( stream, "\t-H:     shows the file system hierarchy\n" );
-	fprintf( stream, "\t-o:     specify the volume offset\n" );
-	fprintf( stream, "\t-p:     specify the password\n" );
-	fprintf( stream, "\t-r:     specify the recovery password\n" );
-	fprintf( stream, "\t-v:     verbose output to stderr\n" );
-	fprintf( stream, "\t-V:     print version\n" );
-}
 
 /* Signal handler for fsapfsinfo
  */
@@ -150,6 +114,26 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
+	const char *description = \
+		"Use fsapfsinfo to determine information about an Apple File System (APFS) container.";
+
+	fsapfstools_option_t options[ ] = {
+		{ 'B', "bodyfile", "output file system information as a bodyfile" },
+		{ 'd', NULL, "calculate a MD5 hash of a file entry to include in the bodyfile" },
+		{ 'E', "identifier", "show information about a specific file entry identifier or \"all\"" },
+		{ 'f', "file_system_index", "show information about a specific file system or \"all\"" },
+		{ 'F', "path", "show information about a specific file entry path" },
+		{ 'h', NULL, "shows this help" },
+		{ 'H', NULL, "shows the file system hierarchy" },
+		{ 'o', "offset", "specify the container offset in bytes" },
+		{ 'p', "password", "specify the password (or passphrase)" },
+		{ 'r', "recovery_password", "specify the recovery password (or passphrase)" },
+		{ 'v', NULL, "verbose output to stderr" },
+		{ 'V', NULL, "print version" },
+		{ 0, "source", "the source container" },
+	};
+	system_character_t options_string[ 32 ];
+
 	libfsapfs_error_t *error                         = NULL;
 	system_character_t *option_bodyfile              = NULL;
 	system_character_t *option_file_entry_identifier = NULL;
@@ -164,6 +148,7 @@ int main( int argc, char * const argv[] )
 	size_t string_length                             = 0;
 	uint64_t file_entry_identifier                   = 0;
 	uint8_t calculate_md5                            = 0;
+	int number_of_options                            = (int) ( sizeof( options ) / sizeof( fsapfstools_option_t ) );
 	int option_mode                                  = FSAPFSINFO_MODE_CONTAINER;
 	int verbose                                      = 0;
 
@@ -202,10 +187,22 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
+	if( fsapfstools_getopt_get_options_string(
+	     options,
+	     number_of_options,
+	     options_string,
+	     32 ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to determine options string.\n" );
+
+		goto on_error;
+	}
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   _SYSTEM_STRING( "B:dE:f:F:hHo:p:r:vV" ) ) ) != (system_integer_t) -1 )
+	                   options_string ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -216,8 +213,12 @@ int main( int argc, char * const argv[] )
 				 "Invalid argument: %" PRIs_SYSTEM "\n",
 				 argv[ optind - 1 ] );
 
-				usage_fprint(
-				 stdout );
+				fsapfstools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_FAILURE );
 
@@ -249,8 +250,12 @@ int main( int argc, char * const argv[] )
 				break;
 
 			case (system_integer_t) 'h':
-				usage_fprint(
-				 stdout );
+				fsapfstools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_SUCCESS );
 
@@ -290,10 +295,14 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Missing source file or device.\n" );
+		 "Missing source container.\n" );
 
-		usage_fprint(
-		 stdout );
+		fsapfstools_getopt_usage_fprint(
+		 stdout,
+		 program,
+		 description,
+		 options,
+		 number_of_options );
 
 		return( EXIT_FAILURE );
 	}

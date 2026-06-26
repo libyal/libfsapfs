@@ -15,7 +15,7 @@ If (-Not (Test-Path ${TestExecutablesDirectory}))
 	Exit ${ExitFailure}
 }
 
-$Result = ${ExitIgnore}
+$Result = ${ExitSuccess}
 
 Foreach (${TestName} in ${LibraryTests} -split " ")
 {
@@ -24,11 +24,11 @@ Foreach (${TestName} in ${LibraryTests} -split " ")
 	{
 		Continue
 	}
-	$Result = RunTestBinary ${TestExecutablesDirectory} "fsapfs_test_${TestName}"
+	$ResultRun = RunTestBinary ${TestExecutablesDirectory} "fsapfs_test_${TestName}"
 
-	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
+	If ((${ResultRun} -ne ${ExitSuccess}) -And (${ResultRun} -ne ${ExitIgnore}))
 	{
-		Break
+		$Result = ${ResultRun}
 	}
 }
 
@@ -43,16 +43,12 @@ Foreach (${TestName} in ${LibraryTestsWithInput} -split " ")
 	}
 	ForEach ($TestInput in ${TestInputs})
 	{
-		$Result = RunTestBinaryWithInput ${TestExecutablesDirectory} "fsapfs_test_${TestName}" ${TestInput}
+		$ResultRun = RunTestBinaryWithInput ${TestExecutablesDirectory} "fsapfs_test_${TestName}" ${TestInput}
 
-		If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
+		If ((${ResultRun} -ne ${ExitSuccess}) -And (${ResultRun} -ne ${ExitIgnore}))
 		{
-			Break
+			$Result = ${ResultRun}
 		}
-	}
-	If ((${Result} -ne ${ExitSuccess}) -And (${Result} -ne ${ExitIgnore}))
-	{
-		Break
 	}
 }
 

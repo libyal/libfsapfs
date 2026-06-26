@@ -4,9 +4,7 @@ man_MANS = \
 	libfsapfs.3
 
 EXTRA_DIST = \
-	fsapfsinfo.1 \
-	fsapfsmount.1 \
-	libfsapfs.3
+	$(man_MANS)
 
 DISTCLEANFILES = \
 	Makefile \

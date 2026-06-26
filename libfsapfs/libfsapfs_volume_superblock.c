@@ -225,16 +225,18 @@ int libfsapfs_volume_superblock_read_data(
      int8_t is_snapshot,
      libcerror_error_t **error )
 {
-	static char *function         = "libfsapfs_volume_superblock_read_data";
-	uint64_t calculated_checksum  = 0;
-	uint64_t stored_checksum      = 0;
-	uint32_t expected_object_type = 0;
-	uint32_t object_subtype       = 0;
-	uint32_t object_type          = 0;
+	static char *function            = "libfsapfs_volume_superblock_read_data";
+	uint64_t calculated_checksum     = 0;
+	uint64_t stored_checksum         = 0;
+	uint32_t expected_object_type    = 0;
+	uint32_t object_subtype          = 0;
+	uint32_t object_type             = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint64_t value_64bit          = 0;
-	uint32_t value_32bit          = 0;
+	uint8_t *change_information_data = NULL;
+	uint64_t value_64bit             = 0;
+	uint32_t value_32bit             = 0;
+	uint8_t change_information_index = 0;
 #endif
 
 	if( volume_superblock == NULL )
@@ -521,10 +523,10 @@ int libfsapfs_volume_superblock_read_data(
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown8,
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_allocated_blocks,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown8\t\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: number of allocated blocks\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -626,58 +628,58 @@ int libfsapfs_volume_superblock_read_data(
 		 volume_superblock->next_file_system_object_identifier );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown23,
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_files,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown23\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: number of files\t\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown24,
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_directories,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown24\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: number of directories\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown25,
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_symbolic_links,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown25\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: number of symbolic links\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown26,
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_other_objects,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown26\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: number of other objects\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown27,
+		 ( (fsapfs_volume_superblock_t *) data )->number_of_snapshots,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown27\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: number of snapshots\t\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown28,
+		 ( (fsapfs_volume_superblock_t *) data )->total_number_of_blocks_allocated,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown28\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: total number of blocks allocated\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown29,
+		 ( (fsapfs_volume_superblock_t *) data )->total_number_of_blocks_freed,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown29\t\t\t\t: 0x%08" PRIx64 "\n",
+		 "%s: total number of blocks freed\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
@@ -727,18 +729,20 @@ int libfsapfs_volume_superblock_read_data(
 		libcnotify_printf(
 		 "\n" );
 
+		change_information_data = ( (fsapfs_volume_superblock_t *) data )->creation_change_information;
+
 		libcnotify_printf(
-		 "%s: unknown32:\n",
+		 "%s: creation application:\n",
 		 function );
 		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown32,
+		 ( (fsapfs_volume_superblock_change_information_t *) change_information_data )->application,
 		 32,
 		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "unknown33\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown33,
+		     "creation change time\t\t\t",
+		     ( (fsapfs_volume_superblock_change_information_t *) change_information_data )->change_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
@@ -755,293 +759,56 @@ int libfsapfs_volume_superblock_read_data(
 			return( -1 );
 		}
 		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown34,
+		 ( (fsapfs_volume_superblock_change_information_t *) change_information_data )->change_transaction_identifier,
 		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown34\t\t\t\t: %" PRIu64 "\n",
+		 "%s: creation transaction identifier\t\t: %" PRIu64 "\n",
 		 function,
 		 value_64bit );
 
-		libcnotify_printf(
-		 "%s: unknown35:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown35,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		change_information_data = ( (fsapfs_volume_superblock_t *) data )->modification_change_information;
 
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown36\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown36,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
+		for( change_information_index = 0;
+		     change_information_index < 8;
+		     change_information_index++ )
 		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
+			libcnotify_printf(
+			 "%s: modification: %" PRIu8 " application:\n",
+			 function,
+			 change_information_index );
+			libcnotify_print_data(
+			 ( (fsapfs_volume_superblock_change_information_t *) change_information_data )->application,
+			 32,
+			 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 
-			return( -1 );
+			if( libfsapfs_debug_print_posix_time_value(
+			     function,
+			     "modification change time\t\t\t",
+			     ( (fsapfs_volume_superblock_change_information_t *) change_information_data )->change_time,
+			     8,
+			     LIBFDATETIME_ENDIAN_LITTLE,
+			     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
+			     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
+			     error ) != 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+				 "%s: unable to print POSIX time value.",
+				 function );
+
+				return( -1 );
+			}
+			byte_stream_copy_to_uint64_little_endian(
+			 ( (fsapfs_volume_superblock_change_information_t *) change_information_data )->change_transaction_identifier,
+			 value_64bit );
+			libcnotify_printf(
+			 "%s: modification: %" PRIu8 " transaction identifier\t: %" PRIu64 "\n",
+			 function,
+			 change_information_index,
+			 value_64bit );
 		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown37,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown37\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: unknown38:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown38,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown39\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown39,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown40,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown40\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: unknown41:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown41,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown42\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown42,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown43,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown43\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: unknown44:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown44,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown45\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown45,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown46,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown46\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: unknown47:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown47,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown48\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown48,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown49,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown49\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: unknown50:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown50,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown51\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown51,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown52,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown52\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: unknown53:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown53,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown54\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown54,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown55,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown55\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
-		libcnotify_printf(
-		 "%s: unknown56:\n",
-		 function );
-		libcnotify_print_data(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown56,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
-
-		if( libfsapfs_debug_print_posix_time_value(
-		     function,
-		     "unknown57\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown57,
-		     8,
-		     LIBFDATETIME_ENDIAN_LITTLE,
-		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
-		     LIBFDATETIME_STRING_FORMAT_TYPE_ISO8601 | LIBFDATETIME_STRING_FORMAT_FLAG_DATE_TIME_NANO_SECONDS,
-		     error ) != 1 )
-		{
-			libcerror_error_set(
-			 error,
-			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
-			 "%s: unable to print POSIX time value.",
-			 function );
-
-			return( -1 );
-		}
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown58,
-		 value_64bit );
-		libcnotify_printf(
-		 "%s: unknown58\t\t\t\t: %" PRIu64 "\n",
-		 function,
-		 value_64bit );
-
 		libcnotify_printf(
 		 "%s: volume name:\n",
 		 function );

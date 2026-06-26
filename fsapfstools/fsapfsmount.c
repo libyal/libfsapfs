@@ -59,43 +59,6 @@
 mount_handle_t *fsapfsmount_mount_handle = NULL;
 int fsapfsmount_abort                    = 0;
 
-/* Prints usage information
- */
-void usage_fprint(
-      FILE *stream )
-{
-	if( stream == NULL )
-	{
-		return;
-	}
-	fprintf( stream, "Use fsapfsmount to mount an Apple File System (APFS) container\n\n" );
-
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
-	fprintf( stream, "Usage: fsapfsmount [ -f file_system_index ] [ -o offset ] [ -p password ]\n"
-	                 "                   [ -r recovery_password ] [ -X extended_options ]\n"
-	                 "                   [ -hvV ] container mount_point\n\n" );
-#else
-	fprintf( stream, "Usage: fsapfsmount [ -f file_system_index ] [ -o offset ] [ -p password ]\n"
-	                 "                   [ -r recovery_password ] [ -hvV ] container\n"
-			 "                   mount_point\n\n" );
-#endif
-	fprintf( stream, "\tcontainer:   an Apple File System (APFS) container\n\n" );
-	fprintf( stream, "\tmount_point: the directory to serve as mount point\n\n" );
-
-	fprintf( stream, "\t-f:          specify a specific file system or \"all\"\n" );
-	fprintf( stream, "\t-h:          shows this help\n" );
-	fprintf( stream, "\t-o:          specify the container offset in bytes\n" );
-	fprintf( stream, "\t-p:          specify the password/passphrase\n" );
-	fprintf( stream, "\t-r:          specify the recovery password/passphrase\n" );
-	fprintf( stream, "\t-v:          verbose output to stderr, while fsapfsmount will remain running in the\n"
-	                 "\t             foreground\n" );
-	fprintf( stream, "\t-V:          print version\n" );
-
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
-	fprintf( stream, "\t-X:          extended options to pass to sub system\n" );
-#endif
-}
-
 /* Signal handler for fsapfsmount
  */
 void fsapfsmount_signal_handler(
@@ -148,20 +111,39 @@ int wmain( int argc, wchar_t * const argv[] )
 int main( int argc, char * const argv[] )
 #endif
 {
+	const char *description = \
+		"Use fsapfsmount to mount an Apple File System (APFS) container.";
+
+	fsapfstools_option_t options[ ] = {
+		{ 'f', "file_system_index", "specify a specific file system or \"all\"" },
+		{ 'h', NULL, "shows this help" },
+		{ 'o', "offset", "specify the container offset in bytes" },
+		{ 'p', "password", "specify the password (or passphrase)" },
+		{ 'r', "recovery_password", "specify the recovery password (or passphrase)" },
+		{ 'v', NULL, "verbose output to stderr, while fsapfsmount will remain running in the foreground" },
+		{ 'V', NULL, "print version" },
+#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
+		{ 'X', "extended_options", "extended options to pass to sub system" },
+#endif
+		{ 0, "container", "an Apple File System (APFS) container" },
+		{ 0, "mount_point", "the directory to serve as mount point" },
+	};
+	system_character_t options_string[ 32 ];
+
 	libfsapfs_error_t *error                     = NULL;
 	system_character_t *option_file_system_index = NULL;
 	system_character_t *option_offset            = NULL;
 	system_character_t *option_password          = NULL;
 	system_character_t *option_recovery_password = NULL;
-	system_character_t *options                  = NULL;
 	system_character_t *source                   = NULL;
 	char *program                                = "fsapfsmount";
 	system_integer_t option                      = 0;
-	int result                                   = 0;
+	int number_of_options                        = (int) ( sizeof( options ) / sizeof( fsapfstools_option_t ) );
 	int verbose                                  = 0;
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE ) || defined( HAVE_LIBDOKAN )
 	system_character_t *mount_point              = NULL;
+	int result                                   = 0;
 #endif
 
 #if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
@@ -221,15 +203,22 @@ int main( int argc, char * const argv[] )
 	 stdout,
 	 program );
 
-#if defined( HAVE_LIBFUSE ) || defined( HAVE_LIBFUSE3 ) || defined( HAVE_LIBOSXFUSE )
-	options = _SYSTEM_STRING( "f:ho:p:r:vVX:" );
-#else
-	options = _SYSTEM_STRING( "f:ho:p:r:vV" );
-#endif
+	if( fsapfstools_getopt_get_options_string(
+	     options,
+	     number_of_options,
+	     options_string,
+	     32 ) != 1 )
+	{
+		fprintf(
+		 stderr,
+		 "Unable to determine options string.\n" );
+
+		goto on_error;
+	}
 	while( ( option = fsapfstools_getopt(
 	                   argc,
 	                   argv,
-	                   options ) ) != (system_integer_t) -1 )
+	                   options_string ) ) != (system_integer_t) -1 )
 	{
 		switch( option )
 		{
@@ -240,8 +229,12 @@ int main( int argc, char * const argv[] )
 				 "Invalid argument: %" PRIs_SYSTEM "\n",
 				 argv[ optind - 1 ] );
 
-				usage_fprint(
-				 stdout );
+				fsapfstools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_FAILURE );
 
@@ -251,8 +244,12 @@ int main( int argc, char * const argv[] )
 				break;
 
 			case (system_integer_t) 'h':
-				usage_fprint(
-				 stdout );
+				fsapfstools_getopt_usage_fprint(
+				 stdout,
+				 program,
+				 description,
+				 options,
+				 number_of_options );
 
 				return( EXIT_SUCCESS );
 
@@ -296,8 +293,12 @@ int main( int argc, char * const argv[] )
 		 stderr,
 		 "Missing source container.\n" );
 
-		usage_fprint(
-		 stdout );
+		fsapfstools_getopt_usage_fprint(
+		 stdout,
+		 program,
+		 description,
+		 options,
+		 number_of_options );
 
 		return( EXIT_FAILURE );
 	}
@@ -309,8 +310,12 @@ int main( int argc, char * const argv[] )
 		 stderr,
 		 "Missing mount point.\n" );
 
-		usage_fprint(
-		 stdout );
+		fsapfstools_getopt_usage_fprint(
+		 stdout,
+		 program,
+		 description,
+		 options,
+		 number_of_options );
 
 		return( EXIT_FAILURE );
 	}
@@ -401,7 +406,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to open source volume\n" );
+		 "Unable to open source container\n" );
 
 		goto on_error;
 	}
@@ -411,7 +416,7 @@ int main( int argc, char * const argv[] )
 	{
 		fprintf(
 		 stderr,
-		 "Unable to unlock source volume\n" );
+		 "Unable to unlock source container\n" );
 
 		goto on_error;
 	}
@@ -730,7 +735,7 @@ int main( int argc, char * const argv[] )
 #else
 	fprintf(
 	 stderr,
-	 "No sub system to mount APFS format.\n" );
+	 "No sub system to mount Apple File System (APFS) format.\n" );
 
 	return( EXIT_FAILURE );
 

@@ -99,10 +99,10 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t number_of_quota_blocks[ 8 ];
 
-	/* Unknown
+	/* The number of allocated blocks
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown8[ 8 ];
+	uint8_t number_of_allocated_blocks[ 8 ];
 
 	/* Unknown
 	 * Consists of 8 bytes
@@ -130,7 +130,7 @@ struct fsapfs_volume_superblock
 	uint8_t file_system_root_tree_object_type[ 4 ];
 
 	/* The extent-reference tree object type
-	 * Consists of 8 bytes
+	 * Consists of 4 bytes
 	 */
 	uint8_t extent_reference_tree_object_type[ 4 ];
 
@@ -174,40 +174,40 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t next_file_system_object_identifier[ 8 ];
 
-	/* Unknown
+	/* The number of files
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown23[ 8 ];
+	uint8_t number_of_files[ 8 ];
 
-	/* Unknown
+	/* The number of directories
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown24[ 8 ];
+	uint8_t number_of_directories[ 8 ];
 
-	/* Unknown
+	/* The number of symbolic links
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown25[ 8 ];
+	uint8_t number_of_symbolic_links[ 8 ];
 
-	/* Unknown
+	/* The number of other file system objects
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown26[ 8 ];
+	uint8_t number_of_other_objects[ 8 ];
 
-	/* Unknown
+	/* The number of snapshots
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown27[ 8 ];
+	uint8_t number_of_snapshots[ 8 ];
 
-	/* Unknown
+	/* Total number of blocks allocated
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown28[ 8 ];
+	uint8_t total_number_of_blocks_allocated[ 8 ];
 
-	/* Unknown
+	/* Total number of blocks freed
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown29[ 8 ];
+	uint8_t total_number_of_blocks_freed[ 8 ];
 
 	/* The volume identifier
 	 * Consists of 16 bytes
@@ -225,140 +225,15 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t volume_flags[ 8 ];
 
-	/* Unknown
-	 * Consists of 32 bytes
+	/* Creation change information
+	 * Consists of 48 bytes
 	 */
-	uint8_t unknown32[ 32 ];
+	uint8_t creation_change_information[ 48 ];
 
-	/* Unknown
-	 * Consists of 8 bytes
+	/* Modification change information
+	 * Consists of 8 x 48 bytes
 	 */
-	uint8_t unknown33[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown34[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown35[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown36[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown37[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown38[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown39[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown40[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown41[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown42[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown43[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown44[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown45[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown46[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown47[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown48[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown49[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown50[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown51[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown52[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown53[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown54[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown55[ 8 ];
-
-	/* Unknown
-	 * Consists of 32 bytes
-	 */
-	uint8_t unknown56[ 32 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown57[ 8 ];
-
-	/* Unknown
-	 * Consists of 8 bytes
-	 */
-	uint8_t unknown58[ 8 ];
+	uint8_t modification_change_information[ 384 ];
 
 	/* The volume name
 	 * Consists of 256 bytes
@@ -384,6 +259,26 @@ struct fsapfs_volume_superblock
 	 * Consists of 32 bytes
 	 */
 	uint8_t unknown62[ 32 ];
+};
+
+typedef struct fsapfs_volume_superblock_change_information fsapfs_volume_superblock_change_information_t;
+
+struct fsapfs_volume_superblock_change_information
+{
+	/* Application (or identifier)
+	 * Consists of 32 bytes
+	 */
+	uint8_t application[ 32 ];
+
+	/* Change date and time (or timestamp)
+	 * Consists of 8 bytes
+	 */
+	uint8_t change_time[ 8 ];
+
+	/* Change transaction identifier
+	 * Consists of 8 bytes
+	 */
+	uint8_t change_transaction_identifier[ 8 ];
 };
 
 #if defined( __cplusplus )

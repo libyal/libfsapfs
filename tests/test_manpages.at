@@ -21,7 +21,10 @@ m4_define([LINT_MANPAGE],
         [! command -v "${MANDOC}" >/dev/null 2>&1])
 
       AT_CHECK(
-        [LC_ALL="en_US.UTF-8" "${MANDOC}" -O width=80 -T lint -W all "$abs_srcdir/../manuals/$1"])
+        [cp "$abs_srcdir/../manuals/$1" "$1"
+        # Strip references given mandoc will check if they exist
+        sed -i'~' '/^.Xr / d' "$1"
+        LC_ALL="en_US.UTF-8" "${MANDOC}" -O width=80 -T lint -W all "$1"])
       ;;
 
     *)
@@ -67,4 +70,4 @@ m4_define([AT_SETUP],
     ])
   )
 
-LINT_MANPAGES([libfsapfs.3])
+LINT_MANPAGES([fsapfsinfo.1 fsapfsmount.1 libfsapfs.3])
