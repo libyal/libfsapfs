@@ -224,7 +224,7 @@ int libfsapfs_key_encrypted_key_read_data(
 	}
 	else if( byte_value == 0x82 )
 	{
-		byte_stream_copy_to_uint16_little_endian(
+		byte_stream_copy_to_uint16_big_endian(
 		 &( data[ data_offset ] ),
 		 value_data_size );
 
@@ -318,7 +318,7 @@ int libfsapfs_key_encrypted_key_read_data(
 		}
 		else if( byte_value == 0x82 )
 		{
-			byte_stream_copy_to_uint16_little_endian(
+			byte_stream_copy_to_uint16_big_endian(
 			 &( data[ data_offset ] ),
 			 value_data_size );
 
@@ -416,6 +416,14 @@ int libfsapfs_key_encrypted_key_read_data(
 				break;
 
 			case 0xa3:
+			{
+				/* The nested wrapped-KEK object must be captured from its own
+				 * tag byte. macOS 26 grew the container VEK entry past 255
+				 * bytes, so this a3 can carry a 2-byte (0x82) length; the old
+				 * "data_offset - 2" hard-coded a 2-byte header and would start
+				 * mid-length. Derive the real header size from byte_value. */
+				size_t wrapped_kek_object_header_size = 2;
+
 				if( value_data_size == 0 )
 				{
 					libcerror_error_set(
@@ -428,10 +436,19 @@ int libfsapfs_key_encrypted_key_read_data(
 
 					return( -1 );
 				}
-				wrapped_kek_object_data      = &( data[ data_offset - 2 ] );
-				wrapped_kek_object_data_size = value_data_size + 2;
+				if( byte_value == 0x81 )
+				{
+					wrapped_kek_object_header_size = 3;
+				}
+				else if( byte_value == 0x82 )
+				{
+					wrapped_kek_object_header_size = 4;
+				}
+				wrapped_kek_object_data      = &( data[ data_offset - wrapped_kek_object_header_size ] );
+				wrapped_kek_object_data_size = wrapped_kek_object_header_size + value_data_size;
 
 				break;
+			}
 
 			default:
 				break;
@@ -455,6 +472,7 @@ int libfsapfs_key_encrypted_key_read_data(
 	byte_value = wrapped_kek_object_data[ data_offset++ ];
 
 	if( ( ( byte_value & 0x80 ) != 0 )
+	 && ( byte_value != 0x81 )
 	 && ( byte_value != 0x82 ) )
 	{
 		libcerror_error_set(
@@ -471,9 +489,13 @@ int libfsapfs_key_encrypted_key_read_data(
 	{
 		value_data_size = (uint16_t) byte_value;
 	}
+	else if( byte_value == 0x81 )
+	{
+		value_data_size = (uint16_t) wrapped_kek_object_data[ data_offset++ ];
+	}
 	else if( byte_value == 0x82 )
 	{
-		byte_stream_copy_to_uint16_little_endian(
+		byte_stream_copy_to_uint16_big_endian(
 		 &( wrapped_kek_object_data[ data_offset ] ),
 		 value_data_size );
 
@@ -544,6 +566,7 @@ int libfsapfs_key_encrypted_key_read_data(
 		byte_value = wrapped_kek_object_data[ data_offset++ ];
 
 		if( ( ( byte_value & 0x80 ) != 0 )
+		 && ( byte_value != 0x81 )
 		 && ( byte_value != 0x82 ) )
 		{
 			libcerror_error_set(
@@ -560,9 +583,13 @@ int libfsapfs_key_encrypted_key_read_data(
 		{
 			value_data_size = (uint16_t) byte_value;
 		}
+		else if( byte_value == 0x81 )
+		{
+			value_data_size = (uint16_t) wrapped_kek_object_data[ data_offset++ ];
+		}
 		else if( byte_value == 0x82 )
 		{
-			byte_stream_copy_to_uint16_little_endian(
+			byte_stream_copy_to_uint16_big_endian(
 			 &( wrapped_kek_object_data[ data_offset ] ),
 			 value_data_size );
 
@@ -672,7 +699,11 @@ int libfsapfs_key_encrypted_key_read_data(
 				break;
 
 			case 0x82:
-				if( value_data_size != 8 )
+				/* macOS 26 (Tahoe) grew this inner KEK-metadata attribute from
+				 * 8 bytes to 22 bytes: a 6-byte header followed by a 16-byte
+				 * wrapping-context UUID. Accept both sizes. */
+				if( ( value_data_size != 8 )
+				 && ( value_data_size != 22 ) )
 				{
 					libcerror_error_set(
 					 error,
@@ -689,6 +720,26 @@ int libfsapfs_key_encrypted_key_read_data(
 				byte_stream_copy_to_uint32_little_endian(
 				 kek_metadata->encryption_method,
 				 key_encrypted_key->encryption_method );
+
+				/* In the macOS 26 22-byte layout the first 4 bytes are NOT the
+				 * legacy encryption_method; the 40-byte wrapped KEK implies
+				 * AES-256 (method 0). Normalise so the unwrap path runs. */
+				if( value_data_size == 22 )
+				{
+#if defined( HAVE_DEBUG_OUTPUT )
+					if( libcnotify_verbose != 0 )
+					{
+						libcnotify_printf(
+						 "%s: macOS 26 22-byte KEK metadata:\n",
+						 function );
+						libcnotify_print_data(
+						 &( wrapped_kek_object_data[ data_offset ] ),
+						 22,
+						 0 );
+					}
+#endif
+					key_encrypted_key->encryption_method = 0;
+				}
 
 #if defined( HAVE_DEBUG_OUTPUT )
 				if( libcnotify_verbose != 0 )
@@ -753,8 +804,7 @@ int libfsapfs_key_encrypted_key_read_data(
 				break;
 
 			case 0x84:
-				if( ( value_data_size == 0 )
-				 || ( value_data_size > 8 ) )
+				if( value_data_size == 0 )
 				{
 					libcerror_error_set(
 					 error,
@@ -766,57 +816,58 @@ int libfsapfs_key_encrypted_key_read_data(
 
 					return( -1 );
 				}
-				key_encrypted_key->number_of_iterations = 0;
-
-				while( value_data_size > 0 )
+				/* A password-protected KEK entry stores a <=8-byte PBKDF2
+				 * iteration count here. A macOS 26 container VEK entry
+				 * (KB_TAG_VOLUME_KEY, key-unwrapped, no password) instead
+				 * carries a 16-byte crypto-state value that must not be read
+				 * as an iteration count. Only interpret <=8 bytes. */
+				if( value_data_size <= 8 )
 				{
-					key_encrypted_key->number_of_iterations <<= 8;
-					key_encrypted_key->number_of_iterations  |= wrapped_kek_object_data[ data_offset++ ];
+					key_encrypted_key->number_of_iterations = 0;
 
-					value_data_size--;
-				}
+					while( value_data_size > 0 )
+					{
+						key_encrypted_key->number_of_iterations <<= 8;
+						key_encrypted_key->number_of_iterations  |= wrapped_kek_object_data[ data_offset++ ];
+
+						value_data_size--;
+					}
 
 #if defined( HAVE_DEBUG_OUTPUT )
-				if( libcnotify_verbose != 0 )
-				{
-					libcnotify_printf(
-					 "%s: number of iterations\t\t: %" PRIu32 "\n",
-					 function,
-					 key_encrypted_key->number_of_iterations );
+					if( libcnotify_verbose != 0 )
+					{
+						libcnotify_printf(
+						 "%s: number of iterations\t\t: %" PRIu32 "\n",
+						 function,
+						 key_encrypted_key->number_of_iterations );
 
-					libcnotify_printf(
-					 "\n" );
-				}
+						libcnotify_printf(
+						 "\n" );
+					}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
-
+				}
 				break;
 
 			case 0x85:
-				if( value_data_size != 16 )
+				/* A password-protected KEK entry stores a 16-byte PBKDF2 salt
+				 * here; a macOS 26 container VEK entry carries an unrelated
+				 * (e.g. 3-byte) crypto-state value. Only copy a 16-byte salt. */
+				if( value_data_size == 16 )
 				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-					 LIBCERROR_RUNTIME_ERROR_UNSUPPORTED_VALUE,
-					 "%s: unsupported salt attribute value data size: %" PRIu16 ".",
-					 function,
-					 value_data_size );
+					if( memory_copy(
+					     key_encrypted_key->salt,
+					     &( wrapped_kek_object_data[ data_offset ] ),
+					     16 ) == NULL )
+					{
+						libcerror_error_set(
+						 error,
+						 LIBCERROR_ERROR_DOMAIN_MEMORY,
+						 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
+						 "%s: unable to copy salt.",
+						 function );
 
-					return( -1 );
-				}
-				if( memory_copy(
-				     key_encrypted_key->salt,
-				     &( wrapped_kek_object_data[ data_offset ] ),
-				     16 ) == NULL )
-				{
-					libcerror_error_set(
-					 error,
-					 LIBCERROR_ERROR_DOMAIN_MEMORY,
-					 LIBCERROR_MEMORY_ERROR_COPY_FAILED,
-					 "%s: unable to copy salt.",
-					 function );
-
-					return( -1 );
+						return( -1 );
+					}
 				}
 				break;
 
@@ -1186,6 +1237,18 @@ int libfsapfs_key_encrypted_key_unlock_with_password(
 	 0,
 	 32 );
 
+#if defined( HAVE_DEBUG_OUTPUT )
+	if( libcnotify_verbose != 0 )
+	{
+		libcnotify_printf(
+		 "%s: post-unwrap check IV + KEK (expect a6a6a6a6a6a6a6a6 prefix on success):\n",
+		 function );
+		libcnotify_print_data(
+		 wrapped_kek,
+		 used_kek_data_size,
+		 0 );
+	}
+#endif
 	if( memory_compare(
 	     wrapped_kek,
 	     libfsapfs_key_encrypted_key_wrapped_kek_initialization_vector,
