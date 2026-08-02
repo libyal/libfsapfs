@@ -11,8 +11,11 @@ Read-only supported APFS formats:
 
 Supported APFS format features:
 
-* ZLIB (DEFLATE) compression
-* LZVN compression
+* decmpfs compression
+  * LZFSE (compresssion methods 11 and 12)
+  * LZVN (compresssion methods 7 and 8)
+  * raw (compresssion methods 9 and 10)
+  * ZLIB (compresssion methods 3 and 4)
 * encryption
 * extended attributes
 
@@ -21,9 +24,10 @@ Unsupported APFS format features:
 * APFS version 1
 * Fusion drive (NX_INCOMPAT_FUSION)
 * snapshots
-* LZFSE compression, compression methods 11 and 12
-* "uncompressed", compression methods 1, 9 and 10
 * T2 encryption
+* decmpfs compression
+  * "uncompressed" (compression methods 1)
+  * LZBitmap (compression methods 13 and 14)
 
 For more information see:
 

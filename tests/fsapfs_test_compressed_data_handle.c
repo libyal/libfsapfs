@@ -41,7 +41,7 @@
 
 /* Single chunk (7) LZVN compresssed data
  */
-uint8_t fsapfs_test_compressed_data_handle_lzvn_compressed_data1[ 35 ] = {
+uint8_t fsapfs_test_compressed_data_handle_lzvn_chunk_compressed_data1[ 35 ] = {
 	0x66, 0x70, 0x6d, 0x63, 0x07, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0xe0, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
 	0x0e, 0x0f, 0x06 };
@@ -82,7 +82,7 @@ int fsapfs_test_compressed_data_handle_initialize(
 	 */
 	result = libfsapfs_data_stream_initialize_from_data(
 	          &compressed_data_stream,
-	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          fsapfs_test_compressed_data_handle_lzvn_chunk_compressed_data1,
 	          35,
 	          &error );
 
@@ -426,7 +426,7 @@ int fsapfs_test_compressed_data_handle_get_compressed_block_offsets(
 	 */
 	result = libfsapfs_data_stream_initialize_from_data(
 	          &compressed_data_stream,
-	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          fsapfs_test_compressed_data_handle_lzvn_chunk_compressed_data1,
 	          35,
 	          &error );
 
@@ -705,7 +705,7 @@ int fsapfs_test_compressed_data_handle_get_compressed_block_offsets(
 	 */
 	result = libfsapfs_data_stream_initialize_from_data(
 	          &compressed_data_stream,
-	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          fsapfs_test_compressed_data_handle_lzvn_chunk_compressed_data1,
 	          35,
 	          &error );
 
@@ -841,7 +841,7 @@ int fsapfs_test_compressed_data_handle_read_segment_data(
 	 */
 	result = libfsapfs_data_stream_initialize_from_data(
 	          &compressed_data_stream,
-	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          fsapfs_test_compressed_data_handle_lzvn_chunk_compressed_data1,
 	          35,
 	          &error );
 
@@ -1160,7 +1160,7 @@ int fsapfs_test_compressed_data_handle_read_segment_data(
 	 */
 	result = libfsapfs_data_stream_initialize_from_data(
 	          &compressed_data_stream,
-	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          fsapfs_test_compressed_data_handle_lzvn_chunk_compressed_data1,
 	          35,
 	          &error );
 
@@ -1366,7 +1366,7 @@ int fsapfs_test_compressed_data_handle_seek_segment_offset(
 	 */
 	result = libfsapfs_data_stream_initialize_from_data(
 	          &compressed_data_stream,
-	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          fsapfs_test_compressed_data_handle_lzvn_chunk_compressed_data1,
 	          35,
 	          &error );
 

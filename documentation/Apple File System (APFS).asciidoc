@@ -61,6 +61,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.14 | J.B. Metz | June 2023 | Corrected typo.
 | 0.0.15 | J.B. Metz | July 2023 | Additional information about volume flags.
 | 0.0.16 | J.B. Metz | June 2026 | Additional format information.
+| 0.0.17 | J.B. Metz | August 2026 | Additional information about raw, LZFSE and LZBITMAP compressed files, with thanks to T. Willenborg.
 |===
 
 :numbered:
@@ -171,7 +172,7 @@ APFS uses the "object" data type to distinguish between different data types.
 
 === [[object_header]]Object header
 
-The object header (obj_phys_t) is 32 bytes of size and consists of:
+The object header (obj_phys_t) is 32 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -354,7 +355,7 @@ See section: <<object_subtypes,Object subtypes>>
 
 The B-tree node header is stored after the B-tree root or node object.
 
-The B-tree node header is 24 bytes of size and consists of:
+The B-tree node header is 24 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -403,7 +404,7 @@ The B-tree entries are stored after the B-tree node header.
 
 ==== Fixed-size B-tree entry
 
-The fixed-size B-tree entry is 4 bytes of size and consists of:
+The fixed-size B-tree entry is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -416,7 +417,7 @@ Contains a reversed offset relative to the start of the B-Tree footer
 
 ==== Variable-size B-tree entry
 
-The variable-size B-tree entry is 8 bytes of size and consists of:
+The variable-size B-tree entry is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -434,7 +435,7 @@ Contains a reversed offset relative to the start of the B-Tree footer
 The B-tree footer is stored at the end of the block that contains the B-tree
 root boject.
 
-The B-tree footer (btree_info_t) is 40 bytes of size and consists of:
+The B-tree footer (btree_info_t) is 40 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -507,7 +508,7 @@ The container consists of:
 
 === [[container_superblock]]Container superblock
 
-The container superblock is 1382 bytes of size and consists of:
+The container superblock is 1382 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -664,7 +665,7 @@ identifiers and their location in the volume.
 
 ==== Checkpoint map object
 
-The checkpoint map object (checkpoint_map_phys_t) is 4080 bytes of size and
+The checkpoint map object (checkpoint_map_phys_t) is 4080 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -696,7 +697,7 @@ See sections: <<checkpoint_map_entry,Checkpoint map entry>>
 
 ==== [[checkpoint_map_entry]]Checkpoint map entry
 
-The checkpoint map (checkpoint_mapping_t) entry entry is 40 bytes of size and
+The checkpoint map (checkpoint_mapping_t) entry entry is 40 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -727,7 +728,7 @@ The object map consists of:
 
 === Object map object
 
-The object map object (omap_phys_t) is 88 bytes of size and consists of:
+The object map object (omap_phys_t) is 88 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -771,7 +772,7 @@ The object map values are stored in <<btree,B-tree>>.
 
 ==== Object map B-tree key
 
-The object map B-tree key (omap_key_t) is 16 bytes of size and consists of:
+The object map B-tree key (omap_key_t) is 16 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -785,7 +786,7 @@ The object map B-tree key (omap_key_t) is 16 bytes of size and consists of:
 An object map B-tree node contains branch node values if BTNODE_LEAF is not set.
 The corresponding object map B-tree key represents the first key in the branch.
 
-An object map B-tree branch node value is 8 bytes of size and consists of:
+An object map B-tree branch node value is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -798,7 +799,7 @@ Contains a block number relative to the start of the container
 
 An object map B-tree node contains object map values if BTNODE_LEAF is set.
 
-The object map value (omap_val_t) is 16 bytes of size and consists of:
+The object map value (omap_val_t) is 16 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -898,7 +899,7 @@ Contains an offset in bytes relative to the start of the space manager
 
 ==== [[space_manager_device]]Space manager device
 
-A space manager device (spaceman_device_t) is 48 bytes of size and consists of:
+A space manager device (spaceman_device_t) is 48 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -916,7 +917,7 @@ Contains an offset in bytes relative to the start of the space manager
 
 ==== [[space_manager_free_queue]]Space manager free queue
 
-A space manager free queue (spaceman_free_queue_t) is 40 bytes of size and
+A space manager free queue (spaceman_free_queue_t) is 40 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -934,7 +935,7 @@ consists of:
 ==== [[space_manager_allocation_zone]]Space manager allocation zone
 
 A space manager allocation zone (spaceman_allocation_zone_info_phys_t) is
-72 bytes of size and consists of:
+72 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -951,7 +952,7 @@ Contains <<space_manager_zone_boundaries,Space manager zone boundaries>>
 ==== [[space_manager_zone_boundaries]]Space manager zone_boundaries
 
 A space manager zone boundaries (spaceman_allocation_zone_boundaries_t) is
-8 bytes of size and consists of:
+8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1026,7 +1027,7 @@ See section: <<object_types,Object types>>
 
 ==== [[chunk_information_entry]]Chunk information entry
 
-The chunk information entry (chunk_info_t) is 32 bytes of size and consists of:
+The chunk information entry (chunk_info_t) is 32 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1099,7 +1100,7 @@ See section: <<reaper_list_entry,Reaper list entry>>
 
 ==== [[reaper_list_entry]]Reaper list entry
 
-The reaper list entry is 40 bytes of size and consists of:
+The reaper list entry is 40 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1126,7 +1127,7 @@ The key bag consists of:
 
 The container key bag object contains key data of the container.
 
-The container key bag object is 32 bytes of size and consists of:
+The container key bag object is 32 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1145,7 +1146,7 @@ See section: <<object_types,Object types>>
 
 The volume key bag object contains key data of a specific volume.
 
-The volume key bag object is 32 bytes of size and consists of:
+The volume key bag object is 32 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1162,7 +1163,7 @@ See section: <<object_types,Object types>>
 
 === Key bag header
 
-The key bag header (kb_locker_t) is 16 bytes of size and consists of:
+The key bag header (kb_locker_t) is 16 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1188,7 +1189,7 @@ The key bag entries are 16-byte aligned.
 
 ==== Key bag entry header
 
-The key bag entry header (keybag_entry_t) is 24 bytes of size and consists of:
+The key bag entry header (keybag_entry_t) is 24 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1271,7 +1272,7 @@ following attribute value tags:
 | 0x80 | | [yellow-background]*Unknown*
 | 0x81 | | HMAC
 | 0x82 | | [yellow-background]*Unknown (salt?)*
-| | | 
+| | |
 | 0xa3 | | Wrapped Wrapped Key Encrypted Key (KEK) packed object +
 See section: <<key_bag_wrapped_kek_packed_object,Wrapped Key Encrypted Key (KEK) packed object>>
 |===
@@ -1296,7 +1297,7 @@ See section: <<wrapped_kek_metadata,Wrapped Key Encrypted Key (KEK) metadata>>
 
 ==== [[wrapped_kek_metadata]]Wrapped Key Encrypted Key (KEK) metadata
 
-The Wrapped Key Encrypted Key (KEK) metadata is 8 bytes of size and consists of:
+The Wrapped Key Encrypted Key (KEK) metadata is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1323,7 +1324,7 @@ Seen in combination with recovery password protected volume key
 
 ==== [[key_bag_data_extent]]Key bag data extent
 
-The key bag data extent is 16 bytes of size and consists of:
+The key bag data extent is 16 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1346,7 +1347,7 @@ this cannot be directly read.
 
 === [[volume_superblock]]Volume superblock
 
-The volume superblock (apfs_superblock_t) is 1012 bytes of size and consists of:
+The volume superblock (apfs_superblock_t) is 1012 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1421,7 +1422,7 @@ See section: <<change_information,Change information>>
 
 === [[encryption_state]]Encryption state
 
-The encryption state (wrapped_meta_crypto_state_t) is 20 bytes of size and
+The encryption state (wrapped_meta_crypto_state_t) is 20 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -1443,7 +1444,7 @@ See section: <<encryption_state_flags,Encryption state flags>>
 
 === [[change_information]]Change information
 
-The change information (apfs_modified_by_t) is 48 bytes of size and consists of:
+The change information (apfs_modified_by_t) is 48 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1569,7 +1570,7 @@ See section: <<sibling_map,Sibling map>>
 A file system B-tree node contains branch node values if BTNODE_LEAF is not set.
 The corresponding file system B-tree key represents the first key in the branch.
 
-A file system B-tree branch node value is 8 bytes of size and consists of:
+A file system B-tree branch node value is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1617,7 +1618,7 @@ Contains an UTF-8 encoded string with an end-of-string character
 
 ==== Extent key data
 
-The extent key data (j_phys_ext_key_t) is 8 bytes of size and consists of:
+The extent key data (j_phys_ext_key_t) is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1629,7 +1630,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Extent value data
 
-The extent value data (j_phys_ext_val_t) is 20 bytes of size and consists of:
+The extent value data (j_phys_ext_val_t) is 20 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1647,7 +1648,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Inode key data
 
-The inode key data (j_inode_key_t) is 8 bytes of size and consists of:
+The inode key data (j_inode_key_t) is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1659,7 +1660,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Inode value data
 
-The inode value data (APFS_TYPE_INVALID) is 8 bytes of size and consists of:
+The inode value data (APFS_TYPE_INVALID) is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1881,7 +1882,7 @@ See section: <<extended_attribute_data_stream,Extended attribute data stream>>
 
 ==== [[extended_attribute_data_stream]]Extended attribute data stream
 
-The extended attribute data stream (j_xattr_dstream_t) is 48 bytes of size and
+The extended attribute data stream (j_xattr_dstream_t) is 48 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -1902,7 +1903,7 @@ The compressed extended attribute is named "com.apple.decmpfs" and consists of:
 
 ===== [[compressed_data_header]]Compressed data header
 
-The compressed data header is 16 bytes of size and consists of:
+The compressed data header is 16 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1923,43 +1924,38 @@ The signature is likely stored in little-endian and represents "cmpf".
 | Value | Identifier | Description
 | 1 | CMP_Type1 | [yellow-background]*Unknown (uncompressed extended attribute data)*
 | | |
-| 3 | | ZLIB (DEFLATE) compressed extended attribute data +
+| 3 | kAFSCTypeZLibChunk | ZLIB (DEFLATE) compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
-| 4 | | 64k chunked ZLIB (DEFLATE) compressed resource fork +
+| 4 | kAFSCTypeZLib | 64k chunked ZLIB (DEFLATE) compressed resource fork +
 The compressed data is stored in the resource fork
 | 5 | | [yellow-background]*Unknown (sparse compressed extended attribute data)* +
 Uncompressed data contains 0-byte values +
 According to `[APPLE04]` specifies de-dup within the generation store.
 | 6 | | [yellow-background]*Unknown (unused)*
-| 7 | | LZVN compressed extended attribute data +
+| 7 | kAFSCTypeLZVNChunk | LZVN compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
-| 8 | | 64k chunked LZVN compressed resource fork +
+| 8 | kAFSCTypeLZVN | 64k chunked LZVN compressed resource fork +
 The compressed data is stored in the resource fork
-| 9 | | [yellow-background]*Unknown (uncompressed extended attribute data, different than CMP_Type1)*
-| 10 | | [yellow-background]*Unknown (64k chunked uncompressed data resource fork)* +
+| 9 | kAFSCTypeRawChunk | Uncompressed (raw) extended attribute data
+| 10 | kAFSCTypeRaw | 64k chunked uncompressed (raw) data resource fork +
 The compressed data is stored in the resource fork
-| 11 | | LZFSE compressed extended attribute data +
+| 11 | kAFSCTypeLZFSEChunk | LZFSE compressed extended attribute data +
 The compressed data is stored in the extended attribute after the compressed data header
-| 12 | | 64k chunked LZFSE compressed resource fork +
+| 12 | kAFSCTypeLZFSE | 64k chunked LZFSE compressed resource fork +
+The compressed data is stored in the resource fork
+| 13 | kAFSCTypeLZBitmapChunk | LZBITMAP compressed extended attribute data +
+The compressed data is stored in the extended attribute after the compressed data header
+| 14 | kAFSCTypeLZBitmap | 64k chunked LZBITMAP compressed resource fork +
 The compressed data is stored in the resource fork
 | | |
 | 0x80000001 | | [yellow-background]*Unknown (faulting file)*
 |===
 
-[NOTE]
-If the ZLIB (DEFLATE) compressed data starts with 0xff the data is stored
-uncompressed after the first compressed data byte. `[GANDER17]` indicates
-that this should be `( byte_value & 0x0f ) == 0x0f`.
-
-[NOTE]
-If the LZVN compressed data starts with 0x06 (end of stream oppcode) the data
-is stored uncompressed after the first compressed data byte.
-
 === [[sibling_link]]Sibling link
 
 ==== Sibling link key data
 
-The sibling link key data (j_sibling_key_t) is 16 bytes of size and consists of:
+The sibling link key data (j_sibling_key_t) is 16 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1990,7 +1986,7 @@ Contains an UTF-8 encoded string with an end-of-string character
 
 ==== Data stream identifier key data
 
-The data stream key data (j_dstream_id_key_t) is 8 bytes of size and consists
+The data stream key data (j_dstream_id_key_t) is 8 bytes in size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2003,7 +1999,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Data stream identifier value data
 
-The data stream value data (j_dstream_id_val_t) is 4 bytes of size and consists
+The data stream value data (j_dstream_id_val_t) is 4 bytes in size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2020,7 +2016,7 @@ of:
 
 ==== File extent key data
 
-The file extent key data (j_file_extent_key_t) is 16 bytes of size and consists
+The file extent key data (j_file_extent_key_t) is 16 bytes in size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2035,7 +2031,7 @@ Contains an offset relative to the start of the file entry data
 
 ==== File extent value data
 
-The file extent value data (j_file_extent_val_t) is 24 bytes of size and consists
+The file extent value data (j_file_extent_val_t) is 24 bytes in size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2182,7 +2178,7 @@ CRC-32 calculation.
 
 ==== Directory stats key data
 
-The directory stats key data (j_dir_stats_key_t) is 8 bytes of size and consists
+The directory stats key data (j_dir_stats_key_t) is 8 bytes in size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2195,7 +2191,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Directory stats value data
 
-The directory stats value data (j_dir_stats_val_t) is 32 bytes of size and
+The directory stats value data (j_dir_stats_val_t) is 32 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -2209,7 +2205,7 @@ consists of:
 
 === [[snapshot_name]]Snapshot name
 
-The snapshot name (j_snap_name_val_t) is 8 bytes of size and consists of:
+The snapshot name (j_snap_name_val_t) is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2223,7 +2219,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Sibling map key data
 
-The sibling map key data (j_sibling_map_key_t) is 8 bytes of size and consists
+The sibling map key data (j_sibling_map_key_t) is 8 bytes in size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2236,7 +2232,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Sibling map value data
 
-The sibling map value data (j_sibling_map_val_t) is 8 bytes of size and
+The sibling map value data (j_sibling_map_val_t) is 8 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -2269,7 +2265,7 @@ value data.
 
 ==== [[extended_field_descriptor]]Extended field descriptor
 
-An extended field descriptor (x_field_t) is 4 bytes of size and consists of:
+An extended field descriptor (x_field_t) is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2348,7 +2344,7 @@ The device identifier can be stored in different formats, such as: native,
 386bsd, 4bsd, bsdos, freebsd, hpux, isc, linux, netbsd, osf1, sco, solaris,
 sunos, svr3, svr4 and ultrix.
 
-The "native" and "hpux" device identifier is 4 bytes of size and consists of:
+The "native" and "hpux" device identifier is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2359,7 +2355,7 @@ The "native" and "hpux" device identifier is 4 bytes of size and consists of:
 |===
 
 The "386bsd", "4bsd", "freebsd", "isc", "linux", "netbsd", "sco", "sunos",
-"svr3" and "ultrix" device identifier is 4 bytes of size and consists of:
+"svr3" and "ultrix" device identifier is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2369,7 +2365,7 @@ The "386bsd", "4bsd", "freebsd", "isc", "linux", "netbsd", "sco", "sunos",
 | 3 | 1 | | Minor device number
 |===
 
-The "solaris" and "svr4" device identifier is 4 bytes of size and consists of:
+The "solaris" and "svr4" device identifier is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2378,7 +2374,7 @@ The "solaris" and "svr4" device identifier is 4 bytes of size and consists of:
 | 2.2 | 14 bits | | Major device number
 |===
 
-The "bsdos" and "osf1" device identifier is 4 bytes of size and consists of:
+The "bsdos" and "osf1" device identifier is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2387,7 +2383,7 @@ The "bsdos" and "osf1" device identifier is 4 bytes of size and consists of:
 | 2.4 | 12 bits | | Major device number
 |===
 
-The "bsdos" alternative device identifier is 4 bytes of size and consists of:
+The "bsdos" alternative device identifier is 4 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2399,7 +2395,7 @@ The "bsdos" alternative device identifier is 4 bytes of size and consists of:
 
 === [[data_stream_attribute]]Data stream attribute
 
-The data stream attribute (j_dstream_t) is 40 bytes of size and consist of:
+The data stream attribute (j_dstream_t) is 40 bytes in size and consist of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2475,27 +2471,80 @@ The file content data is stored in a "com.apple.ResourceFork"
 The compressed data starts with metadata that contains the offsets
 of the compressed data blocks.
 
-==== ZLIB (DEFLATE) compressed data
-
-* ZLIB (DEFLATE) compressed header
-* [yellow-background]*Unknown (empty values)*
-* ZLIB (DEFLATE) compressed data block offsets and sizes
-* ZLIB (DEFLATE) compressed data blocks
-* ZLIB (DEFLATE) compressed footer
-
-===== ZLIB (DEFLATE) compressed header
-
-The ZLIB (DEFLATE) compressed header is 16 bytes of size and consists of:
+==== LZFSE compressed data
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 4 | | Compressed data block descriptors offset +
-The offset is relative from the start of the ZLIB (DEFLATE) compressed data
+| 0 | 4 x ... | | Array of compressed data block offsets +
+The offset is relative from the start of the LZFSE compressed data
+| ... | ... | | LZFSE compressed data blocks
+|===
+
+[NOTE]
+If the LIBZFSE compressed data starts with 0xff the data is stored uncompressed
+after the first compressed data byte.
+
+==== LZVN compressed data
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 x ... | | Array of compressed data block offsets +
+The offset is relative from the start of the LZVN compressed data
+| ... | ... | | LZVN compressed data blocks
+|===
+
+[NOTE]
+The compressed data block contains a maximum of 65536 bytes of data. The
+compressed data block therefore should not exceed 65537 bytes in size.
+
+[NOTE]
+If the LZVN compressed data starts with 0x06 (end of stream oppcode) the data
+is stored uncompressed after the first compressed data byte.
+
+==== Raw compressed data
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 x ... | | Array of compressed data block offsets +
+The offset is relative from the start of the raw compressed data
+| ... | ... | | raw compressed data blocks
+|===
+
+If the raw compressed data starts with 0xcc the data is stored uncompressed
+after the first compressed data byte.
+
+The behavior of other byte values is unknown, it has been observed that Mac OS
+returns no data.
+
+==== ZLIB (DEFLATE) compressed data
+
+* ZLIB (DEFLATE) compressed header
+* ZLIB (DEFLATE) compressed data block descriptors
+* ZLIB (DEFLATE) compressed data blocks
+* ZLIB (DEFLATE) compressed footer
+
+[NOTE]
+If the ZLIB (DEFLATE) compressed data starts with 0xff the data is stored
+uncompressed after the first compressed data byte. `[GANDER17]` indicates
+that this should be `( byte_value & 0x0f ) == 0x0f`.
+
+===== ZLIB (DEFLATE) compressed header
+
+The ZLIB (DEFLATE) compressed header is 260 bytes in size and consists of:
+
+[cols="1,1,1,5",options="header"]
+|===
+| Offset | Size | Value | Description
+| 0 | 4 | | [yellow-background]*Unknown (header size or offset?)*
 | 4 | 4 | | Compressed footer offset +
 The offset is relative from the start of the ZLIB (DEFLATE) compressed data
-| 8 | 4 | | Compressed data block descriptors and data size
+| 8 | 4 | | [yellow-background]*Unknown (total size - header size?)*
 | 12 | 4 | | Compressed footer size
+| 16 | 240 | | [yellow-background]*Unknown (empty values)*
+| 256 | 4 | | [yellow-background]*Unknown*
 |===
 
 [NOTE]
@@ -2503,20 +2552,20 @@ The values in the ZLIB (DEFLATE) compressed header are stored in big-endian.
 
 ===== ZLIB (DEFLATE) compressed data block descriptors
 
-The ZLIB (DEFLATE) compressed data block descriptors are variable in size and
+The ZLIB (DEFLATE) compressed data block descriptors are of variable size and
 consist of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 | 0 | 4 | | Compressed data size
-| 4 | 4 | | Number of compressed data block offset and size tuples
-| 8 | 8 x ... | | Array of compressed data block descriptors
+| 4 | 4 | | Number of block descriptiors (offset and size tuples)
+| 8 | 8 x ... | | Array of block descriptors
 |===
 
 ===== ZLIB (DEFLATE) compressed data block descriptor
 
-The ZLIB (DEFLATE) compressed data block descriptor is 8 bytes of size and
+The ZLIB (DEFLATE) compressed data block descriptor is 8 bytes in size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -2547,20 +2596,6 @@ The ZLIB (DEFLATE) compressed footer is 50 bytes size and consists of:
 
 [NOTE]
 The values in the ZLIB (DEFLATE) compressed footer are stored in big-endian.
-
-==== LZVN compressed data
-
-[cols="1,1,1,5",options="header"]
-|===
-| Offset | Size | Value | Description
-| 0 | 4 x ... | | Array of compressed data block offsets +
-The offset is relative from the start of the LZVN compressed data
-| ... | ... | | LZVN compressed data blocks
-|===
-
-[NOTE]
-The compressed data block contains a maximum of 65536 bytes of data. The
-compressed data block therefore should not exceed 65537 bytes of size.
 
 === Resource fork
 
@@ -2598,7 +2633,7 @@ See section: <<efi_jumpstart_extent,EFI jumpstart extent>>
 
 == [[efi_jumpstart_extent]]EFI jumpstart extent
 
-The EFI jumpstart extent (prange_t) is 16 bytes of size and consists of:
+The EFI jumpstart extent (prange_t) is 16 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2624,7 +2659,7 @@ The snapshot metadata tree consists of:
 
 === Snapshot metadata tree object
 
-The snapshot metadata tree object is 32 bytes of size and consists of:
+The snapshot metadata tree object is 32 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2660,11 +2695,11 @@ Contains an UTF-8 encoded string with an end-of-string character
 
 ==== Snapshot metadata B-tree branch node value
 
-An snapshot metadata B-tree node contains branch node values if BTNODE_LEAF is
+A snapshot metadata B-tree node contains branch node values if BTNODE_LEAF is
 not set. The corresponding inapshot metadata B-tree key represents the first
 key in the branch.
 
-An napshot metadata B-tree branch node value is 8 bytes of size and consists of:
+A snapshot metadata B-tree branch node value is 8 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
