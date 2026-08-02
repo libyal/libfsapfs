@@ -21,6 +21,7 @@
 
 #include <common.h>
 #include <file_stream.h>
+#include <memory.h>
 #include <types.h>
 
 #if defined( HAVE_STDLIB_H ) || defined( WINAPI )
@@ -38,10 +39,25 @@
 #include "../libfsapfs/libfsapfs_data_stream.h"
 #include "../libfsapfs/libfsapfs_definitions.h"
 
+/* Single chunk (7) LZVN compresssed data
+ */
 uint8_t fsapfs_test_compressed_data_handle_lzvn_compressed_data1[ 35 ] = {
 	0x66, 0x70, 0x6d, 0x63, 0x07, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0xe0, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d,
 	0x0e, 0x0f, 0x06 };
+
+/* Single chunk raw (9) compresssed data
+ */
+uint8_t fsapfs_test_compressed_data_handle_raw_chunk_compressed_data1[ 33 ] = {
+	0x66, 0x70, 0x6d, 0x63, 0x09, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	0xcc, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+	0x0f };
+
+/* Multi chunk raw (10) compresssed data
+ */
+uint8_t fsapfs_test_compressed_data_handle_raw_compressed_data1[ 25 ] = {
+	0x08, 0x00, 0x00, 0x00, 0x19, 0x00, 0x00, 0x00, 0xcc, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06,
+	0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
@@ -463,6 +479,269 @@ int fsapfs_test_compressed_data_handle_get_compressed_block_offsets(
 	 "error",
 	 error );
 
+	/* Clean up
+	 */
+	result = libfsapfs_compressed_data_handle_free(
+	          &compressed_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfdata_stream_free(
+	          &compressed_data_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_data_stream_initialize_from_data(
+	          &compressed_data_stream,
+	          fsapfs_test_compressed_data_handle_raw_chunk_compressed_data1,
+	          33,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_compressed_data_handle_initialize(
+	          &compressed_data_handle,
+	          compressed_data_stream,
+	          16,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsapfs_compressed_data_handle_get_compressed_block_offsets(
+	          compressed_data_handle,
+	          NULL,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_compressed_data_handle_free(
+	          &compressed_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfdata_stream_free(
+	          &compressed_data_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_data_stream_initialize_from_data(
+	          &compressed_data_stream,
+	          fsapfs_test_compressed_data_handle_raw_compressed_data1,
+	          25,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_compressed_data_handle_initialize(
+	          &compressed_data_handle,
+	          compressed_data_stream,
+	          16,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	result = libfsapfs_compressed_data_handle_get_compressed_block_offsets(
+	          compressed_data_handle,
+	          NULL,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Clean up
+	 */
+	result = libfsapfs_compressed_data_handle_free(
+	          &compressed_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfdata_stream_free(
+	          &compressed_data_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_data_stream_initialize_from_data(
+	          &compressed_data_stream,
+	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          35,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_compressed_data_handle_initialize(
+	          &compressed_data_handle,
+	          compressed_data_stream,
+	          16,
+	          LIBFSAPFS_COMPRESSION_METHOD_LZVN,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
 	/* Test error cases
 	 */
 	result = libfsapfs_compressed_data_handle_get_compressed_block_offsets(
@@ -547,6 +826,9 @@ on_error:
 int fsapfs_test_compressed_data_handle_read_segment_data(
      void )
 {
+	uint8_t expected_segment_data2[ 16 ] = {
+		0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
+
 	uint8_t segment_data[ 32 ];
 
 	libcerror_error_t *error                                   = NULL;
@@ -598,6 +880,322 @@ int fsapfs_test_compressed_data_handle_read_segment_data(
 
 	/* Test regular cases
 	 */
+	read_count = libfsapfs_compressed_data_handle_read_segment_data(
+	              compressed_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) 16 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* TODO compare segment_data with expected_segment_data1 */
+
+	/* Clean up
+	 */
+	result = libfsapfs_compressed_data_handle_free(
+	          &compressed_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfdata_stream_free(
+	          &compressed_data_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_data_stream_initialize_from_data(
+	          &compressed_data_stream,
+	          fsapfs_test_compressed_data_handle_raw_chunk_compressed_data1,
+	          33,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_compressed_data_handle_initialize(
+	          &compressed_data_handle,
+	          compressed_data_stream,
+	          16,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	read_count = libfsapfs_compressed_data_handle_read_segment_data(
+	              compressed_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) 16 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = memory_compare(
+	          segment_data,
+	          expected_segment_data2,
+	          16 );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	/* Clean up
+	 */
+	result = libfsapfs_compressed_data_handle_free(
+	          &compressed_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfdata_stream_free(
+	          &compressed_data_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_data_stream_initialize_from_data(
+	          &compressed_data_stream,
+	          fsapfs_test_compressed_data_handle_raw_compressed_data1,
+	          25,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_compressed_data_handle_initialize(
+	          &compressed_data_handle,
+	          compressed_data_stream,
+	          16,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Test regular cases
+	 */
+	read_count = libfsapfs_compressed_data_handle_read_segment_data(
+	              compressed_data_handle,
+	              NULL,
+	              0,
+	              0,
+	              segment_data,
+	              16,
+	              0,
+	              0,
+	              &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_SSIZE(
+	 "read_count",
+	 read_count,
+	 (ssize_t) 16 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = memory_compare(
+	          segment_data,
+	          expected_segment_data2,
+	          16 );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	/* Clean up
+	 */
+	result = libfsapfs_compressed_data_handle_free(
+	          &compressed_data_handle,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfdata_stream_free(
+	          &compressed_data_stream,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	/* Initialize test
+	 */
+	result = libfsapfs_data_stream_initialize_from_data(
+	          &compressed_data_stream,
+	          fsapfs_test_compressed_data_handle_lzvn_compressed_data1,
+	          35,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_stream",
+	 compressed_data_stream );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = libfsapfs_compressed_data_handle_initialize(
+	          &compressed_data_handle,
+	          compressed_data_stream,
+	          16,
+	          LIBFSAPFS_COMPRESSION_METHOD_LZVN,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "compressed_data_handle",
+	 compressed_data_handle );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
 
 	/* Test error cases
 	 */

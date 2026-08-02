@@ -56,6 +56,10 @@ uint8_t fsapfs_test_compression_lzvn_uncompressed_data1[ 17 ] = {
 uint8_t fsapfs_test_compression_uncompressed_data1[ 16 ] = {
 	0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f };
 
+uint8_t fsapfs_test_compression_raw_data1[ 17 ] = {
+	0xcc, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e,
+	0x0f };
+
 #if defined( __GNUC__ ) && !defined( LIBFSAPFS_DLL_IMPORT )
 
 /* Tests the libfsapfs_decompress_data function
@@ -180,6 +184,40 @@ int fsapfs_test_decompress_data(
 	          fsapfs_test_compression_lzvn_uncompressed_data1,
 	          17,
 	          LIBFSAPFS_COMPRESSION_METHOD_LZVN,
+	          uncompressed_data,
+	          &uncompressed_data_size,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 1 );
+
+	FSAPFS_TEST_ASSERT_EQUAL_SIZE(
+	 "uncompressed_data_size",
+	 uncompressed_data_size,
+	 (size_t) 16 );
+
+	FSAPFS_TEST_ASSERT_IS_NULL(
+	 "error",
+	 error );
+
+	result = memory_compare(
+	          uncompressed_data,
+	          fsapfs_test_compression_uncompressed_data1,
+	          16 );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 0 );
+
+	uncompressed_data_size = 16;
+
+	result = libfsapfs_decompress_data(
+	          fsapfs_test_compression_raw_data1,
+	          17,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
 	          uncompressed_data,
 	          &uncompressed_data_size,
 	          &error );
@@ -379,6 +417,34 @@ int fsapfs_test_decompress_data(
 	libcerror_error_free(
 	 &error );
 
+	/* Test with unsupported raw compressed data
+	 */
+	uncompressed_data_size = 16;
+
+	fsapfs_test_compression_raw_data1[ 0 ] = 0x00;
+
+	result = libfsapfs_decompress_data(
+	          fsapfs_test_compression_raw_data1,
+	          17,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          uncompressed_data,
+	          &uncompressed_data_size,
+	          &error );
+
+	fsapfs_test_compression_raw_data1[ 0 ] = 0xcc;
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 #if defined( HAVE_FSAPFS_TEST_MEMORY ) && defined( OPTIMIZATION_DISABLED )
 
 	uncompressed_data_size = 16;
@@ -481,6 +547,72 @@ int fsapfs_test_decompress_data(
 	libcerror_error_free(
 	 &error );
 
+	uncompressed_data_size = 16;
+
+	result = libfsapfs_decompress_data(
+	          fsapfs_test_compression_raw_data1,
+	          (size_t) SSIZE_MAX + 1,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          uncompressed_data,
+	          &uncompressed_data_size,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	uncompressed_data_size = 0;
+
+	result = libfsapfs_decompress_data(
+	          fsapfs_test_compression_raw_data1,
+	          17,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          uncompressed_data,
+	          &uncompressed_data_size,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
+	uncompressed_data_size = (size_t) SSIZE_MAX + 1;
+
+	result = libfsapfs_decompress_data(
+	          fsapfs_test_compression_raw_data1,
+	          17,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
+	          uncompressed_data,
+	          &uncompressed_data_size,
+	          &error );
+
+	FSAPFS_TEST_ASSERT_EQUAL_INT(
+	 "result",
+	 result,
+	 -1 );
+
+	FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+	 "error",
+	 error );
+
+	libcerror_error_free(
+	 &error );
+
 #if defined( HAVE_FSAPFS_TEST_MEMORY ) && defined( OPTIMIZATION_DISABLED )
 
 	uncompressed_data_size = 16;
@@ -493,6 +625,42 @@ int fsapfs_test_decompress_data(
 	          fsapfs_test_compression_lzvn_uncompressed_data1,
 	          17,
 	          LIBFSAPFS_COMPRESSION_METHOD_LZVN,
+	          uncompressed_data,
+	          &uncompressed_data_size,
+	          &error );
+
+	if( fsapfs_test_memcpy_attempts_before_fail != -1 )
+	{
+		fsapfs_test_memcpy_attempts_before_fail = -1;
+	}
+	else
+	{
+		FSAPFS_TEST_ASSERT_EQUAL_INT(
+		 "result",
+		 result,
+		 -1 );
+
+		FSAPFS_TEST_ASSERT_IS_NOT_NULL(
+		 "error",
+		 error );
+
+		libcerror_error_free(
+		 &error );
+	}
+#endif /* defined( HAVE_FSAPFS_TEST_MEMORY ) && defined( OPTIMIZATION_DISABLED ) */
+
+#if defined( HAVE_FSAPFS_TEST_MEMORY ) && defined( OPTIMIZATION_DISABLED )
+
+	uncompressed_data_size = 16;
+
+	/* Test libfsapfs_decompress_data with memcpy failing
+	 */
+	fsapfs_test_memcpy_attempts_before_fail = 0;
+
+	result = libfsapfs_decompress_data(
+	          fsapfs_test_compression_raw_data1,
+	          17,
+	          LIBFSAPFS_COMPRESSION_METHOD_RAW,
 	          uncompressed_data,
 	          &uncompressed_data_size,
 	          &error );
