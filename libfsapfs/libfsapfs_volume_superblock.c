@@ -489,8 +489,8 @@ int libfsapfs_volume_superblock_read_data(
 
 		if( libfsapfs_debug_print_posix_time_value(
 		     function,
-		     "unknown5\t\t\t\t\t",
-		     ( (fsapfs_volume_superblock_t *) data )->unknown5,
+		     "unmount time\t\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->unmount_time,
 		     8,
 		     LIBFDATETIME_ENDIAN_LITTLE,
 		     LIBFDATETIME_POSIX_TIME_VALUE_TYPE_NANO_SECONDS_64BIT_SIGNED,
@@ -530,37 +530,13 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		byte_stream_copy_to_uint64_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown9,
-		 value_64bit );
 		libcnotify_printf(
-		 "%s: unknown9\t\t\t\t\t: 0x%08" PRIx64 "\n",
-		 function,
-		 value_64bit );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown10,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: unknown10\t\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown11,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: unknown11\t\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
-
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_volume_superblock_t *) data )->unknown12,
-		 value_32bit );
-		libcnotify_printf(
-		 "%s: unknown12\t\t\t\t: 0x%08" PRIx32 "\n",
-		 function,
-		 value_32bit );
+		 "%s: encryption state:\n",
+		 function );
+		libcnotify_print_data(
+		 ( (fsapfs_volume_superblock_t *) data )->encryption_state,
+		 20,
+		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
 
 		byte_stream_copy_to_uint32_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->file_system_root_tree_object_type,
@@ -808,6 +784,8 @@ int libfsapfs_volume_superblock_read_data(
 			 function,
 			 change_information_index,
 			 value_64bit );
+
+			change_information_data += sizeof( fsapfs_volume_superblock_change_information_t );
 		}
 		libcnotify_printf(
 		 "%s: volume name:\n",
@@ -841,13 +819,98 @@ int libfsapfs_volume_superblock_read_data(
 		 function,
 		 value_64bit );
 
-		libcnotify_printf(
-		 "%s: unknown62:\n",
-		 function );
-		libcnotify_print_data(
+		byte_stream_copy_to_uint64_little_endian(
 		 ( (fsapfs_volume_superblock_t *) data )->unknown62,
-		 32,
-		 LIBCNOTIFY_PRINT_DATA_FLAG_GROUP_DATA );
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown62\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown63,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown63\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown64,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown64\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown65,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown65\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		if( libfsapfs_debug_print_guid_value(
+		     function,
+		     "volume group identifier\t\t\t",
+		     ( (fsapfs_volume_superblock_t *) data )->volume_group_identifier,
+		     16,
+		     LIBFGUID_ENDIAN_BIG,
+		     LIBFGUID_STRING_FORMAT_FLAG_USE_LOWER_CASE,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_PRINT_FAILED,
+			 "%s: unable to print UUID value.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown66,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown66\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown67,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown67\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown68,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown68\t\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint32_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown69,
+		 value_32bit );
+		libcnotify_printf(
+		 "%s: unknown69\t\t\t\t: 0x%08" PRIx32 "\n",
+		 function,
+		 value_32bit );
+
+		byte_stream_copy_to_uint64_little_endian(
+		 ( (fsapfs_volume_superblock_t *) data )->unknown70,
+		 value_64bit );
+		libcnotify_printf(
+		 "%s: unknown70\t\t\t\t: 0x%08" PRIx64 "\n",
+		 function,
+		 value_64bit );
+
+		libcnotify_printf(
+		 "\n" );
 	}
 #endif /* defined( HAVE_DEBUG_OUTPUT ) */
 

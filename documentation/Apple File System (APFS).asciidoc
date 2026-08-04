@@ -178,7 +178,7 @@ The object header (obj_phys_t) is 32 bytes in size and consists of:
 |===
 | Offset | Size | Value | Description
 | 0 | 8 | | Checksum (o_cksum) +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier (o_oid)
 | 16 | 8 | | Object transaction identifier (o_xid) +
 Identifier of the most recent transaction that this object was modified in
@@ -192,9 +192,9 @@ See section: <<object_subtypes,Object subtypes>>
 
 The checksum algorithm:
 
-* calculate a Fletcher-64 checksum of the block data without the object checkum value and an initial value of 0
-* `checksum_lower_32bit = (fletcher_lower_32bit + fletcher_upper_32bit) mod 0xffffffff`
-* `checksum_upper_32bit = (fletcher_lower_32bit + checksum_lower_32bit) mod 0xffffffff`
+* calculate a Fletcher-64 checksum of the block data without the object checksum value and an initial value of 0
+* `checksum_lower_32bit = 0xffffffff - ((fletcher_lower_32bit + fletcher_upper_32bit) mod 0xffffffff)`
+* `checksum_upper_32bit = 0xffffffff - ((fletcher_lower_32bit + checksum_lower_32bit) mod 0xffffffff)`
 * `checksum = (checksum_upper_32bit << 32) | checksum_lower_32bit`
 
 === Object identifiers
@@ -254,10 +254,8 @@ See section: <<reaper_list,Reaper list>>
 See section: <<efi_jumpstart,EFI jumpstart>>
 | 0x00000015 | OBJECT_TYPE_FUSION_MIDDLE_TREE | Fusion middle tree +
 See section: <<fusion_middle_tree,Fusion middle tree>>
-| 0x00000016 | OBJECT_TYPE_NX_FUSION_WBC | Fusion write-back cache +
-See section: <<fusion_write_back_cache,Fusion write-back cache>>
-| 0x00000017 | OBJECT_TYPE_NX_FUSION_WBC_LIST | Fusion write-back cache list +
-See section: <<fusion_write_back_cache,Fusion write-back cache>>
+| 0x00000016 | OBJECT_TYPE_NX_FUSION_WBC | Fusion write-back cache
+| 0x00000017 | OBJECT_TYPE_NX_FUSION_WBC_LIST | Fusion write-back cache list
 | 0x00000018 | OBJECT_TYPE_ER_STATE | [yellow-background]*Unknown (ER state?)*
 | 0x00000019 | OBJECT_TYPE_GBITMAP | [yellow-background]*Unknown (G Bitmap?)*
 | 0x0000001a | OBJECT_TYPE_GBITMAP_TREE | [yellow-background]*Unknown (G Bitmap tree?)*
@@ -321,7 +319,7 @@ structure referred to as btree_node_phys_t.
 | Offset | Size | Value | Description
 4+| _Object header (btn_o)_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x00000002 +
@@ -341,7 +339,7 @@ Object type can be 0x00000000 if the B-tree is empty.
 | Offset | Size | Value | Description
 4+| _Object header (btn_o)_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x00000003 +
@@ -433,7 +431,7 @@ Contains a reversed offset relative to the start of the B-Tree footer
 === B-tree footer
 
 The B-tree footer is stored at the end of the block that contains the B-tree
-root boject.
+root object.
 
 The B-tree footer (btree_info_t) is 40 bytes in size and consists of:
 
@@ -508,14 +506,14 @@ The container consists of:
 
 === [[container_superblock]]Container superblock
 
-The container superblock is 1382 bytes in size and consists of:
+The container superblock is 4096 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000001 | Object type +
@@ -556,7 +554,7 @@ Contains a block number relative to the start of the container of the <<object_m
 | 168 | 8 | | Reaper object identifier (nx_reaper_oid) +
 Contains a object identifier that can be resolved in the <<checkpoint_map,checkpoint map>>
 | 176 | 4 | | [yellow-background]*Unknown (nx_test_type)*
-| 180 | 4 | | Maxmum number of volumes (nx_max_file_systems) +
+| 180 | 4 | | Maximum number of volumes (nx_max_file_systems) +
 Contains the maximum number of volumes supported by the container
 | 184 | 100 x 8 = 800 | | Array of volume object identifiers (nx_fs_oid) +
 The object identifiers can be resolved in the <<object_map,object map>> to a "physical" location
@@ -566,28 +564,31 @@ See section: <<container_counters,Container counters>>
 | 1240 | 8 | | [yellow-background]*Unknown (nx_blocked_out_base)*
 | 1248 | 8 | | [yellow-background]*Unknown (nx_blocked_out_blocks)*
 4+|
-| 1254 | 8 | | [yellow-background]*Unknown (nx_evict_mapping_tree_oid)*
-| 1262 | 8 | | Container flags (nx_flags) +
+| 1256 | 8 | | [yellow-background]*Unknown (nx_evict_mapping_tree_oid)*
+| 1264 | 8 | | Container flags (nx_flags) +
 See section: <<container_flags,Container flags>>
-| 1270 | 8 | | EFI jumpstart (physical) object identifier (nx_efi_jumpstart) +
+| 1272 | 8 | | EFI jumpstart (physical) object identifier (nx_efi_jumpstart) +
 Contains a block number relative to the start of the container of the <<efi_jumpstart,EFI jumpstart>>
-| 1278 | 16 | | Fusion set identifier (nx_fusion_uuid) +
+| 1280 | 16 | | Fusion set identifier (nx_fusion_uuid) +
 Contains a UUID stored in big-endian
 4+| _Unknown (nx_keylocker)_
-| 1294 | 8 | | Container key bag data block number (nx_keybag_base) +
+| 1296 | 8 | | Container key bag data block number (nx_keybag_base) +
 Contains a block number relative to the start of the container of the <<key_bag,Key bag>>
-| 1302 | 8 | | Contaner key bag data number of blocks (nx_keybag_blocks)
+| 1304 | 8 | | Contaner key bag data number of blocks (nx_keybag_blocks)
 4+|
-| 1310 | 4 x 8 = 32 | | [yellow-background]*Unknown (nx_ephemeral_info)*
-| 1342 | 8 | | [yellow-background]*Unknown (Test object identifier) (nx_test_oid)*
-| 1350 | 8 | | Fusion middle tree block number  (nx_fusion_mt_oid) +
+| 1312 | 4 x 8 = 32 | | [yellow-background]*Unknown (nx_ephemeral_info)*
+| 1344 | 8 | | [yellow-background]*Unknown (Test object identifier) (nx_test_oid)*
+| 1352 | 8 | | Fusion middle tree block number  (nx_fusion_mt_oid) +
 Contains a block number relative to the start of the container of the <<fusion_middle_tree,Fusion middle tree>>
-| 1358 | 8 | | Fusion write-back cache state object identifier (nx_fusion_wbc_oid) +
+| 1360 | 8 | | Fusion write-back cache state object identifier (nx_fusion_wbc_oid) +
 Contains a object identifier that can be resolved in the <<checkpoint_map,checkpoint map>>
 4+| _Unknown (nx_fusion_wbc)_
-| 1366 | 8 | | Start block of the Fusion write-back cache area (nx_fusion_wbc_base)
-| 1374 | 8 | | Number of blocks of the Fusion write-back cache area (nx_fusion_wbc_blocks)
+| 1368 | 8 | | Start block of the Fusion write-back cache area (nx_fusion_wbc_base)
+| 1376 | 8 | | Number of blocks of the Fusion write-back cache area (nx_fusion_wbc_blocks)
 4+|
+| 1384 | 8 | | Unknown (nx_newest_mounted_version)
+| 1392 | 16 | | Unknown (nx_mkb_locker)
+| 1408 | 2688 | | Unknown (empty values)
 |===
 
 [NOTE]
@@ -673,7 +674,7 @@ consists of:
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x4000000c | Object type +
@@ -697,13 +698,12 @@ See sections: <<checkpoint_map_entry,Checkpoint map entry>>
 
 ==== [[checkpoint_map_entry]]Checkpoint map entry
 
-The checkpoint map (checkpoint_mapping_t) entry entry is 40 bytes in size and
-consists of:
+The checkpoint map entry (checkpoint_mapping_t) is 40 bytes in size and consists
+of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-4+| _Object header_
 | 0 | 4 | | (Container) object type (cpm_type) +
 See section: <<object_types,Object types>>
 | 4 | 4 | | (Container) object subtype (cpm_subtype)
@@ -735,7 +735,7 @@ The object map object (omap_phys_t) is 88 bytes in size and consists of:
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x4000000b | Object type +
@@ -763,7 +763,7 @@ See section: <<object_map_flags,Object map flags>>
 | 0x00000002 | OMAP_ENCRYPTING | Encryption in progress
 | 0x00000004 | OMAP_DECRYPTING | Decryption in progress
 | 0x00000008 | OMAP_KEYROLLING | Re-encryption with new key in progress
-| 0x00000010 | OMAP_CRYPTO_GENERATION | Encryption configuation has changed
+| 0x00000010 | OMAP_CRYPTO_GENERATION | Encryption configuration has changed
 |===
 
 === Object map B-tree
@@ -830,14 +830,14 @@ TODO document Object Map Reaper Phases
 
 === Space manager
 
-The space manager (spaceman_phys_t) is variable of size and consists of:
+The space manager (spaceman_phys_t) is of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 4+| _Object header (sm_o)_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000005 | Object type +
@@ -981,7 +981,7 @@ Probably an OBJECT_TYPE_SPACEMAN_CAB block when necessary.
 
 === [[chunk_information_address_block]]Chunk information address block
 
-The chunk information address block (cib_addr_block_t) is variable of size
+The chunk information address block (cib_addr_block_t) is of variable size
 and consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -989,7 +989,7 @@ and consists of:
 | Offset | Size | Value | Description
 4+| _Object header (cab_o)_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x40000006 | Object type +
@@ -1004,7 +1004,7 @@ See section: <<object_types,Object types>>
 
 === [[chunk_information_block]]Chunk information block
 
-The chunk information block (chunk_info_block_t) is variable of size and
+The chunk information block (chunk_info_block_t) is of variable size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -1012,7 +1012,7 @@ consists of:
 | Offset | Size | Value | Description
 4+| _Object header (cib_o)_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x40000007 | Object type +
@@ -1041,14 +1041,14 @@ The chunk information entry (chunk_info_t) is 32 bytes in size and consists of:
 
 === [[reaper]]Reaper
 
-The reaper is [yellow-background]*unknown* of size and consists of:
+The reaper is of [yellow-background]*unknown* size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000011 | Object type +
@@ -1072,14 +1072,14 @@ See section: <<object_types,Object types>>
 
 ==== [[reaper_list]]Reaper list
 
-The reaper list entry is [yellow-background]*unknown* of size and consists of:
+The reaper list entry is of [yellow-background]*unknown* size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x80000012 | Object type +
@@ -1134,7 +1134,7 @@ The container key bag object is 32 bytes in size and consists of:
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x6b657973 ("syek") | Object type +
@@ -1153,7 +1153,7 @@ The volume key bag object is 32 bytes in size and consists of:
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x72656373 ("scer") | Object type +
@@ -1242,7 +1242,7 @@ packed values.
 
 ===== Key bag packed value
 
-The key bag packed value is variable of size and consists of:
+The key bag packed value is of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1273,7 +1273,7 @@ following attribute value tags:
 | 0x81 | | HMAC
 | 0x82 | | [yellow-background]*Unknown (salt?)*
 | | |
-| 0xa3 | | Wrapped Wrapped Key Encrypted Key (KEK) packed object +
+| 0xa3 | | Wrapped Key Encrypted Key (KEK) packed object +
 See section: <<key_bag_wrapped_kek_packed_object,Wrapped Key Encrypted Key (KEK) packed object>>
 |===
 
@@ -1347,14 +1347,14 @@ this cannot be directly read.
 
 === [[volume_superblock]]Volume superblock
 
-The volume superblock (apfs_superblock_t) is 1012 bytes in size and consists of:
+The volume superblock (apfs_superblock_t) is 1056 bytes in size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x0000000d +
@@ -1370,7 +1370,7 @@ See section: <<object_types,Object types>>
 <<volume_read_only_superblock_feature,Volume read-only superblock features>>
 | 56 | 8 | | Incompatible feature flags (apfs_incompatible_features) +
 <<volume_incompatible_superblock_feature,Volume incompatible superblock features>>
-| 64 | 8 | | [yellow-background]*Unknown (apfs_unmount_time)* +
+| 64 | 8 | | (Last) unmount date and time (apfs_unmount_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 72 | 8 | | Number of reserved blocks (apfs_reserve_block_count)
 | 80 | 8 | | Number of quota blocks (apfs_quota_block_count)
@@ -1383,41 +1383,51 @@ See section: <<object_types,Object types>>
 See section: <<object_types,Object types>>
 | 124 | 4 | | Snapshot metadata tree object type (apfs_snap_meta_tree_type) +
 See section: <<object_types,Object types>>
-| 132 | 8 | | Object map block number (apfs_omap_oid) +
+| 128 | 8 | | Object map block number (apfs_omap_oid) +
 Contains a block number relative to the start of the container of the <<object_map,object map>>
-| 140 | 8 | | File system root tree object identifier (apfs_root_tree_oid)
-| 148 | 8 | | Extent-reference tree block number (apfs_extentref_tree_oid) +
+| 136 | 8 | | File system root tree object identifier (apfs_root_tree_oid)
+| 144 | 8 | | Extent-reference tree block number (apfs_extentref_tree_oid) +
 See section: <<extent_reference_tree,Extent reference tree>>
-| 156 | 8 | | Snapshot metadata tree block number (apfs_snap_meta_tree_oid) +
+| 152 | 8 | | Snapshot metadata tree block number (apfs_snap_meta_tree_oid) +
 See section: <<snapshot_metadata_tree,Snapshot metadata tree>>
-| 164 | 8 | | [yellow-background]*Unknown (apfs_revert_to_xid)*
-| 172 | 8 | | [yellow-background]*Unknown (apfs_revert_to_sblock_oid)*
-| 180 | 8 | | Next (available) file system object identifier (apfs_next_obj_id) +
+| 160 | 8 | | [yellow-background]*Unknown (apfs_revert_to_xid)*
+| 168 | 8 | | [yellow-background]*Unknown (apfs_revert_to_sblock_oid)*
+| 176 | 8 | | Next (available) file system object identifier (apfs_next_obj_id) +
 Seen upper 32-bit contain 0xffffffff
-| 188 | 8 | | Number of files (apfs_num_files)
-| 196 | 8 | | Number of directories (apfs_num_directories)
-| 204 | 8 | | Number of symbolic links (apfs_num_symlinks)
-| 212 | 8 | | Number of other file system objects (apfs_num_other_fsobjects)
-| 220 | 8 | | Number of snapshots (apfs_num_snapshots)
-| 228 | 8 | | Total number of blocks allocated (apfs_total_blocks_alloced)
-| 236 | 8 | | Total number of blocks freed (apfs_total_blocks_freed)
-| 244 | 16 | | Volume identifier (apfs_vol_uuid) +
+| 184 | 8 | | Number of files (apfs_num_files)
+| 192 | 8 | | Number of directories (apfs_num_directories)
+| 200 | 8 | | Number of symbolic links (apfs_num_symlinks)
+| 208 | 8 | | Number of other file system objects (apfs_num_other_fsobjects)
+| 216 | 8 | | Number of snapshots (apfs_num_snapshots)
+| 224 | 8 | | Total number of blocks allocated (apfs_total_blocks_alloced)
+| 232 | 8 | | Total number of blocks freed (apfs_total_blocks_freed)
+| 240 | 16 | | Volume identifier (apfs_vol_uuid) +
 Contains a UUID stored in big-endian
-| 260 | 8 | | Modification date and time (apfs_last_mod_time) +
+| 256 | 8 | | Modification date and time (apfs_last_mod_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
-| 268 | 8 | | Volume flags (apfs_fs_flags) +
+| 264 | 8 | | Volume flags (apfs_fs_flags) +
 See section: <<volume_superblock_flags,Volume superblock flags>>
-| 276 | 48 | | Creation change information (apfs_formatted_by) +
+| 272 | 48 | | Creation change information (apfs_formatted_by) +
 See section: <<change_information,Change information>>
-| 324 | 8 x 48 = 384 | | Modification change information (apfs_modified_by) +
+| 320 | 8 x 48 = 384 | | Modification change information (apfs_modified_by) +
 [yellow-background]*Contains the 8 last entries from least recent to most recent?* +
 See section: <<change_information,Change information>>
-| 708 | 256 | | Volume name (apfs_volname)
-| 964 | 4 | | Next (available) document identifier (apfs_next_doc_id)
-| 968 | 2 | | [yellow-background]*Unknown (apfs_role)*
-| 970 | 2 | | [yellow-background]*Unknown (reserved)*
-| 972 | 8 | | [yellow-background]*Unknown (apfs_root_to_xid)*
-| 980 | 32 | | [yellow-background]*Unknown (apfs_er_state_oid)*
+| 704 | 256 | | Volume name (apfs_volname)
+| 960 | 4 | | Next (available) document identifier (apfs_next_doc_id)
+| 964 | 2 | | [yellow-background]*Unknown (apfs_role)*
+| 966 | 2 | | [yellow-background]*Unknown (reserved)*
+| 968 | 8 | | [yellow-background]*Unknown (apfs_root_to_xid)*
+| 976 | 8 | | [yellow-background]*Unknown (apfs_er_state_oid)*
+| 984 | 8 | | Unknown (apfs_cloneinfo_id_epoch) |
+| 992 | 8 | | Unknown (apfs_cloneinfo_xid) |
+| 1000 | 8 | | Unknown (apfs_snap_meta_ext_oid) |
+| 1008 | 16 | | Volume group identifier (apfs_volume_group_id) +
+Contains a UUID stored in big-endian
+| 1024 | 8 | | Unknown (apfs_integrity_meta_oid)
+| 1032 | 8 | | Unknown (apfs_fext_tree_oid)
+| 1040 | 4 | | Unknown (apfs_fext_tree_type)
+| 1044 | 4 | | Unknown (reserved_type)
+| 1048 | 8 | | Unknown (reserved_oid)
 |===
 
 === [[encryption_state]]Encryption state
@@ -1519,7 +1529,7 @@ System object identifiers (FSOIDs) to contrast other object identifiers (OIDs).
 
 === File system B-tree key
 
-The file system B-tree key is variable of size and consists of:
+The file system B-tree key is of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1581,7 +1591,7 @@ The object identifiers can be resolved in the <<object_map,object map>> to a "ph
 
 === [[snapshot_metadata]]Snapshot metadata
 
-The snapshot metadata value (j_snap_metadata_val_t) is variable of size and
+The snapshot metadata value (j_snap_metadata_val_t) is of variable size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -1793,7 +1803,7 @@ Not implement in MacOS
 
 ==== Extended attribute key data
 
-The extended attribute key data (j_xattr_key_t) is variable of size and consists
+The extended attribute key data (j_xattr_key_t) is of variable size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -1815,7 +1825,7 @@ a case insensitive file system.
 
 ==== Extended attribute value data
 
-The extended attribute value data (j_xattr_val_t) is variable of size and
+The extended attribute value data (j_xattr_val_t) is of variable size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -1969,7 +1979,7 @@ Contains the file system object identifier of the sibling map record
 
 ==== Sibling link value data
 
-The sibling link value data (j_sibling_val_t) is variable of size and consists
+The sibling link value data (j_sibling_val_t) is of variable size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2007,10 +2017,6 @@ of:
 | Offset | Size | Value | Description
 | 0 | 4 | | Reference count (refcnt)
 |===
-
-=== [[encryption_state]]Encryption state
-
-[yellow-background]*TODO: complete this section.*
 
 === [[file_extent]]File extent
 
@@ -2077,7 +2083,7 @@ file system is case-insensitive.
 
 ==== Directory record key data with name
 
-The directory record key data with name (j_drec_key_t) is variable of size and
+The directory record key data with name (j_drec_key_t) is of variable size and
 consists of:
 
 [cols="1,1,1,5",options="header"]
@@ -2097,7 +2103,7 @@ Contains an UTF-8 encoded string with an end-of-string character
 ==== Directory record key data with name and hash
 
 The directory record key data with name and hash (j_drec_hashed_key_t) is
-variable of size and consists of:
+of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2118,7 +2124,7 @@ Contains an UTF-8 encoded string with an end-of-string character
 
 ==== Directory record value data
 
-The directory record value data (j_drec_val_t) is variable of size and consists
+The directory record value data (j_drec_val_t) is of variable size and consists
 of:
 
 [cols="1,1,1,5",options="header"]
@@ -2166,7 +2172,7 @@ The name hash of a directory entry is calculated as following:
 * If the file system is case-insensitive represent the name in lower-case
 * Represent the name as an Unicode string in Normalization Form Canonical Decomposition (NFD)
 * Format the Unicode string as a little-endian UTF-32 stream without a byte-order-mark or end-of-string character
-* Calculate a CRC-32c checksum of the UTF-32 stream with an initial checkum of 0xffffffff (-1)
+* Calculate a CRC-32c checksum of the UTF-32 stream with an initial checksum of 0xffffffff (-1)
 * The lower 22-bits of checksum form the hash
 
 The CRC-32 calculation uses the Castagnoli polynomial (0x1edc6f41), also known
@@ -2309,8 +2315,8 @@ The extended field data contains a 32-bit integer value
 | 8 | INO_EXT_TYPE_DSTREAM | Data stream +
 The extended field data contains a <<data_stream_attribute,data stream attribute>>
 | 9 | INO_EXT_TYPE_RESERVED_9 | [yellow-background]*Unknown (Reserved)*
-| 10 | INO_EXT_TYPE_DIR_STATS_KEY | Direcotry statistics +
-[yellow-background]*Unknown if this contains the object identifier of the directory statisticts or a j_dir_stats_val_t structure, seen 8 byte value*
+| 10 | INO_EXT_TYPE_DIR_STATS_KEY | Directory statistics +
+[yellow-background]*Unknown if this contains the object identifier of the directory statistics or a j_dir_stats_val_t structure, seen 8 byte value*
 | 11 | INO_EXT_TYPE_FS_UUID | Mounted file system identifier +
 The extended field data contains a 128-bit UUID value
 | 12 | INO_EXT_TYPE_RESERVED_12 | [yellow-background]*Unknown (Reserved)*
@@ -2607,14 +2613,14 @@ The values in the ZLIB (DEFLATE) compressed footer are stored in big-endian.
 
 == [[efi_jumpstart]]EFI jumpstart
 
-The EFI jumpstart (nx_efi_jumpstart_t) is variable of size and consists of:
+The EFI jumpstart (nx_efi_jumpstart_t) is of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x00000014 | Object type +
@@ -2666,7 +2672,7 @@ The snapshot metadata tree object is 32 bytes in size and consists of:
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x40000002 +
@@ -2682,7 +2688,7 @@ The object map values are stored in <<btree,B-tree>>.
 ==== Snapshot metadata B-tree key
 
 The snapshot metadata B-tree key (j_snap_metadata_key_t or j_snap_name_key_t)
-is variable of size and consists of:
+is of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -2736,7 +2742,7 @@ form one logical APFS container.
 | Offset | Size | Value | Description
 4+| _Object header_
 | 0 | 8 | | Object checksum +
-See section: <<object_checksum,Object checkum>>
+See section: <<object_checksum,Object checksum>>
 | 8 | 8 | | Object identifier
 | 16 | 8 | | Object transaction identifier (xid)
 | 24 | 4 | 0x40000002 | Object type +

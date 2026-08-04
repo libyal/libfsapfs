@@ -259,6 +259,7 @@ int libfsapfs_checkpoint_map_read_data(
 	size_t data_offset                          = 0;
 	uint64_t calculated_checksum                = 0;
 	uint64_t stored_checksum                    = 0;
+	uint32_t flags                              = 0;
 	uint32_t map_entry_index                    = 0;
 	uint32_t number_of_map_entries              = 0;
 	uint32_t object_subtype                     = 0;
@@ -353,6 +354,10 @@ int libfsapfs_checkpoint_map_read_data(
 		goto on_error;
 	}
 	byte_stream_copy_to_uint32_little_endian(
+	 ( (fsapfs_checkpoint_map_t *) data )->flags,
+	 flags );
+
+	byte_stream_copy_to_uint32_little_endian(
 	 ( (fsapfs_checkpoint_map_t *) data )->number_of_entries,
 	 number_of_map_entries );
 
@@ -390,15 +395,12 @@ int libfsapfs_checkpoint_map_read_data(
 		 function,
 		 object_subtype );
 
-		byte_stream_copy_to_uint32_little_endian(
-		 ( (fsapfs_checkpoint_map_t *) data )->flags,
-		 value_32bit );
 		libcnotify_printf(
 		 "%s: flags\t\t\t\t: 0x%08" PRIx32 "\n",
 		 function,
-		 value_32bit );
+		 flags );
 		libfsapfs_debug_print_checkpoint_flags(
-		 value_32bit );
+		 flags );
 		libcnotify_printf(
 		 "\n" );
 
@@ -438,6 +440,18 @@ int libfsapfs_checkpoint_map_read_data(
 		 function,
 		 stored_checksum,
 		 calculated_checksum );
+
+		goto on_error;
+	}
+/* TODO add support for chained checkpoint map objects */
+	if( ( flags & 0x00000001UL ) == 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: unsupported chained checkpoint map objects.",
+		 function );
 
 		goto on_error;
 	}

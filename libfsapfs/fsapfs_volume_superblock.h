@@ -84,10 +84,10 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t incompatible_features_flags[ 8 ];
 
-	/* Unknown
+	/* The volume (last) unmount date and time
 	 * Consists of 8 bytes
 	 */
-	uint8_t unknown5[ 8 ];
+	uint8_t unmount_time[ 8 ];
 
 	/* The number of reserved blocks
 	 * Consists of 8 bytes
@@ -104,25 +104,10 @@ struct fsapfs_volume_superblock
 	 */
 	uint8_t number_of_allocated_blocks[ 8 ];
 
-	/* Unknown
-	 * Consists of 8 bytes
+	/* The encryption state
+	 * Consists of 10 bytes
 	 */
-	uint8_t unknown9[ 8 ];
-
-	/* Unknown
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown10[ 4 ];
-
-	/* Unknown
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown11[ 4 ];
-
-	/* Unknown
-	 * Consists of 4 bytes
-	 */
-	uint8_t unknown12[ 4 ];
+	uint8_t encryption_state[ 20 ];
 
 	/* The file system root tree object type
 	 * Consists of 4 bytes
@@ -256,9 +241,55 @@ struct fsapfs_volume_superblock
 	uint8_t unknown61[ 8 ];
 
 	/* Unknown
-	 * Consists of 32 bytes
+	 * Consists of 8 bytes
 	 */
-	uint8_t unknown62[ 32 ];
+	uint8_t unknown62[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown63[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown64[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown65[ 8 ];
+
+	/* The volume group identifier
+	 * Consists of 16 bytes
+	 * Contains an UUID
+	 */
+	uint8_t volume_group_identifier[ 16 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown66[ 8 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown67[ 8 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown68[ 4 ];
+
+	/* Unknown
+	 * Consists of 4 bytes
+	 */
+	uint8_t unknown69[ 4 ];
+
+	/* Unknown
+	 * Consists of 8 bytes
+	 */
+	uint8_t unknown70[ 8 ];
 };
 
 typedef struct fsapfs_volume_superblock_change_information fsapfs_volume_superblock_change_information_t;
