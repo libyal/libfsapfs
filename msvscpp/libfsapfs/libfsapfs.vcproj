@@ -342,6 +342,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_key_bag_value.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_key_encrypted_key.c"
 				>
 			</File>
@@ -653,6 +657,10 @@
 			</File>
 			<File
 				RelativePath="..\..\libfsapfs\libfsapfs_key_bag_header.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\libfsapfs\libfsapfs_key_bag_value.h"
 				>
 			</File>
 			<File

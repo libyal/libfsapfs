@@ -724,8 +724,8 @@ int fsapfs_test_key_encrypted_key_read_data(
 	 (uint64_t) 559440 );
 
 	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "key_encrypted_key->encryption_method",
-	 key_encrypted_key->encryption_method,
+	 "key_encrypted_key->flags",
+	 key_encrypted_key->flags,
 	 (uint32_t) 0 );
 
 	result = libfsapfs_key_encrypted_key_free(
@@ -826,8 +826,8 @@ int fsapfs_test_key_encrypted_key_read_data(
 	 (uint64_t) 682789 );
 
 	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "key_encrypted_key->encryption_method",
-	 key_encrypted_key->encryption_method,
+	 "key_encrypted_key->flags",
+	 key_encrypted_key->flags,
 	 (uint32_t) 0 );
 
 	result = libfsapfs_key_encrypted_key_free(
@@ -932,8 +932,8 @@ int fsapfs_test_key_encrypted_key_read_data(
 	 (uint64_t) 0 );
 
 	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "key_encrypted_key->encryption_method",
-	 key_encrypted_key->encryption_method,
+	 "key_encrypted_key->flags",
+	 key_encrypted_key->flags,
 	 (uint32_t) 0 );
 
 	result = libfsapfs_key_encrypted_key_free(
@@ -1035,8 +1035,8 @@ int fsapfs_test_key_encrypted_key_read_data(
 	 (uint64_t) 559440 );
 
 	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "key_encrypted_key->encryption_method",
-	 key_encrypted_key->encryption_method,
+	 "key_encrypted_key->flags",
+	 key_encrypted_key->flags,
 	 (uint32_t) 2 );
 
 	result = libfsapfs_key_encrypted_key_free(
@@ -1137,8 +1137,8 @@ int fsapfs_test_key_encrypted_key_read_data(
 	 (uint64_t) 559440 );
 
 	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "key_encrypted_key->encryption_method",
-	 key_encrypted_key->encryption_method,
+	 "key_encrypted_key->flags",
+	 key_encrypted_key->flags,
 	 (uint32_t) 0 );
 
 	result = libfsapfs_key_encrypted_key_free(
@@ -1242,8 +1242,8 @@ int fsapfs_test_key_encrypted_key_read_data(
 	 (uint64_t) 559440 );
 
 	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "key_encrypted_key->encryption_method",
-	 key_encrypted_key->encryption_method,
+	 "key_encrypted_key->flags",
+	 key_encrypted_key->flags,
 	 (uint32_t) 0 );
 
 	result = libfsapfs_key_encrypted_key_free(
@@ -1346,8 +1346,8 @@ int fsapfs_test_key_encrypted_key_read_data(
 	 (uint64_t) 559440 );
 
 	FSAPFS_TEST_ASSERT_EQUAL_UINT32(
-	 "key_encrypted_key->encryption_method",
-	 key_encrypted_key->encryption_method,
+	 "key_encrypted_key->flags",
+	 key_encrypted_key->flags,
 	 (uint32_t) 2 );
 
 	result = libfsapfs_key_encrypted_key_free(

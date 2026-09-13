@@ -86,6 +86,7 @@ libfsapfs_la_SOURCES = \
 	libfsapfs_io_handle.c libfsapfs_io_handle.h \
 	libfsapfs_key_bag_entry.c libfsapfs_key_bag_entry.h \
 	libfsapfs_key_bag_header.c libfsapfs_key_bag_header.h \
+	libfsapfs_key_bag_value.c libfsapfs_key_bag_value.h \
 	libfsapfs_key_encrypted_key.c libfsapfs_key_encrypted_key.h \
 	libfsapfs_libbfio.h \
 	libfsapfs_libcaes.h \

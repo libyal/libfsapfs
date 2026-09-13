@@ -51,9 +51,9 @@ struct libfsapfs_key_encrypted_key
 	 */
 	uint8_t salt[ 16 ];
 
-	/* The encryption method
+	/* The flags
 	 */
-	uint32_t encryption_method;
+	uint32_t flags;
 
 	/* The wrapped key encrypted key (KEK)
 	 */

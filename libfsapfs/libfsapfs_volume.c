@@ -1121,8 +1121,10 @@ int libfsapfs_internal_volume_unlock(
 	uint8_t volume_key[ 32 ];
 	uint8_t volume_master_key[ 32 ];
 
-	static char *function = "libfsapfs_internal_volume_unlock";
-	int result            = 0;
+	static char *function           = "libfsapfs_internal_volume_unlock";
+	size_t recovery_password_length = 0;
+	size_t user_password_length     = 0;
+	int result                      = 0;
 
 	if( internal_volume == NULL )
 	{
@@ -1152,12 +1154,20 @@ int libfsapfs_internal_volume_unlock(
 	}
 	else
 	{
+		if( internal_volume->user_password_size > 0 )
+		{
+			user_password_length = internal_volume->user_password_size - 1;
+		}
+		if( internal_volume->recovery_password_size > 0 )
+		{
+			recovery_password_length = internal_volume->recovery_password_size - 1;
+		}
 		result = libfsapfs_volume_key_bag_get_volume_key(
 		          internal_volume->key_bag,
 		          internal_volume->user_password,
-		          internal_volume->user_password_size - 1,
+		          user_password_length,
 		          internal_volume->recovery_password,
-		          internal_volume->recovery_password_size - 1,
+		          recovery_password_length,
 		          volume_key,
 		          256,
 		          error );
@@ -3001,6 +3011,17 @@ int libfsapfs_volume_get_file_entry_by_identifier(
 
 		return( -1 );
 	}
+	if( internal_volume->is_locked != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - volume is locked.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_LIBFSAPFS_MULTI_THREAD_SUPPORT )
 	if( libcthreads_read_write_lock_grab_for_write(
 	     internal_volume->read_write_lock,
@@ -3107,6 +3128,17 @@ int libfsapfs_volume_get_file_entry_by_utf8_path(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->is_locked != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - volume is locked.",
 		 function );
 
 		return( -1 );
@@ -3239,6 +3271,17 @@ int libfsapfs_volume_get_file_entry_by_utf16_path(
 		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
 		 "%s: invalid volume - missing superblock.",
+		 function );
+
+		return( -1 );
+	}
+	if( internal_volume->is_locked != 0 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_MISSING,
+		 "%s: invalid volume - volume is locked.",
 		 function );
 
 		return( -1 );

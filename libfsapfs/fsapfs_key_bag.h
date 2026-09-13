@@ -80,29 +80,19 @@ struct fsapfs_key_bag_entry_header
 	uint8_t unknown1[ 4 ];
 };
 
-typedef struct fsapfs_key_bag_kek_metadata fsapfs_key_bag_kek_metadata_t;
+typedef struct fsapfs_key_bag_kek_metadata_header fsapfs_key_bag_kek_metadata_header_t;
 
-struct fsapfs_key_bag_kek_metadata
+struct fsapfs_key_bag_kek_metadata_header
 {
-	/* The encryption method
+	/* The flags
 	 * Consists of 4 bytes
 	 */
-	uint8_t encryption_method[ 4 ];
+	uint8_t flags[ 4 ];
 
 	/* Unknown
 	 * Consists of 2 bytes
 	 */
 	uint8_t unknown1[ 2 ];
-
-	/* Unknown
-	 * Consists of 1 byte
-	 */
-	uint8_t unknown2;
-
-	/* Unknown
-	 * Consists of 1 byte
-	 */
-	uint8_t unknown3;
 };
 
 typedef struct fsapfs_key_bag_extent fsapfs_key_bag_extent_t;
@@ -118,6 +108,21 @@ struct fsapfs_key_bag_extent
 	 * Consists of 8 bytes
 	 */
 	uint8_t number_of_blocks[ 8 ];
+};
+
+typedef struct fsapfs_key_bag_value fsapfs_key_bag_value_t;
+
+struct fsapfs_key_bag_value
+{
+	/* The tag
+	 * Consists of 1 byte
+	 */
+	uint8_t tag;
+
+	/* The data size with flag
+	 * Consists of 1 byte
+	 */
+	uint8_t data_size_with_flag;
 };
 
 #if defined( __cplusplus )

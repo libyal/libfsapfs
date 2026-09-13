@@ -1,0 +1,70 @@
+/*
+ * The key bag (packed) value functions
+ *
+ * Copyright (C) 2018-2026, Joachim Metz <joachim.metz@gmail.com>
+ *
+ * Refer to AUTHORS for acknowledgements.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#if !defined( _LIBFSAPFS_KEY_BAG_VALUE_H )
+#define _LIBFSAPFS_KEY_BAG_VALUE_H
+
+#include <common.h>
+#include <types.h>
+
+#include "libfsapfs_libcerror.h"
+
+#if defined( __cplusplus )
+extern "C" {
+#endif
+
+typedef struct libfsapfs_key_bag_value libfsapfs_key_bag_value_t;
+
+struct libfsapfs_key_bag_value
+{
+	/* The tag
+	 */
+	uint8_t tag;
+
+	/* The extended size
+	 */
+	uint8_t extended_size;
+
+	/* The data size
+	 */
+	uint16_t data_size;
+};
+
+int libfsapfs_key_bag_value_initialize(
+     libfsapfs_key_bag_value_t **key_bag_value,
+     libcerror_error_t **error );
+
+int libfsapfs_key_bag_value_free(
+     libfsapfs_key_bag_value_t **key_bag_value,
+     libcerror_error_t **error );
+
+int libfsapfs_key_bag_value_read_data(
+     libfsapfs_key_bag_value_t *key_bag_value,
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
+#if defined( __cplusplus )
+}
+#endif
+
+#endif /* !defined( _LIBFSAPFS_KEY_BAG_VALUE_H ) */
+

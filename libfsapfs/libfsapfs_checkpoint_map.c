@@ -268,7 +268,6 @@ int libfsapfs_checkpoint_map_read_data(
 
 #if defined( HAVE_DEBUG_OUTPUT )
 	uint64_t value_64bit                        = 0;
-	uint32_t value_32bit                        = 0;
 #endif
 
 	if( checkpoint_map == NULL )

@@ -639,14 +639,24 @@ int libfsapfs_container_key_bag_read_data(
 
 		goto on_error;
 	}
-/* TODO bounds check number of entries ? */
-
 	data_offset += 16;
 
 	for( bag_entry_index = 0;
 	     bag_entry_index < bag_header->number_of_entries;
 	     bag_entry_index++ )
 	{
+		if( data_offset > ( data_size - 24 ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid key bag entry: %" PRIu16 " value out of bounds.",
+			 function,
+			 bag_entry_index );
+
+			goto on_error;
+		}
 		if( libfsapfs_key_bag_entry_initialize(
 		     &bag_entry,
 		     error ) != 1 )
@@ -688,6 +698,18 @@ int libfsapfs_container_key_bag_read_data(
 			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
 			 LIBCERROR_RUNTIME_ERROR_APPEND_FAILED,
 			 "%s: unable to append bag entry: %" PRIu32 " to array.",
+			 function,
+			 bag_entry_index );
+
+			goto on_error;
+		}
+		if( bag_entry->size > ( data_size - data_offset ) )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid key bag entry: %" PRIu16 " data size value out of bounds.",
 			 function,
 			 bag_entry_index );
 

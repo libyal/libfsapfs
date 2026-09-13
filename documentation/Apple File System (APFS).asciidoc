@@ -62,6 +62,7 @@ in the section entitled "GNU Free Documentation License".
 | 0.0.15 | J.B. Metz | July 2023 | Additional information about volume flags.
 | 0.0.16 | J.B. Metz | June 2026 | Additional format information.
 | 0.0.17 | J.B. Metz | August 2026 | Additional information about raw, LZFSE and LZBITMAP compressed files, with thanks to T. Willenborg.
+| 0.0.18 | J.B. Metz | August 2026 | Additional information about macOS encrypted system volumes, with thanks to W. McGinnis.
 |===
 
 :numbered:
@@ -574,7 +575,7 @@ Contains a UUID stored in big-endian
 4+| _Unknown (nx_keylocker)_
 | 1296 | 8 | | Container key bag data block number (nx_keybag_base) +
 Contains a block number relative to the start of the container of the <<key_bag,Key bag>>
-| 1304 | 8 | | Contaner key bag data number of blocks (nx_keybag_blocks)
+| 1304 | 8 | | Container key bag data number of blocks (nx_keybag_blocks)
 4+|
 | 1312 | 4 x 8 = 32 | | [yellow-background]*Unknown (nx_ephemeral_info)*
 | 1344 | 8 | | [yellow-background]*Unknown (Test object identifier) (nx_test_oid)*
@@ -1194,7 +1195,7 @@ The key bag entry header (keybag_entry_t) is 24 bytes in size and consists of:
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 16 | | Volume identifer (ke_uuid) +
+| 0 | 16 | | Volume identifier (ke_uuid) +
 Contains a UUID stored in big-endian
 | 16 | 2 | | Entry type (ke_tag) +
 See section: <<key_bag_entry_types,Key bag entry types>>
@@ -1212,7 +1213,7 @@ See section: <<key_bag_entry_types,Key bag entry types>>
 | 0x00 | KB_TAG_UNKNOWN | Unknown
 | 0x01 | KB_TAG_WRAPPING_KEY | Wrapping key
 | 0x02 | KB_TAG_VOLUME_KEY | Volume master key +
-See section: <<key_bag_kek_packed_object,Key encrypted key (KEK) packed object>>
+See section: <<key_bag_kek_packed_object,Key encryption key (KEK) packed object>>
 | 0x03 | KB_TAG_VOLUME_UNLOCK_RECORDS | Volume key bag extent +
 See section: <<key_bag_data_extent,Key bag data extent>>
 | 0x04 | KB_TAG_VOLUME_PASSPHRASE_HINT | Passphrase hint
@@ -1228,7 +1229,7 @@ The volume master key is encryped with a volume key.
 |===
 | Value | Identifier | Description
 | 3 | | Volume key +
-See section: <<key_bag_kek_packed_object,Key encrypted key (KEK) packed object>>
+See section: <<key_bag_kek_packed_object,Key encryption key (KEK) packed object>>
 | 4 | | Password Hint +
 Contains a string without end-of-string character
 |===
@@ -1237,8 +1238,12 @@ The volume key is encryped with an user key.
 
 ==== [[key_bag_packed_object]]Key bag packed object
 
-The packed object consist of an object packed value that embeds attribute
-packed values.
+The packed object consist of:
+
+* an object packed value that embeds attribute packed values.
+
+A packed value with a tag and size of 0 signifies the end of the attribute packed
+values.
 
 ===== Key bag packed value
 
@@ -1249,21 +1254,23 @@ The key bag packed value is of variable size and consists of:
 | Offset | Size | Value | Description
 | 0 | 1 | | Value tag (or value type) +
 [yellow-background]*Unknown (Where the most-significant bit represents a user-defined flag?)*
-| 1 | 1 | | Value data size +
-If the most-significant bit is set the value data size is stored in the next ( value & 0x7f ) bytes +
-Seen: 0x81
+| 1 | 1 | | Value data size, where the most-significant bit represents an extended size flag
+4+| _If extended size flag is set_
+| ... | ... | | Extended value data size, in big-endian
+4+|
 | ... | ... | | Value data
 |===
+
+If the most-significant bit is set the value data size is stored in the next
+( value & 0x7f ) bytes. E.g. if value data size is 0x82 the first 2 bytes of the
+extended value data size contain the value data size.
 
 [NOTE]
 The meaning of the value tags differ per packed object type.
 
-[NOTE]
-A packed value with a tag and size of 0 signifies the end of the packed values.
+===== [[key_bag_kek_packed_object]]Key encryption key (KEK) packed object
 
-===== [[key_bag_kek_packed_object]]Key encrypted key (KEK) packed object
-
-The packed object value tag of a key encrypted key is 0x30 and contains the
+The packed object value tag of a key encryption key is 0x30 and contains the
 following attribute value tags:
 
 [cols="1,1,5",options="header"]
@@ -1279,14 +1286,14 @@ See section: <<key_bag_wrapped_kek_packed_object,Wrapped Key Encrypted Key (KEK)
 
 ===== [[key_bag_wrapped_kek_packed_object]]Wrapped Key Encrypted Key (KEK) packed object
 
-The packed object value tag of a wrapped kek encrypted key is 0xa3 and contains
+The packed object value tag of a wrapped kek encryption key is 0xa3 and contains
 the following attribute value tags:
 
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
 | 0x80 | | [yellow-background]*Unknown*
-| 0x81 | | Volume identifer +
+| 0x81 | | Volume identifier +
 Contains a UUID stored in big-endian
 | 0x82 | | Wrapped Key Encrypted Key (KEK) metadata +
 See section: <<wrapped_kek_metadata,Wrapped Key Encrypted Key (KEK) metadata>>
@@ -1297,28 +1304,27 @@ See section: <<wrapped_kek_metadata,Wrapped Key Encrypted Key (KEK) metadata>>
 
 ==== [[wrapped_kek_metadata]]Wrapped Key Encrypted Key (KEK) metadata
 
-The Wrapped Key Encrypted Key (KEK) metadata is 8 bytes in size and consists of:
+The Wrapped Key Encrypted Key (KEK) metadata is of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
 | Offset | Size | Value | Description
-| 0 | 4 | | Encryption method +
-See section: <<encryption_methods,Encryption methods>>
-| 4 | 2 | | [yellow-background]*Unknown*
-| 6 | 1 | | [yellow-background]*Unknown*
-| 7 | 1 | | [yellow-background]*Unknown*
+| 0 | 4 | | <<wrapped_kek_metadata_flags,Flags>>
+| 4 | 2 | | [yellow-background]*Unknown*, seen 0x0001, 0x0002, 0x0101
+4+| _If data size is 8_
+| 6 | 2 | | [yellow-background]*Unknown*
+4+| _If data size is 16_
+| 6 | 16 | | [yellow-background]*Unknown (UUID)*
 |===
 
-===== [[encryption_methods]]Encryption methods
+===== [[wrapped_kek_metadata_flags]]Wrapped Key Encryption Key (KEK) metadata flags
 
 [cols="1,1,5",options="header"]
 |===
 | Value | Identifier | Description
-| 0 | | [yellow-background]*Unknown (AES-256)*
+| 0x000000002 | | AES-128 CoreStorage FileVault compatible mode if set (1), AES-256 if not set (0)
 | | |
-| 2 | | [yellow-background]*Unknown (AES-128 FVDE (CoreStorage FileVault) compatible)*
-| | |
-| 16 | | [yellow-background]*Unknown (AES-256)* +
+| 0x000000010 | | [yellow-background]*Unknown (AES-256)* +
 Seen in combination with recovery password protected volume key
 |===
 
@@ -1670,7 +1676,7 @@ See section: <<file_system_data_types,File system data types>>
 
 ==== Inode value data
 
-The inode value data (APFS_TYPE_INVALID) is 8 bytes in size and consists of:
+The inode value data (j_inode_val_t) is of variable size and consists of:
 
 [cols="1,1,1,5",options="header"]
 |===
@@ -1684,22 +1690,22 @@ Signed integer that contains the number of nanoseconds since January 1, 1970 00:
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
 | 32 | 8 | | Inode change date and time (change_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
-| 48 | 8 | | Access date and time (access_time) +
+| 40 | 8 | | Access date and time (access_time) +
 Signed integer that contains the number of nanoseconds since January 1, 1970 00:00:00 UTC or 0 if not set
-| 56 | 8 | | Inode flags (internal_flags) +
+| 48 | 8 | | Inode flags (internal_flags) +
 See section: <<inode_flags,Inode flags>>
-| 64 | 4 | | Number of children (nchildren) or number of (hard) links (nlink)
-| 68 | 4 | | [yellow-background]*Unknown (default_protection_class)*
-| 72 | 4 | | [yellow-background]*Unknown (write_generation_counter)*
-| 76 | 4 | | BSD file entry flags (bsd_flags) +
+| 56 | 4 | | Number of children (nchildren) or number of (hard) links (nlink)
+| 60 | 4 | | [yellow-background]*Unknown (default_protection_class)*
+| 64 | 4 | | [yellow-background]*Unknown (write_generation_counter)*
+| 68 | 4 | | BSD file entry flags (bsd_flags) +
 See section: <<bsd_file_entry_flags,BSD file entry flags>>
-| 80 | 4 | | Owner user identifier (owner)
-| 84 | 4 | | Group identifier (gid)
-| 86 | 2 | | File mode +
+| 72 | 4 | | Owner user identifier (owner)
+| 76 | 4 | | Group identifier (gid)
+| 80 | 2 | | File mode +
 See section: <<file_modes,File modes>>
-| 88 | 2 | | [yellow-background]*Unknown (pad1)*
-| 90 | 8 | | [yellow-background]*Unknown (pad2)*
-| 98 | ... | | Extended fields (xfields) +
+| 82 | 2 | | [yellow-background]*Unknown (pad1)*
+| 84 | 8 | | [yellow-background]*Unknown (pad2)*
+| 92 | ... | | Extended fields (xfields) +
 See section: <<extended_fields,Extended fields>>
 |===
 
