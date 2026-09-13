@@ -154,6 +154,9 @@ int libfsapfs_key_encrypted_key_read_data(
 	const uint8_t *wrapped_kek_object_data      = NULL;
 	static char *function                       = "libfsapfs_key_encrypted_key_read_data";
 	size_t data_offset                          = 0;
+	size_t object_value_data_end                = 0;
+	size_t wrapped_kek_object_header_size       = 0;
+	uint16_t kek_metadata_value_data_size       = 0;
 	uint16_t value_data_size                    = 0;
 	uint16_t wrapped_kek_object_data_size       = 0;
 	uint8_t byte_value                          = 0;
@@ -220,16 +223,51 @@ int libfsapfs_key_encrypted_key_read_data(
 	}
 	else if( byte_value == 0x81 )
 	{
+		if( ( data_size - data_offset ) < 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid object extended value data size value out of bounds.",
+			 function );
+
+			return( -1 );
+		}
 		value_data_size = (uint16_t) data[ data_offset++ ];
 	}
 	else if( byte_value == 0x82 )
 	{
-		byte_stream_copy_to_uint16_little_endian(
+		if( ( data_size - data_offset ) < 2 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid object extended value data size value out of bounds.",
+			 function );
+
+			return( -1 );
+		}
+		byte_stream_copy_to_uint16_big_endian(
 		 &( data[ data_offset ] ),
 		 value_data_size );
 
 		data_offset += 2;
 	}
+	if( value_data_size > ( data_size - data_offset ) )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid object value data size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
+	object_value_data_end = data_offset + value_data_size;
+
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -278,19 +316,22 @@ int libfsapfs_key_encrypted_key_read_data(
 
 		return( -1 );
 	}
-	if( value_data_size > ( data_size - 2 ) )
+	/* The attributes are bound by the object value data, not by the data,
+	 * so that trailing data is not parsed as an attribute.
+	 */
+	while( data_offset < object_value_data_end )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
-		 "%s: invalid object value data size value out of bounds.",
-		 function );
+		if( ( object_value_data_end - data_offset ) < 2 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid attribute value data size value out of bounds.",
+			 function );
 
-		return( -1 );
-	}
-	while( data_offset < data_size )
-	{
+			return( -1 );
+		}
 		value_tag  = data[ data_offset++ ];
 		byte_value = data[ data_offset++ ];
 
@@ -314,11 +355,33 @@ int libfsapfs_key_encrypted_key_read_data(
 		}
 		else if( byte_value == 0x81 )
 		{
+			if( ( object_value_data_end - data_offset ) < 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid attribute extended value data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
 			value_data_size = (uint16_t) data[ data_offset++ ];
 		}
 		else if( byte_value == 0x82 )
 		{
-			byte_stream_copy_to_uint16_little_endian(
+			if( ( object_value_data_end - data_offset ) < 2 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid attribute extended value data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			byte_stream_copy_to_uint16_big_endian(
 			 &( data[ data_offset ] ),
 			 value_data_size );
 
@@ -344,8 +407,7 @@ int libfsapfs_key_encrypted_key_read_data(
 		{
 			break;
 		}
-		if( ( data_offset >= data_size )
-		 || ( value_data_size > ( data_size - data_offset ) ) )
+		if( value_data_size > ( object_value_data_end - data_offset ) )
 		{
 			libcerror_error_set(
 			 error,
@@ -428,8 +490,24 @@ int libfsapfs_key_encrypted_key_read_data(
 
 					return( -1 );
 				}
-				wrapped_kek_object_data      = &( data[ data_offset - 2 ] );
-				wrapped_kek_object_data_size = value_data_size + 2;
+				/* The wrapped KEK packed object is parsed from its own tag
+				 * byte onwards, hence the size of the tag and length bytes
+				 * needs to be determined.
+				 */
+				if( byte_value == 0x81 )
+				{
+					wrapped_kek_object_header_size = 3;
+				}
+				else if( byte_value == 0x82 )
+				{
+					wrapped_kek_object_header_size = 4;
+				}
+				else
+				{
+					wrapped_kek_object_header_size = 2;
+				}
+				wrapped_kek_object_data      = &( data[ data_offset - wrapped_kek_object_header_size ] );
+				wrapped_kek_object_data_size = (uint16_t) ( wrapped_kek_object_header_size + value_data_size );
 
 				break;
 
@@ -455,6 +533,7 @@ int libfsapfs_key_encrypted_key_read_data(
 	byte_value = wrapped_kek_object_data[ data_offset++ ];
 
 	if( ( ( byte_value & 0x80 ) != 0 )
+	 && ( byte_value != 0x81 )
 	 && ( byte_value != 0x82 ) )
 	{
 		libcerror_error_set(
@@ -471,9 +550,13 @@ int libfsapfs_key_encrypted_key_read_data(
 	{
 		value_data_size = (uint16_t) byte_value;
 	}
+	else if( byte_value == 0x81 )
+	{
+		value_data_size = (uint16_t) wrapped_kek_object_data[ data_offset++ ];
+	}
 	else if( byte_value == 0x82 )
 	{
-		byte_stream_copy_to_uint16_little_endian(
+		byte_stream_copy_to_uint16_big_endian(
 		 &( wrapped_kek_object_data[ data_offset ] ),
 		 value_data_size );
 
@@ -538,12 +621,24 @@ int libfsapfs_key_encrypted_key_read_data(
 
 		return( -1 );
 	}
-	while( data_offset < wrapped_kek_object_data_size )
+	while( data_offset < (size_t) wrapped_kek_object_data_size )
 	{
+		if( ( (size_t) wrapped_kek_object_data_size - data_offset ) < 2 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid attribute value data size value out of bounds.",
+			 function );
+
+			return( -1 );
+		}
 		value_tag  = wrapped_kek_object_data[ data_offset++ ];
 		byte_value = wrapped_kek_object_data[ data_offset++ ];
 
 		if( ( ( byte_value & 0x80 ) != 0 )
+		 && ( byte_value != 0x81 )
 		 && ( byte_value != 0x82 ) )
 		{
 			libcerror_error_set(
@@ -560,9 +655,35 @@ int libfsapfs_key_encrypted_key_read_data(
 		{
 			value_data_size = (uint16_t) byte_value;
 		}
+		else if( byte_value == 0x81 )
+		{
+			if( ( (size_t) wrapped_kek_object_data_size - data_offset ) < 1 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid attribute extended value data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			value_data_size = (uint16_t) wrapped_kek_object_data[ data_offset++ ];
+		}
 		else if( byte_value == 0x82 )
 		{
-			byte_stream_copy_to_uint16_little_endian(
+			if( ( (size_t) wrapped_kek_object_data_size - data_offset ) < 2 )
+			{
+				libcerror_error_set(
+				 error,
+				 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+				 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+				 "%s: invalid attribute extended value data size value out of bounds.",
+				 function );
+
+				return( -1 );
+			}
+			byte_stream_copy_to_uint16_big_endian(
 			 &( wrapped_kek_object_data[ data_offset ] ),
 			 value_data_size );
 
@@ -588,8 +709,7 @@ int libfsapfs_key_encrypted_key_read_data(
 		{
 			break;
 		}
-		if( ( data_offset >= wrapped_kek_object_data_size )
-		 || ( value_data_size > ( wrapped_kek_object_data_size - data_offset ) ) )
+		if( value_data_size > ( (size_t) wrapped_kek_object_data_size - data_offset ) )
 		{
 			libcerror_error_set(
 			 error,
@@ -672,7 +792,11 @@ int libfsapfs_key_encrypted_key_read_data(
 				break;
 
 			case 0x82:
-				if( value_data_size != 8 )
+				/* macOS 26 grew this attribute from 8 bytes to 22 bytes,
+				 * namely a 6-byte header followed by a 16-byte identifier.
+				 */
+				if( ( value_data_size != 8 )
+				 && ( value_data_size != 22 ) )
 				{
 					libcerror_error_set(
 					 error,
@@ -684,11 +808,21 @@ int libfsapfs_key_encrypted_key_read_data(
 
 					return( -1 );
 				}
-				kek_metadata = (fsapfs_key_bag_kek_metadata_t *) &( wrapped_kek_object_data[ data_offset ] );
+				kek_metadata_value_data_size = value_data_size;
+				kek_metadata                 = (fsapfs_key_bag_kek_metadata_t *) &( wrapped_kek_object_data[ data_offset ] );
 
 				byte_stream_copy_to_uint32_little_endian(
 				 kek_metadata->encryption_method,
 				 key_encrypted_key->encryption_method );
+
+				/* In the 22-byte variant the first 4 bytes are not the
+				 * encryption method. The 40-byte wrapped KEK corresponds with
+				 * AES-256.
+				 */
+				if( value_data_size == 22 )
+				{
+					key_encrypted_key->encryption_method = 0;
+				}
 
 #if defined( HAVE_DEBUG_OUTPUT )
 				if( libcnotify_verbose != 0 )
@@ -753,8 +887,16 @@ int libfsapfs_key_encrypted_key_read_data(
 				break;
 
 			case 0x84:
+				/* A password-protected KEK entry stores a <= 8-byte PBKDF2
+				 * iteration count here. A macOS 26 container key bag VEK
+				 * entry, which is unwrapped with a key instead of a password,
+				 * carries a 16-byte value that is not an iteration count. The
+				 * 22-byte KEK metadata attribute distinguishes the two, so
+				 * that a corrupt legacy entry is still rejected.
+				 */
 				if( ( value_data_size == 0 )
-				 || ( value_data_size > 8 ) )
+				 || ( ( value_data_size > 8 )
+				  &&  ( kek_metadata_value_data_size != 22 ) ) )
 				{
 					libcerror_error_set(
 					 error,
@@ -765,6 +907,10 @@ int libfsapfs_key_encrypted_key_read_data(
 					 value_data_size );
 
 					return( -1 );
+				}
+				if( value_data_size > 8 )
+				{
+					break;
 				}
 				key_encrypted_key->number_of_iterations = 0;
 
@@ -780,7 +926,7 @@ int libfsapfs_key_encrypted_key_read_data(
 				if( libcnotify_verbose != 0 )
 				{
 					libcnotify_printf(
-					 "%s: number of iterations\t\t: %" PRIu32 "\n",
+					 "%s: number of iterations\t\t: %" PRIu64 "\n",
 					 function,
 					 key_encrypted_key->number_of_iterations );
 
@@ -792,7 +938,14 @@ int libfsapfs_key_encrypted_key_read_data(
 				break;
 
 			case 0x85:
-				if( value_data_size != 16 )
+				/* A password-protected KEK entry stores a 16-byte PBKDF2 salt
+				 * here. A macOS 26 container key bag VEK entry carries an
+				 * unrelated 3-byte value that is not a salt. The 22-byte KEK
+				 * metadata attribute distinguishes the two, so that a corrupt
+				 * legacy entry is still rejected.
+				 */
+				if( ( value_data_size != 16 )
+				 && ( kek_metadata_value_data_size != 22 ) )
 				{
 					libcerror_error_set(
 					 error,
@@ -803,6 +956,10 @@ int libfsapfs_key_encrypted_key_read_data(
 					 value_data_size );
 
 					return( -1 );
+				}
+				if( value_data_size != 16 )
+				{
+					break;
 				}
 				if( memory_copy(
 				     key_encrypted_key->salt,
