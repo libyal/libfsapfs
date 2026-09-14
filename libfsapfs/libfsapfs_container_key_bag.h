@@ -55,6 +55,11 @@ int libfsapfs_container_key_bag_free(
      libfsapfs_container_key_bag_t **container_key_bag,
      libcerror_error_t **error );
 
+int libfsapfs_container_key_bag_data_is_unencrypted(
+     const uint8_t *data,
+     size_t data_size,
+     libcerror_error_t **error );
+
 int libfsapfs_container_key_bag_read_file_io_handle(
      libfsapfs_container_key_bag_t *container_key_bag,
      libfsapfs_io_handle_t *io_handle,
