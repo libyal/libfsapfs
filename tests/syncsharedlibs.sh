@@ -1,68 +1,67 @@
 #!/bin/sh
 # Script that synchronizes the shared library dependencies
 #
-# Version: 20201121
+# Version: 20260914
 
-EXIT_SUCCESS=0;
-EXIT_FAILURE=1;
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
 
-GIT_URL_PREFIX="https://github.com/libyal";
-SHARED_LIBS="libcerror libcthreads libcdata libclocale libcnotify libcsplit libuna libcfile libcpath libbfio libfcache libfdata libfdatetime libfguid libfmos libhmac libcaes";
+GIT_URL_PREFIX="https://github.com/libyal"
+SHARED_LIBS="libcerror libcthreads libcdata libclocale libcnotify libcsplit libuna libcfile libcpath libbfio libfcache libfdata libfdatetime libfguid libfmos libhmac libcaes"
 
-USE_HEAD="";
+USE_HEAD=""
 
-if test "$1" = "--use-head";
+if test "$1" = "--use-head"
 then
-	USE_HEAD="--use-head";
+    USE_HEAD="--use-head"
 fi
 
-OLDIFS=$IFS;
-IFS=" ";
+OLDIFS=$IFS
+IFS=" "
 
-for SHARED_LIB in ${SHARED_LIBS};
+for SHARED_LIB in ${SHARED_LIBS}
 do
-	GIT_URL="${GIT_URL_PREFIX}/${SHARED_LIB}.git";
+    GIT_URL="${GIT_URL_PREFIX}/${SHARED_LIB}.git"
 
-	git clone --quiet ${GIT_URL} ${SHARED_LIB}-$$;
+    git clone --quiet "${GIT_URL}" "${SHARED_LIB}-$$"
 
-	if ! test -d ${SHARED_LIB}-$$;
-	then
-		echo "Unable to git clone: ${GIT_URL}";
+    if [ ! -d "${SHARED_LIB}-$$" ]
+    then
+        echo "Unable to git clone: ${GIT_URL}"
 
-		IFS=$OLDIFS;
+        IFS=$OLDIFS
 
-		exit ${EXIT_FAILURE};
-	fi
-	(cd ${SHARED_LIB}-$$ && git fetch --quiet --all --tags --prune)
+        exit ${EXIT_FAILURE}
+    fi
+    (cd "${SHARED_LIB}-$$" && git fetch --quiet --all --tags --prune)
 
-	LATEST_TAG=`cd ${SHARED_LIB}-$$ && git describe --tags --abbrev=0`;
+    LATEST_TAG=$(cd "${SHARED_LIB}-$$" && git tag --sort=-v:refname | head -n 1)
 
-	if test -n ${LATEST_TAG} && test -z ${USE_HEAD};
-	then
-		echo "Synchronizing: ${SHARED_LIB} from ${GIT_URL} tag ${LATEST_TAG}";
+    if [ -n "${LATEST_TAG}" ] && [ "$1" != "--use-head" ]
+    then
+        echo "Synchronizing: ${SHARED_LIB} from ${GIT_URL} tag ${LATEST_TAG}"
 
-		(cd ${SHARED_LIB}-$$ && git checkout --quiet tags/${LATEST_TAG});
-	else
-		echo "Synchronizing: ${SHARED_LIB} from ${GIT_URL} HEAD";
-	fi
+        (cd "${SHARED_LIB}-$$" && git checkout --quiet "tags/${LATEST_TAG}")
+    else
+        echo "Synchronizing: ${SHARED_LIB} from ${GIT_URL} HEAD"
+    fi
+    (cd "${SHARED_LIB}-$$" && ./synclibs.sh "${USE_HEAD}" && ./autogen.sh)
 
-	(cd ${SHARED_LIB}-$$ && ./synclibs.sh ${USE_HEAD} && ./autogen.sh);
+    CONFIGURE_OPTIONS=""
 
-	CONFIGURE_OPTIONS="";
+    (cd "${SHARED_LIB}-$$" && ./configure --help | grep -- '--enable-wide-character-type' > /dev/null)
 
-	(cd ${SHARED_LIB}-$$ && ./configure --help | grep -- '--enable-wide-character-type' > /dev/null);
+    if test $? -eq 0
+    then
+        CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --enable-wide-character-type"
+    fi
+    # shellcheck disable=SC2086
+    (cd "${SHARED_LIB}-$$" && ./configure --prefix=/usr ${CONFIGURE_OPTIONS} && make && sudo make install)
 
-	if test $? -eq 0;
-	then
-		CONFIGURE_OPTIONS="${CONFIGURE_OPTIONS} --enable-wide-character-type";
-	fi
-
-	(cd ${SHARED_LIB}-$$ && ./configure --prefix=/usr ${CONFIGURE_OPTIONS} && make && sudo make install);
-
-	rm -rf ${SHARED_LIB}-$$;
+    rm -rf "${SHARED_LIB}-$$"
 done
 
-IFS=$OLDIFS;
+IFS=$OLDIFS
 
-exit ${EXIT_SUCCESS};
+exit ${EXIT_SUCCESS}
 

@@ -1124,6 +1124,9 @@ The key bag consists of:
 * Key bag header
 * Key bag entries
 
+[NOTE]
+The container key bag has been observed to be stored unencrypted.
+
 === Container key bag object
 
 The container key bag object contains key data of the container.

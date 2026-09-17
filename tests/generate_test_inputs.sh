@@ -1,7 +1,7 @@
 #!/bin/sh
 # Script to generate test_inputs.at
 #
-# Version: 20260617
+# Version: 20260914
 
 ignore_list_add() {
     if ! ignore_list_contains "$1"; then
@@ -48,7 +48,7 @@ read_options() {
     FILE="${INPUT}/.${TEST_PROFILE}/${TEST_SET}/${TEST_FILENAME}.${OPTION_SET}"
     if test -f "${FILE}"; then
         # The original format of the options file contains all options on the first line.
-        OPTIONS=`head -n 1 "${FILE}" | sed 's/[\r\n]*$//'`
+        OPTIONS=$(head -n 1 "${FILE}" | sed 's/[\r\n]*$//')
 
         # The newer format of the options file has a distinct header.
         if test "${OPTIONS}" = "# libyal test data options"; then
@@ -158,7 +158,8 @@ read_project_ini() {
         CURRENT_SECTION=""
 
         while IFS= read -r LINE || test -n "${LINE}"; do
-            LINE="${LINE%"${LINE##*[!$'\r']}"}"
+            CR=$(printf '\r')
+            LINE="${LINE%"${LINE##*[!"${CR}"]}"}"
 
             case "${LINE}" in
                 \[*\])
@@ -170,11 +171,11 @@ read_project_ini() {
                     if test "${CURRENT_SECTION}" = "tests"; then
                         case "${LINE}" in
                             input_glob:*)
-                                INPUT_GLOB=`printf '%s' "${LINE#*:}" | tr -d '" '`
+                                INPUT_GLOB=$(printf '%s' "${LINE#*:}" | tr -d '" ')
                                 ;;
 
                             option_sets:*)
-                                OPTION_SETS=`printf '%s' "${LINE#*:}" | tr -d '[]" ' | tr ',' '|'`
+                                OPTION_SETS=$(printf '%s' "${LINE#*:}" | tr -d '[]" ' | tr ',' '|')
                                 ;;
                         esac
                     fi
@@ -204,7 +205,7 @@ if test -d "${INPUT}"; then
     read_ignore_list "${INPUT}/.${TEST_PROFILE}"
 
     for TEST_SET in "${INPUT}"/*; do
-        TEST_SET=`basename "${TEST_SET}"`
+        TEST_SET=$(basename "${TEST_SET}")
 
         if test ! -d "${INPUT}/${TEST_SET}"; then
             echo "Skipping '${TEST_SET}' not a directory"
@@ -224,7 +225,7 @@ if test -d "${INPUT}"; then
         else
             GLOB_FILE="${INPUT}/.${TEST_PROFILE}/glob"
             if test -f "${GLOB_FILE}"; then
-                TEST_FILES_GLOB=`head -n 1 "${GLOB_FILE}" | sed 's/[\r\n]*$//'`
+                TEST_FILES_GLOB=$(head -n 1 "${GLOB_FILE}" | sed 's/[\r\n]*$//')
             else
                 TEST_FILES_GLOB="${INPUT_GLOB}"
             fi
@@ -235,7 +236,7 @@ if test -d "${INPUT}"; then
             continue
         fi
         while test_files_pop; test -n "${TEST_FILE}"; do
-            TEST_FILENAME=`basename "${TEST_FILE}"`
+            TEST_FILENAME=$(basename "${TEST_FILE}")
 
             if test ${GLOB_FILES} -eq 0 && test ! -f "${TEST_FILE}"; then
                 echo "Skipping missing file '${TEST_FILENAME}' defined in '${TEST_SET}/files'"
@@ -244,12 +245,12 @@ if test -d "${INPUT}"; then
             TEST_FILE="${TEST_FILE#*input/}"
 
             # Escape [ and ] as @<:@ and @:>@
-            TEST_FILE=`echo "${TEST_FILE}" | sed 's/\[/@<:@/g;s/\]/@:>@/g'`
+            TEST_FILE=$(echo "${TEST_FILE}" | sed 's/\[/@<:@/g;s/\]/@:>@/g')
 
             OPTIONS_PER_PROFILE=""
             OPTIONS_FILE="${INPUT}/.${TEST_PROFILE}/options"
             if test -f "${OPTIONS_FILE}"; then
-                OPTIONS_PER_PROFILE=`head -n 1 "${OPTIONS_FILE}" | sed 's/[\r\n]*$//'`
+                OPTIONS_PER_PROFILE=$(head -n 1 "${OPTIONS_FILE}" | sed 's/[\r\n]*$//')
             fi
             TEST_WITH_OPTIONS=0
 
@@ -294,8 +295,8 @@ while test_inputs_pop; test -n "${TEST_INPUT}"; do
     else
         ENTRIES="${ENTRY}"
     fi
-    COUNTER=`expr "${COUNTER}" + 1`
+    COUNTER=$((COUNTER + 1))
 done
 
 echo "" >> "${AT_FILE}"
-echo -n "m4_define([test_inputs_${TEST_PROFILE}], [[${ENTRIES}]])" >> "${AT_FILE}"
+printf "m4_define([test_inputs_%s], [[%s]])" "${TEST_PROFILE}" "${ENTRIES}" >> "${AT_FILE}"

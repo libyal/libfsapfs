@@ -1,170 +1,156 @@
 #!/bin/sh
 # Script to generate configure and Makefile using the autotools.
 #
-# Version: 20260505
+# Version: 20260914
 
-EXIT_SUCCESS=0;
-EXIT_FAILURE=1;
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
 
-BINDIR=`which aclocal`;
+BINDIR=$(which aclocal)
 
-if test -x "${BINDIR}";
+if [ -x "${BINDIR}" ]
 then
-	BINDIR=`dirname ${BINDIR}`;
+    BINDIR=$(dirname "${BINDIR}")
 
-elif test -x "/usr/bin/aclocal";
+elif [ -x "/usr/bin/aclocal" ]
 then
-	BINDIR="/usr/bin";
+    BINDIR="/usr/bin"
 
-elif test -x "/usr/local/bin/aclocal";
+elif [ -x "/usr/local/bin/aclocal" ]
 then
-	BINDIR="/usr/local/bin";
+    BINDIR="/usr/local/bin"
 
 # Try default location of MacPorts installed binaries.
-elif test -x "/opt/local/bin/aclocal";
+elif [ -x "/opt/local/bin/aclocal" ]
 then
-	BINDIR="/opt/local/bin";
+    BINDIR="/opt/local/bin"
 
 # Try default location of Homebrew installed binaries.
-elif test -x "/opt/homebrew/bin/aclocal";
+elif [ -x "/opt/homebrew/bin/aclocal" ]
 then
-	BINDIR="/opt/homebrew/bin";
+    BINDIR="/opt/homebrew/bin"
 
 # Try default location of 32-bit MSYS2-MinGW installed binaries.
-elif test -x "/mingw32/bin/aclocal";
+elif [ -x "/mingw32/bin/aclocal" ]
 then
-	BINDIR="/mingw32/bin";
+    BINDIR="/mingw32/bin"
 
 # Try default location of 64-bit MSYS2-MinGW installed binaries.
-elif test -x "/mingw64/bin/aclocal";
+elif [ -x "/mingw64/bin/aclocal" ]
 then
-	BINDIR="/mingw64/bin";
+    BINDIR="/mingw64/bin"
 
 else
-	echo "Unable to find autotools";
+    echo "Unable to find autotools"
 
-	exit ${EXIT_FAILURE};
+    exit ${EXIT_FAILURE}
 fi
 
-ACLOCAL="${BINDIR}/aclocal";
-AUTOCONF="${BINDIR}/autoconf";
-AUTOHEADER="${BINDIR}/autoheader";
-AUTOMAKE="${BINDIR}/automake";
-AUTOPOINT="${BINDIR}/autopoint";
-AUTORECONF="${BINDIR}/autoreconf";
-LIBTOOLIZE="${BINDIR}/libtoolize";
-PKGCONFIG="${BINDIR}/pkg-config";
+ACLOCAL="${BINDIR}/aclocal"
+AUTOCONF="${BINDIR}/autoconf"
+AUTOHEADER="${BINDIR}/autoheader"
+AUTOMAKE="${BINDIR}/automake"
+AUTOPOINT="${BINDIR}/autopoint"
+AUTORECONF="${BINDIR}/autoreconf"
+LIBTOOLIZE="${BINDIR}/libtoolize"
+PKGCONFIG="${BINDIR}/pkg-config"
 
-if test "${OSTYPE}" = "msys";
+# shellcheck disable=SC3028
+if [ "${OSTYPE}" = "msys" ]
 then
-	# Work-around for autopoint failing to detect gettext version using
-	# func_trace (which is not available) on MSYS by writing the gettext
-	# version to intl/VERSION.
-	if ! test -d intl;
-	then
-		mkdir intl;
-	fi
-	GETTEXT_VERSION=`gettext --version | head -n1 | sed 's/^.* //'`;
+    # Work-around for autopoint failing to detect gettext version using
+    # func_trace (which is not available) on MSYS by writing the gettext
+    # version to intl/VERSION.
+    if [ ! -d intl ]
+    then
+        mkdir intl
+    fi
+    GETTEXT_VERSION=$(gettext --version | head -n1 | sed 's/^.* //')
 
-	echo "gettext-${GETTEXT_VERSION}" > intl/VERSION;
+    echo "gettext-${GETTEXT_VERSION}" > intl/VERSION
 
-elif ! test -x "${PKGCONFIG}";
+elif [ ! -x "${PKGCONFIG}" ]
 then
-	if test "${BINDIR}" != "/usr/bin";
-	then
-		# On OpenBSD most of the autotools are located in /usr/local/bin
-		# while pkg-config is located in /usr/bin
-		PKGCONFIG="/usr/bin/pkg-config";
-	fi
-	if ! test -x "${PKGCONFIG}";
-	then
-		echo "Unable to find: pkg-config";
+    if [ "${BINDIR}" != "/usr/bin" ]
+    then
+        # On OpenBSD most of the autotools are located in /usr/local/bin
+        # while pkg-config is located in /usr/bin
+        PKGCONFIG="/usr/bin/pkg-config"
+    fi
+    if [ ! -x "${PKGCONFIG}" ]
+    then
+        echo "Unable to find: pkg-config"
 
-		exit ${EXIT_FAILURE};
-	fi
+        exit ${EXIT_FAILURE}
+    fi
 fi
 
-if test -x "${AUTORECONF}";
+if [ -x "${AUTORECONF}" ]
 then
-	${AUTORECONF} --force --install
-	if test $? -ne 0;
-	then
-		exit $?;
-	fi
+    ${AUTORECONF} --force --install
+    RESULT=$?
+    [ "$RESULT" -ne 0 ] && exit "$RESULT"
 else
-	if ! test -x "${ACLOCAL}";
-	then
-		echo "Unable to find: aclocal";
+    if [ ! -x "${ACLOCAL}" ]
+    then
+        echo "Unable to find: aclocal"
 
-		exit ${EXIT_FAILURE};
-	fi
-	if ! test -x "${AUTOCONF}";
-		then
-		echo "Unable to find: autoconf";
+        exit ${EXIT_FAILURE}
+    fi
+    if [ ! -x "${AUTOCONF}" ]
+        then
+        echo "Unable to find: autoconf"
 
-		exit ${EXIT_FAILURE};
-	fi
-	if ! test -x "${AUTOHEADER}";
-	then
-		echo "Unable to find: autoheader";
+        exit ${EXIT_FAILURE}
+    fi
+    if [ ! -x "${AUTOHEADER}" ]
+    then
+        echo "Unable to find: autoheader"
 
-		exit ${EXIT_FAILURE};
-	fi
-	if ! test -x "${AUTOMAKE}";
-	then
-		echo "Unable to find: automake";
+        exit ${EXIT_FAILURE}
+    fi
+    if [ ! -x "${AUTOMAKE}" ]
+    then
+        echo "Unable to find: automake"
 
-		exit ${EXIT_FAILURE};
-	fi
-	if ! test -x "${AUTOPOINT}";
-	then
-		echo "Unable to find: autopoint";
+        exit ${EXIT_FAILURE}
+    fi
+    if [ ! -x "${AUTOPOINT}" ]
+    then
+        echo "Unable to find: autopoint"
 
-		exit ${EXIT_FAILURE};
-	fi
-	if ! test -x "${LIBTOOLIZE}";
-	then
-		echo "Unable to find: libtoolize";
+        exit ${EXIT_FAILURE}
+    fi
+    if [ ! -x "${LIBTOOLIZE}" ]
+    then
+        echo "Unable to find: libtoolize"
 
-		exit ${EXIT_FAILURE};
-	fi
+        exit ${EXIT_FAILURE}
+    fi
+    ${AUTOPOINT} --force
+    RESULT=$?
+    [ "$RESULT" -ne 0 ] && exit "$RESULT"
 
-	${AUTOPOINT} --force;
-	if test $? -ne 0;
-	then
-		exit $?;
-	fi
+    ${ACLOCAL} --force --install -I m4
+    RESULT=$?
+    [ "$RESULT" -ne 0 ] && exit "$RESULT"
 
-	${ACLOCAL} --force --install -I m4;
-	if test $? -ne 0;
-	then
-		exit $?;
-	fi
+    ${LIBTOOLIZE} --force
+    RESULT=$?
+    [ "$RESULT" -ne 0 ] && exit "$RESULT"
 
-	${LIBTOOLIZE} --force;
-	if test $? -ne 0;
-	then
-		exit $?;
-	fi
+    ${AUTOHEADER} --force
+    RESULT=$?
+    [ "$RESULT" -ne 0 ] && exit "$RESULT"
 
-	${AUTOHEADER} --force;
-	if test $? -ne 0;
-	then
-		exit $?;
-	fi
+    ${AUTOCONF} --force
+    RESULT=$?
+    [ "$RESULT" -ne 0 ] && exit "$RESULT"
 
-	${AUTOCONF} --force;
-	if test $? -ne 0;
-	then
-		exit $?;
-	fi
-
-	${AUTOMAKE} --force --add-missing;
-	if test $? -ne 0;
-	then
-		exit $?;
-	fi
+    ${AUTOMAKE} --force --add-missing
+    RESULT=$?
+    [ "$RESULT" -ne 0 ] && exit "$RESULT"
 fi
 
-exit ${EXIT_SUCCESS};
+exit ${EXIT_SUCCESS}
 

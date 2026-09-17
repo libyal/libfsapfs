@@ -96,6 +96,20 @@ jobs:
       with:
         sarif_file: scan-build-report.sarif
         category: scan-build
+  shellcheck:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Install shellcheck
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y shellcheck
+    - name: Check format of shell scripts
+      run: |
+        shellcheck ./autogen.sh
+        shellcheck ./runtests.sh
+        shellcheck ./synclibs.sh
+        find tests/ -name "*.sh" -exec shellcheck {} +
   ubsan:
     name: Check source with ubsan
     runs-on: ${{ matrix.os }}

@@ -1,6 +1,7 @@
 extend-diff-ignore = "(^|/)\.codecov\.yml$"
 extend-diff-ignore = "(^|/)\.git($|/)"
 extend-diff-ignore = "(^|/)\.github/.+$"
+extend-diff-ignore = "(^|/)\.shellcheckrc$"
 extend-diff-ignore = "(^|/)[^/]+\.(ini|nuspec|ps1|sh|yaml|yml)$"
 extend-diff-ignore = "(^|/).+/Makefile.in$"
 extend-diff-ignore = "(^|/)common/.+\.h$"

@@ -40,6 +40,9 @@
 #include "fsapfs_key_bag.h"
 #include "fsapfs_object.h"
 
+const uint8_t fsapfs_unencrypted_container_key_bag_signature[ 8 ] = {
+	0x73, 0x79, 0x65, 0x6b, 0x00, 0x00, 0x00, 0x00 };
+
 /* Creates a container key bag
  * Make sure the value container_key_bag is referencing, is set to NULL
  * Returns 1 if successful or -1 on error
@@ -229,7 +232,7 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 
 		return( -1 );
 	}
-	if( ( data_size == 0 )
+	if( ( data_size < 32 )
 	 || ( data_size > (size64_t) MEMORY_MAXIMUM_ALLOCATION_SIZE ) )
 	{
 		libcerror_error_set(
@@ -285,89 +288,99 @@ int libfsapfs_container_key_bag_read_file_io_handle(
 
 		goto on_error;
 	}
-	data = (uint8_t *) memory_allocate(
-	                    sizeof( uint8_t ) * (size_t) data_size );
-
-	if( data == NULL )
+	if( memory_compare(
+	     &( encrypted_data[ 24 ] ),
+	     fsapfs_unencrypted_container_key_bag_signature,
+	     8 ) == 0 )
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_MEMORY,
-		 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
-		 "%s: unable to create data.",
-		 function );
-
-		goto on_error;
+		data           = encrypted_data;
+		encrypted_data = NULL;
 	}
-	if( libfsapfs_encryption_context_initialize(
-	     &encryption_context,
-	     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
-	     error ) != 1 )
+	else
 	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
-		 "%s: unable to initialize encryption context.",
-		 function );
+		data = (uint8_t *) memory_allocate(
+		                    sizeof( uint8_t ) * (size_t) data_size );
 
-		goto on_error;
+		if( data == NULL )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_MEMORY,
+			 LIBCERROR_MEMORY_ERROR_INSUFFICIENT,
+			 "%s: unable to create data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_encryption_context_initialize(
+		     &encryption_context,
+		     LIBFSAPFS_ENCRYPTION_METHOD_AES_128_XTS,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_INITIALIZE_FAILED,
+			 "%s: unable to initialize encryption context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_encryption_context_set_keys(
+		     encryption_context,
+		     container_identifier,
+		     16,
+		     container_identifier,
+		     16,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
+			 "%s: unable to set keys in encryption context.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_encryption_context_crypt(
+		     encryption_context,
+		     LIBCAES_CRYPT_MODE_DECRYPT,
+		     encrypted_data,
+		     (size_t) data_size,
+		     data,
+		     (size_t) data_size,
+		     (uint64_t) ( file_offset / io_handle->bytes_per_sector ),
+		     io_handle->bytes_per_sector,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
+			 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
+			 "%s: unable to decrypt data.",
+			 function );
+
+			goto on_error;
+		}
+		if( libfsapfs_encryption_context_free(
+		     &encryption_context,
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free encryption context.",
+			 function );
+
+			goto on_error;
+		}
+		memory_free(
+		 encrypted_data );
+
+		encrypted_data = NULL;
 	}
-	if( libfsapfs_encryption_context_set_keys(
-	     encryption_context,
-	     container_identifier,
-	     16,
-	     container_identifier,
-	     16,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_SET_FAILED,
-		 "%s: unable to set keys in encryption context.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_encryption_context_crypt(
-	     encryption_context,
-	     LIBCAES_CRYPT_MODE_DECRYPT,
-	     encrypted_data,
-	     (size_t) data_size,
-	     data,
-	     (size_t) data_size,
-	     (uint64_t) ( file_offset / io_handle->bytes_per_sector ),
-	     io_handle->bytes_per_sector,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_ENCRYPTION,
-		 LIBCERROR_ENCRYPTION_ERROR_DECRYPT_FAILED,
-		 "%s: unable to decrypt data.",
-		 function );
-
-		goto on_error;
-	}
-	if( libfsapfs_encryption_context_free(
-	     &encryption_context,
-	     error ) != 1 )
-	{
-		libcerror_error_set(
-		 error,
-		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
-		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
-		 "%s: unable to free encryption context.",
-		 function );
-
-		goto on_error;
-	}
-	memory_free(
-	 encrypted_data );
-
-	encrypted_data = NULL;
-
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
