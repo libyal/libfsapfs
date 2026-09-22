@@ -517,14 +517,13 @@ int mount_handle_open(
      const system_character_t *filename,
      libcerror_error_t **error )
 {
-	libbfio_handle_t *file_io_handle        = NULL;
-	libfsapfs_container_t *fsapfs_container = NULL;
-	libfsapfs_volume_t *fsapfs_volume       = NULL;
-	static char *function                   = "mount_handle_open";
-	size_t filename_length                  = 0;
-	int number_of_volumes                   = 0;
-	int result                              = 0;
-	int volume_index                        = 0;
+	libbfio_handle_t *file_io_handle  = NULL;
+	libfsapfs_volume_t *fsapfs_volume = NULL;
+	static char *function             = "mount_handle_open";
+	size_t filename_length            = 0;
+	int number_of_volumes             = 0;
+	int result                        = 0;
+	int volume_index                  = 0;
 
 	if( mount_handle == NULL )
 	{
@@ -603,7 +602,7 @@ int mount_handle_open(
 		goto on_error;
 	}
 	if( libfsapfs_container_initialize(
-	     &fsapfs_container,
+	     &( mount_handle->container ),
 	     error ) != 1 )
 	{
 		libcerror_error_set(
@@ -616,7 +615,7 @@ int mount_handle_open(
 		goto on_error;
 	}
 	result = libfsapfs_container_open_file_io_handle(
-	          fsapfs_container,
+	          mount_handle->container,
 	          file_io_handle,
 	          LIBFSAPFS_OPEN_READ,
 	          error );
@@ -634,7 +633,7 @@ int mount_handle_open(
 	}
 /* TODO add support for volume selection including all volumes */
 	if( libfsapfs_container_get_number_of_volumes(
-	     fsapfs_container,
+	     mount_handle->container,
 	     &number_of_volumes,
 	     error ) != 1 )
 	{
@@ -648,7 +647,7 @@ int mount_handle_open(
 		goto on_error;
 	}
 	result = libfsapfs_container_is_locked(
-	          fsapfs_container,
+	          mount_handle->container,
 	          error );
 
 	if( result == -1 )
@@ -687,7 +686,6 @@ int mount_handle_open(
 
 	if( mount_handle_get_volume_by_index(
 	     mount_handle,
-	     fsapfs_container,
 	     volume_index,
 	     &fsapfs_volume,
 	     error ) != 1 )
@@ -744,10 +742,10 @@ on_error:
 		 &fsapfs_volume,
 		 NULL );
 	}
-	if( fsapfs_container != NULL )
+	if( mount_handle->container != NULL )
 	{
 		libfsapfs_container_free(
-		 &fsapfs_container,
+		 &( mount_handle->container ),
 		 NULL );
 	}
 	if( file_io_handle != NULL )
@@ -823,6 +821,19 @@ int mount_handle_close(
 
 		goto on_error;
 	}
+	if( libfsapfs_container_free(
+	     &( mount_handle->container ),
+	     error ) != 1 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+		 "%s: unable to free container.",
+		 function );
+
+		goto on_error;
+	}
 	if( libbfio_handle_close(
 	     mount_handle->file_io_handle,
 	     error ) != 0 )
@@ -889,7 +900,6 @@ int mount_handle_is_locked(
  */
 int mount_handle_get_volume_by_index(
      mount_handle_t *mount_handle,
-     libfsapfs_container_t *fsapfs_container,
      int volume_index,
      libfsapfs_volume_t **fsapfs_volume,
      libcerror_error_t **error )
@@ -931,7 +941,7 @@ int mount_handle_get_volume_by_index(
 		return( -1 );
 	}
 	if( libfsapfs_container_get_volume_by_index(
-	     fsapfs_container,
+	     mount_handle->container,
 	     volume_index,
 	     fsapfs_volume,
 	     error ) != 1 )

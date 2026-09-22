@@ -195,6 +195,7 @@ int libfsapfs_compressed_data_handle_free(
      libcerror_error_t **error )
 {
 	static char *function = "libfsapfs_compressed_data_handle_free";
+	int result            = 1;
 
 	if( data_handle == NULL )
 	{
@@ -224,12 +225,25 @@ int libfsapfs_compressed_data_handle_free(
 			memory_free(
 			 ( *data_handle )->compressed_block_offsets );
 		}
+		if( libfdata_stream_free(
+		     &( ( *data_handle )->compressed_data_stream ),
+		     error ) != 1 )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_FINALIZE_FAILED,
+			 "%s: unable to free compressed data stream.",
+			 function );
+
+			result = -1;
+		}
 		memory_free(
 		 *data_handle );
 
 		*data_handle = NULL;
 	}
-	return( 1 );
+	return( result );
 }
 
 /* Determines the compressed block offsets
@@ -240,22 +254,23 @@ int libfsapfs_compressed_data_handle_get_compressed_block_offsets(
      libbfio_handle_t *file_io_handle,
      libcerror_error_t **error )
 {
-	static char *function                     = "libfsapfs_compressed_data_handle_get_compressed_block_offsets";
-	size64_t compressed_data_size             = 0;
-	size_t compressed_block_descriptor_size   = 0;
-	size_t read_size                          = 0;
-	size_t segment_data_offset                = 0;
-	ssize_t read_count                        = 0;
-	uint32_t compressed_block_index           = 0;
-	uint32_t compressed_block_offset          = 0;
-	uint32_t compressed_descriptors_offset    = 0;
-	uint32_t compressed_footer_offset         = 0;
-	uint32_t compressed_footer_size           = 0;
-	uint32_t previous_compressed_block_offset = 0;
-	int compare_result                        = 0;
+	static char *function                        = "libfsapfs_compressed_data_handle_get_compressed_block_offsets";
+	size64_t compressed_data_size                = 0;
+	size_t compressed_block_descriptor_size      = 0;
+	size_t read_size                             = 0;
+	size_t segment_data_offset                   = 0;
+	ssize_t read_count                           = 0;
+	uint32_t compressed_block_index              = 0;
+	uint32_t compressed_block_offset             = 0;
+	uint32_t compressed_descriptors_offset       = 0;
+	uint32_t compressed_footer_offset            = 0;
+	uint32_t compressed_footer_size              = 0;
+	uint32_t maximum_number_of_compressed_blocks = 0;
+	uint32_t previous_compressed_block_offset    = 0;
+	int compare_result                           = 0;
 
 #if defined( HAVE_DEBUG_OUTPUT )
-	uint32_t value_32bit                      = 0;
+	uint32_t value_32bit                         = 0;
 #endif
 
 	if( data_handle == NULL )
@@ -439,7 +454,8 @@ int libfsapfs_compressed_data_handle_get_compressed_block_offsets(
 		 &( data_handle->compressed_segment_data[ 260 ] ),
 		 data_handle->number_of_compressed_blocks );
 
-		if( data_handle->number_of_compressed_blocks > ( (uint32_t) UINT32_MAX / 8 ) )
+		if( ( data_handle->number_of_compressed_blocks == 0 )
+		 || ( data_handle->number_of_compressed_blocks > ( (uint32_t) UINT32_MAX / 8 ) ) )
 		{
 			libcerror_error_set(
 			 error,
@@ -498,7 +514,13 @@ int libfsapfs_compressed_data_handle_get_compressed_block_offsets(
 		 data_handle->number_of_compressed_blocks );
 	}
 #endif
-	if( (size_t) data_handle->number_of_compressed_blocks > ( (size_t) ( MEMORY_MAXIMUM_ALLOCATION_SIZE / 4 ) - 1 ) )
+	maximum_number_of_compressed_blocks = MEMORY_MAXIMUM_ALLOCATION_SIZE;
+
+	if( compressed_block_descriptor_size != 0 )
+	{
+		maximum_number_of_compressed_blocks /= compressed_block_descriptor_size;
+	}
+	if( data_handle->number_of_compressed_blocks > ( maximum_number_of_compressed_blocks - 1 ) )
 	{
 		libcerror_error_set(
 		 error,
@@ -532,6 +554,17 @@ int libfsapfs_compressed_data_handle_get_compressed_block_offsets(
 	{
 		read_size = ( (size_t) data_handle->number_of_compressed_blocks - 1 ) * compressed_block_descriptor_size;
 
+		if( read_size > ( LIBFSAPFS_COMPRESSED_DATA_HANDLE_BLOCK_SIZE + 1 ) - segment_data_offset )
+		{
+			libcerror_error_set(
+			 error,
+			 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+			 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+			 "%s: invalid compressed block descriptors data size value out of bounds.",
+			 function );
+
+			goto on_error;
+		}
 		read_count = libfdata_stream_read_buffer_at_offset(
 		              data_handle->compressed_data_stream,
 		              (intptr_t *) file_io_handle,

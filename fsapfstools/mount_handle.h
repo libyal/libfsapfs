@@ -40,6 +40,10 @@ typedef struct mount_handle mount_handle_t;
 
 struct mount_handle
 {
+	/* The APFS container.
+	 */
+	libfsapfs_container_t *container;
+
 	/* The file system
 	 */
 	mount_file_system_t *file_system;
@@ -138,7 +142,6 @@ int mount_handle_is_locked(
 
 int mount_handle_get_volume_by_index(
      mount_handle_t *mount_handle,
-     libfsapfs_container_t *fsapfs_container,
      int volume_index,
      libfsapfs_volume_t **fsapfs_volume,
      libcerror_error_t **error );

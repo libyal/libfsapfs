@@ -34,6 +34,15 @@ jobs:
     - name: Run tests
       run: |
         tests/runtests.sh VERBOSE=1
+  black:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v6
+    - name: Check format of Python code
+      uses: psf/black@stable
+      with:
+        options: "--check"
+        src: "."
   scan_build:
     name: Check source with scan-build
     runs-on: ${{ matrix.os }}

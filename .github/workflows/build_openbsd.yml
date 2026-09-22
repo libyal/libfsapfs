@@ -18,6 +18,8 @@ jobs:
       run: |
         export AUTOCONF_VERSION="2.72"
         export AUTOMAKE_VERSION="1.16"
+        export CFLAGS="-I/usr/local/include"
+        export LDFLAGS="-L/usr/local/lib"
         export YACC="bison -y"
         if test -x "synctestdata.sh"; then ./synctestdata.sh; fi
         ./synclibs.sh --use-head
@@ -29,5 +31,7 @@ jobs:
       run: |
         export AUTOCONF_VERSION="2.72"
         export AUTOMAKE_VERSION="1.16"
+        export CFLAGS="-I/usr/local/include"
+        export LDFLAGS="-L/usr/local/lib"
         export YACC="bison -y"
         tests/runtests.sh -j4 VERBOSE=1
