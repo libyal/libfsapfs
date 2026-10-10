@@ -72,10 +72,10 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
+        - os: ubuntu-26.04
           compiler: 'gcc'
           configure_options: '--enable-code-coverage --enable-wide-character-type --with-openssl=no CPPFLAGS=-DHAVE_MEMORY_TESTS=1'
-          codecov_name: 'ubuntu-24.04-gcc-no-optimization'
+          codecov_name: 'ubuntu-26.04-gcc-no-optimization'
     steps:
     - uses: actions/checkout@v6
     - name: Install build dependencies

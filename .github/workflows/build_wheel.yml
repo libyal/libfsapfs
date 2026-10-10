@@ -37,8 +37,8 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: ubuntu-24.04
-        - os: ubuntu-24.04-arm
+        - os: ubuntu-26.04
+        - os: ubuntu-26.04-arm
     steps:
     - uses: actions/checkout@v6
     - name: Install build dependencies

@@ -10,9 +10,6 @@ jobs:
     strategy:
       matrix:
         include:
-        - os: macos-14
-          compiler: 'clang'
-          configure_options: ''
         - os: macos-15
           compiler: 'clang'
           configure_options: ''

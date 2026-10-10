@@ -2,7 +2,7 @@ AC_PREREQ([2.71])
 
 AC_INIT(
   [libfsapfs],
-  [20260923],
+  [20261010],
   [https://github.com/libyal/libfsapfs/issues])
 
 AC_CONFIG_SRCDIR(
