@@ -1,9 +1,13 @@
 # Generate code coverage report and upload to Codecov.
 name: coverage
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   coverage_cygwin:
     runs-on: windows-latest
@@ -16,6 +20,8 @@ jobs:
     - name: Configure git
       run: git config --global core.autocrlf false
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install Cygwin and build dependencies
       uses: cygwin/cygwin-install-action@v6
       with:
@@ -78,6 +84,8 @@ jobs:
           codecov_name: 'ubuntu-26.04-gcc-no-optimization'
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -118,6 +126,8 @@ jobs:
     - name: Configure git
       run: git config --global core.autocrlf false
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Set up MSYS2 with MinGW-w64
       uses: msys2/setup-msys2@v2
       with:

@@ -1,9 +1,13 @@
 # Build from source on Linux.
 name: build_linux
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -45,6 +49,8 @@ jobs:
           configure_options: '--disable-multi-threading-support --enable-static-executables'
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -73,6 +79,8 @@ jobs:
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -101,6 +109,8 @@ jobs:
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -129,6 +139,8 @@ jobs:
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -158,6 +170,8 @@ jobs:
           python_version: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -188,6 +202,8 @@ jobs:
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update
@@ -216,6 +232,8 @@ jobs:
           configure_options: '--enable-wide-character-type'
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y update

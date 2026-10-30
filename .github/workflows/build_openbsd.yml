@@ -1,12 +1,20 @@
 # Build from source on OpenBSD.
 name: build_openbsd
-on: [pull_request, push]
-permissions: read-all
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+on:
+  pull_request:
+  push:
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Start VM
       uses: vmactions/openbsd-vm@v1
       with:

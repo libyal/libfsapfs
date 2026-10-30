@@ -1,9 +1,13 @@
 # Build from source on Mac OS.
 name: build_macos
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -24,6 +28,8 @@ jobs:
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         brew update -q
@@ -53,6 +59,8 @@ jobs:
           configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         brew update -q
@@ -84,6 +92,8 @@ jobs:
           configure_options: '--enable-python'
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         brew update -q
@@ -98,8 +108,8 @@ jobs:
       run: |
         ./synclibs.sh --use-head
         ./autogen.sh
-        ./configure ${{ matrix.configure_options }}
+        ./configure ${{ matrix.configure_options }} PYTHON="$(brew --prefix python3)/bin/python3"
         make -j4 > /dev/null
     - name: Run tests
       run: |
-        tests/runtests.sh -j4 VERBOSE=1
+        tests/runtests.sh -j4 PYTHON="$(brew --prefix python3)/bin/python3" VERBOSE=1

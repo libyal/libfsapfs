@@ -1,5 +1,8 @@
 # Build Python wheels from source using cibuildwheel.
 name: build_wheels
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
@@ -7,13 +10,16 @@ on:
     types: [published]
   # Allow trigger via API
   workflow_dispatch:
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   build_sdist:
     name: Build sdist
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt update
@@ -41,6 +47,8 @@ jobs:
         - os: ubuntu-26.04-arm
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y install autoconf automake autopoint build-essential git libtool pkg-config
@@ -73,6 +81,8 @@ jobs:
         - os: macos-26-intel
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         brew update -q
@@ -107,6 +117,8 @@ jobs:
         - os: windows-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Prepare build
       run: |
         .\synclibs.ps1

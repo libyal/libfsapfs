@@ -1,9 +1,13 @@
 # Run source checks.
 name: source_checks
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   asan:
     name: Check source with asan
@@ -17,6 +21,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y install autoconf automake autopoint build-essential git libasan8 libtool pkg-config
@@ -38,6 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Check format of Python code
       uses: psf/black@stable
       with:
@@ -57,6 +65,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y install autoconf automake autopoint build-essential clang clang-tools git jq libtool pkg-config
@@ -109,6 +119,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install shellcheck
       run: |
         sudo apt-get update
@@ -131,6 +143,8 @@ jobs:
     steps:
     - name: Checkout repository
       uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Install build dependencies
       run: |
         sudo apt -y install autoconf automake autopoint build-essential git libtool libubsan1 pkg-config

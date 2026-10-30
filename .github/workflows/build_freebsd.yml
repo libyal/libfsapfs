@@ -1,9 +1,13 @@
 # Build from source on FreeBSD.
 name: build_freebsd
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 on:
   pull_request:
   push:
-permissions: read-all
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -13,6 +17,8 @@ jobs:
         - configure_options: ''
     steps:
     - uses: actions/checkout@v6
+      with:
+        persist-credentials: false
     - name: Start VM
       uses: vmactions/freebsd-vm@v1
       with:

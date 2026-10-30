@@ -1,6 +1,6 @@
 dnl Functions for Python bindings
 dnl
-dnl Version: 20260529
+dnl Version: 20261022
 
 dnl Function to check if the python binary is available
 dnl "python${PYTHON_VERSION} python python# python#.#"
@@ -188,7 +188,7 @@ AC_DEFUN([AX_PYTHON_CHECK_PYPREFIX],
     [use `python-config --prefix' to determine the prefix of pythondir instead of --prefix],
     [no],
     [no])
-])
+  ])
 
 dnl Function to detect if to enable Python
 AC_DEFUN([AX_PYTHON_CHECK_ENABLE],
@@ -208,7 +208,9 @@ AC_DEFUN([AX_PYTHON_CHECK_ENABLE],
 
   AS_IF(
     [test "x${ac_cv_enable_python}" != xno],
-    [AX_PYTHON_CHECK])
+    [AX_PYTHON_CHECK
+
+    dnl TODO: add check to catch mismatch Python runtime used in tests and module version])
 
   AM_CONDITIONAL(
     HAVE_PYTHON,

@@ -221,15 +221,15 @@ struct fsapfs_file_system_btree_value_inode
 	 */
 	uint8_t data_stream_identifier[ 8 ];
 
-	/* The modification date and time
-	 * Consists of 8 bytes
-	 */
-	uint8_t modification_time[ 8 ];
-
 	/* The creation date and time
 	 * Consists of 8 bytes
 	 */
 	uint8_t creation_time[ 8 ];
+
+	/* The modification date and time
+	 * Consists of 8 bytes
+	 */
+	uint8_t modification_time[ 8 ];
 
 	/* The inode change date and time
 	 * Consists of 8 bytes
