@@ -36,24 +36,44 @@ extern "C" {
  */
 LIBFSAPFS_EXTERN \
 int libfsapfs_container_open_file_io_handle(
-     libfsapfs_container_t *container,
-     libbfio_handle_t *file_io_handle,
-     int access_flags,
-     libfsapfs_error_t **error );
+      libfsapfs_container_t *container,
+      libbfio_handle_t *file_io_handle,
+      int access_flags,
+      libfsapfs_error_t **error );
 
 #endif /* !defined( LIBFSAPFS_HAVE_BFIO ) */
 
 int LLVMFuzzerTestOneInput(
-     const uint8_t *data,
-     size_t size )
+      const uint8_t *data,
+      size_t size )
 {
+	uint8_t buffer[ 512 ];
+	uint8_t utf8_string[ 64 ];
+	uint16_t utf16_string[ 32 ];
+
 	libbfio_handle_t *file_io_handle                   = NULL;
 	libfsapfs_container_t *container                   = NULL;
 	libfsapfs_extended_attribute_t *extended_attribute = NULL;
 	libfsapfs_file_entry_t *file_entry                 = NULL;
+	libfsapfs_file_entry_t *root_directory             = NULL;
+	libfsapfs_file_entry_t *sub_file_entry             = NULL;
 	libfsapfs_volume_t *volume                         = NULL;
+	ssize_t read_count                                 = 0;
+	size64_t extent_size                               = 0;
+	size64_t stream_size                               = 0;
+	size_t utf8_string_size                            = 0;
+	size_t utf16_string_size                           = 0;
+	off64_t extent_offset                              = 0;
+	off64_t stream_offset                              = 0;
+	uint64_t extended_attribute_identifier             = 0;
+	uint32_t extent_flags                              = 0;
 	int number_of_extended_attributes                  = 0;
+	int number_of_extents                              = 0;
+	int number_of_sub_file_entries                     = 0;
 	int number_of_volumes                              = 0;
+	int extended_attribute_index                       = 0;
+	int extent_index                                   = 0;
+	int read_iterator                                  = 0;
 	int result                                         = 0;
 
 	if( libbfio_memory_range_initialize(
@@ -93,53 +113,221 @@ int LLVMFuzzerTestOneInput(
 	}
 	if( number_of_volumes > 0 )
 	{
-		if( libfsapfs_container_get_volume_by_index(
-		     container,
-		     0,
-		     &volume,
-		     NULL ) != 1 )
+		result = libfsapfs_container_get_volume_by_index(
+		          container,
+		          0,
+		          &volume,
+		          NULL );
+
+		if( result == -1 )
 		{
 			goto on_error_libfsapfs_container;
 		}
-		result = libfsapfs_volume_get_file_entry_by_utf8_path(
-		          volume,
-		          (uint8_t *) "/a_directory/a_file",
-		          19,
-		          &file_entry,
-		          NULL );
-
 		if( result == 1 )
 		{
-			if( libfsapfs_file_entry_get_number_of_extended_attributes(
-			     file_entry,
-			     &number_of_extended_attributes,
-			     NULL ) != 1 )
+			result = libfsapfs_volume_get_root_directory(
+			          volume,
+			          &root_directory,
+			          NULL );
+
+			if( result == -1 )
 			{
-				goto on_error_libfsapfs_file_entry;
+				goto on_error_libfsapfs_volume;
 			}
-			if( number_of_extended_attributes > 0 )
+			if( result == 1 )
 			{
-				if( libfsapfs_file_entry_get_extended_attribute_by_index(
+				if( libfsapfs_file_entry_get_number_of_sub_file_entries(
+				     root_directory,
+				     &number_of_sub_file_entries,
+				     NULL ) != 1 )
+				{
+					goto on_error_libfsapfs_root_directory;
+				}
+				if( number_of_sub_file_entries > 0 )
+				{
+					if( libfsapfs_file_entry_get_sub_file_entry_by_index(
+					     root_directory,
+					     0,
+					     &sub_file_entry,
+					     NULL ) != 1 )
+					{
+						goto on_error_libfsapfs_root_directory;
+					}
+					file_entry = sub_file_entry;
+				}
+				else
+				{
+					file_entry = root_directory;
+				}
+				if( libfsapfs_file_entry_get_number_of_extended_attributes(
 				     file_entry,
-				     0,
-				     &extended_attribute,
+				     &number_of_extended_attributes,
 				     NULL ) != 1 )
 				{
 					goto on_error_libfsapfs_file_entry;
 				}
+				for( extended_attribute_index = 0;
+				     ( extended_attribute_index < number_of_extended_attributes )
+				   && ( extended_attribute_index < 16 );
+				     extended_attribute_index++ )
+				{
+					if( libfsapfs_file_entry_get_extended_attribute_by_index(
+					     file_entry,
+					     extended_attribute_index,
+					     &extended_attribute,
+					     NULL ) != 1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					if( libfsapfs_extended_attribute_get_identifier(
+					     extended_attribute,
+					     &extended_attribute_identifier,
+					     NULL ) != 1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					if( libfsapfs_extended_attribute_get_utf8_name_size(
+					     extended_attribute,
+					     &utf8_string_size,
+					     NULL ) == -1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					if( utf8_string_size > 0 )
+					{
+						if( libfsapfs_extended_attribute_get_utf8_name(
+						     extended_attribute,
+						     utf8_string,
+						     64,
+						     NULL ) == -1 )
+						{
+							goto on_error_libfsapfs_extended_attribute;
+						}
+					}
+					if( libfsapfs_extended_attribute_get_utf16_name_size(
+					     extended_attribute,
+					     &utf16_string_size,
+					     NULL ) == -1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					if( utf16_string_size > 0 )
+					{
+						if( libfsapfs_extended_attribute_get_utf16_name(
+						     extended_attribute,
+						     utf16_string,
+						     32,
+						     NULL ) == -1 )
+						{
+							goto on_error_libfsapfs_extended_attribute;
+						}
+					}
+					if( libfsapfs_extended_attribute_get_size(
+					     extended_attribute,
+					     &stream_size,
+					     NULL ) != 1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					if( libfsapfs_extended_attribute_get_offset(
+					     extended_attribute,
+					     &stream_offset,
+					     NULL ) != 1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					if( libfsapfs_extended_attribute_seek_offset(
+					     extended_attribute,
+					     0,
+					     0,
+					     NULL ) == -1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					read_count = libfsapfs_extended_attribute_read_buffer(
+					           extended_attribute,
+					           buffer,
+					           497,
+					           NULL );
+
+					if( read_count == -1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					for( read_iterator = 0;
+					     read_iterator < 128;
+					     read_iterator++ )
+					{
+						if( stream_offset >= stream_size )
+						{
+							break;
+						}
+						read_count = libfsapfs_extended_attribute_read_buffer_at_offset(
+						           extended_attribute,
+						           buffer,
+						           497,
+						           stream_offset,
+						           NULL );
+
+						if( read_count == -1 )
+						{
+							goto on_error_libfsapfs_extended_attribute;
+						}
+						stream_offset += 497;
+					}
+					if( libfsapfs_extended_attribute_get_number_of_extents(
+					     extended_attribute,
+					     &number_of_extents,
+					     NULL ) != 1 )
+					{
+						goto on_error_libfsapfs_extended_attribute;
+					}
+					for( extent_index = 0;
+					     ( extent_index < number_of_extents )
+					   && ( extent_index < 16 );
+					     extent_index++ )
+					{
+						if( libfsapfs_extended_attribute_get_extent_by_index(
+						     extended_attribute,
+						     extent_index,
+						     &extent_offset,
+						     &extent_size,
+						     &extent_flags,
+						     NULL ) != 1 )
+						{
+							goto on_error_libfsapfs_extended_attribute;
+						}
+					}
+					libfsapfs_extended_attribute_free(
+					 &extended_attribute,
+					 NULL );
+				}
+on_error_libfsapfs_extended_attribute:
 				libfsapfs_extended_attribute_free(
 				 &extended_attribute,
 				 NULL );
-			}
 on_error_libfsapfs_file_entry:
+				if( sub_file_entry != NULL )
+				{
+					libfsapfs_file_entry_free(
+					 &sub_file_entry,
+					 NULL );
+				}
+			}
+on_error_libfsapfs_root_directory:
 			libfsapfs_file_entry_free(
-			 &file_entry,
+			 &root_directory,
 			 NULL );
 		}
+on_error_libfsapfs_volume:
 		libfsapfs_volume_free(
 		 &volume,
 		 NULL );
 	}
+	libfsapfs_container_close(
+	 container,
+	 NULL );
+
 on_error_libfsapfs_container:
 	libfsapfs_container_free(
 	 &container,
@@ -154,4 +342,3 @@ on_error_libbfio:
 }
 
 } /* extern "C" */
-

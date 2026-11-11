@@ -31,24 +31,45 @@ extern "C" {
 
 #if !defined( LIBFSAPFS_HAVE_BFIO )
 
+/* Determines if a file contains an APFS container signature using a Basic File IO (bfio) handle
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_container_signature_file_io_handle(
+      libbfio_handle_t *file_io_handle,
+      libfsapfs_error_t **error );
+
+/* Determines if a file contains an APFS volume signature using a Basic File IO (bfio) handle
+ * Returns 1 if true, 0 if not or -1 on error
+ */
+LIBFSAPFS_EXTERN \
+int libfsapfs_check_volume_signature_file_io_handle(
+      libbfio_handle_t *file_io_handle,
+      libfsapfs_error_t **error );
+
 /* Opens a container using a Basic File IO (bfio) handle
  * Returns 1 if successful or -1 on error
  */
 LIBFSAPFS_EXTERN \
 int libfsapfs_container_open_file_io_handle(
-     libfsapfs_container_t *container,
-     libbfio_handle_t *file_io_handle,
-     int access_flags,
-     libfsapfs_error_t **error );
+      libfsapfs_container_t *container,
+      libbfio_handle_t *file_io_handle,
+      int access_flags,
+      libfsapfs_error_t **error );
 
 #endif /* !defined( LIBFSAPFS_HAVE_BFIO ) */
 
 int LLVMFuzzerTestOneInput(
-     const uint8_t *data,
-     size_t size )
+      const uint8_t *data,
+      size_t size )
 {
+	uint8_t container_identifier[ 16 ];
+
 	libbfio_handle_t *file_io_handle = NULL;
 	libfsapfs_container_t *container = NULL;
+	size64_t container_size          = 0;
+	int is_locked                    = 0;
+	int number_of_volumes            = 0;
 
 	if( libbfio_memory_range_initialize(
 	     &file_io_handle,
@@ -64,6 +85,18 @@ int LLVMFuzzerTestOneInput(
 	{
 		goto on_error_libbfio;
 	}
+	if( libfsapfs_check_container_signature_file_io_handle(
+	     file_io_handle,
+	     NULL ) == -1 )
+	{
+		goto on_error_libbfio;
+	}
+	if( libfsapfs_check_volume_signature_file_io_handle(
+	     file_io_handle,
+	     NULL ) == -1 )
+	{
+		goto on_error_libbfio;
+	}
 	if( libfsapfs_container_initialize(
 	     &container,
 	     NULL ) != 1 )
@@ -74,6 +107,36 @@ int LLVMFuzzerTestOneInput(
 	     container,
 	     file_io_handle,
 	     LIBFSAPFS_OPEN_READ,
+	     NULL ) != 1 )
+	{
+		goto on_error_libfsapfs;
+	}
+	if( libfsapfs_container_get_size(
+	     container,
+	     &container_size,
+	     NULL ) != 1 )
+	{
+		goto on_error_libfsapfs;
+	}
+	if( libfsapfs_container_get_identifier(
+	     container,
+	     container_identifier,
+	     16,
+	     NULL ) != 1 )
+	{
+		goto on_error_libfsapfs;
+	}
+	is_locked = libfsapfs_container_is_locked(
+	               container,
+	               NULL );
+
+	if( is_locked == -1 )
+	{
+		goto on_error_libfsapfs;
+	}
+	if( libfsapfs_container_get_number_of_volumes(
+	     container,
+	     &number_of_volumes,
 	     NULL ) != 1 )
 	{
 		goto on_error_libfsapfs;
@@ -96,4 +159,3 @@ on_error_libbfio:
 }
 
 } /* extern "C" */
-

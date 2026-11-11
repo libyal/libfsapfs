@@ -15,6 +15,7 @@ bin_PROGRAMS = \
 	container_fuzzer \
 	extended_attribute_fuzzer \
 	file_entry_fuzzer \
+	snapshot_fuzzer \
 	volume_fuzzer
 
 container_fuzzer_SOURCES = \
@@ -71,10 +72,28 @@ file_entry_fuzzer_LDADD = \
 	@LIBCERROR_LIBADD@ \
 	@LIBINTL@
 
-volume_fuzzer_SOURCES = \
+snapshot_fuzzer_SOURCES = \
+	snapshot_fuzzer.cc \
 	ossfuzz_libbfio.h \
-	ossfuzz_libfsapfs.h \
-	volume_fuzzer.cc
+	ossfuzz_libfsapfs.h
+
+snapshot_fuzzer_LDADD = \
+	@LIB_FUZZING_ENGINE@ \
+	@LIBBFIO_LIBADD@ \
+	@LIBCPATH_LIBADD@ \
+	@LIBCFILE_LIBADD@ \
+	@LIBUNA_LIBADD@ \
+	@LIBCDATA_LIBADD@ \
+	../libfsapfs/libfsapfs.la \
+	@LIBCNOTIFY_LIBADD@ \
+	@LIBCLOCALE_LIBADD@ \
+	@LIBCERROR_LIBADD@ \
+	@LIBINTL@
+
+volume_fuzzer_SOURCES = \
+	volume_fuzzer.cc \
+	ossfuzz_libbfio.h \
+	ossfuzz_libfsapfs.h
 
 volume_fuzzer_LDADD = \
 	@LIB_FUZZING_ENGINE@ \
@@ -101,6 +120,7 @@ splint-local:
 	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(extended_attribute_fuzzer_SOURCES)
 	@echo "Running splint on file_entry_fuzzer ..."
 	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(file_entry_fuzzer_SOURCES)
+	@echo "Running splint on snapshot_fuzzer ..."
+	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(snapshot_fuzzer_SOURCES)
 	@echo "Running splint on volume_fuzzer ..."
 	-splint -preproc -redef $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(volume_fuzzer_SOURCES)
-

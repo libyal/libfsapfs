@@ -36,28 +36,38 @@ extern "C" {
  */
 LIBFSAPFS_EXTERN \
 int libfsapfs_container_open_file_io_handle(
-     libfsapfs_container_t *container,
-     libbfio_handle_t *file_io_handle,
-     int access_flags,
-     libfsapfs_error_t **error );
+      libfsapfs_container_t *container,
+      libbfio_handle_t *file_io_handle,
+      int access_flags,
+      libfsapfs_error_t **error );
 
 #endif /* !defined( LIBFSAPFS_HAVE_BFIO ) */
 
 int LLVMFuzzerTestOneInput(
-     const uint8_t *data,
-     size_t size )
+      const uint8_t *data,
+      size_t size )
 {
+	uint8_t utf8_string[ 64 ];
 	uint8_t volume_identifier[ 16 ];
-	uint8_t string_value[ 64 ];
+	uint16_t utf16_path[ 1 ]                 = { 0x002f };
+	uint16_t utf16_string[ 32 ];
+	uint16_t utf16_password[ 11 ]            = { 'f', 's', 'a', 'p', 'f', 's', '-', 'T', 'E', 'S', 'T' };
+	uint16_t utf16_recovery_password[ 20 ]   = { 'f', 's', 'a', 'p', 'f', 's', '-', 'r', 'e', 'c', 'o', 'v',
+	                                           'e', 'r', 'y', '-', 'T', 'E', 'S', 'T' };
 
 	libbfio_handle_t *file_io_handle             = NULL;
 	libfsapfs_container_t *container             = NULL;
+	libfsapfs_file_entry_t *file_entry           = NULL;
 	libfsapfs_volume_t *volume                   = NULL;
 	size64_t volume_size                         = 0;
-	size_t string_size                           = 0;
+	size_t utf8_string_size                      = 0;
+	size_t utf16_string_size                     = 0;
 	uint64_t compatible_features_flags           = 0;
 	uint64_t incompatible_features_flags         = 0;
+	uint64_t next_file_entry_identifier          = 0;
 	uint64_t read_only_compatible_features_flags = 0;
+	int is_locked                                = 0;
+	int number_of_snapshots                      = 0;
 	int number_of_volumes                        = 0;
 	int result                                   = 0;
 
@@ -104,46 +114,210 @@ int LLVMFuzzerTestOneInput(
 		          &volume,
 		          NULL );
 
-		if( result != -1 )
+		if( result == -1 )
 		{
-			libfsapfs_volume_get_features_flags(
-			 volume,
-			 &compatible_features_flags,
-			 &incompatible_features_flags,
-			 &read_only_compatible_features_flags,
-			 NULL );
-
-			libfsapfs_volume_get_size(
-			 volume,
-			 &volume_size,
-			 NULL );
-
-			libfsapfs_volume_get_identifier(
-			 volume,
-			 volume_identifier,
-			 16,
-			 NULL );
-
-			libfsapfs_volume_get_utf8_name_size(
-			 volume,
-			 &string_size,
-			 NULL );
-
-			libfsapfs_volume_get_utf8_name(
-			 volume,
-			 string_value,
-			 64,
-			 NULL );
-
-			libfsapfs_volume_is_locked(
-			 volume,
-			 NULL );
-
-			libfsapfs_volume_free(
-			 &volume,
-			 NULL );
+			goto on_error_libfsapfs_container;
 		}
+		if( result == 1 )
+		{
+			if( libfsapfs_volume_get_features_flags(
+			     volume,
+			     &compatible_features_flags,
+			     &incompatible_features_flags,
+			     &read_only_compatible_features_flags,
+			     NULL ) != 1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( libfsapfs_volume_get_size(
+			     volume,
+			     &volume_size,
+			     NULL ) != 1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( libfsapfs_volume_get_identifier(
+			     volume,
+			     volume_identifier,
+			     16,
+			     NULL ) != 1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( libfsapfs_volume_get_utf8_name_size(
+			     volume,
+			     &utf8_string_size,
+			     NULL ) == -1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( utf8_string_size > 0 )
+			{
+				if( libfsapfs_volume_get_utf8_name(
+				     volume,
+				     utf8_string,
+				     64,
+				     NULL ) == -1 )
+				{
+					goto on_error_libfsapfs_volume;
+				}
+			}
+			if( libfsapfs_volume_get_utf16_name_size(
+			     volume,
+			     &utf16_string_size,
+			     NULL ) == -1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( utf16_string_size > 0 )
+			{
+				if( libfsapfs_volume_get_utf16_name(
+				     volume,
+				     utf16_string,
+				     32,
+				     NULL ) == -1 )
+				{
+					goto on_error_libfsapfs_volume;
+				}
+			}
+			is_locked = libfsapfs_volume_is_locked(
+			               volume,
+			               NULL );
+
+			if( is_locked == -1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( is_locked == 1 )
+			{
+				if( libfsapfs_volume_set_utf8_password(
+				     volume,
+				     (uint8_t *) "fsapfs-TEST",
+				     11,
+				     NULL ) == -1 )
+				{
+					goto on_error_libfsapfs_volume;
+				}
+				if( libfsapfs_volume_set_utf16_password(
+				     volume,
+				     utf16_password,
+				     22,
+				     NULL ) == -1 )
+				{
+					goto on_error_libfsapfs_volume;
+				}
+				if( libfsapfs_volume_set_utf8_recovery_password(
+				     volume,
+				     (uint8_t *) "fsapfs-recovery-TEST",
+				     20,
+				     NULL ) == -1 )
+				{
+					goto on_error_libfsapfs_volume;
+				}
+				if( libfsapfs_volume_set_utf16_recovery_password(
+				     volume,
+				     utf16_recovery_password,
+				     40,
+				     NULL ) == -1 )
+				{
+					goto on_error_libfsapfs_volume;
+				}
+				if( libfsapfs_volume_unlock(
+				     volume,
+				     NULL ) == -1 )
+				{
+					goto on_error_libfsapfs_volume;
+				}
+			}
+			if( libfsapfs_volume_get_next_file_entry_identifier(
+			     volume,
+			     &next_file_entry_identifier,
+			     NULL ) != 1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			result = libfsapfs_volume_get_root_directory(
+			          volume,
+			          &file_entry,
+			          NULL );
+
+			if( result == -1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( result == 1 )
+			{
+				libfsapfs_file_entry_free(
+				 &file_entry,
+				 NULL );
+			}
+			result = libfsapfs_volume_get_file_entry_by_identifier(
+			          volume,
+			          1,
+			          &file_entry,
+			          NULL );
+
+			if( result == -1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( result == 1 )
+			{
+				libfsapfs_file_entry_free(
+				 &file_entry,
+				 NULL );
+			}
+			result = libfsapfs_volume_get_file_entry_by_utf8_path(
+			          volume,
+			          (uint8_t *) "/",
+			          1,
+			          &file_entry,
+			          NULL );
+
+			if( result == -1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( result == 1 )
+			{
+				libfsapfs_file_entry_free(
+				 &file_entry,
+				 NULL );
+			}
+			result = libfsapfs_volume_get_file_entry_by_utf16_path(
+			          volume,
+			          utf16_path,
+			          2,
+			          &file_entry,
+			          NULL );
+
+			if( result == -1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+			if( result == 1 )
+			{
+				libfsapfs_file_entry_free(
+				 &file_entry,
+				 NULL );
+			}
+			if( libfsapfs_volume_get_number_of_snapshots(
+			     volume,
+			     &number_of_snapshots,
+			     NULL ) != 1 )
+			{
+				goto on_error_libfsapfs_volume;
+			}
+		}
+on_error_libfsapfs_volume:
+		libfsapfs_volume_free(
+		 &volume,
+		 NULL );
 	}
+	libfsapfs_container_close(
+	 container,
+	 NULL );
+
 on_error_libfsapfs_container:
 	libfsapfs_container_free(
 	 &container,
@@ -158,4 +332,3 @@ on_error_libbfio:
 }
 
 } /* extern "C" */
-
