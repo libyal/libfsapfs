@@ -2,7 +2,7 @@
 name: coverage
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 on:
   pull_request:
   push:
@@ -19,11 +19,11 @@ jobs:
     steps:
     - name: Configure git
       run: git config --global core.autocrlf false
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install Cygwin and build dependencies
-      uses: cygwin/cygwin-install-action@v6
+      uses: cygwin/cygwin-install-action@5a1b0cd107181fa6bb6bf3f90d500f4fb3132f18 # v7
       with:
         packages: autoconf, automake, binutils, curl, cygfuse, gcc-core, gettext-devel, git, libssl-devel, libtool, make, pkg-config, python312, python312-devel, zlib-devel
         platform: x86_64
@@ -83,7 +83,7 @@ jobs:
           configure_options: '--enable-code-coverage --enable-wide-character-type --with-openssl=no CPPFLAGS=-DHAVE_MEMORY_TESTS=1'
           codecov_name: 'ubuntu-26.04-gcc-no-optimization'
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies
@@ -110,7 +110,7 @@ jobs:
           (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
         done
     - name: Upload coverage report to Codecov
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         name: ${{ matrix.codecov_name }}
         token: ${{ secrets.CODECOV_TOKEN }}
@@ -125,11 +125,11 @@ jobs:
     steps:
     - name: Configure git
       run: git config --global core.autocrlf false
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Set up MSYS2 with MinGW-w64
-      uses: msys2/setup-msys2@v2
+      uses: msys2/setup-msys2@ec48f7c5447b3140e2b088413ae3a55687bccb6e # v2.33.0
       with:
         msystem: MINGW64
         update: true
@@ -158,7 +158,7 @@ jobs:
           (cd ${DIRECTORY} && find . -maxdepth 1 -name \*.gcno -type f -exec gcov -pb {} \;) \
         done
     - name: Upload coverage report to Codecov
-      uses: codecov/codecov-action@v6
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         name: ${{ matrix.codecov_name }}
         token: ${{ secrets.CODECOV_TOKEN }}

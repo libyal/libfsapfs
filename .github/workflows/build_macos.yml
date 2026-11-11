@@ -2,7 +2,7 @@
 name: build_macos
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 on:
   pull_request:
   push:
@@ -27,7 +27,7 @@ jobs:
           compiler: 'clang'
           configure_options: ''
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies
@@ -58,7 +58,7 @@ jobs:
           compiler: 'clang'
           configure_options: ''
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies
@@ -91,7 +91,7 @@ jobs:
           compiler: 'gcc'
           configure_options: '--enable-python'
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies

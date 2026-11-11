@@ -2,7 +2,7 @@
 name: build_wheels
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 on:
   pull_request:
   push:
@@ -17,7 +17,7 @@ jobs:
     name: Build sdist
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies
@@ -33,7 +33,7 @@ jobs:
     - name: Build sdist
       run: |
         python -m build --sdist
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: cibw-sdist
         path: dist/*.tar.gz
@@ -46,7 +46,7 @@ jobs:
         - os: ubuntu-26.04
         - os: ubuntu-26.04-arm
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies
@@ -59,15 +59,15 @@ jobs:
         ./configure
         make sources >/dev/null
     - name: Build Python wheels
-      uses: pypa/cibuildwheel@v4.0.0
+      uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
       env:
-        CIBW_ENABLE: ${{ github.event_name == 'release' && github.event.action == 'published' && '' || 'cpython-prerelease' }}
+        CIBW_ENABLE: ${{ !(github.event_name == 'release' && github.event.action == 'published') && 'cpython-prerelease' || '' }}
         CIBW_TEST_COMMAND: python tests/runtests.py
         CIBW_TEST_SOURCES: tests
       with:
         package-dir: .
         output-dir: dist
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
         path: dist/*.whl
@@ -80,7 +80,7 @@ jobs:
         - os: macos-26
         - os: macos-26-intel
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies
@@ -95,15 +95,15 @@ jobs:
         ./configure
         make sources >/dev/null
     - name: Build Python wheels
-      uses: pypa/cibuildwheel@v4.0.0
+      uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
       env:
-        CIBW_ENABLE: ${{ github.event_name == 'release' && github.event.action == 'published' && '' || 'cpython-prerelease' }}
+        CIBW_ENABLE: ${{ !(github.event_name == 'release' && github.event.action == 'published') && 'cpython-prerelease' || '' }}
         CIBW_TEST_COMMAND: python tests/runtests.py
         CIBW_TEST_SOURCES: tests
       with:
         package-dir: .
         output-dir: dist
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
         path: dist/*.whl
@@ -116,7 +116,7 @@ jobs:
         - os: windows-11-arm
         - os: windows-latest
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Prepare build
@@ -124,15 +124,15 @@ jobs:
         .\synclibs.ps1
         .\autogen.ps1
     - name: Build Python wheels
-      uses: pypa/cibuildwheel@v4.0.0
+      uses: pypa/cibuildwheel@f9b966cfadf4109556cadc5bb39ddb72d0ce664e # v4.3.5
       env:
-        CIBW_ENABLE: ${{ github.event_name == 'release' && github.event.action == 'published' && '' || 'cpython-prerelease' }}
+        CIBW_ENABLE: ${{ !(github.event_name == 'release' && github.event.action == 'published') && 'cpython-prerelease' || '' }}
         CIBW_TEST_COMMAND: python tests/runtests.py
         CIBW_TEST_SOURCES: tests
       with:
         package-dir: .
         output-dir: dist
-    - uses: actions/upload-artifact@v7
+    - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
         path: dist/*.whl
@@ -144,12 +144,12 @@ jobs:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: cibw-*
           path: dist
           merge-multiple: true
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
         with:
           repository-url: https://test.pypi.org/legacy/
   upload_pypi:
@@ -160,9 +160,9 @@ jobs:
       id-token: write
     if: github.event_name == 'release' && github.event.action == 'published'
     steps:
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           pattern: cibw-*
           path: dist
           merge-multiple: true
-      - uses: pypa/gh-action-pypi-publish@release/v1
+      - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3

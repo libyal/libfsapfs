@@ -2,7 +2,7 @@
 name: build_package
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 on:
   pull_request:
   push:
@@ -29,7 +29,7 @@ jobs:
       run: |
         apt update -q
         apt install -y autoconf automake autopoint autotools-dev build-essential debhelper dh-autoreconf dh-python fakeroot git libfuse3-dev libssl-dev libtool pkg-config python3-dev python3-setuptools zlib1g-dev
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Download test data
@@ -62,7 +62,7 @@ jobs:
     - name: Install build dependencies
       run: |
         dnf install -y @development-tools autoconf automake fuse3-devel gettext-devel git libtool make openssl-devel pkg-config python3-devel python3-setuptools rpm-build zlib-devel
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Download test data
@@ -86,7 +86,7 @@ jobs:
         - os: macos-26
           configure_options: ''
     steps:
-    - uses: actions/checkout@v6
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         persist-credentials: false
     - name: Install build dependencies
